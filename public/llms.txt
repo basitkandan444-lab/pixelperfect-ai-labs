@@ -1,0 +1,17 @@
+# Pixel Perfect Pro
+
+> Free AI image enhancer and photo upscaler. Turn blurry, low-quality photos into sharp 4K & 8K images — remove blur and noise, restore old photos. No signup.
+
+Pixel Perfect Pro is a free, no-signup AI image enhancer and photo upscaler that runs in the browser. It sharpens blurry, low-quality photos, removes noise and compression artifacts, and upscales images to 4K and 8K quality while preserving the original subject.
+
+## Pages
+
+- [Home](https://pixelperfect-ai-labs.lovable.app/): Upload a photo and enhance it to 4K/8K quality for free.
+- [About](https://pixelperfect-ai-labs.lovable.app/about): What Pixel Perfect Pro does and how the AI upscaler works.
+- [Contact](https://pixelperfect-ai-labs.lovable.app/contact): Get in touch with the team.
+
+## Optional
+
+- [Privacy Policy](https://pixelperfect-ai-labs.lovable.app/privacy): How uploaded images and data are handled.
+- [Terms of Service](https://pixelperfect-ai-labs.lovable.app/terms): Terms governing use of the service.
+- [Cookie Policy](https://pixelperfect-ai-labs.lovable.app/cookies): How cookies are used on the site.
