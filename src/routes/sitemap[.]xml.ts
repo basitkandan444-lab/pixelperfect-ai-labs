@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 
-const BASE_URL = "";
-
 interface SitemapEntry {
   path: string;
   changefreq?: "weekly" | "monthly";
@@ -12,7 +10,17 @@ interface SitemapEntry {
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async ({ request }) => {
+        // Derive an absolute base URL from the incoming request so sitemap
+        // <loc> entries are valid absolute URLs on whatever host serves them.
+        let baseUrl = "";
+        try {
+          const url = new URL(request.url);
+          baseUrl = url.origin;
+        } catch {
+          baseUrl = "";
+        }
+
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "weekly", priority: "1.0" },
           { path: "/about", changefreq: "monthly", priority: "0.6" },
@@ -25,7 +33,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         const urls = entries.map((e) =>
           [
             `  <url>`,
-            `    <loc>${BASE_URL}${e.path}</loc>`,
+            `    <loc>${baseUrl}${e.path}</loc>`,
             e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
             e.priority ? `    <priority>${e.priority}</priority>` : null,
             `  </url>`,
