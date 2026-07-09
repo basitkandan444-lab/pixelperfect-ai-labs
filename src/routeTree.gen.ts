@@ -10,33 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiEnhanceImageRouteImport } from './routes/api/enhance-image'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiEnhanceImageRoute = ApiEnhanceImageRouteImport.update({
+  id: '/api/enhance-image',
+  path: '/api/enhance-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/enhance-image': typeof ApiEnhanceImageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/enhance-image': typeof ApiEnhanceImageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/enhance-image': typeof ApiEnhanceImageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/enhance-image'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/enhance-image'
+  id: '__root__' | '/' | '/api/enhance-image'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiEnhanceImageRoute: typeof ApiEnhanceImageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/enhance-image': {
+      id: '/api/enhance-image'
+      path: '/api/enhance-image'
+      fullPath: '/api/enhance-image'
+      preLoaderRoute: typeof ApiEnhanceImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiEnhanceImageRoute: ApiEnhanceImageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
