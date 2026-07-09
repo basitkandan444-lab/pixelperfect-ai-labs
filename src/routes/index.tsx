@@ -256,7 +256,12 @@ function Index() {
               <div className="flex flex-col gap-6">
                 <div className="relative">
                   {stage === "done" && result ? (
-                    <CompareSlider before={original} after={result} />
+                    <CompareSlider
+                      before={original}
+                      after={result}
+                      afterAlt={`Enhanced ${scale.toUpperCase()} result`}
+                    />
+
                   ) : (
                     <div className="relative overflow-hidden rounded-2xl border border-border">
                       <img src={original} alt="Your uploaded image preview" className="block w-full" />
