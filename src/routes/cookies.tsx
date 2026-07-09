@@ -1,23 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { ContentPage, Section } from "@/components/ContentPage";
-import { SITE } from "@/lib/site";
+import { SITE, absoluteUrl } from "@/lib/site";
+import { getRequestOrigin } from "@/lib/origin.functions";
 
 export const Route = createFileRoute("/cookies")({
   component: CookiePage,
-  head: () => ({
-    meta: [
-      { title: `Cookie Policy — ${SITE.name}` },
-      {
-        name: "description",
-        content:
-          "How Pixel Perfect Pro uses cookies and similar technologies for analytics and to improve your experience.",
-      },
-      { property: "og:title", content: `Cookie Policy — ${SITE.name}` },
-      { property: "og:url", content: "/cookies" },
-    ],
-    links: [{ rel: "canonical", href: "/cookies" }],
-  }),
+  loader: async () => ({ origin: await getRequestOrigin() }),
+  head: ({ loaderData }) => {
+    const canonical = absoluteUrl(loaderData?.origin, "/cookies");
+    return {
+      meta: [
+        { title: `Cookie Policy — ${SITE.name}` },
+        {
+          name: "description",
+          content:
+            "How Pixel Perfect Pro uses cookies and similar technologies for analytics and to improve your experience.",
+        },
+        { property: "og:title", content: `Cookie Policy — ${SITE.name}` },
+        { property: "og:url", content: canonical },
+      ],
+      links: [{ rel: "canonical", href: canonical }],
+    };
+  },
 });
 
 function CookiePage() {
