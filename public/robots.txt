@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://pixelperfect-ai-labs.lovable.app/sitemap.xml
