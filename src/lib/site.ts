@@ -5,7 +5,7 @@ export const SITE = {
   shortName: "Pixel Perfect Pro",
   title: "Pixel Perfect Pro — Free AI Image Enhancer & Photo Upscaler",
   description:
-    "Free AI image enhancer and photo upscaler. Turn blurry, low-quality photos into sharp 4K & 8K images — fix blur, remove noise and restore old photos online, no signup.",
+    "Free AI image enhancer and photo upscaler. Turn blurry, low-quality photos into sharp 4K & 8K images — remove blur and noise, restore old photos. No signup.",
   // No custom domain yet — relative URLs resolve against the live host at request time.
   url: "",
   ogImage: "/og-image.jpg",

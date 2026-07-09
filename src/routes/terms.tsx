@@ -18,6 +18,11 @@ export const Route = createFileRoute("/terms")({
             "The terms governing your use of Pixel Perfect Pro, the free AI image enhancer and photo upscaler.",
         },
         { property: "og:title", content: `Terms of Service — ${SITE.name}` },
+        {
+          property: "og:description",
+          content:
+            "The terms governing your use of Pixel Perfect Pro, the free AI image enhancer and photo upscaler.",
+        },
         { property: "og:url", content: canonical },
       ],
       links: [{ rel: "canonical", href: canonical }],
