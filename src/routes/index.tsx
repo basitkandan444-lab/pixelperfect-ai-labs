@@ -17,7 +17,8 @@ import { Button } from "@/components/ui/button";
 import { CompareSlider } from "@/components/CompareSlider";
 import { SiteFooter } from "@/components/SiteFooter";
 import { trackEvent } from "@/lib/analytics";
-import { SITE, FAQS } from "@/lib/site";
+import { SITE, FAQS, absoluteUrl } from "@/lib/site";
+import { getRequestOrigin } from "@/lib/origin.functions";
 
 export const Route = createFileRoute("/")({
   component: Index,
