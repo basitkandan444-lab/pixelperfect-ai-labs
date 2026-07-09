@@ -18,6 +18,11 @@ export const Route = createFileRoute("/privacy")({
             "How Pixel Perfect Pro handles your uploaded images and data. We do not sell your data and images are not stored permanently.",
         },
         { property: "og:title", content: `Privacy Policy — ${SITE.name}` },
+        {
+          property: "og:description",
+          content:
+            "How Pixel Perfect Pro handles uploaded images and data — we don't sell your data and images aren't stored permanently.",
+        },
         { property: "og:url", content: canonical },
       ],
       links: [{ rel: "canonical", href: canonical }],
