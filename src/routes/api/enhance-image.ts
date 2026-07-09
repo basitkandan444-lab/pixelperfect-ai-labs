@@ -1,8 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
+// Accept only supported raster formats, encoded as a data URL.
+const DATA_URL_RE = /^data:image\/(jpeg|jpg|png|webp);base64,[A-Za-z0-9+/=]+$/;
+const MAX_BASE64_BYTES = 20 * 1024 * 1024; // ~15MB binary once decoded
+
 const BodySchema = z.object({
-  image: z.string().min(1),
+  image: z
+    .string()
+    .min(1)
+    .max(MAX_BASE64_BYTES, "Image is too large.")
+    .regex(DATA_URL_RE, "Unsupported image format."),
   scale: z.enum(["4k", "8k"]).default("4k"),
 });
 
@@ -32,8 +40,12 @@ export const Route = createFileRoute("/api/enhance-image")({
         try {
           parsed = BodySchema.parse(await request.json());
         } catch {
-          return Response.json({ error: "Invalid request." }, { status: 400 });
+          return Response.json(
+            { error: "Invalid image. Please upload a JPG, PNG or WEBP under 15MB." },
+            { status: 400 },
+          );
         }
+
 
         const upstream = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
           method: "POST",
