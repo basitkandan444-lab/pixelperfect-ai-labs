@@ -10,16 +10,10 @@ interface SitemapEntry {
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
-      GET: async ({ request }) => {
-        // Derive an absolute base URL from the incoming request so sitemap
-        // <loc> entries are valid absolute URLs on whatever host serves them.
-        let baseUrl = "";
-        try {
-          const url = new URL(request.url);
-          baseUrl = url.origin;
-        } catch {
-          baseUrl = "";
-        }
+      GET: async () => {
+        // Advertise the canonical project domain so sitemap <loc> entries
+        // stay stable regardless of which preview host serves the request.
+        const baseUrl = "https://pixelperfect-ai-labs.lovable.app";
 
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "weekly", priority: "1.0" },
