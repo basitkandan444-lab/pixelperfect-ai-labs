@@ -3,10 +3,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 interface CompareSliderProps {
   before: string;
   after: string;
+  afterAlt?: string;
   className?: string;
 }
 
-export function CompareSlider({ before, after, className }: CompareSliderProps) {
+export function CompareSlider({ before, after, afterAlt, className }: CompareSliderProps) {
   const [pos, setPos] = useState(50);
   const [width, setWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -55,7 +56,7 @@ export function CompareSlider({ before, after, className }: CompareSliderProps) 
       onMouseLeave={() => (dragging.current = false)}
       onTouchMove={(e) => updateFromClientX(e.touches[0].clientX)}
     >
-      <img src={after} alt="Enhanced 4K result" className="block w-full" draggable={false} />
+      <img src={after} alt={afterAlt ?? "Enhanced high-resolution result"} className="block w-full" draggable={false} />
       <div className="absolute inset-0 overflow-hidden" style={{ width: `${pos}%` }}>
         <img
           src={before}

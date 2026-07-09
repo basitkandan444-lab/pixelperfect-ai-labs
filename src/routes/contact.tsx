@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { ContentPage } from "@/components/ContentPage";
 import { Button } from "@/components/ui/button";
-import { SITE, absoluteUrl } from "@/lib/site";
+import { SITE, absoluteUrl, breadcrumbSchema } from "@/lib/site";
 import { getRequestOrigin } from "@/lib/origin.functions";
 
 export const Route = createFileRoute("/contact")({
@@ -26,6 +26,14 @@ export const Route = createFileRoute("/contact")({
         { property: "og:url", content: canonical },
       ],
       links: [{ rel: "canonical", href: canonical }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            breadcrumbSchema(loaderData?.origin, { name: "Contact", path: "/contact" }),
+          ),
+        },
+      ],
     };
   },
 });

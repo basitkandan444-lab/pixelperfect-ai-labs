@@ -22,6 +22,24 @@ export function absoluteUrl(origin: string | undefined, path: string): string {
   return origin ? `${origin}${path}` : path;
 }
 
+/**
+ * Builds a BreadcrumbList JSON-LD object for a subpage. Improves SEO rich
+ * results and reflects the site's internal linking structure.
+ */
+export function breadcrumbSchema(
+  origin: string | undefined,
+  page: { name: string; path: string },
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl(origin, "/") },
+      { "@type": "ListItem", position: 2, name: page.name, item: absoluteUrl(origin, page.path) },
+    ],
+  };
+}
+
 export const KEYWORDS = [
   "AI image enhancer",
   "free AI image enhancer",
