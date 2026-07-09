@@ -5,24 +5,29 @@ import { toast } from "sonner";
 
 import { ContentPage } from "@/components/ContentPage";
 import { Button } from "@/components/ui/button";
-import { SITE } from "@/lib/site";
+import { SITE, absoluteUrl } from "@/lib/site";
+import { getRequestOrigin } from "@/lib/origin.functions";
 
 export const Route = createFileRoute("/contact")({
   component: ContactPage,
-  head: () => ({
-    meta: [
-      { title: `Contact — ${SITE.name}` },
-      {
-        name: "description",
-        content:
-          "Get in touch with the Pixel Perfect Pro team for support, feedback or questions about our free AI image enhancer.",
-      },
-      { property: "og:title", content: `Contact — ${SITE.name}` },
-      { property: "og:description", content: "Contact the Pixel Perfect Pro team." },
-      { property: "og:url", content: "/contact" },
-    ],
-    links: [{ rel: "canonical", href: "/contact" }],
-  }),
+  loader: async () => ({ origin: await getRequestOrigin() }),
+  head: ({ loaderData }) => {
+    const canonical = absoluteUrl(loaderData?.origin, "/contact");
+    return {
+      meta: [
+        { title: `Contact — ${SITE.name}` },
+        {
+          name: "description",
+          content:
+            "Get in touch with the Pixel Perfect Pro team for support, feedback or questions about our free AI image enhancer.",
+        },
+        { property: "og:title", content: `Contact — ${SITE.name}` },
+        { property: "og:description", content: "Contact the Pixel Perfect Pro team." },
+        { property: "og:url", content: canonical },
+      ],
+      links: [{ rel: "canonical", href: canonical }],
+    };
+  },
 });
 
 const ContactSchema = z.object({

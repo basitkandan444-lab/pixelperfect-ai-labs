@@ -13,6 +13,15 @@ export const SITE = {
   email: "hello@pixelperfect.pro",
 } as const;
 
+/**
+ * Builds an absolute URL from a request origin and path. Falls back to the
+ * relative path when the origin is unknown (local/prerender) so we never emit
+ * an invalid canonical.
+ */
+export function absoluteUrl(origin: string | undefined, path: string): string {
+  return origin ? `${origin}${path}` : path;
+}
+
 export const KEYWORDS = [
   "AI image enhancer",
   "free AI image enhancer",
