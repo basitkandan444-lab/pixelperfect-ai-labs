@@ -18,6 +18,11 @@ export const Route = createFileRoute("/cookies")({
             "How Pixel Perfect Pro uses cookies and similar technologies for analytics and to improve your experience.",
         },
         { property: "og:title", content: `Cookie Policy — ${SITE.name}` },
+        {
+          property: "og:description",
+          content:
+            "How Pixel Perfect Pro uses cookies and similar technologies for analytics and to improve your experience.",
+        },
         { property: "og:url", content: canonical },
       ],
       links: [{ rel: "canonical", href: canonical }],
