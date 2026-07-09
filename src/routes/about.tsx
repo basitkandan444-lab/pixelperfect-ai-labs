@@ -1,27 +1,32 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { ContentPage, Section } from "@/components/ContentPage";
-import { SITE } from "@/lib/site";
+import { SITE, absoluteUrl } from "@/lib/site";
+import { getRequestOrigin } from "@/lib/origin.functions";
 
 export const Route = createFileRoute("/about")({
   component: AboutPage,
-  head: () => ({
-    meta: [
-      { title: `About — ${SITE.name}` },
-      {
-        name: "description",
-        content:
-          "Learn about Pixel Perfect Pro, the free AI image enhancer that upscales and restores photos to 4K and 8K quality with no signup.",
-      },
-      { property: "og:title", content: `About — ${SITE.name}` },
-      {
-        property: "og:description",
-        content: "The free AI photo enhancer and upscaler behind Pixel Perfect Pro.",
-      },
-      { property: "og:url", content: "/about" },
-    ],
-    links: [{ rel: "canonical", href: "/about" }],
-  }),
+  loader: async () => ({ origin: await getRequestOrigin() }),
+  head: ({ loaderData }) => {
+    const canonical = absoluteUrl(loaderData?.origin, "/about");
+    return {
+      meta: [
+        { title: `About — ${SITE.name}` },
+        {
+          name: "description",
+          content:
+            "Learn about Pixel Perfect Pro, the free AI image enhancer that upscales and restores photos to 4K and 8K quality with no signup.",
+        },
+        { property: "og:title", content: `About — ${SITE.name}` },
+        {
+          property: "og:description",
+          content: "The free AI photo enhancer and upscaler behind Pixel Perfect Pro.",
+        },
+        { property: "og:url", content: canonical },
+      ],
+      links: [{ rel: "canonical", href: canonical }],
+    };
+  },
 });
 
 function AboutPage() {
