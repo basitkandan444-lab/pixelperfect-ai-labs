@@ -15,6 +15,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@/components/Analytics";
 import { ANALYTICS } from "@/lib/analytics";
 import { SITE, KEYWORDS } from "@/lib/site";
+import { getRequestOrigin } from "@/lib/origin.functions";
 
 function NotFoundComponent() {
   return (
