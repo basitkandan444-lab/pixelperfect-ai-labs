@@ -1,23 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { ContentPage, Section } from "@/components/ContentPage";
-import { SITE } from "@/lib/site";
+import { SITE, absoluteUrl } from "@/lib/site";
+import { getRequestOrigin } from "@/lib/origin.functions";
 
 export const Route = createFileRoute("/privacy")({
   component: PrivacyPage,
-  head: () => ({
-    meta: [
-      { title: `Privacy Policy — ${SITE.name}` },
-      {
-        name: "description",
-        content:
-          "How Pixel Perfect Pro handles your uploaded images and data. We do not sell your data and images are not stored permanently.",
-      },
-      { property: "og:title", content: `Privacy Policy — ${SITE.name}` },
-      { property: "og:url", content: "/privacy" },
-    ],
-    links: [{ rel: "canonical", href: "/privacy" }],
-  }),
+  loader: async () => ({ origin: await getRequestOrigin() }),
+  head: ({ loaderData }) => {
+    const canonical = absoluteUrl(loaderData?.origin, "/privacy");
+    return {
+      meta: [
+        { title: `Privacy Policy — ${SITE.name}` },
+        {
+          name: "description",
+          content:
+            "How Pixel Perfect Pro handles your uploaded images and data. We do not sell your data and images are not stored permanently.",
+        },
+        { property: "og:title", content: `Privacy Policy — ${SITE.name}` },
+        { property: "og:url", content: canonical },
+      ],
+      links: [{ rel: "canonical", href: canonical }],
+    };
+  },
 });
 
 function PrivacyPage() {
