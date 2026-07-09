@@ -77,79 +77,85 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      {
-        name: "viewport",
-        content: "width=device-width, initial-scale=1, viewport-fit=cover",
-      },
-      { title: SITE.title },
-      { name: "description", content: SITE.description },
-      { name: "keywords", content: KEYWORDS },
-      { name: "author", content: SITE.name },
-      { name: "theme-color", content: "#0f1729" },
-      { name: "application-name", content: SITE.name },
-      ...(ANALYTICS.gscVerification
-        ? [{ name: "google-site-verification", content: ANALYTICS.gscVerification }]
-        : []),
-      { property: "og:site_name", content: SITE.name },
-      { property: "og:title", content: SITE.title },
-      { property: "og:description", content: SITE.description },
-      { property: "og:type", content: "website" },
-      { property: "og:image", content: SITE.ogImage },
-      { property: "og:image:width", content: "1200" },
-      { property: "og:image:height", content: "630" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: SITE.title },
-      { name: "twitter:description", content: SITE.description },
-      { name: "twitter:image", content: SITE.ogImage },
-    ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon", sizes: "any" },
-      { rel: "icon", href: "/icon.png", type: "image/png", sizes: "512x512" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
-      { rel: "manifest", href: "/site.webmanifest" },
-      {
-        rel: "preload",
-        href: "/fonts/inter-latin.woff2",
-        as: "font",
-        type: "font/woff2",
-        crossOrigin: "anonymous",
-      },
-      {
-        rel: "preload",
-        href: "/fonts/space-grotesk-latin.woff2",
-        as: "font",
-        type: "font/woff2",
-        crossOrigin: "anonymous",
-      },
-    ],
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "WebSite",
-          name: SITE.name,
-          description: SITE.description,
-          url: SITE.url || undefined,
-        }),
-      },
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Organization",
-          name: SITE.name,
-          description: SITE.description,
-          url: SITE.url || undefined,
-          logo: SITE.ogImage,
-        }),
-      },
-    ],
-  }),
+  loader: async () => ({ origin: await getRequestOrigin() }),
+  head: ({ loaderData }) => {
+    const origin = loaderData?.origin ?? "";
+    const ogImage = origin ? `${origin}${SITE.ogImage}` : SITE.ogImage;
+    const siteUrl = origin || SITE.url || undefined;
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        {
+          name: "viewport",
+          content: "width=device-width, initial-scale=1, viewport-fit=cover",
+        },
+        { title: SITE.title },
+        { name: "description", content: SITE.description },
+        { name: "keywords", content: KEYWORDS },
+        { name: "author", content: SITE.name },
+        { name: "theme-color", content: "#0f1729" },
+        { name: "application-name", content: SITE.name },
+        ...(ANALYTICS.gscVerification
+          ? [{ name: "google-site-verification", content: ANALYTICS.gscVerification }]
+          : []),
+        { property: "og:site_name", content: SITE.name },
+        { property: "og:title", content: SITE.title },
+        { property: "og:description", content: SITE.description },
+        { property: "og:type", content: "website" },
+        { property: "og:image", content: ogImage },
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: SITE.title },
+        { name: "twitter:description", content: SITE.description },
+        { name: "twitter:image", content: ogImage },
+      ],
+      links: [
+        { rel: "stylesheet", href: appCss },
+        { rel: "icon", href: "/favicon.ico", type: "image/x-icon", sizes: "any" },
+        { rel: "icon", href: "/icon.png", type: "image/png", sizes: "512x512" },
+        { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
+        { rel: "manifest", href: "/site.webmanifest" },
+        {
+          rel: "preload",
+          href: "/fonts/inter-latin.woff2",
+          as: "font",
+          type: "font/woff2",
+          crossOrigin: "anonymous",
+        },
+        {
+          rel: "preload",
+          href: "/fonts/space-grotesk-latin.woff2",
+          as: "font",
+          type: "font/woff2",
+          crossOrigin: "anonymous",
+        },
+      ],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: SITE.name,
+            description: SITE.description,
+            url: siteUrl,
+          }),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: SITE.name,
+            description: SITE.description,
+            url: siteUrl,
+            logo: ogImage,
+          }),
+        },
+      ],
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
