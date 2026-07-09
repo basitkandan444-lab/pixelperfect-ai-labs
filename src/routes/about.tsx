@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { ContentPage, Section } from "@/components/ContentPage";
-import { SITE, absoluteUrl } from "@/lib/site";
+import { SITE, absoluteUrl, breadcrumbSchema } from "@/lib/site";
 import { getRequestOrigin } from "@/lib/origin.functions";
 
 export const Route = createFileRoute("/about")({
@@ -25,6 +25,14 @@ export const Route = createFileRoute("/about")({
         { property: "og:url", content: canonical },
       ],
       links: [{ rel: "canonical", href: canonical }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            breadcrumbSchema(loaderData?.origin, { name: "About", path: "/about" }),
+          ),
+        },
+      ],
     };
   },
 });
