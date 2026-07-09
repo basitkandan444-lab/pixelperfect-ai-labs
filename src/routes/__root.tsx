@@ -80,32 +80,64 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Upscayl AI — Enhance Photos to 4K & 8K" },
       {
-        name: "description",
-        content:
-          "Turn blurry, low-quality photos into stunning 4K and 8K images in seconds with AI-powered enhancement.",
+        name: "viewport",
+        content: "width=device-width, initial-scale=1, viewport-fit=cover",
       },
-      { name: "author", content: "Upscayl AI" },
-      { property: "og:title", content: "Upscayl AI — Enhance Photos to 4K & 8K" },
-      {
-        property: "og:description",
-        content:
-          "Turn blurry, low-quality photos into stunning 4K and 8K images in seconds with AI-powered enhancement.",
-      },
+      { title: SITE.title },
+      { name: "description", content: SITE.description },
+      { name: "keywords", content: KEYWORDS },
+      { name: "author", content: SITE.name },
+      { name: "theme-color", content: "#0f1729" },
+      { name: "application-name", content: SITE.name },
+      ...(ANALYTICS.gscVerification
+        ? [{ name: "google-site-verification", content: ANALYTICS.gscVerification }]
+        : []),
+      { property: "og:site_name", content: SITE.name },
+      { property: "og:title", content: SITE.title },
+      { property: "og:description", content: SITE.description },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: SITE.ogImage },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: SITE.title },
+      { name: "twitter:description", content: SITE.description },
+      { name: "twitter:image", content: SITE.ogImage },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/icon.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/icon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap",
+      },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: SITE.name,
+          description: SITE.description,
+          url: SITE.url || undefined,
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: SITE.name,
+          description: SITE.description,
+          url: SITE.url || undefined,
+          logo: SITE.ogImage,
+        }),
       },
     ],
   }),
@@ -137,6 +169,7 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <Toaster position="top-center" richColors />
+      <Analytics />
     </QueryClientProvider>
   );
 }
