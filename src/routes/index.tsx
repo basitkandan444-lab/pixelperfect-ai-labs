@@ -183,9 +183,17 @@ function Index() {
             </div>
             <span className="font-display text-lg font-bold tracking-tight">{SITE.name}</span>
           </div>
-          <span className="hidden items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs text-muted-foreground sm:flex">
-            <Zap className="h-3.5 w-3.5 text-primary" aria-hidden="true" /> Free · Powered by AI
-          </span>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/contact"
+              className="rounded-full px-3 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Contact
+            </Link>
+            <span className="hidden items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs text-muted-foreground sm:flex">
+              <Zap className="h-3.5 w-3.5 text-primary" aria-hidden="true" /> Free · Powered by AI
+            </span>
+          </div>
         </header>
 
         <main>
