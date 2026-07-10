@@ -17,6 +17,14 @@ export const Route = createFileRoute("/sitemap.xml")({
 
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "weekly", priority: "1.0" },
+          { path: "/ai-image-enhancer", changefreq: "weekly", priority: "0.9" },
+          { path: "/image-upscaler", changefreq: "weekly", priority: "0.9" },
+          { path: "/fix-blurry-photo", changefreq: "weekly", priority: "0.9" },
+          { path: "/restore-old-photo", changefreq: "weekly", priority: "0.9" },
+          { path: "/sharpen-image", changefreq: "weekly", priority: "0.9" },
+          { path: "/remove-image-noise", changefreq: "weekly", priority: "0.9" },
+          { path: "/increase-image-resolution", changefreq: "weekly", priority: "0.9" },
+          { path: "/enhance-low-quality-photo", changefreq: "weekly", priority: "0.9" },
           { path: "/about", changefreq: "monthly", priority: "0.6" },
           { path: "/contact", changefreq: "monthly", priority: "0.5" },
           { path: "/privacy", changefreq: "monthly", priority: "0.3" },
