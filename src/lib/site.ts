@@ -65,34 +65,54 @@ export interface FaqItem {
 export const FAQS: FaqItem[] = [
   {
     q: "Is Pixel Perfect Pro really free?",
-    a: "Yes. Pixel Perfect Pro is a completely free AI image enhancer. There is no subscription, trial or payment required to upscale and enhance your photos.",
+    a: "Yes. Pixel Perfect Pro is completely free to use. There is no subscription, trial, watermark or payment step — you can upload a photo and download the enhanced version without ever entering card details.",
   },
   {
     q: "Do I need to create an account?",
-    a: "No. You can enhance images straight away without signing up, logging in or providing an email address. Just upload a photo and enhance it.",
+    a: "No. There is no sign-up, login or email required. You open the site, upload an image and enhance it. Because there is no account, we do not build a user profile or ask for personal information.",
   },
   {
-    q: "Which image formats are supported?",
-    a: "You can upload JPG, JPEG, PNG and WEBP images up to 15MB. The enhanced result is delivered as a high-resolution image you can download instantly.",
+    q: "Which image formats can I upload?",
+    a: "You can upload JPG and JPEG (best for photos), PNG (best for screenshots, graphics and transparency) and WEBP (a modern web format). The enhanced result is returned as a high-resolution PNG you can download instantly.",
   },
   {
-    q: "Is my uploaded image stored?",
-    a: "Your image is only used to generate the enhanced result during processing and is not stored permanently, shared or sold. You keep full ownership of every photo you upload.",
+    q: "What is the maximum upload size?",
+    a: "Each image can be up to 15MB. This comfortably covers typical phone and camera photos. If a file is larger, exporting it at a slightly lower quality or resizing it before upload usually brings it under the limit.",
   },
   {
-    q: "Can I use the website on my phone?",
-    a: "Yes. Pixel Perfect Pro runs entirely in your browser and works on phones, tablets and desktops — there is nothing to install on any device.",
+    q: "Is my uploaded image stored or shared?",
+    a: "Your image is sent securely to the AI only to generate the enhanced result for that single request. It is not saved to a public gallery, used for advertising, sold or shared with third parties for their own purposes.",
+  },
+  {
+    q: "Who owns the images I upload and download?",
+    a: "You do. You keep full ownership of both the original photo you upload and the enhanced image you download. We claim no rights over your content.",
+  },
+  {
+    q: "Does it work on mobile phones and tablets?",
+    a: "Yes. The entire tool runs in the browser and the layout adapts to any screen, so it works the same on phones, tablets, laptops and desktops. There is no app to install.",
   },
   {
     q: "How long does enhancement take?",
-    a: "Most images are enhanced in a few seconds. Larger files or 8K output can take a little longer depending on your connection and the current AI workload.",
+    a: "Most images finish in a few seconds. Larger files, 8K output, a slow connection or heavy demand on the AI can add a little time. A progress indicator shows that work is in progress.",
   },
   {
-    q: "Does the AI improve every image?",
-    a: "It improves the vast majority of photos by sharpening detail and removing noise. Results depend on the source image, so extremely small or heavily damaged files may see more modest gains.",
+    q: "What is the difference between 4K and 8K?",
+    a: "4K produces a sharp, high-resolution result quickly and suits most everyday uses. 8K pushes resolution and fine detail further, which is useful for large prints or heavy cropping, but takes a little longer to process.",
   },
   {
-    q: "Can I enhance old or scanned photographs?",
-    a: "Yes. The AI is well suited to restoring old, faded or scanned photos — it can reduce grain, recover detail and upscale them to a much higher resolution.",
+    q: "Will enhancing improve every single image?",
+    a: "It improves the large majority of photos by sharpening edges, reducing noise and reconstructing detail. Results depend on the source: a reasonably clear photo improves more than an image that is extremely small, heavily compressed or badly damaged.",
+  },
+  {
+    q: "Can the AI invent detail that was never there?",
+    a: "The AI reconstructs plausible detail based on patterns it has learned — it does not recover information that the original image never captured. On faces, text or fine markings it can subtly reinterpret detail, so always review the result before important use.",
+  },
+  {
+    q: "Can I restore old or scanned photographs?",
+    a: "Yes. The AI is well suited to old, faded or scanned prints: it can reduce grain and scanning noise, recover softened detail and upscale the photo to a much higher resolution for reprinting or sharing.",
+  },
+  {
+    q: "What quality is the downloaded file?",
+    a: "You download the full enhanced image at the resolution you selected, without an added watermark. Save it and it is ready to print, post or reuse.",
   },
 ];
