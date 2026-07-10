@@ -11,9 +11,17 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SharpenImageRouteImport } from './routes/sharpen-image'
+import { Route as RestoreOldPhotoRouteImport } from './routes/restore-old-photo'
+import { Route as RemoveImageNoiseRouteImport } from './routes/remove-image-noise'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as IncreaseImageResolutionRouteImport } from './routes/increase-image-resolution'
+import { Route as ImageUpscalerRouteImport } from './routes/image-upscaler'
+import { Route as FixBlurryPhotoRouteImport } from './routes/fix-blurry-photo'
+import { Route as EnhanceLowQualityPhotoRouteImport } from './routes/enhance-low-quality-photo'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as AiImageEnhancerRouteImport } from './routes/ai-image-enhancer'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiEnhanceImageRouteImport } from './routes/api/enhance-image'
@@ -28,9 +36,44 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SharpenImageRoute = SharpenImageRouteImport.update({
+  id: '/sharpen-image',
+  path: '/sharpen-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RestoreOldPhotoRoute = RestoreOldPhotoRouteImport.update({
+  id: '/restore-old-photo',
+  path: '/restore-old-photo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RemoveImageNoiseRoute = RemoveImageNoiseRouteImport.update({
+  id: '/remove-image-noise',
+  path: '/remove-image-noise',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IncreaseImageResolutionRoute = IncreaseImageResolutionRouteImport.update({
+  id: '/increase-image-resolution',
+  path: '/increase-image-resolution',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImageUpscalerRoute = ImageUpscalerRouteImport.update({
+  id: '/image-upscaler',
+  path: '/image-upscaler',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FixBlurryPhotoRoute = FixBlurryPhotoRouteImport.update({
+  id: '/fix-blurry-photo',
+  path: '/fix-blurry-photo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnhanceLowQualityPhotoRoute = EnhanceLowQualityPhotoRouteImport.update({
+  id: '/enhance-low-quality-photo',
+  path: '/enhance-low-quality-photo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CookiesRoute = CookiesRouteImport.update({
@@ -41,6 +84,11 @@ const CookiesRoute = CookiesRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiImageEnhancerRoute = AiImageEnhancerRouteImport.update({
+  id: '/ai-image-enhancer',
+  path: '/ai-image-enhancer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -62,9 +110,17 @@ const ApiEnhanceImageRoute = ApiEnhanceImageRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/ai-image-enhancer': typeof AiImageEnhancerRoute
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
+  '/enhance-low-quality-photo': typeof EnhanceLowQualityPhotoRoute
+  '/fix-blurry-photo': typeof FixBlurryPhotoRoute
+  '/image-upscaler': typeof ImageUpscalerRoute
+  '/increase-image-resolution': typeof IncreaseImageResolutionRoute
   '/privacy': typeof PrivacyRoute
+  '/remove-image-noise': typeof RemoveImageNoiseRoute
+  '/restore-old-photo': typeof RestoreOldPhotoRoute
+  '/sharpen-image': typeof SharpenImageRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/api/enhance-image': typeof ApiEnhanceImageRoute
@@ -72,9 +128,17 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/ai-image-enhancer': typeof AiImageEnhancerRoute
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
+  '/enhance-low-quality-photo': typeof EnhanceLowQualityPhotoRoute
+  '/fix-blurry-photo': typeof FixBlurryPhotoRoute
+  '/image-upscaler': typeof ImageUpscalerRoute
+  '/increase-image-resolution': typeof IncreaseImageResolutionRoute
   '/privacy': typeof PrivacyRoute
+  '/remove-image-noise': typeof RemoveImageNoiseRoute
+  '/restore-old-photo': typeof RestoreOldPhotoRoute
+  '/sharpen-image': typeof SharpenImageRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/api/enhance-image': typeof ApiEnhanceImageRoute
@@ -83,9 +147,17 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/ai-image-enhancer': typeof AiImageEnhancerRoute
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
+  '/enhance-low-quality-photo': typeof EnhanceLowQualityPhotoRoute
+  '/fix-blurry-photo': typeof FixBlurryPhotoRoute
+  '/image-upscaler': typeof ImageUpscalerRoute
+  '/increase-image-resolution': typeof IncreaseImageResolutionRoute
   '/privacy': typeof PrivacyRoute
+  '/remove-image-noise': typeof RemoveImageNoiseRoute
+  '/restore-old-photo': typeof RestoreOldPhotoRoute
+  '/sharpen-image': typeof SharpenImageRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/api/enhance-image': typeof ApiEnhanceImageRoute
@@ -95,9 +167,17 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/ai-image-enhancer'
     | '/contact'
     | '/cookies'
+    | '/enhance-low-quality-photo'
+    | '/fix-blurry-photo'
+    | '/image-upscaler'
+    | '/increase-image-resolution'
     | '/privacy'
+    | '/remove-image-noise'
+    | '/restore-old-photo'
+    | '/sharpen-image'
     | '/sitemap.xml'
     | '/terms'
     | '/api/enhance-image'
@@ -105,9 +185,17 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/ai-image-enhancer'
     | '/contact'
     | '/cookies'
+    | '/enhance-low-quality-photo'
+    | '/fix-blurry-photo'
+    | '/image-upscaler'
+    | '/increase-image-resolution'
     | '/privacy'
+    | '/remove-image-noise'
+    | '/restore-old-photo'
+    | '/sharpen-image'
     | '/sitemap.xml'
     | '/terms'
     | '/api/enhance-image'
@@ -115,9 +203,17 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/ai-image-enhancer'
     | '/contact'
     | '/cookies'
+    | '/enhance-low-quality-photo'
+    | '/fix-blurry-photo'
+    | '/image-upscaler'
+    | '/increase-image-resolution'
     | '/privacy'
+    | '/remove-image-noise'
+    | '/restore-old-photo'
+    | '/sharpen-image'
     | '/sitemap.xml'
     | '/terms'
     | '/api/enhance-image'
@@ -126,9 +222,17 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AiImageEnhancerRoute: typeof AiImageEnhancerRoute
   ContactRoute: typeof ContactRoute
   CookiesRoute: typeof CookiesRoute
+  EnhanceLowQualityPhotoRoute: typeof EnhanceLowQualityPhotoRoute
+  FixBlurryPhotoRoute: typeof FixBlurryPhotoRoute
+  ImageUpscalerRoute: typeof ImageUpscalerRoute
+  IncreaseImageResolutionRoute: typeof IncreaseImageResolutionRoute
   PrivacyRoute: typeof PrivacyRoute
+  RemoveImageNoiseRoute: typeof RemoveImageNoiseRoute
+  RestoreOldPhotoRoute: typeof RestoreOldPhotoRoute
+  SharpenImageRoute: typeof SharpenImageRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   ApiEnhanceImageRoute: typeof ApiEnhanceImageRoute
@@ -150,11 +254,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sharpen-image': {
+      id: '/sharpen-image'
+      path: '/sharpen-image'
+      fullPath: '/sharpen-image'
+      preLoaderRoute: typeof SharpenImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/restore-old-photo': {
+      id: '/restore-old-photo'
+      path: '/restore-old-photo'
+      fullPath: '/restore-old-photo'
+      preLoaderRoute: typeof RestoreOldPhotoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/remove-image-noise': {
+      id: '/remove-image-noise'
+      path: '/remove-image-noise'
+      fullPath: '/remove-image-noise'
+      preLoaderRoute: typeof RemoveImageNoiseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/increase-image-resolution': {
+      id: '/increase-image-resolution'
+      path: '/increase-image-resolution'
+      fullPath: '/increase-image-resolution'
+      preLoaderRoute: typeof IncreaseImageResolutionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/image-upscaler': {
+      id: '/image-upscaler'
+      path: '/image-upscaler'
+      fullPath: '/image-upscaler'
+      preLoaderRoute: typeof ImageUpscalerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fix-blurry-photo': {
+      id: '/fix-blurry-photo'
+      path: '/fix-blurry-photo'
+      fullPath: '/fix-blurry-photo'
+      preLoaderRoute: typeof FixBlurryPhotoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/enhance-low-quality-photo': {
+      id: '/enhance-low-quality-photo'
+      path: '/enhance-low-quality-photo'
+      fullPath: '/enhance-low-quality-photo'
+      preLoaderRoute: typeof EnhanceLowQualityPhotoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cookies': {
@@ -169,6 +322,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-image-enhancer': {
+      id: '/ai-image-enhancer'
+      path: '/ai-image-enhancer'
+      fullPath: '/ai-image-enhancer'
+      preLoaderRoute: typeof AiImageEnhancerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -198,9 +358,17 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AiImageEnhancerRoute: AiImageEnhancerRoute,
   ContactRoute: ContactRoute,
   CookiesRoute: CookiesRoute,
+  EnhanceLowQualityPhotoRoute: EnhanceLowQualityPhotoRoute,
+  FixBlurryPhotoRoute: FixBlurryPhotoRoute,
+  ImageUpscalerRoute: ImageUpscalerRoute,
+  IncreaseImageResolutionRoute: IncreaseImageResolutionRoute,
   PrivacyRoute: PrivacyRoute,
+  RemoveImageNoiseRoute: RemoveImageNoiseRoute,
+  RestoreOldPhotoRoute: RestoreOldPhotoRoute,
+  SharpenImageRoute: SharpenImageRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   ApiEnhanceImageRoute: ApiEnhanceImageRoute,
@@ -208,3 +376,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

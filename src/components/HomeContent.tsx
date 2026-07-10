@@ -402,6 +402,38 @@ export function HomeContent() {
         </div>
       </section>
 
+      {/* Popular tools / internal linking to search-intent landing pages */}
+      <section className="mt-24" aria-labelledby="tools-heading">
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 id="tools-heading" className="font-display text-2xl font-bold sm:text-3xl">
+            Popular image tools
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
+            Every tool runs on the same free AI engine — jump to the one that matches what you need.
+          </p>
+          <nav aria-label="Image tools" className="mt-6 flex flex-wrap justify-center gap-3">
+            {[
+              { to: "/ai-image-enhancer", label: "AI Image Enhancer" },
+              { to: "/image-upscaler", label: "Image Upscaler" },
+              { to: "/fix-blurry-photo", label: "Fix Blurry Photo" },
+              { to: "/restore-old-photo", label: "Restore Old Photo" },
+              { to: "/sharpen-image", label: "Sharpen Image" },
+              { to: "/remove-image-noise", label: "Remove Image Noise" },
+              { to: "/increase-image-resolution", label: "Increase Resolution" },
+              { to: "/enhance-low-quality-photo", label: "Enhance Low-Quality Photo" },
+            ].map((l) => (
+              <Link
+                key={l.to}
+                to={l.to}
+                className="rounded-full border border-border glass px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {l.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      </section>
+
       {/* Explore / internal linking */}
       <section className="mt-24" aria-labelledby="explore-heading">
         <div className="mx-auto max-w-3xl text-center">
