@@ -65,22 +65,34 @@ export interface FaqItem {
 export const FAQS: FaqItem[] = [
   {
     q: "Is Pixel Perfect Pro really free?",
-    a: "Yes. Pixel Perfect Pro is a completely free AI image enhancer. There is no signup, no subscription and no payment required to upscale and enhance your photos.",
+    a: "Yes. Pixel Perfect Pro is a completely free AI image enhancer. There is no subscription, trial or payment required to upscale and enhance your photos.",
   },
   {
-    q: "What image formats are supported?",
-    a: "You can upload JPG, JPEG, PNG and WEBP images up to 15MB. The enhanced result is available as a high-resolution PNG download.",
+    q: "Do I need to create an account?",
+    a: "No. You can enhance images straight away without signing up, logging in or providing an email address. Just upload a photo and enhance it.",
   },
   {
-    q: "Can it fix blurry or low-quality photos?",
-    a: "Absolutely. The AI sharpens blurry images, removes noise and compression artifacts, and reconstructs fine detail to convert low-quality photos into crisp, high-resolution results.",
+    q: "Which image formats are supported?",
+    a: "You can upload JPG, JPEG, PNG and WEBP images up to 15MB. The enhanced result is delivered as a high-resolution image you can download instantly.",
   },
   {
-    q: "How does the AI upscaler increase resolution?",
-    a: "Our AI super-resolution engine analyzes your image and intelligently rebuilds textures and edges, upscaling it to 4K or 8K quality while keeping the original subject and composition intact.",
+    q: "Is my uploaded image stored?",
+    a: "Your image is only used to generate the enhanced result during processing and is not stored permanently, shared or sold. You keep full ownership of every photo you upload.",
   },
   {
-    q: "Are my uploaded images private?",
-    a: "Your image is only used to generate the enhanced result and is not shared or sold. Processing happens on demand and images are not stored permanently.",
+    q: "Can I use the website on my phone?",
+    a: "Yes. Pixel Perfect Pro runs entirely in your browser and works on phones, tablets and desktops — there is nothing to install on any device.",
+  },
+  {
+    q: "How long does enhancement take?",
+    a: "Most images are enhanced in a few seconds. Larger files or 8K output can take a little longer depending on your connection and the current AI workload.",
+  },
+  {
+    q: "Does the AI improve every image?",
+    a: "It improves the vast majority of photos by sharpening detail and removing noise. Results depend on the source image, so extremely small or heavily damaged files may see more modest gains.",
+  },
+  {
+    q: "Can I enhance old or scanned photographs?",
+    a: "Yes. The AI is well suited to restoring old, faded or scanned photos — it can reduce grain, recover detail and upscale them to a much higher resolution.",
   },
 ];

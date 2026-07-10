@@ -7,8 +7,6 @@ import {
   Download,
   RotateCcw,
   Zap,
-  ImageIcon,
-  ShieldCheck,
   Gauge,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -16,6 +14,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { CompareSlider } from "@/components/CompareSlider";
 import { SiteFooter } from "@/components/SiteFooter";
+import { HomeContent } from "@/components/HomeContent";
 import { trackEvent } from "@/lib/analytics";
 import { SITE, FAQS, absoluteUrl } from "@/lib/site";
 import { getRequestOrigin } from "@/lib/origin.functions";
@@ -361,62 +360,8 @@ function Index() {
               </div>
             )}
           </section>
+          <HomeContent />
 
-          {/* Features */}
-          <section className="mt-16 grid gap-4 sm:grid-cols-3" aria-label="Features">
-            {[
-              {
-                icon: ImageIcon,
-                title: "Up to 8K Resolution",
-                desc: "Rebuild crisp detail and lifelike textures from tiny, low-resolution inputs.",
-              },
-              {
-                icon: Zap,
-                title: "Ready in Seconds",
-                desc: "Fast AI processing with a live before / after comparison slider.",
-              },
-              {
-                icon: ShieldCheck,
-                title: "Free & Private",
-                desc: "No signup, no watermark, no cost — and your photos aren't stored.",
-              },
-            ].map((f, i) => (
-              <div
-                key={f.title}
-                className="animate-fade-up rounded-2xl glass p-5"
-                style={{ animationDelay: `${0.15 + i * 0.08}s` }}
-              >
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15">
-                  <f.icon className="h-5 w-5 text-primary" aria-hidden="true" />
-                </div>
-                <h2 className="mt-4 font-display text-base font-semibold">{f.title}</h2>
-                <p className="mt-1 text-sm text-muted-foreground">{f.desc}</p>
-              </div>
-            ))}
-          </section>
-
-          {/* FAQ */}
-          <section className="mt-20" aria-labelledby="faq-heading">
-            <h2 id="faq-heading" className="text-center font-display text-2xl font-bold sm:text-3xl">
-              Frequently asked questions
-            </h2>
-            <div className="mx-auto mt-8 flex max-w-3xl flex-col gap-3">
-              {FAQS.map((f) => (
-                <details
-                  key={f.q}
-                  className="group rounded-2xl glass p-5 [&_summary]:cursor-pointer"
-                >
-                  <summary className="flex items-center justify-between gap-4 font-display text-base font-semibold marker:content-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                    {f.q}
-                    <span className="text-primary transition-transform group-open:rotate-45" aria-hidden="true">
-                      +
-                    </span>
-                  </summary>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.a}</p>
-                </details>
-              ))}
-            </div>
-          </section>
         </main>
       </div>
 
