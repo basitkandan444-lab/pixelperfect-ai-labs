@@ -4,10 +4,19 @@ interface CompareSliderProps {
   before: string;
   after: string;
   afterAlt?: string;
+  beforeAlt?: string;
   className?: string;
+  loading?: "lazy" | "eager";
 }
 
-export function CompareSlider({ before, after, afterAlt, className }: CompareSliderProps) {
+export function CompareSlider({
+  before,
+  after,
+  afterAlt,
+  beforeAlt,
+  className,
+  loading = "eager",
+}: CompareSliderProps) {
   const [pos, setPos] = useState(50);
   const [width, setWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
