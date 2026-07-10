@@ -10,7 +10,7 @@ export const SITE = {
   url: "",
   ogImage: "/og-image.jpg",
   twitter: "@pixelperfectpro",
-  email: "hello@pixelperfect.pro",
+  email: "basitkandan444@gmail.com",
 } as const;
 
 /**

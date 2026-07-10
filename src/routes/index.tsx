@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Sparkles,
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { CompareSlider } from "@/components/CompareSlider";
 import { SiteFooter } from "@/components/SiteFooter";
 import { HomeContent } from "@/components/HomeContent";
+import { BeforeAfterGallery } from "@/components/BeforeAfterGallery";
 import { trackEvent } from "@/lib/analytics";
 import { SITE, FAQS, absoluteUrl } from "@/lib/site";
 import { getRequestOrigin } from "@/lib/origin.functions";
@@ -182,9 +183,17 @@ function Index() {
             </div>
             <span className="font-display text-lg font-bold tracking-tight">{SITE.name}</span>
           </div>
-          <span className="hidden items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs text-muted-foreground sm:flex">
-            <Zap className="h-3.5 w-3.5 text-primary" aria-hidden="true" /> Free · Powered by AI
-          </span>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/contact"
+              className="rounded-full px-3 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Contact
+            </Link>
+            <span className="hidden items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs text-muted-foreground sm:flex">
+              <Zap className="h-3.5 w-3.5 text-primary" aria-hidden="true" /> Free · Powered by AI
+            </span>
+          </div>
         </header>
 
         <main>
@@ -361,6 +370,7 @@ function Index() {
             )}
           </section>
           <HomeContent />
+          <BeforeAfterGallery />
 
         </main>
       </div>
