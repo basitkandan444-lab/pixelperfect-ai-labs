@@ -7,8 +7,6 @@ import {
   Download,
   RotateCcw,
   Zap,
-  ImageIcon,
-  ShieldCheck,
   Gauge,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -16,6 +14,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { CompareSlider } from "@/components/CompareSlider";
 import { SiteFooter } from "@/components/SiteFooter";
+import { HomeContent } from "@/components/HomeContent";
 import { trackEvent } from "@/lib/analytics";
 import { SITE, FAQS, absoluteUrl } from "@/lib/site";
 import { getRequestOrigin } from "@/lib/origin.functions";
