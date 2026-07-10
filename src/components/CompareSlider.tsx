@@ -65,14 +65,23 @@ export function CompareSlider({
       onMouseLeave={() => (dragging.current = false)}
       onTouchMove={(e) => updateFromClientX(e.touches[0].clientX)}
     >
-      <img src={after} alt={afterAlt ?? "Enhanced high-resolution result"} className="block w-full" draggable={false} />
+      <img
+        src={after}
+        alt={afterAlt ?? "Enhanced high-resolution result"}
+        className="block w-full"
+        draggable={false}
+        loading={loading}
+        decoding="async"
+      />
       <div className="absolute inset-0 overflow-hidden" style={{ width: `${pos}%` }}>
         <img
           src={before}
-          alt="Original low-quality image"
+          alt={beforeAlt ?? "Original low-quality image"}
           className="absolute inset-0 h-full max-w-none object-cover"
           style={{ width: width || "100%" }}
           draggable={false}
+          loading={loading}
+          decoding="async"
         />
       </div>
 
