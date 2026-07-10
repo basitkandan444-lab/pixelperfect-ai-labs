@@ -42,7 +42,8 @@ const STEPS = [
 const BENEFITS = [
   {
     title: "Blurry photos become usable again",
-    problem: "A slightly out-of-focus or shaky shot is often the only copy of a moment you can't recreate.",
+    problem:
+      "A slightly out-of-focus or shaky shot is often the only copy of a moment you can't recreate.",
     outcome:
       "The AI sharpens soft edges and rebuilds texture, so a photo you were about to delete becomes clear enough to keep, print or post.",
   },
@@ -54,13 +55,15 @@ const BENEFITS = [
   },
   {
     title: "Compression artefacts disappear",
-    problem: "Photos saved or re-shared through chat apps and social media pick up blocky, smeared JPEG artefacts.",
+    problem:
+      "Photos saved or re-shared through chat apps and social media pick up blocky, smeared JPEG artefacts.",
     outcome:
       "The model removes those artefacts and recovers cleaner tones, giving you a version that looks closer to the original capture.",
   },
   {
     title: "No software to learn",
-    problem: "Traditional editors have steep learning curves and paid licences just to sharpen one photo.",
+    problem:
+      "Traditional editors have steep learning curves and paid licences just to sharpen one photo.",
     outcome:
       "Three clear steps — upload, enhance, download — get you a finished result without any technical knowledge.",
   },
@@ -207,8 +210,8 @@ export function HomeContent() {
             How Pixel Perfect Pro works
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Behind the single Enhance button, the AI moves through four stages. Here is what actually
-            happens to your photo — in plain language, without the hype.
+            Behind the single Enhance button, the AI moves through four stages. Here is what
+            actually happens to your photo — in plain language, without the hype.
           </p>
         </div>
         <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -343,7 +346,10 @@ export function HomeContent() {
           </p>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {TRUST.map((t) => (
-              <div key={t.title} className="rounded-2xl border border-border/60 bg-background/30 p-4">
+              <div
+                key={t.title}
+                className="rounded-2xl border border-border/60 bg-background/30 p-4"
+              >
                 <h3 className="font-display text-sm font-semibold">{t.title}</h3>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{t.desc}</p>
               </div>

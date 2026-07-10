@@ -76,8 +76,8 @@ function ContactPage() {
     >
       <Section heading="What we can help with">
         <p>
-          This inbox reaches the people who build and maintain Pixel Perfect Pro, so you can write to
-          us about almost anything related to the tool:
+          This inbox reaches the people who build and maintain Pixel Perfect Pro, so you can write
+          to us about almost anything related to the tool:
         </p>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>

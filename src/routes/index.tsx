@@ -1,14 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Sparkles,
-  UploadCloud,
-  Wand2,
-  Download,
-  RotateCcw,
-  Zap,
-  Gauge,
-} from "lucide-react";
+import { Sparkles, UploadCloud, Wand2, Download, RotateCcw, Zap, Gauge } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -195,7 +187,10 @@ function Index() {
           {/* Hero */}
           <section className="animate-fade-up mt-14 text-center sm:mt-20">
             <span className="inline-flex items-center gap-2 rounded-full border border-border glass px-4 py-1.5 text-xs font-medium text-muted-foreground">
-              <span className="h-2 w-2 animate-glow-pulse rounded-full bg-primary" aria-hidden="true" />
+              <span
+                className="h-2 w-2 animate-glow-pulse rounded-full bg-primary"
+                aria-hidden="true"
+              />
               Free AI Image Enhancer
             </span>
             <h1 className="mx-auto mt-6 max-w-3xl font-display text-4xl font-bold leading-[1.1] tracking-tight sm:text-6xl">
@@ -249,9 +244,7 @@ function Index() {
                 <p className="mt-5 font-display text-lg font-semibold">
                   Drop your image here, or tap to upload
                 </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  JPG, PNG or WEBP — up to 15MB
-                </p>
+                <p className="mt-1 text-sm text-muted-foreground">JPG, PNG or WEBP — up to 15MB</p>
               </label>
             )}
 
@@ -264,19 +257,28 @@ function Index() {
                       after={result}
                       afterAlt={`Enhanced ${scale.toUpperCase()} result`}
                     />
-
                   ) : (
                     <div className="relative overflow-hidden rounded-2xl border border-border">
-                      <img src={original} alt="Your uploaded image preview" className="block w-full" />
+                      <img
+                        src={original}
+                        alt="Your uploaded image preview"
+                        className="block w-full"
+                      />
                       {stage === "loading" && (
                         <div
                           className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/70 px-6 backdrop-blur-sm"
                           role="status"
                           aria-live="polite"
                         >
-                          <div className="shimmer absolute inset-0 h-full w-full" aria-hidden="true" />
+                          <div
+                            className="shimmer absolute inset-0 h-full w-full"
+                            aria-hidden="true"
+                          />
                           <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow">
-                            <Wand2 className="h-7 w-7 animate-pulse text-primary-foreground" aria-hidden="true" />
+                            <Wand2
+                              className="h-7 w-7 animate-pulse text-primary-foreground"
+                              aria-hidden="true"
+                            />
                           </div>
                           <p className="relative font-display font-semibold">
                             Enhancing to {scale.toUpperCase()}…
@@ -306,7 +308,10 @@ function Index() {
                 {/* Controls */}
                 <div className="flex flex-col gap-4">
                   {stage !== "done" && (
-                    <fieldset className="grid grid-cols-2 gap-3 border-0 p-0" disabled={stage === "loading"}>
+                    <fieldset
+                      className="grid grid-cols-2 gap-3 border-0 p-0"
+                      disabled={stage === "loading"}
+                    >
                       <legend className="sr-only">Choose output resolution</legend>
                       {(["4k", "8k"] as Scale[]).map((s) => (
                         <button
@@ -366,7 +371,6 @@ function Index() {
           </section>
           <HomeContent />
           <BeforeAfterGallery />
-
         </main>
       </div>
 

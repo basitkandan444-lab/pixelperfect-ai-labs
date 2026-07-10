@@ -15,7 +15,8 @@ const ITEMS: GalleryItem[] = [
     category: "Landscape",
     title: "Mountain lake at golden hour",
     problem: "Soft, low-resolution scenery with washed-out colour and mushy detail.",
-    enhancement: "AI reconstructs edges, recovers texture in rock and water, and rebalances colour.",
+    enhancement:
+      "AI reconstructs edges, recovers texture in rock and water, and rebalances colour.",
     result: "A crisp, vibrant landscape ready for prints and wallpapers.",
   },
   {
@@ -74,8 +75,8 @@ export function BeforeAfterGallery() {
           Before &amp; after gallery
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground">
-          Drag the slider on each example to see how our AI image enhancer sharpens detail,
-          reduces noise and restores clarity across different types of photos.
+          Drag the slider on each example to see how our AI image enhancer sharpens detail, reduces
+          noise and restores clarity across different types of photos.
         </p>
       </div>
 

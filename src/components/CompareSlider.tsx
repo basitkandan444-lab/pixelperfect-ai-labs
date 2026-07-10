@@ -92,7 +92,10 @@ export function CompareSlider({
         After
       </span>
 
-      <div className="absolute inset-y-0 z-10 w-0.5 bg-gradient-primary" style={{ left: `${pos}%` }}>
+      <div
+        className="absolute inset-y-0 z-10 w-0.5 bg-gradient-primary"
+        style={{ left: `${pos}%` }}
+      >
         <button
           type="button"
           role="slider"
@@ -109,7 +112,17 @@ export function CompareSlider({
           onTouchStart={() => (dragging.current = true)}
           className="absolute top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize items-center justify-center rounded-full bg-gradient-primary text-primary-foreground shadow-glow transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
             <path d="m15 18-6-6 6-6" />
             <path d="m9 6 6 6-6 6" />
           </svg>

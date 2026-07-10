@@ -26,10 +26,7 @@ export function absoluteUrl(origin: string | undefined, path: string): string {
  * Builds a BreadcrumbList JSON-LD object for a subpage. Improves SEO rich
  * results and reflects the site's internal linking structure.
  */
-export function breadcrumbSchema(
-  origin: string | undefined,
-  page: { name: string; path: string },
-) {
+export function breadcrumbSchema(origin: string | undefined, page: { name: string; path: string }) {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

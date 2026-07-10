@@ -47,10 +47,10 @@ function CookiePage() {
     >
       <Section heading="What cookies are">
         <p>
-          Cookies are small text files that a website stores on your device. They help a site function
-          correctly, remember short-lived preferences and understand — in aggregate — how visitors use
-          it. Similar technologies such as local storage and pixels can serve the same purposes. Most
-          cookies are harmless and expire on their own after a set period.
+          Cookies are small text files that a website stores on your device. They help a site
+          function correctly, remember short-lived preferences and understand — in aggregate — how
+          visitors use it. Similar technologies such as local storage and pixels can serve the same
+          purposes. Most cookies are harmless and expire on their own after a set period.
         </p>
       </Section>
       <Section heading="How we use cookies">
@@ -60,26 +60,26 @@ function CookiePage() {
         </p>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>
-            <strong className="text-foreground">Essential:</strong> required for the app to work, such
-            as remembering your choices during a single session. These cannot be switched off without
-            affecting core functionality.
+            <strong className="text-foreground">Essential:</strong> required for the app to work,
+            such as remembering your choices during a single session. These cannot be switched off
+            without affecting core functionality.
           </li>
           <li>
-            <strong className="text-foreground">Analytics:</strong> anonymous, aggregated measurement
-            of traffic and performance so we can see which features are useful and where to improve.
-            These do not identify you personally.
+            <strong className="text-foreground">Analytics:</strong> anonymous, aggregated
+            measurement of traffic and performance so we can see which features are useful and where
+            to improve. These do not identify you personally.
           </li>
         </ul>
         <p className="mt-2">
-          We do not use advertising or cross-site tracking cookies, and we do not sell any information
-          collected through cookies.
+          We do not use advertising or cross-site tracking cookies, and we do not sell any
+          information collected through cookies.
         </p>
       </Section>
       <Section heading="Third-party cookies">
         <p>
-          Some cookies may be set by the analytics provider we use to measure site performance. These
-          third parties process the data only on our behalf and for the purpose of reporting usage
-          statistics, not for their own advertising.
+          Some cookies may be set by the analytics provider we use to measure site performance.
+          These third parties process the data only on our behalf and for the purpose of reporting
+          usage statistics, not for their own advertising.
         </p>
       </Section>
       <Section heading="Managing cookies">
