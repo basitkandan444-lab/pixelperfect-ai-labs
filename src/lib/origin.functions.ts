@@ -20,9 +20,7 @@ export const getRequestOrigin = createIsomorphicFn()
   })
   .server(async () => {
     try {
-      const { getRequestHost, getRequestProtocol } = await import(
-        "@tanstack/react-start/server"
-      );
+      const { getRequestHost, getRequestProtocol } = await import("@tanstack/react-start/server");
       const host = getRequestHost();
       if (!host || host.startsWith("localhost") || host.startsWith("127.")) return "";
       const proto = getRequestProtocol() ?? "https";

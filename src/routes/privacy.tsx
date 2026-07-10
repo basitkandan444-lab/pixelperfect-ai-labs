@@ -47,24 +47,24 @@ function PrivacyPage() {
     >
       <Section heading="Images you upload">
         <p>
-          When you upload a photo, it is used for one purpose only: to generate your enhanced result.
-          The image is processed on demand and is not added to a public gallery, used to train
-          unrelated systems, sold, or shared with third parties for advertising. We do not require an
-          account, so an uploaded image is never tied to a personal profile.
+          When you upload a photo, it is used for one purpose only: to generate your enhanced
+          result. The image is processed on demand and is not added to a public gallery, used to
+          train unrelated systems, sold, or shared with third parties for advertising. We do not
+          require an account, so an uploaded image is never tied to a personal profile.
         </p>
         <p>
           Enhanced results are returned to you for download and are not retained as a permanent
-          archive. Once your request is complete, you hold the copy — we do not keep a working library
-          of user photos.
+          archive. Once your request is complete, you hold the copy — we do not keep a working
+          library of user photos.
         </p>
       </Section>
       <Section heading="Information we collect">
         <p>
           Because there is no login, we do not collect names, email addresses or account details
           unless you choose to email us directly. We may collect anonymous, aggregated usage
-          analytics — such as page views, approximate region, browser and device type — to understand
-          how the app is used and where to improve it. This information is statistical and is not used
-          to identify you personally.
+          analytics — such as page views, approximate region, browser and device type — to
+          understand how the app is used and where to improve it. This information is statistical
+          and is not used to identify you personally.
         </p>
       </Section>
       <Section heading="Cookies and analytics">
@@ -85,30 +85,30 @@ function PrivacyPage() {
       </Section>
       <Section heading="Data security">
         <p>
-          We use industry-standard encryption in transit and limit data handling to what is needed to
-          deliver the service. No online service can promise absolute security, but we avoid storing
-          personal data we do not need, which is the most effective way to keep it safe.
+          We use industry-standard encryption in transit and limit data handling to what is needed
+          to deliver the service. No online service can promise absolute security, but we avoid
+          storing personal data we do not need, which is the most effective way to keep it safe.
         </p>
       </Section>
       <Section heading="Children's privacy">
         <p>
-          Pixel Perfect Pro is a general-purpose tool and is not directed at children under 13. We do
-          not knowingly collect personal information from children. If you believe a child has sent us
-          personal data, contact us and we will remove it.
+          Pixel Perfect Pro is a general-purpose tool and is not directed at children under 13. We
+          do not knowingly collect personal information from children. If you believe a child has
+          sent us personal data, contact us and we will remove it.
         </p>
       </Section>
       <Section heading="Your choices">
         <p>
-          You can use the core tool without providing any personal information. You are free to clear
-          cookies, decline analytics through your browser, or contact us with questions or requests
-          regarding your data at any time.
+          You can use the core tool without providing any personal information. You are free to
+          clear cookies, decline analytics through your browser, or contact us with questions or
+          requests regarding your data at any time.
         </p>
       </Section>
       <Section heading="Changes to this policy">
         <p>
           We may update this policy as the app evolves or as regulations change. When we do, we will
-          revise the “Last updated” date above. Continued use of the service after an update means you
-          accept the revised policy.
+          revise the “Last updated” date above. Continued use of the service after an update means
+          you accept the revised policy.
         </p>
       </Section>
       <Section heading="Contact">

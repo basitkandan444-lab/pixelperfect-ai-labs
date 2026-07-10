@@ -49,14 +49,12 @@ function TermsPage() {
         <p>
           Pixel Perfect Pro is provided free of charge for enhancing and upscaling images. You may
           use it for personal or commercial projects, as often as you like, without creating an
-          account. In exchange, you agree to use it only for lawful purposes and only with images you
-          own or otherwise have the right to edit.
+          account. In exchange, you agree to use it only for lawful purposes and only with images
+          you own or otherwise have the right to edit.
         </p>
       </Section>
       <Section heading="Acceptable use">
-        <p>
-          To keep the service safe and available for everyone, you agree not to:
-        </p>
+        <p>To keep the service safe and available for everyone, you agree not to:</p>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>Upload content that is illegal, harmful, hateful or sexually exploitative</li>
           <li>Upload images that infringe another person's copyright, trademark or privacy</li>
@@ -67,23 +65,24 @@ function TermsPage() {
       <Section heading="Your responsibilities">
         <p>
           You are solely responsible for the images you upload and for how you use the enhanced
-          results. You confirm that you have the necessary rights to each image and that processing it
-          does not break any law or third-party agreement. AI enhancement reconstructs plausible
-          detail rather than recovering original information, so you should review results before using
-          them in any context where accuracy matters, such as identification, legal or medical use.
+          results. You confirm that you have the necessary rights to each image and that processing
+          it does not break any law or third-party agreement. AI enhancement reconstructs plausible
+          detail rather than recovering original information, so you should review results before
+          using them in any context where accuracy matters, such as identification, legal or medical
+          use.
         </p>
       </Section>
       <Section heading="Content ownership">
         <p>
-          You retain all rights to the images you upload and to the enhanced results you download. We
-          claim no ownership over your content and do not use it to build unrelated products. Our
+          You retain all rights to the images you upload and to the enhanced results you download.
+          We claim no ownership over your content and do not use it to build unrelated products. Our
           rights are limited to the software, branding and design of Pixel Perfect Pro itself.
         </p>
       </Section>
       <Section heading="Availability and warranty">
         <p>
-          The service is provided “as is” and “as available”, without warranties of any kind. We work
-          to keep it reliable, but we do not guarantee that every enhancement will meet your
+          The service is provided “as is” and “as available”, without warranties of any kind. We
+          work to keep it reliable, but we do not guarantee that every enhancement will meet your
           expectations, that results will be error-free, or that the service will always be
           uninterrupted or maintained indefinitely.
         </p>
@@ -98,8 +97,8 @@ function TermsPage() {
       <Section heading="Changes to these terms">
         <p>
           We may update these terms from time to time as the service evolves. When we do, we will
-          update the “Last updated” date above. Continued use of the service after changes take effect
-          means you accept the updated terms.
+          update the “Last updated” date above. Continued use of the service after changes take
+          effect means you accept the updated terms.
         </p>
       </Section>
       <Section heading="Contact">

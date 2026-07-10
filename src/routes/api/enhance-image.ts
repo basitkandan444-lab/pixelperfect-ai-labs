@@ -46,7 +46,6 @@ export const Route = createFileRoute("/api/enhance-image")({
           );
         }
 
-
         const upstream = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
           method: "POST",
           headers: {
@@ -82,10 +81,7 @@ export const Route = createFileRoute("/api/enhance-image")({
         }
         if (!upstream.ok) {
           const detail = await upstream.text();
-          return Response.json(
-            { error: "Enhancement failed.", detail },
-            { status: 502 },
-          );
+          return Response.json({ error: "Enhancement failed.", detail }, { status: 502 });
         }
 
         const data = (await upstream.json()) as Record<string, unknown>;

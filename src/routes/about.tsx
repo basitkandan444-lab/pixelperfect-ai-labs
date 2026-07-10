@@ -80,23 +80,23 @@ function AboutPage() {
         <p>
           Upload a JPG, PNG or WEBP file up to 15MB, choose your target resolution, and the AI
           processes the image and returns a high-resolution PNG you can download instantly.
-          Everything happens on demand — there are no queues to sign up for and no files left sitting
-          on a server. If you want a step-by-step walkthrough and real before-and-after examples, the
-          homepage explains the full workflow in detail.
+          Everything happens on demand — there are no queues to sign up for and no files left
+          sitting on a server. If you want a step-by-step walkthrough and real before-and-after
+          examples, the homepage explains the full workflow in detail.
         </p>
       </Section>
       <Section heading="Privacy first">
         <p>
           Your images belong to you. Uploads are used only to generate your enhanced result for that
-          single request and are not stored permanently, sold or shared for advertising. You can read
-          the specifics in our Privacy Policy, and you never have to create an account to use the
-          tool.
+          single request and are not stored permanently, sold or shared for advertising. You can
+          read the specifics in our Privacy Policy, and you never have to create an account to use
+          the tool.
         </p>
       </Section>
       <Section heading="Always free">
         <p>
-          Pixel Perfect Pro is completely free to use. There are no subscriptions, no hidden fees, no
-          watermarks and no account required. Just upload, enhance and download — as often as you
+          Pixel Perfect Pro is completely free to use. There are no subscriptions, no hidden fees,
+          no watermarks and no account required. Just upload, enhance and download — as often as you
           like.
         </p>
       </Section>
