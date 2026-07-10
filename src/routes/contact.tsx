@@ -3,7 +3,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 
-import { ContentPage } from "@/components/ContentPage";
+import { ContentPage, Section } from "@/components/ContentPage";
 import { Button } from "@/components/ui/button";
 import { SITE, absoluteUrl, breadcrumbSchema } from "@/lib/site";
 import { getRequestOrigin } from "@/lib/origin.functions";
