@@ -370,6 +370,7 @@ function Index() {
             )}
           </section>
           <HomeContent />
+          <BeforeAfterGallery />
 
         </main>
       </div>
