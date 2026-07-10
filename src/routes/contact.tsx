@@ -72,8 +72,19 @@ function ContactPage() {
   return (
     <ContentPage
       title="Contact us"
-      intro="Have a question, found a bug, or want to share feedback? We'd love to hear from you."
+      intro="Reach out for support, bug reports, feature requests or business inquiries — we read every message and would love to hear from you."
     >
+      <p className="mb-6 rounded-2xl border border-border bg-background/40 p-4 text-sm text-muted-foreground">
+        Prefer email? Contact us directly at{" "}
+        <a
+          href={`mailto:${SITE.email}`}
+          className="font-medium text-primary underline-offset-4 hover:underline"
+        >
+          {SITE.email}
+        </a>
+        . Whether you need help, spotted a bug, have a feature idea or a partnership proposal, this
+        inbox reaches the team.
+      </p>
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">
           <label htmlFor="name" className="text-sm font-medium text-foreground">
