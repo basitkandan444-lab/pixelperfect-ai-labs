@@ -156,7 +156,7 @@ export function LandingPage({ data }: { data: LandingContent }) {
                   or read the{" "}
                   <Link
                     to="/"
-                    hash="faq"
+                    hash="faq-heading"
                     className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
                   >
                     full FAQ
