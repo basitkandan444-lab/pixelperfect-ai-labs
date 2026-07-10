@@ -74,17 +74,46 @@ function ContactPage() {
       title="Contact us"
       intro="Reach out for support, bug reports, feature requests or business inquiries — we read every message and would love to hear from you."
     >
-      <p className="mb-6 rounded-2xl border border-border bg-background/40 p-4 text-sm text-muted-foreground">
-        Prefer email? Contact us directly at{" "}
-        <a
-          href={`mailto:${SITE.email}`}
-          className="font-medium text-primary underline-offset-4 hover:underline"
-        >
-          {SITE.email}
-        </a>
-        . Whether you need help, spotted a bug, have a feature idea or a partnership proposal, this
-        inbox reaches the team.
-      </p>
+      <Section heading="What we can help with">
+        <p>
+          This inbox reaches the people who build and maintain Pixel Perfect Pro, so you can write to
+          us about almost anything related to the tool:
+        </p>
+        <ul className="mt-2 list-disc space-y-1 pl-5">
+          <li>
+            <strong className="text-foreground">Support:</strong> trouble uploading, enhancing or
+            downloading an image, or questions about supported formats and the 15MB size limit.
+          </li>
+          <li>
+            <strong className="text-foreground">Bug reports:</strong> something not working as
+            expected — describe what you did and what happened, and a screenshot helps us fix it
+            faster.
+          </li>
+          <li>
+            <strong className="text-foreground">Feature requests:</strong> an idea for a new format,
+            resolution or capability you would like to see added.
+          </li>
+          <li>
+            <strong className="text-foreground">Business enquiries:</strong> partnerships, press or
+            other professional questions.
+          </li>
+        </ul>
+      </Section>
+      <Section heading="How to reach us">
+        <p className="rounded-2xl border border-border bg-background/40 p-4 text-sm text-muted-foreground">
+          Prefer email? Contact us directly at{" "}
+          <a
+            href={`mailto:${SITE.email}`}
+            className="font-medium text-primary underline-offset-4 hover:underline"
+          >
+            {SITE.email}
+          </a>
+          . You can also use the form below — it opens your email app with the details filled in. We
+          read every message and typically reply by email within a few business days. Including as
+          much detail as possible helps us respond usefully the first time.
+        </p>
+      </Section>
+
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">
           <label htmlFor="name" className="text-sm font-medium text-foreground">
