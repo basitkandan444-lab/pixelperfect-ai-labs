@@ -6,6 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Testing
+
+- **Testing foundation expansion (Module 4, Waves 4A–4C):** after an audit that
+  confirmed the enhancement core was already covered (validation, error mapping,
+  timeout/retry, client-abort, rate limiting — 19 tests in
+  `enhance-image.core.test.ts`), added focused unit tests for the previously
+  untested high/medium-risk modules: the rate limiter
+  (`rate-limit.test.ts` — window limits/reset, per-key isolation, `resetSec`,
+  memory-bounded key eviction, client-IP resolution), the API response envelopes
+  (`api-response.test.ts` — success/failure shape, `Cache-Control: no-store`,
+  header merging, `requestId` echo), the in-memory metrics
+  (`metrics.test.ts` — counters, rejection/abort categories, `successRate`
+  bounds, p95 ≥ average), and the landing-page SEO data
+  (`landing.test.ts` — unique slugs/paths, valid internal "related" links,
+  required metadata, JSON-LD validity). Suite now runs 49 tests across 5 files.
+  No production logic changed.
+
 ### Documentation
 
 - **Architecture alignment & documentation maturity (Wave 3E, docs only):**
