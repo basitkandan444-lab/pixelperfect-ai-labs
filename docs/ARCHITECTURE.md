@@ -140,42 +140,58 @@ bun run check   # typecheck + lint + format:check
 bun run build   # production build must succeed
 ```
 
-## Future browser-first architecture
+## Future execution direction
 
-This section describes the project's intended long-term direction. It is **not
-yet implemented** — the current implementation enhances images server-side
-through the AI Gateway (see [System overview](#system-overview) and the AI
-enhancement request flow above). Future releases will progressively migrate
-image enhancement into the user's browser.
+This section describes the project's intended architectural direction. It is
+**not yet implemented**.
 
-**Vision.** Image enhancement executes inside the user's browser, on the user's
-own hardware, with centralized coordination only when required:
+### Current state
 
-- **Local device execution** — enhancement runs on the user's device instead of
-  a centralized inference backend. Future execution targets may include WebGPU,
-  WebNN, WebAssembly, PWAs, and native wrappers (e.g. Electron, Tauri).
-- **User-owned hardware acceleration** — use **WebGPU** where available, with
-  graceful fallback to WebAssembly and CPU/GPU paths where WebGPU is
-  unsupported.
-- **Graceful degradation** — devices and browsers without acceleration still
-  work, trading speed for compatibility rather than failing.
-- **Centralized coordination only when required** — scalability depends
-  primarily on the aggregate capability of users' devices rather than
-  centralized inference infrastructure, so every new user brings their own
-  compute and the application scales with its user base at little marginal cost.
-- **Excellent privacy** — images can be processed locally without leaving the
-  device.
-- **Scalable client-side performance** — browser performance, compatibility,
-  responsiveness, and UX become the primary engineering priorities.
+The current enhancement engine runs enhancement on centralized infrastructure —
+the request is validated at the edge and processed through the AI Gateway (see
+[System overview](#system-overview) and the enhancement request flow above).
+This is what exists today.
 
-**Engineering rationale that stays correct across the migration.** The design
-choices already in place — stopping abandoned requests immediately, avoiding
-redundant processing, bounded retries, and reliability/efficiency metrics —
-describe generic benefits (freeing processing resources, improving efficiency,
-improving responsiveness) that remain accurate whether enhancement runs on the
-server today or in the browser later.
+### Future direction
 
-**Transition posture.** The current implementation may temporarily continue to
-use backend processing during development. Documentation should keep
-distinguishing the current server-side reality from the future browser-first
-model, and never present the browser-first model as already implemented.
+The intended direction moves enhancement toward the participant's own device,
+using centralized coordination only when required. This is planned, not present.
+
+- **Local device execution** — enhancement runs on the participant's device
+  rather than on centralized infrastructure. Execution targets are treated as
+  interchangeable examples, not commitments; future targets may include WebGPU,
+  WebNN, WebAssembly, ONNX Runtime, TensorFlow.js, native acceleration,
+  Electron/Tauri desktop wrappers, PWAs, and future browser or engine APIs.
+- **Hardware acceleration where available** — use whatever acceleration the
+  execution environment exposes, with graceful fallback to CPU paths where
+  acceleration is unavailable. No single accelerator is assumed to be permanent.
+- **Graceful degradation** — environments without acceleration still work,
+  trading throughput for compatibility rather than failing.
+- **Scales with aggregate capability** — the system scales with the aggregate
+  capability of participating devices rather than with centralized inference
+  infrastructure, so each additional participant contributes its own
+  computational capacity and the system grows with its user base with little
+  additional centralized infrastructure.
+- **Strong privacy posture** — content can be processed locally without leaving
+  the device.
+- **Execution-environment performance** — responsiveness, compatibility, and UX
+  of the execution environment become primary engineering priorities.
+
+Hybrid, offline, edge, and centralized execution may coexist; the wording above
+is written to remain correct whichever combination is active.
+
+### Rationale that survives migration
+
+The design choices already in place — stopping abandoned requests immediately,
+avoiding redundant processing, bounded retries, and reliability/efficiency
+metrics — describe engineering outcomes (freeing processing resources, reducing
+unnecessary computation, improving responsiveness) that remain accurate under
+any execution model, whether processing happens on centralized infrastructure
+today or on participant devices later.
+
+### Transition posture
+
+The current implementation may continue to use centralized processing during
+development. Documentation must keep the **Current state** and **Future
+direction** explicitly separated, and never present the future direction as
+already implemented.
