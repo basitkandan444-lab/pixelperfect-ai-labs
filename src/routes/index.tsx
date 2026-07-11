@@ -110,14 +110,24 @@ function Index() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image: original, scale }),
       });
-      const data = (await res.json()) as { image?: string; error?: string };
-      if (!res.ok || !data.image) {
-        toast.error(data.error ?? "Enhancement failed. Please try again.");
+      // Standardized envelope: { success, data: { image }, error: { message } }.
+      // Falls back to the legacy flat shape for resilience during rollout.
+      const data = (await res.json()) as {
+        success?: boolean;
+        data?: { image?: string };
+        error?: { message?: string } | string;
+        image?: string;
+      };
+      const image = data.data?.image ?? data.image;
+      const errorMessage =
+        typeof data.error === "string" ? data.error : data.error?.message;
+      if (!res.ok || !image) {
+        toast.error(errorMessage ?? "Enhancement failed. Please try again.");
         setStage("ready");
         return;
       }
       setProgress(100);
-      setResult(data.image);
+      setResult(image);
       setStage("done");
       toast.success(`Enhanced to ${scale.toUpperCase()} quality!`);
       trackEvent("enhance_complete", { scale });

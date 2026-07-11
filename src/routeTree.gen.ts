@@ -25,6 +25,7 @@ import { Route as AiImageEnhancerRouteImport } from './routes/ai-image-enhancer'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiEnhanceImageRouteImport } from './routes/api/enhance-image'
+import { Route as ApiPublicMetricsRouteImport } from './routes/api/public/metrics'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 
 const TermsRoute = TermsRouteImport.update({
@@ -107,6 +108,11 @@ const ApiEnhanceImageRoute = ApiEnhanceImageRouteImport.update({
   path: '/api/enhance-image',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicMetricsRoute = ApiPublicMetricsRouteImport.update({
+  id: '/api/public/metrics',
+  path: '/api/public/metrics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
   id: '/api/public/health',
   path: '/api/public/health',
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/api/enhance-image': typeof ApiEnhanceImageRoute
   '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/metrics': typeof ApiPublicMetricsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/api/enhance-image': typeof ApiEnhanceImageRoute
   '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/metrics': typeof ApiPublicMetricsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -170,6 +178,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/api/enhance-image': typeof ApiEnhanceImageRoute
   '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/metrics': typeof ApiPublicMetricsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -191,6 +200,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/api/enhance-image'
     | '/api/public/health'
+    | '/api/public/metrics'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -210,6 +220,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/api/enhance-image'
     | '/api/public/health'
+    | '/api/public/metrics'
   id:
     | '__root__'
     | '/'
@@ -229,6 +240,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/api/enhance-image'
     | '/api/public/health'
+    | '/api/public/metrics'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -249,6 +261,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   ApiEnhanceImageRoute: typeof ApiEnhanceImageRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
+  ApiPublicMetricsRoute: typeof ApiPublicMetricsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -365,6 +378,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiEnhanceImageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/metrics': {
+      id: '/api/public/metrics'
+      path: '/api/public/metrics'
+      fullPath: '/api/public/metrics'
+      preLoaderRoute: typeof ApiPublicMetricsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/health': {
       id: '/api/public/health'
       path: '/api/public/health'
@@ -393,6 +413,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   ApiEnhanceImageRoute: ApiEnhanceImageRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
+  ApiPublicMetricsRoute: ApiPublicMetricsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
