@@ -84,3 +84,27 @@ test.describe("Accessibility (axe-core, WCAG 2.1 AA)", () => {
     await expect(slider).toHaveAttribute("aria-valuenow", /\d+/);
   });
 });
+
+// WCAG 2.3.3 — motion is honored, not merely declared. The CSS reset lives in
+// src/styles.css; this test emulates `prefers-reduced-motion: reduce` and asserts
+// the ambient decorative animations are actually neutralized in the browser, so a
+// regression that drops the media query fails the build instead of silently
+// shipping vestibular-unsafe motion.
+test.describe("Reduced motion (WCAG 2.3.3)", () => {
+  test.use({ reducedMotion: "reduce" });
+
+  test("continuous decorative animations are collapsed when motion is reduced", async ({
+    page,
+  }) => {
+    await openHome(page);
+    const durationMs = await page
+      .locator(".animate-glow-pulse")
+      .first()
+      .evaluate((el) => {
+        const raw = getComputedStyle(el).animationDuration; // e.g. "0.001ms" or "5s"
+        return raw.endsWith("ms") ? parseFloat(raw) : parseFloat(raw) * 1000;
+      });
+    // The reset forces ~0ms; anything under a frame (16ms) proves motion is off.
+    expect(durationMs).toBeLessThan(16);
+  });
+});
