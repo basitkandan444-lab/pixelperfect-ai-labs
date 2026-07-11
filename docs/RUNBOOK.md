@@ -54,7 +54,7 @@ server routes pick it up on the next request.
 - **Code:** recoverable from Lovable version history and (if connected) the
   GitHub repository. Keep GitHub sync enabled for an off-platform copy.
 - **Secrets:** not stored in the repo. Keep an off-platform record of which
-  secret *names* exist and where each value is obtained (the values themselves
+  secret _names_ exist and where each value is obtained (the values themselves
   live only in Lovable / the source provider).
 - **Data:** the app stores no persistent user data, so there is no database to
   back up or restore. If a database is added later, enable scheduled backups and

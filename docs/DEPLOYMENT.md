@@ -27,12 +27,12 @@ through **Lovable** onto a Cloudflare Workers (edge) runtime.
 
 ## Environment variables
 
-| Variable                | Scope   | Purpose                                       |
-| ----------------------- | ------- | --------------------------------------------- |
-| `LOVABLE_API_KEY`       | server  | AI enhancement gateway key (never exposed)    |
-| `VITE_GA4_ID`           | client  | Google Analytics 4 measurement ID             |
-| `VITE_CLARITY_ID`       | client  | Microsoft Clarity project ID                  |
-| `VITE_GSC_VERIFICATION` | client  | Extra Google Search Console verification token |
+| Variable                | Scope  | Purpose                                        |
+| ----------------------- | ------ | ---------------------------------------------- |
+| `LOVABLE_API_KEY`       | server | AI enhancement gateway key (never exposed)     |
+| `VITE_GA4_ID`           | client | Google Analytics 4 measurement ID              |
+| `VITE_CLARITY_ID`       | client | Microsoft Clarity project ID                   |
+| `VITE_GSC_VERIFICATION` | client | Extra Google Search Console verification token |
 
 `VITE_*` values ship in the client bundle (public by design). Server secrets are
 read only inside route handlers.
