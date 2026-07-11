@@ -39,8 +39,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   testing philosophy, all test layers, the browser matrix, how to run/debug each
   layer, the coverage gate and the CI pipeline.
 
-
-
 - **Cross-engine browser matrix:** expanded Playwright projects from 2 to 5 —
   `desktop-chromium`, `desktop-firefox`, `desktop-webkit`, `mobile-chrome`
   (Pixel 5) and `mobile-safari` (iPhone 13). Functional + accessibility specs

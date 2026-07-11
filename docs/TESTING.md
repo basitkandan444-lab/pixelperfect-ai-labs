@@ -21,16 +21,16 @@ to read this and be productive without asking anyone.
 
 ## Test layers
 
-| Layer                | Tool                     | Location                     | Runs on            |
-| -------------------- | ------------------------ | ---------------------------- | ------------------ |
-| Unit / logic         | Vitest (`node`)          | `src/lib/*.test.ts`          | every push / PR    |
-| Component            | Vitest (`jsdom`) + RTL   | `src/components/*.test.tsx`  | every push / PR    |
-| HTTP integration     | Vitest (`node`)          | `src/lib/enhance-image.http.test.ts` | every push / PR |
-| Load / concurrency   | Vitest (`node`)          | `src/lib/enhance-image.load.test.ts` | every push / PR |
-| E2E functional       | Playwright               | `e2e/enhance-journey.spec.ts`, `e2e/failure-scenarios.spec.ts` | every push / PR |
-| Network resilience   | Playwright (CDP offline) | `e2e/network.spec.ts`        | every push / PR    |
-| Accessibility        | Playwright + axe-core    | `e2e/a11y.spec.ts`           | every push / PR    |
-| Visual regression    | Playwright screenshots   | `e2e/visual.spec.ts`         | every push / PR    |
+| Layer              | Tool                     | Location                                                       | Runs on         |
+| ------------------ | ------------------------ | -------------------------------------------------------------- | --------------- |
+| Unit / logic       | Vitest (`node`)          | `src/lib/*.test.ts`                                            | every push / PR |
+| Component          | Vitest (`jsdom`) + RTL   | `src/components/*.test.tsx`                                    | every push / PR |
+| HTTP integration   | Vitest (`node`)          | `src/lib/enhance-image.http.test.ts`                           | every push / PR |
+| Load / concurrency | Vitest (`node`)          | `src/lib/enhance-image.load.test.ts`                           | every push / PR |
+| E2E functional     | Playwright               | `e2e/enhance-journey.spec.ts`, `e2e/failure-scenarios.spec.ts` | every push / PR |
+| Network resilience | Playwright (CDP offline) | `e2e/network.spec.ts`                                          | every push / PR |
+| Accessibility      | Playwright + axe-core    | `e2e/a11y.spec.ts`                                             | every push / PR |
+| Visual regression  | Playwright screenshots   | `e2e/visual.spec.ts`                                           | every push / PR |
 
 ### Browser matrix
 
@@ -44,7 +44,7 @@ Playwright runs five projects: `desktop-chromium`, `desktop-firefox`,
   (`desktop-chromium` + `mobile-chrome`). Pixel-exact snapshots are per-engine
   and per-OS; maintaining WebKit/Firefox baselines would multiply flake and
   maintenance for little added signal — layout regressions surface on Chromium
-  just as reliably, and cross-engine *behaviour* is covered by the functional
+  just as reliably, and cross-engine _behaviour_ is covered by the functional
   and a11y suites. The scoping is enforced by a guard in `e2e/visual.spec.ts`.
 
 ## Running tests
