@@ -53,24 +53,56 @@ bun run preview    # preview the production build locally
 ## Quality checks
 
 ```bash
+bun run typecheck  # tsc --noEmit (strict)
 bun run lint       # ESLint + Prettier rules
 bun run format     # auto-format with Prettier
+bun run test       # Vitest unit tests
+bun run check      # typecheck + lint + format check + test (the full local gate)
 ```
+
+`bun run check` mirrors CI exactly — run it before every pull request.
 
 ## Environment variables
 
-All are optional — the app runs without them. Set them in the Lovable Cloud
-secrets / environment for production.
+All are optional — the app boots without them. Copy `.env.example` to `.env`
+for local development. Values are format-validated at startup in
+`src/lib/env.ts`; malformed values fail fast (server) or warn loudly (optional
+client analytics). Set production values in the Lovable Cloud secrets /
+environment, never in a committed file.
 
-| Variable                | Purpose                                        |
-| ----------------------- | ---------------------------------------------- |
-| `LOVABLE_API_KEY`       | Server-side key for the AI enhancement gateway |
-| `VITE_GA4_ID`           | Google Analytics 4 measurement ID (client)     |
-| `VITE_CLARITY_ID`       | Microsoft Clarity project ID (client)          |
-| `VITE_GSC_VERIFICATION` | Extra Google Search Console verification token |
+| Variable                | Scope  | Purpose                                        |
+| ----------------------- | ------ | ---------------------------------------------- |
+| `LOVABLE_API_KEY`       | server | AI enhancement gateway key (never exposed)     |
+| `VITE_GA4_ID`           | client | Google Analytics 4 measurement ID              |
+| `VITE_CLARITY_ID`       | client | Microsoft Clarity project ID                   |
+| `VITE_GSC_VERIFICATION` | client | Extra Google Search Console verification token |
 
-Never commit secrets. `LOVABLE_API_KEY` is read only inside the server route
-handler and is never exposed to the browser.
+`VITE_*` values ship in the client bundle (public by design). `LOVABLE_API_KEY`
+is read only inside the server route handler and is never exposed to the browser.
+Never put a secret behind a `VITE_` prefix.
+
+## Release workflow
+
+1. Branch from `main` (`feat/…`, `fix/…`, `chore/…`, `docs/…`).
+2. `bun run check` and `bun run build` pass locally.
+3. Open a PR; CI (`.github/workflows/ci.yml`) must be green.
+4. Squash-merge to `main`.
+5. Frontend changes go live after clicking **Update** in the Lovable publish
+   dialog; backend/server-route changes deploy automatically.
+
+See [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) and
+[`CONTRIBUTING.md`](./CONTRIBUTING.md) for details.
+
+## Troubleshooting
+
+| Symptom                              | Likely cause / fix                                                        |
+| ------------------------------------ | ------------------------------------------------------------------------- |
+| `/api/enhance-image` returns `ai_unconfigured` | `LOVABLE_API_KEY` not set in the environment.                   |
+| Enhancement returns `rate_limited`   | Per-IP limit (15/min) hit — back off; honor the `Retry-After` header.     |
+| Analytics not loading                | `VITE_GA4_ID` / `VITE_CLARITY_ID` unset or malformed (see console warns). |
+| `Invalid server environment` on boot | A server env var has an invalid format — check against `.env.example`.    |
+| 404 on refresh of a deep link        | Confirm the route file exists under `src/routes/`; never edit `routeTree.gen.ts`. |
+| Health check                         | `curl -fsS <url>/api/public/health` → `{"status":"ok",...}`.              |
 
 ## Deployment
 
