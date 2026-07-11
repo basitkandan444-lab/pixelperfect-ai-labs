@@ -13,6 +13,13 @@ runtime (`workerd`) via the Lovable Cloud platform. There is no persistent
 database — the product is stateless: an image is uploaded, enhanced through the
 AI Gateway, returned, and downloaded. Nothing is stored server-side.
 
+> **Current implementation vs. future direction.** As described here, image
+> enhancement currently runs server-side through the AI Gateway while
+> development continues. The long-term direction is a **browser-first execution
+> model** where enhancement runs on the user's own hardware. See
+> [Future browser-first architecture](#future-browser-first-architecture). Text
+> below describes the current implementation unless explicitly noted.
+
 ```text
 Browser (React 19)
   │  upload image (data URL)
