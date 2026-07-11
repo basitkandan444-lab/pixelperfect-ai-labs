@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 
+- **Architecture alignment & documentation maturity (Wave 3E, docs only):**
+  expanded `docs/ARCHITECTURE.md` with a detailed current processing-flow
+  diagram (User → Frontend → Backend processing → Validation → AI Gateway →
+  Gemini model → Enhanced response) plus an explicit "where things happen today"
+  breakdown of processing, validation, failure handling, request control, and
+  existing infrastructure. Added dedicated **Architecture layers** (frontend,
+  backend, AI processing, monitoring, security), **Engineering principles**
+  (reliability first, measurable improvements only, avoid unnecessary
+  complexity, verify before completion), and **Future migration philosophy**
+  (evolve toward more efficient execution only when technically and economically
+  justified) sections. Current state and future direction remain explicitly
+  separated. No functional, API, route, test, or behaviour changes.
+
 - **Future-proof documentation & terminology (docs only):** added a "Future
   execution direction" section to `README.md` and `docs/ARCHITECTURE.md` that
   keeps **Current state** (enhancement runs on centralized infrastructure today)
