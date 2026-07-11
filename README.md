@@ -62,12 +62,12 @@ bun run format     # auto-format with Prettier
 All are optional — the app runs without them. Set them in the Lovable Cloud
 secrets / environment for production.
 
-| Variable               | Purpose                                              |
-| ---------------------- | --------------------------------------------------- |
-| `LOVABLE_API_KEY`      | Server-side key for the AI enhancement gateway      |
-| `VITE_GA4_ID`          | Google Analytics 4 measurement ID (client)          |
-| `VITE_CLARITY_ID`      | Microsoft Clarity project ID (client)               |
-| `VITE_GSC_VERIFICATION`| Extra Google Search Console verification token      |
+| Variable                | Purpose                                        |
+| ----------------------- | ---------------------------------------------- |
+| `LOVABLE_API_KEY`       | Server-side key for the AI enhancement gateway |
+| `VITE_GA4_ID`           | Google Analytics 4 measurement ID (client)     |
+| `VITE_CLARITY_ID`       | Microsoft Clarity project ID (client)          |
+| `VITE_GSC_VERIFICATION` | Extra Google Search Console verification token |
 
 Never commit secrets. `LOVABLE_API_KEY` is read only inside the server route
 handler and is never exposed to the browser.

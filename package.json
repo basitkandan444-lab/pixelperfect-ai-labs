@@ -9,7 +9,10 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "check": "bun run typecheck && bun run lint && bun run format:check"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -80,7 +83,7 @@
     "globals": "^15.15.0",
     "nitro": "3.0.260603-beta",
     "prettier": "^3.7.3",
-    "typescript": "^5.8.3",
+    "typescript": "5.9.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^8.0.16"
   }
