@@ -93,7 +93,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     retry on transient timeouts/5xx only (`src/lib/enhance-image.core.ts`).
   - Structured, PII-free JSON logging of the request lifecycle
     (`src/lib/logger.ts`).
-  - Aggregate reliability/cost metrics (`src/lib/metrics.ts`) exposed at
+  - Aggregate reliability/efficiency metrics (`src/lib/metrics.ts`) exposed at
     `/api/public/metrics`.
   - Enhancement logic extracted to a testable core module with a Vitest suite
     (`src/lib/enhance-image.core.test.ts`, 16 tests). `bun run test` script and
