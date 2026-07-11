@@ -138,12 +138,15 @@ export async function callGatewayWithRetry(args: {
   maxRetries: number;
   fetchImpl: typeof fetch;
   onTimeout?: () => void;
+  signal?: AbortSignal;
 }): Promise<Response> {
-  const { apiKey, body, timeoutMs, maxRetries, fetchImpl, onTimeout } = args;
+  const { apiKey, body, timeoutMs, maxRetries, fetchImpl, onTimeout, signal } = args;
   let attempt = 0;
   let lastError: unknown;
 
   while (attempt <= maxRetries) {
+    // Stop before spending another upstream call if the client already left.
+    if (signal?.aborted) throw new ClientAbortError();
     try {
       const res = await fetchWithTimeout(
         GATEWAY_URL,
@@ -157,6 +160,7 @@ export async function callGatewayWithRetry(args: {
         },
         timeoutMs,
         fetchImpl,
+        signal,
       );
 
       // Retry transient upstream 5xx (but not the final attempt).
@@ -168,6 +172,8 @@ export async function callGatewayWithRetry(args: {
       return res;
     } catch (err) {
       lastError = err;
+      // A client disconnect is terminal — never retry a caller that is gone.
+      if (err instanceof ClientAbortError) throw err;
       if (err instanceof TimeoutError) onTimeout?.();
       if (attempt >= maxRetries) break;
       attempt += 1;
