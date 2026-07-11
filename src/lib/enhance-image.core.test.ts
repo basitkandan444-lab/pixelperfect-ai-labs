@@ -220,4 +220,37 @@ describe("handleEnhanceImage", () => {
     expect(res.status).toBe(402);
     expect(body.error.code).toBe("ai_credits_exhausted");
   });
+
+  it("aborts the upstream call and returns 499 without retrying when the client disconnects", async () => {
+    const ac = new AbortController();
+    const req = new Request("http://localhost/api/enhance-image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "cf-connecting-ip": "9.9.9.9" },
+      body: JSON.stringify({ image: VALID_IMAGE }),
+      signal: ac.signal,
+    });
+    let fetchCalls = 0;
+    const hanging: typeof fetch = (_url, init) =>
+      new Promise((_resolve, reject) => {
+        fetchCalls += 1;
+        init?.signal?.addEventListener("abort", () => {
+          const err = new Error("aborted");
+          err.name = "AbortError";
+          reject(err);
+        });
+      });
+    const promise = handleEnhanceImage(req, {
+      apiKey: "key",
+      fetchImpl: hanging,
+      maxRetries: 2,
+      rateLimiter: createRateLimiter({ limit: 100, windowMs: 60_000 }),
+    });
+    // Give the handler a tick to dispatch the upstream call, then disconnect.
+    await new Promise((r) => setTimeout(r, 10));
+    ac.abort();
+    const res = await promise;
+    expect(res.status).toBe(499);
+    // A client disconnect is terminal: the upstream call is not retried.
+    expect(fetchCalls).toBe(1);
+  });
 });
