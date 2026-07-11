@@ -15,6 +15,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Public health-check endpoint at `/api/public/health` for uptime monitoring.
 - GitHub pull request and issue templates.
 - Operational documentation: `docs/RUNBOOK.md`, `docs/DEPLOYMENT.md`, `CONTRIBUTING.md`.
+- **AI request governance (Wave 1B)** for `/api/enhance-image`:
+  - Standardized response envelopes (`{ success, data }` / `{ success, error }`)
+    with a per-request `requestId` (`src/lib/api-response.ts`).
+  - Per-IP rate limiting foundation (`src/lib/rate-limit.ts`, 15 req/min) with
+    `Retry-After` / `X-RateLimit-*` headers.
+  - AI timeout protection (`AbortController`, 60s) and bounded exponential-backoff
+    retry on transient timeouts/5xx only (`src/lib/enhance-image.core.ts`).
+  - Structured, PII-free JSON logging of the request lifecycle
+    (`src/lib/logger.ts`).
+  - Aggregate reliability/cost metrics (`src/lib/metrics.ts`) exposed at
+    `/api/public/metrics`.
+  - Enhancement logic extracted to a testable core module with a Vitest suite
+    (`src/lib/enhance-image.core.test.ts`, 16 tests). `bun run test` script and
+    a CI test step.
 
 ### Fixed
 
