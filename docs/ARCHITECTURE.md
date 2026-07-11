@@ -214,7 +214,6 @@ Each migration step must preserve the engineering principles above and keep the
 
 ## Future execution direction
 
-
 This section describes the project's intended architectural direction. It is
 **not yet implemented**.
 
