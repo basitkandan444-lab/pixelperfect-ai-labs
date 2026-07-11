@@ -8,6 +8,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Repository hardening (Wave 1C):**
+  - Centralized, fail-fast environment validation (`src/lib/env.ts`) with Zod;
+    wired into analytics (client) and the enhance-image route (server).
+  - `.env.example` template documenting every environment variable.
+  - GitHub engineering files: `CODEOWNERS`, `SECURITY.md`, `SUPPORT.md`, and
+    `dependabot.yml` (grouped weekly dependency + Actions updates).
+  - README release workflow and troubleshooting sections.
+- CI quality gate (`.github/workflows/ci.yml`): typecheck, lint, format check,
+  production build, and dependency audit on every push and pull request.
+- `bun run typecheck`, `bun run format:check`, and `bun run check` scripts.
+- Explicit `typescript` dev dependency so the typecheck gate is reproducible.
+- Public health-check endpoint at `/api/public/health` for uptime monitoring.
+- GitHub pull request and issue templates.
+- Operational documentation: `docs/RUNBOOK.md`, `docs/DEPLOYMENT.md`, `CONTRIBUTING.md`.
+
+### Changed
+
+- `bun run check` now also runs the test suite, matching CI exactly.
+
+### Removed
+
+- Unused dependencies `date-fns` and `@hookform/resolvers`.
+
 - CI quality gate (`.github/workflows/ci.yml`): typecheck, lint, format check,
   production build, and dependency audit on every push and pull request.
 - `bun run typecheck`, `bun run format:check`, and `bun run check` scripts.
