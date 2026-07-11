@@ -186,7 +186,8 @@ describe("handleEnhanceImage", () => {
   it("maps upstream 402 to credits exhausted", async () => {
     const res = await handleEnhanceImage(makeRequest({ image: VALID_IMAGE }), {
       apiKey: "key",
-      fetchImpl: (async () => new Response("no credits", { status: 402 })) as unknown as typeof fetch,
+      fetchImpl: (async () =>
+        new Response("no credits", { status: 402 })) as unknown as typeof fetch,
       rateLimiter: createRateLimiter({ limit: 100, windowMs: 60_000 }),
     });
     const body = await res.json();

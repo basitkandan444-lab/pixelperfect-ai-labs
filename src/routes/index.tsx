@@ -119,8 +119,7 @@ function Index() {
         image?: string;
       };
       const image = data.data?.image ?? data.image;
-      const errorMessage =
-        typeof data.error === "string" ? data.error : data.error?.message;
+      const errorMessage = typeof data.error === "string" ? data.error : data.error?.message;
       if (!res.ok || !image) {
         toast.error(errorMessage ?? "Enhancement failed. Please try again.");
         setStage("ready");

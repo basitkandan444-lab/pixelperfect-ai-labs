@@ -160,10 +160,7 @@ export type EnhanceDeps = {
 // ~15 enhancement requests per IP per minute (see rate-limit.ts limitation note).
 const defaultRateLimiter = createRateLimiter({ limit: 15, windowMs: 60_000 });
 
-export async function handleEnhanceImage(
-  request: Request,
-  deps: EnhanceDeps,
-): Promise<Response> {
+export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): Promise<Response> {
   const requestId = newRequestId();
   const start = Date.now();
   const fetchImpl = deps.fetchImpl ?? fetch;
@@ -271,10 +268,14 @@ export async function handleEnhanceImage(
   if (upstream.status === 402) {
     metrics.failed(Date.now() - start);
     log.error("enhance.ai.credits_exhausted", { requestId });
-    return jsonFail("ai_credits_exhausted", "AI credits exhausted. Please add credits to continue.", {
-      status: 402,
-      requestId,
-    });
+    return jsonFail(
+      "ai_credits_exhausted",
+      "AI credits exhausted. Please add credits to continue.",
+      {
+        status: 402,
+        requestId,
+      },
+    );
   }
   if (!upstream.ok) {
     const durationMs = Date.now() - start;

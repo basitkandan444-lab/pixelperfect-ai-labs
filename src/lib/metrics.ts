@@ -55,9 +55,7 @@ export const metrics = {
   snapshot(): MetricsSnapshot {
     const durations = state.durations;
     const total = state.success + state.failure;
-    const avg = durations.length
-      ? durations.reduce((a, b) => a + b, 0) / durations.length
-      : 0;
+    const avg = durations.length ? durations.reduce((a, b) => a + b, 0) / durations.length : 0;
     return {
       requests: state.requests,
       success: state.success,
