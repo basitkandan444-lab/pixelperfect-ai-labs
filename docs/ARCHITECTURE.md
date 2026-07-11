@@ -13,11 +13,11 @@ runtime (`workerd`) via the Lovable Cloud platform. There is no persistent
 database — the product is stateless: an image is uploaded, enhanced through the
 AI Gateway, returned, and downloaded. Nothing is stored server-side.
 
-> **Current implementation vs. future direction.** As described here, image
-> enhancement currently runs through the current enhancement runtime while
-> development continues. The long-term direction is a **browser-first execution
-> model** where enhancement runs on the user's own hardware. See
-> [Future browser-first architecture](#future-browser-first-architecture). Text
+> **Current state vs. future direction.** As described here, the current
+> enhancement engine runs enhancement on centralized infrastructure while
+> development continues. The intended architectural direction moves enhancement
+> toward participants' own devices, using centralized coordination only when
+> required. See [Future execution direction](#future-execution-direction). Text
 > below describes the current implementation unless explicitly noted.
 
 ```text
