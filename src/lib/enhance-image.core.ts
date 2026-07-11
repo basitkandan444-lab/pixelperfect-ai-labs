@@ -82,21 +82,48 @@ export class TimeoutError extends Error {
   }
 }
 
+// Raised when the *client* disconnects mid-flight (incoming request aborted).
+// Distinct from TimeoutError so the retry loop terminates immediately instead
+// of wasting further upstream AI calls (and credits) on a caller that is gone.
+export class ClientAbortError extends Error {
+  constructor() {
+    super("Client aborted the request.");
+    this.name = "ClientAbortError";
+  }
+}
+
 export async function fetchWithTimeout(
   url: string,
   init: RequestInit,
   timeoutMs: number,
   fetchImpl: typeof fetch,
+  externalSignal?: AbortSignal,
 ): Promise<Response> {
+  // Fast-path: the client already went away before we even dispatched.
+  if (externalSignal?.aborted) throw new ClientAbortError();
+
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs);
+  // Propagate a client disconnect into the upstream fetch so the expensive AI
+  // subrequest is cancelled instead of running to completion unobserved.
+  const onExternalAbort = () => controller.abort();
+  externalSignal?.addEventListener("abort", onExternalAbort, { once: true });
+
   try {
     return await fetchImpl(url, { ...init, signal: controller.signal });
   } catch (err) {
-    if (err instanceof Error && err.name === "AbortError") throw new TimeoutError();
+    if (err instanceof Error && err.name === "AbortError") {
+      if (timedOut) throw new TimeoutError();
+      if (externalSignal?.aborted) throw new ClientAbortError();
+    }
     throw err;
   } finally {
     clearTimeout(timer);
+    externalSignal?.removeEventListener("abort", onExternalAbort);
   }
 }
 
