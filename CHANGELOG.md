@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Testing
 
+- **Missing desktop landing visual baseline:** restored the absent
+  `e2e/visual.spec.ts-snapshots/landing-empty-desktop-chromium-linux.png`
+  baseline. Root cause: the `desktop-chromium` landing snapshot was never
+  committed (the other three snapshots existed), so CI's first comparison for
+  that project had nothing to diff against and failed with "A snapshot doesn't
+  exist … writing actual". It was not gitignored, renamed, or relocated — the
+  file was simply missing. Fix: generated the baseline via Playwright's official
+  `--update-snapshots` workflow on the same Linux/Chromium platform CI uses and
+  committed it. All 20 E2E tests now pass. This is a genuine baseline, not a
+  suppression — the visual assertion remains fully active.
+
 - **Mobile oversized-upload E2E stability:** eliminated the flaky
   `mobile-chrome` "rejects an oversized image" spec. Root cause: the shared
   `uploadImage` helper retried the entire upload until React hydration attached
