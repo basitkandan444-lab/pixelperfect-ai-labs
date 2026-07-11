@@ -233,7 +233,7 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
   const imageBytes = parsed.image.length;
   log.info("enhance.validation.ok", { requestId, scale: parsed.scale, imageBytes });
 
-  // 4) Call the AI provider with timeout + bounded retry.
+  // 5) Call the AI provider with timeout + bounded retry.
   log.info("enhance.ai.start", { requestId, scale: parsed.scale });
   let upstream: Response;
   try {
@@ -274,7 +274,7 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
     });
   }
 
-  // 5) Map upstream status codes to standardized errors.
+  // 6) Map upstream status codes to standardized errors.
   if (upstream.status === 429) {
     metrics.failed(Date.now() - start);
     log.warn("enhance.ai.upstream_429", { requestId });
@@ -305,7 +305,7 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
     });
   }
 
-  // 6) Parse + extract the generated image.
+  // 7) Parse + extract the generated image.
   let data: Record<string, unknown>;
   try {
     data = (await upstream.json()) as Record<string, unknown>;
@@ -328,7 +328,7 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
     });
   }
 
-  // 7) Success.
+  // 8) Success.
   const durationMs = Date.now() - start;
   metrics.succeeded(durationMs);
   log.info("enhance.request.success", { requestId, scale: parsed.scale, durationMs });
