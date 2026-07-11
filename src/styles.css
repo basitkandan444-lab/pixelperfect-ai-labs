@@ -122,6 +122,13 @@
   );
   --shadow-glow: 0 0 60px -12px color-mix(in oklab, var(--primary) 55%, transparent);
   --shadow-elegant: 0 24px 60px -24px color-mix(in oklab, var(--accent) 40%, transparent);
+  /* Operational status (traffic-light) tokens for the command center. */
+  --status-ok: oklch(0.72 0.17 155);
+  --status-ok-foreground: oklch(0.16 0.02 265);
+  --status-warn: oklch(0.8 0.16 85);
+  --status-warn-foreground: oklch(0.16 0.02 265);
+  --status-bad: oklch(0.62 0.24 25);
+  --status-bad-foreground: oklch(0.98 0.003 248);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -170,6 +177,12 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+  --status-ok: oklch(0.72 0.17 155);
+  --status-ok-foreground: oklch(0.16 0.02 265);
+  --status-warn: oklch(0.8 0.16 85);
+  --status-warn-foreground: oklch(0.16 0.02 265);
+  --status-bad: oklch(0.62 0.24 25);
+  --status-bad-foreground: oklch(0.98 0.003 248);
 }
 
 @layer base {
