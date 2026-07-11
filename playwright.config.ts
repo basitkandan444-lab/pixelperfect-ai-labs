@@ -29,9 +29,22 @@ export default defineConfig({
   expect: {
     toHaveScreenshot: { maxDiffPixelRatio: 0.02, animations: "disabled" },
   },
+  // Production-grade engine matrix. Functional + accessibility specs run on all
+  // five projects so we catch engine-specific rendering, upload, pointer,
+  // keyboard and a11y differences (Blink, Gecko, WebKit) on desktop and mobile.
+  //
+  // Visual-regression baselines are intentionally scoped to two projects (see
+  // the guard in e2e/visual.spec.ts): pixel-exact snapshots are inherently
+  // per-engine and per-OS, so maintaining WebKit/Firefox baselines on top of
+  // Chromium would multiply flake and maintenance cost for little added signal —
+  // layout regressions surface on Chromium just as reliably. Cross-engine
+  // *behaviour* is what the functional/a11y suites protect.
   projects: [
     { name: "desktop-chromium", use: { ...devices["Desktop Chrome"] } },
+    { name: "desktop-firefox", use: { ...devices["Desktop Firefox"] } },
+    { name: "desktop-webkit", use: { ...devices["Desktop Safari"] } },
     { name: "mobile-chrome", use: { ...devices["Pixel 5"] } },
+    { name: "mobile-safari", use: { ...devices["iPhone 13"] } },
   ],
   webServer: {
     command: `bun run dev --port ${PORT}`,

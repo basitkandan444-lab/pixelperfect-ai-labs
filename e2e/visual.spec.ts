@@ -1,16 +1,34 @@
 import { test, expect } from "@playwright/test";
 
-import { locators, mockEnhanceSuccess, openHome, uploadValidImage } from "./helpers";
+import {
+  locators,
+  mockEnhanceError,
+  mockEnhanceSuccess,
+  openHome,
+  uploadValidImage,
+} from "./helpers";
 
-// MODULE 4E — visual regression protection. Snapshots run across the config's
-// projects (desktop + Pixel 5), so each captures a per-device, per-platform
-// baseline automatically. Animations are disabled (see playwright.config.ts) and
-// a small pixel tolerance absorbs font sub-pixel noise, so these fail on real
+// MODULE 4E — visual regression protection. Pixel-exact snapshots are inherently
+// per-engine and per-OS, so baselines are maintained for a scoped set of
+// projects (desktop Chromium + Pixel 5). Firefox/WebKit run the functional and
+// accessibility suites instead — layout regressions surface reliably on
+// Chromium, and cross-engine visual baselines would multiply flake for little
+// added signal. Animations are disabled (see playwright.config.ts) and a small
+// pixel tolerance absorbs font sub-pixel noise, so these fail on real
 // layout/spacing regressions — not on rendering jitter.
 //
 // First run creates baselines; update intentionally with:
 //   bun run test:e2e -- --update-snapshots
+const VISUAL_PROJECTS = new Set(["desktop-chromium", "mobile-chrome"]);
+
 test.describe("Visual regression", () => {
+  test.beforeEach(({}, testInfo) => {
+    test.skip(
+      !VISUAL_PROJECTS.has(testInfo.project.name),
+      "Visual baselines are scoped to desktop-chromium + mobile-chrome (see note above).",
+    );
+  });
+
   // The decorative ambient glows animate continuously; mask them so snapshots
   // capture layout/spacing, not animation phase.
   const ambientGlow = (page: import("@playwright/test").Page) =>
@@ -25,6 +43,15 @@ test.describe("Visual regression", () => {
     });
   });
 
+  test("workspace — ready-to-enhance state", async ({ page }) => {
+    // After a valid upload but before enhancing: preview + enhance CTA visible.
+    // A deterministic, high-value layout to guard (the primary conversion point).
+    await uploadValidImage(page);
+    await expect(locators.enhanceButton(page)).toBeVisible();
+    const workspace = page.locator("#workspace");
+    await expect(workspace).toHaveScreenshot("workspace-ready.png");
+  });
+
   test("workspace — successful result state", async ({ page }) => {
     await mockEnhanceSuccess(page);
     await uploadValidImage(page);
@@ -34,5 +61,17 @@ test.describe("Visual regression", () => {
     // Snapshot just the workspace card to keep the assertion focused and stable.
     const workspace = page.locator("#workspace");
     await expect(workspace).toHaveScreenshot("workspace-result.png");
+  });
+
+  test("workspace — recoverable error state", async ({ page }) => {
+    // A typed upstream error leaves the workspace intact and re-enhanceable —
+    // the experience is never broken. Snapshot the recovered, retryable layout.
+    await mockEnhanceError(page, 502, "ai_failed", "Enhancement failed. Please try again.");
+    await uploadValidImage(page);
+    await locators.enhanceButton(page).click();
+    // The enhance CTA returns (retry is possible) once the request settles.
+    await expect(locators.enhanceButton(page)).toBeEnabled();
+    const workspace = page.locator("#workspace");
+    await expect(workspace).toHaveScreenshot("workspace-error.png");
   });
 });

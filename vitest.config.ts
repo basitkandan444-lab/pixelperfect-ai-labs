@@ -18,5 +18,33 @@ export default defineConfig({
     exclude: ["e2e/**", "node_modules/**"],
     setupFiles: ["src/test/setup.ts"],
     globals: false,
+    // Coverage visibility (MODULE 4). `text` + `text-summary` print to the
+    // console (and CI logs); `html` produces a browsable report; `lcov` feeds
+    // external dashboards (Codecov/Sonar) without extra config.
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "text-summary", "html", "lcov"],
+      reportsDirectory: "./coverage",
+      // Only the tested, framework-agnostic business logic is measured against
+      // thresholds. UI components and presentational modules are exercised by
+      // Playwright (e2e), not Vitest, so counting them here would produce a
+      // misleading number and a threshold that punishes the wrong layer.
+      include: [
+        "src/lib/enhance-image.core.ts",
+        "src/lib/rate-limit.ts",
+        "src/lib/metrics.ts",
+        "src/lib/api-response.ts",
+        "src/lib/landing.ts",
+      ],
+      // Enforceable floor. Regressions below these numbers fail CI. Set from the
+      // measured baseline (which is well above), leaving headroom so honest
+      // refactors don't trip the gate while real coverage loss does.
+      thresholds: {
+        lines: 90,
+        functions: 90,
+        branches: 85,
+        statements: 90,
+      },
+    },
   },
 });
