@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **Early payload-size guard (Wave 3A/3B):** `/api/enhance-image` now rejects
+  oversized requests with `413 payload_too_large` by inspecting the
+  `Content-Length` header **before** buffering the body. Previously the entire
+  request body was read into memory via `request.json()` before the zod size cap
+  ran, so a malicious multi-hundred-MB payload could be fully buffered before
+  rejection (unbounded-memory / DoS vector). Valid uploads are unaffected.
+
 ### Changed
 
 - **Mobile touch fix (Wave 2C/2D):** added `touch-none` to the `CompareSlider`

@@ -18,6 +18,11 @@ import { clientKeyFromRequest, createRateLimiter, type RateLimiter } from "./rat
 export const DATA_URL_RE = /^data:image\/(jpeg|jpg|png|webp);base64,[A-Za-z0-9+/=]+$/;
 // Base64 inflates bytes ~33%; ~20MB of base64 ≈ ~15MB decoded binary.
 export const MAX_BASE64_BYTES = 20 * 1024 * 1024;
+// Hard cap on the raw request body. The JSON envelope wraps the image string in
+// `{"image":"...","scale":"..."}`, so allow a small margin over the image cap.
+// Enforced from the Content-Length header BEFORE the body is buffered, so an
+// oversized payload is rejected without reading it into memory.
+export const MAX_BODY_BYTES = MAX_BASE64_BYTES + 1024;
 
 export const BodySchema = z.object({
   image: z
@@ -196,7 +201,20 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
     });
   }
 
-  // 3) Input validation — invalid requests never reach the AI provider.
+  // 3) Reject oversized bodies from the Content-Length header BEFORE buffering,
+  //    so a malicious multi-hundred-MB payload never gets read into memory.
+  const contentLength = Number(request.headers.get("content-length"));
+  if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
+    metrics.validationRejected();
+    metrics.failed(Date.now() - start);
+    log.warn("enhance.payload.too_large", { requestId, contentLength });
+    return jsonFail("payload_too_large", "Image is too large. Please upload a file under 15MB.", {
+      status: 413,
+      requestId,
+    });
+  }
+
+  // 4) Input validation — invalid requests never reach the AI provider.
   let parsed: EnhanceBody;
   try {
     const raw = await request.json();
@@ -215,7 +233,7 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
   const imageBytes = parsed.image.length;
   log.info("enhance.validation.ok", { requestId, scale: parsed.scale, imageBytes });
 
-  // 4) Call the AI provider with timeout + bounded retry.
+  // 5) Call the AI provider with timeout + bounded retry.
   log.info("enhance.ai.start", { requestId, scale: parsed.scale });
   let upstream: Response;
   try {
@@ -256,7 +274,7 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
     });
   }
 
-  // 5) Map upstream status codes to standardized errors.
+  // 6) Map upstream status codes to standardized errors.
   if (upstream.status === 429) {
     metrics.failed(Date.now() - start);
     log.warn("enhance.ai.upstream_429", { requestId });
@@ -287,7 +305,7 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
     });
   }
 
-  // 6) Parse + extract the generated image.
+  // 7) Parse + extract the generated image.
   let data: Record<string, unknown>;
   try {
     data = (await upstream.json()) as Record<string, unknown>;
@@ -310,7 +328,7 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
     });
   }
 
-  // 7) Success.
+  // 8) Success.
   const durationMs = Date.now() - start;
   metrics.succeeded(durationMs);
   log.info("enhance.request.success", { requestId, scale: parsed.scale, durationMs });
