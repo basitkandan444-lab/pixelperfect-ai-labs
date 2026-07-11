@@ -112,13 +112,27 @@ export async function openHome(page: Page, path = "/") {
 }
 
 /**
- * Set a file on the upload input and wait for a specific UI reaction, retrying
- * the whole action until it succeeds.
+ * Wait until React has hydrated the upload input.
  *
- * Why retry: the input exists in the SSR HTML before React attaches its
- * `onChange` handler. A single `setInputFiles` fired in that window is silently
- * dropped. `expect(...).toPass` re-runs the upload until the handler is attached
- * and the app reacts — deterministic and bounded, never a fixed `waitForTimeout`.
+ * The `<input>` is server-rendered, so its `onChange` handler is only attached
+ * once the client bundle hydrates. The app sets `data-hydrated="true"` on the
+ * input at that moment, giving us a deterministic signal to wait for instead of
+ * re-firing the upload (which, for large files, re-transfers the whole buffer
+ * over CDP on every retry — the source of the mobile oversized-upload flake).
+ */
+export async function waitForHydration(page: Page) {
+  await expect(
+    page.locator('input[aria-label="Upload an image to enhance"][data-hydrated="true"]'),
+  ).toBeAttached({ timeout: 15_000 });
+}
+
+/**
+ * Set a file on the upload input and wait for a specific UI reaction.
+ *
+ * Hydration is awaited first so the `onChange` handler is guaranteed attached;
+ * the file is then transferred exactly once. A short, bounded `toPass` remains
+ * only to absorb the sub-frame gap between the hydration marker and the handler
+ * being live — it does NOT re-transfer large buffers on a hot loop.
  */
 export async function uploadImage(
   page: Page,
@@ -126,9 +140,10 @@ export async function uploadImage(
   reaction: (page: Page) => ReturnType<Page["getByText"]>,
 ) {
   const input = locators.uploadInput(page);
+  await waitForHydration(page);
   await expect(async () => {
     await input.setInputFiles(file);
-    await expect(reaction(page)).toBeVisible({ timeout: 1500 });
+    await expect(reaction(page)).toBeVisible({ timeout: 2000 });
   }).toPass({ timeout: 15_000 });
 }
 

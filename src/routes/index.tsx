@@ -67,7 +67,14 @@ function Index() {
   const [scale, setScale] = useState<Scale>("4k");
   const [dragOver, setDragOver] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [hydrated, setHydrated] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Signal that React has hydrated and the upload handler is attached. The
+  // server-rendered <input> exists before hydration, so a file set in that
+  // window is silently dropped; consumers (and E2E specs) can wait for this
+  // marker instead of retrying the whole upload.
+  useEffect(() => setHydrated(true), []);
 
   // Simulated progress while the AI works (the API returns a single result).
   useEffect(() => {
@@ -242,6 +249,7 @@ function Index() {
                   accept={ACCEPT_ATTR}
                   className="sr-only"
                   aria-label="Upload an image to enhance"
+                  data-hydrated={hydrated ? "true" : undefined}
                   onChange={(e) => {
                     const f = e.target.files?.[0];
                     if (f) loadFile(f);
