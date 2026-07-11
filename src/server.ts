@@ -45,16 +45,16 @@ function isH3SwallowedErrorBody(body: string): boolean {
 }
 
 // Content-Security-Policy scoped to directives that harden injection,
-// clickjacking and data-exfiltration vectors WITHOUT enumerating every script
-// / style / image source. Deliberately omits script-src/style-src so inline
-// JSON-LD, the analytics bootstrap and Tailwind styles keep working while these
-// four directives still close real attack surface:
+// clickjacking and data-exfiltration vectors WITHOUT a `default-src`. Omitting
+// default-src (and script-src/style-src/img-src) leaves those resource types
+// unrestricted, so inline JSON-LD, the analytics bootstrap, external analytics
+// and Tailwind styles keep working while these four directives still close real
+// attack surface:
 //   - object-src 'none'      -> no plugin/embed injection (Flash/PDF vectors)
 //   - base-uri 'self'        -> blocks <base> hijacking of relative URLs
 //   - frame-ancestors 'self' -> clickjacking defense (mirrors X-Frame-Options)
 //   - form-action 'self'     -> blocks form-based credential exfiltration
 const CONTENT_SECURITY_POLICY = [
-  "default-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",
   "frame-ancestors 'self'",
