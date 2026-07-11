@@ -104,6 +104,32 @@ See [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) and
 | 404 on refresh of a deep link                  | Confirm the route file exists under `src/routes/`; never edit `routeTree.gen.ts`. |
 | Health check                                   | `curl -fsS <url>/api/public/health` → `{"status":"ok",...}`.                      |
 
+## Future browser-first architecture
+
+This is the project's intended long-term direction — **not yet implemented**.
+Today, image enhancement runs server-side through the Lovable AI Gateway (see
+[Tech stack](#tech-stack)). Future releases will progressively migrate image
+enhancement into the user's browser.
+
+The long-term goal:
+
+- **Browser-side execution** — enhancement runs on the client rather than a
+  centralized inference backend.
+- **User-owned hardware acceleration** — **WebGPU** where available, with
+  graceful fallback to WebAssembly and CPU/GPU paths where unsupported.
+- **Graceful degradation** — unsupported browsers/devices still work.
+- **Minimal centralized processing** — scalability depends primarily on the
+  user's device rather than centralized infrastructure.
+- **Excellent privacy** — images can be processed locally without leaving the
+  device.
+- **Scalable client-side performance** — browser performance, compatibility,
+  responsiveness, and UX become the primary engineering priorities.
+
+The current implementation may temporarily continue to use backend processing
+during development. See
+[`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md#future-browser-first-architecture)
+for the full rationale.
+
 ## Deployment
 
 Deploys through Lovable. Frontend changes go live after clicking **Update** in

@@ -6,20 +6,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- **Browser-first future direction (docs only):** added a "Future browser-first
+  architecture" section to `README.md` and `docs/ARCHITECTURE.md` describing the
+  long-term goal of running enhancement in the user's browser (WebGPU with
+  graceful fallback, user-owned hardware, minimal centralized processing,
+  privacy, client-side scalability), while clearly stating the current
+  implementation still enhances server-side. Reworded engineering comments,
+  reports, and terminology to describe generic benefits (freeing processing
+  resources, preventing unnecessary computation, improving efficiency) instead
+  of assuming permanent server-side inference costs. No functional, API, route,
+  test, or behaviour changes.
+
 ### Reliability
 
 - **Client-disconnect cancellation (Wave 3C/3D):** `/api/enhance-image` now
-  propagates the incoming request's abort signal into the upstream AI call. When
-  a client disconnects mid-enhancement (tab closed, navigation away, network
-  drop), the expensive Gateway subrequest is aborted instead of running to
-  completion unobserved — freeing worker compute and avoiding wasted AI credits.
-  A client abort is terminal (never retried) and returns `499`; it is tracked in
-  the new `clientAborted` metric rather than counted as a server `failure`, so
-  reliability metrics (`successRate`) stay accurate. Zero behaviour change for
-  normal requests.
+  propagates the incoming request's abort signal into the upstream enhancement
+  call. When a client disconnects mid-enhancement (tab closed, navigation away,
+  network drop), the in-flight processing is stopped immediately instead of
+  running to completion unobserved — freeing processing resources and preventing
+  unnecessary computation after the user leaves. A client abort is terminal
+  (never retried) and returns `499`; it is tracked in the new `clientAborted`
+  metric rather than counted as a server `failure`, so reliability metrics
+  (`successRate`) stay accurate. Zero behaviour change for normal requests.
 
 ### Security
-
 
 - **Early payload-size guard (Wave 3A/3B):** `/api/enhance-image` now rejects
   oversized requests with `413 payload_too_large` by inspecting the
@@ -93,7 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     retry on transient timeouts/5xx only (`src/lib/enhance-image.core.ts`).
   - Structured, PII-free JSON logging of the request lifecycle
     (`src/lib/logger.ts`).
-  - Aggregate reliability/cost metrics (`src/lib/metrics.ts`) exposed at
+  - Aggregate reliability/efficiency metrics (`src/lib/metrics.ts`) exposed at
     `/api/public/metrics`.
   - Enhancement logic extracted to a testable core module with a Vitest suite
     (`src/lib/enhance-image.core.test.ts`, 16 tests). `bun run test` script and
