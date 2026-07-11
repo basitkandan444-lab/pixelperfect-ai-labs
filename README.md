@@ -95,14 +95,14 @@ See [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) and
 
 ## Troubleshooting
 
-| Symptom                              | Likely cause / fix                                                        |
-| ------------------------------------ | ------------------------------------------------------------------------- |
-| `/api/enhance-image` returns `ai_unconfigured` | `LOVABLE_API_KEY` not set in the environment.                   |
-| Enhancement returns `rate_limited`   | Per-IP limit (15/min) hit — back off; honor the `Retry-After` header.     |
-| Analytics not loading                | `VITE_GA4_ID` / `VITE_CLARITY_ID` unset or malformed (see console warns). |
-| `Invalid server environment` on boot | A server env var has an invalid format — check against `.env.example`.    |
-| 404 on refresh of a deep link        | Confirm the route file exists under `src/routes/`; never edit `routeTree.gen.ts`. |
-| Health check                         | `curl -fsS <url>/api/public/health` → `{"status":"ok",...}`.              |
+| Symptom                                        | Likely cause / fix                                                                |
+| ---------------------------------------------- | --------------------------------------------------------------------------------- |
+| `/api/enhance-image` returns `ai_unconfigured` | `LOVABLE_API_KEY` not set in the environment.                                     |
+| Enhancement returns `rate_limited`             | Per-IP limit (15/min) hit — back off; honor the `Retry-After` header.             |
+| Analytics not loading                          | `VITE_GA4_ID` / `VITE_CLARITY_ID` unset or malformed (see console warns).         |
+| `Invalid server environment` on boot           | A server env var has an invalid format — check against `.env.example`.            |
+| 404 on refresh of a deep link                  | Confirm the route file exists under `src/routes/`; never edit `routeTree.gen.ts`. |
+| Health check                                   | `curl -fsS <url>/api/public/health` → `{"status":"ok",...}`.                      |
 
 ## Deployment
 
