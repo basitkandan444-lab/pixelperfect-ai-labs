@@ -6,3 +6,7 @@ pnpm-lock.yaml
 package-lock.json
 bun.lock
 routeTree.gen.ts
+test-results
+playwright-report
+blob-report
+e2e/**/*-snapshots

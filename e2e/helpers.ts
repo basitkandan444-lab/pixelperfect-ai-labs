@@ -1,0 +1,139 @@
+import { type Page, type Route, expect } from "@playwright/test";
+
+// Reusable end-to-end helpers. Centralising selectors and the API mock keeps the
+// specs readable and means a UI change is fixed in ONE place, not across files.
+// Selectors are intentionally role/label based (accessibility-first, stable)
+// rather than brittle CSS or text-position selectors.
+
+// A real 1x1 PNG — small enough to keep tests fast, valid enough that the
+// browser's FileReader produces a usable data URL and the preview renders.
+const TINY_PNG_BASE64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+
+export const ENHANCE_ROUTE = "**/api/enhance-image";
+
+/** A valid in-memory image file for `setInputFiles`. */
+export function validImageFile(name = "photo.png") {
+  return {
+    name,
+    mimeType: "image/png",
+    buffer: Buffer.from(TINY_PNG_BASE64, "base64"),
+  };
+}
+
+/** A wrong-type file to exercise client-side format validation. */
+export function invalidTypeFile() {
+  return {
+    name: "notes.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("this is not an image"),
+  };
+}
+
+/** An oversized (>15MB) image to exercise the size guard. */
+export function oversizedImageFile() {
+  return {
+    name: "huge.png",
+    mimeType: "image/png",
+    buffer: Buffer.alloc(15 * 1024 * 1024 + 1024, 1),
+  };
+}
+
+/** A successful enhancement response in the standardized API envelope. */
+export async function mockEnhanceSuccess(page: Page, delayMs = 400) {
+  await page.route(ENHANCE_ROUTE, async (route: Route) => {
+    // A small delay so the transient processing state is observable (mirrors a
+    // real AI round-trip); without it the result would appear instantly.
+    if (delayMs) await new Promise((r) => setTimeout(r, delayMs));
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        data: {
+          image: `data:image/png;base64,${TINY_PNG_BASE64}`,
+          scale: "4k",
+        },
+      }),
+    });
+  });
+}
+
+/** A failing enhancement response with a given status + typed error. */
+export async function mockEnhanceError(
+  page: Page,
+  status: number,
+  code: string,
+  message: string,
+  headers: Record<string, string> = {},
+) {
+  await page.route(ENHANCE_ROUTE, async (route: Route) => {
+    await route.fulfill({
+      status,
+      headers,
+      contentType: "application/json",
+      body: JSON.stringify({ success: false, error: { code, message } }),
+    });
+  });
+}
+
+/** Simulate a dropped connection / client abort mid-request. */
+export async function mockEnhanceNetworkFailure(page: Page) {
+  await page.route(ENHANCE_ROUTE, async (route: Route) => {
+    await route.abort("connectionaborted");
+  });
+}
+
+// ---- Stable locators -------------------------------------------------------
+
+export const locators = {
+  uploadInput: (page: Page) => page.getByLabel("Upload an image to enhance"),
+  imagePreview: (page: Page) => page.getByAltText("Your uploaded image preview"),
+  enhanceButton: (page: Page) => page.getByRole("button", { name: /^Enhance to 4K$/i }),
+  processingStatus: (page: Page) => page.getByRole("status"),
+  compareSlider: (page: Page) =>
+    page.locator("#workspace").getByRole("slider", { name: /compare before and after/i }),
+  downloadButton: (page: Page) => page.getByRole("button", { name: /Download 4K Image/i }),
+  resetButton: (page: Page) => page.getByRole("button", { name: /New Image/i }),
+  toast: (page: Page, text: RegExp) => page.getByText(text),
+};
+
+/**
+ * Navigate to a route and wait for the server-rendered shell to be present.
+ *
+ * The app is server-rendered, so headings/upload zone are visible before React
+ * hydrates. This only guarantees the DOM is there — interactions still go
+ * through `uploadImage`, which retries to absorb the brief hydration window (see
+ * below) rather than relying on an arbitrary sleep.
+ */
+export async function openHome(page: Page, path = "/") {
+  await page.goto(path);
+  await page.getByRole("heading", { level: 1 }).waitFor();
+}
+
+/**
+ * Set a file on the upload input and wait for a specific UI reaction, retrying
+ * the whole action until it succeeds.
+ *
+ * Why retry: the input exists in the SSR HTML before React attaches its
+ * `onChange` handler. A single `setInputFiles` fired in that window is silently
+ * dropped. `expect(...).toPass` re-runs the upload until the handler is attached
+ * and the app reacts — deterministic and bounded, never a fixed `waitForTimeout`.
+ */
+export async function uploadImage(
+  page: Page,
+  file: ReturnType<typeof validImageFile>,
+  reaction: (page: Page) => ReturnType<Page["getByText"]>,
+) {
+  const input = locators.uploadInput(page);
+  await expect(async () => {
+    await input.setInputFiles(file);
+    await expect(reaction(page)).toBeVisible({ timeout: 1500 });
+  }).toPass({ timeout: 15_000 });
+}
+
+/** Load the home page and upload a valid image, asserting the preview appears. */
+export async function uploadValidImage(page: Page) {
+  await openHome(page);
+  await uploadImage(page, validImageFile(), locators.imagePreview);
+}
