@@ -50,9 +50,7 @@ export function LandingPage({ data }: { data: LandingContent }) {
                     <dd>{data.summary.helps}</dd>
                   </div>
                   <div>
-                    <dt className="font-medium text-foreground">
-                      How {SITE.name} solves it
-                    </dt>
+                    <dt className="font-medium text-foreground">How {SITE.name} solves it</dt>
                     <dd>{data.summary.solves}</dd>
                   </div>
                 </dl>
