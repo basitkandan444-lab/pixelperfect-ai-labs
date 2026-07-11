@@ -9,7 +9,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 
 export function LandingPage({ data }: { data: LandingContent }) {
   return (
-    <div className="min-h-screen bg-hero">
+    <div className="min-h-dvh bg-hero">
       <div className="relative mx-auto flex max-w-3xl flex-col px-5 pt-8 sm:px-8">
         <PageHeader />
 

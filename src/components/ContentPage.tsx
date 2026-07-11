@@ -17,7 +17,7 @@ interface ContentPageProps {
 
 export function ContentPage({ title, intro, updated, children }: ContentPageProps) {
   return (
-    <div className="min-h-screen bg-hero">
+    <div className="min-h-dvh bg-hero">
       <div className="relative mx-auto flex max-w-3xl flex-col px-5 pt-8 sm:px-8">
         <PageHeader />
 
