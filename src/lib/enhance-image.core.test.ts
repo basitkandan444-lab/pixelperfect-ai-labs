@@ -127,6 +127,24 @@ describe("handleEnhanceImage", () => {
     expect(res.status).toBe(400);
   });
 
+  it("rejects an oversized Content-Length with 413 before buffering", async () => {
+    const spy = vi.fn(async () => gatewayResponse("nope"));
+    const res = await handleEnhanceImage(
+      makeRequest({ image: VALID_IMAGE }, { "content-length": String(MAX_BODY_BYTES + 1) }),
+      {
+        apiKey: "key",
+        fetchImpl: spy as unknown as typeof fetch,
+        rateLimiter: createRateLimiter({ limit: 100, windowMs: 60_000 }),
+      },
+    );
+    const body = await res.json();
+    expect(res.status).toBe(413);
+    expect(body.error.code).toBe("payload_too_large");
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+
+
   it("maps a timeout to 504", async () => {
     const slow: typeof fetch = (_url, init) =>
       new Promise((_resolve, reject) => {
