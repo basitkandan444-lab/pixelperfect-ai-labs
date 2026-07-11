@@ -40,12 +40,19 @@ read only inside route handlers.
 ## Post-deploy verification
 
 1. Load production and confirm the page renders.
-2. Hit the health endpoint:
+2. Confirm the rollout actually landed (release intelligence):
+   `curl -fsS https://pixelperfect-ai-labs.lovable.app/api/public/version`
+   → expect the version/commit you just shipped.
+3. Hit the health endpoint:
    `curl -fsS https://pixelperfect-ai-labs.lovable.app/api/public/health`
-   → expect `{"status":"ok",...}`.
-3. Run one image enhancement end-to-end.
-4. Check GA4 Realtime shows the pageview.
-5. Watch error reporting for a spike after release.
+   → expect `{"status":"ok","deployment":"operational",...}`.
+4. Open the **Developer Command Center** at `/ops` and confirm status is
+   Operational with no error codes accumulating.
+5. Run one image enhancement end-to-end.
+6. Check GA4 Realtime shows the pageview and watch `/api/public/metrics` for a
+   failure/error spike after release.
+
+See [`OBSERVABILITY.md`](./OBSERVABILITY.md) for the full telemetry map.
 
 ## Rollback
 

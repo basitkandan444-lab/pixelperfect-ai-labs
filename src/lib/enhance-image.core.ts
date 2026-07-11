@@ -211,7 +211,7 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
 
   // 1) Server misconfiguration.
   if (!deps.apiKey) {
-    metrics.failed(Date.now() - start);
+    metrics.failed(Date.now() - start, "ai_unconfigured");
     log.error("enhance.config.missing_key", { requestId });
     return jsonFail("ai_unconfigured", "AI is not configured.", { status: 500, requestId });
   }
@@ -239,7 +239,7 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
   const contentLength = Number(request.headers.get("content-length"));
   if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
     metrics.validationRejected();
-    metrics.failed(Date.now() - start);
+    metrics.failed(Date.now() - start, "payload_too_large");
     log.warn("enhance.payload.too_large", { requestId, contentLength });
     return jsonFail("payload_too_large", "Image is too large. Please upload a file under 15MB.", {
       status: 413,
@@ -254,7 +254,7 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
     parsed = BodySchema.parse(raw);
   } catch (err) {
     metrics.validationRejected();
-    metrics.failed(Date.now() - start);
+    metrics.failed(Date.now() - start, "invalid_request");
     const message =
       err instanceof z.ZodError
         ? "Invalid image. Please upload a JPG, PNG or WEBP under 15MB."
@@ -300,7 +300,7 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
       log.info("enhance.client.aborted", { requestId, durationMs });
       return new Response(null, { status: 499 });
     }
-    metrics.failed(durationMs);
+    metrics.failed(durationMs, err instanceof TimeoutError ? "ai_timeout" : "ai_unreachable");
     if (err instanceof TimeoutError) {
       log.error("enhance.ai.timeout", { requestId, durationMs });
       return jsonFail("ai_timeout", "The enhancement timed out. Please try again.", {
@@ -317,7 +317,7 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
 
   // 6) Map upstream status codes to standardized errors.
   if (upstream.status === 429) {
-    metrics.failed(Date.now() - start);
+    metrics.failed(Date.now() - start, "ai_rate_limited");
     log.warn("enhance.ai.upstream_429", { requestId });
     return jsonFail("ai_rate_limited", "Rate limit reached. Please try again in a moment.", {
       status: 429,
@@ -325,7 +325,7 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
     });
   }
   if (upstream.status === 402) {
-    metrics.failed(Date.now() - start);
+    metrics.failed(Date.now() - start, "ai_credits_exhausted");
     log.error("enhance.ai.credits_exhausted", { requestId });
     return jsonFail(
       "ai_credits_exhausted",
@@ -338,7 +338,7 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
   }
   if (!upstream.ok) {
     const durationMs = Date.now() - start;
-    metrics.failed(durationMs);
+    metrics.failed(durationMs, "ai_failed");
     log.error("enhance.ai.upstream_error", { requestId, status: upstream.status, durationMs });
     return jsonFail("ai_failed", "Enhancement failed. Please try again.", {
       status: 502,
@@ -351,7 +351,7 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
   try {
     data = (await upstream.json()) as Record<string, unknown>;
   } catch {
-    metrics.failed(Date.now() - start);
+    metrics.failed(Date.now() - start, "ai_failed");
     log.error("enhance.ai.bad_json", { requestId });
     return jsonFail("ai_failed", "Enhancement failed. Please try again.", {
       status: 502,
@@ -361,7 +361,7 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
 
   const resultUrl = extractImageUrl(data);
   if (!resultUrl) {
-    metrics.failed(Date.now() - start);
+    metrics.failed(Date.now() - start, "no_image");
     log.error("enhance.ai.no_image", { requestId });
     return jsonFail("no_image", "No image returned. Please try again.", {
       status: 502,

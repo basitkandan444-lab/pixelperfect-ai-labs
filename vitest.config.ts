@@ -35,6 +35,9 @@ export default defineConfig({
         "src/lib/metrics.ts",
         "src/lib/api-response.ts",
         "src/lib/landing.ts",
+        "src/lib/build-info.ts",
+        "src/lib/vitals-store.ts",
+        "src/lib/ops.ts",
       ],
       // Enforceable floor. Regressions below these numbers fail CI. Set from the
       // measured baseline (which is well above), leaving headroom so honest

@@ -57,6 +57,11 @@ jobs:
       - name: Production build
         run: bun run build
 
+      - name: Bundle budget check
+        # Fails the build if client JS/CSS payload exceeds BUNDLE_BUDGETS
+        # (src/lib/ops.ts). Guards LCP/TTI against silent payload regressions.
+        run: bun run bundle:check
+
   e2e:
     name: End-to-end (Playwright)
     runs-on: ubuntu-latest

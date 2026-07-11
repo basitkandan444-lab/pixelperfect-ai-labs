@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@/components/Analytics";
+import { WebVitals } from "@/components/WebVitals";
 import { ANALYTICS } from "@/lib/analytics";
 import { SITE, KEYWORDS } from "@/lib/site";
 import { originLoader } from "@/lib/origin.functions";
@@ -190,6 +191,7 @@ function RootComponent() {
       <Outlet />
       <Toaster position="top-center" />
       <Analytics />
+      <WebVitals />
     </QueryClientProvider>
   );
 }

@@ -16,6 +16,8 @@ export type MetricsSnapshot = {
   successRate: number;
   avgDurationMs: number;
   p95DurationMs: number;
+  /** Aggregated runtime error breakdown by stable error code (PII-free). */
+  errors: Record<string, number>;
   since: string;
 };
 
@@ -28,10 +30,13 @@ const state = {
   clientAborted: 0,
   aiTimeouts: 0,
   durations: [] as number[],
+  errors: {} as Record<string, number>,
   since: new Date().toISOString(),
 };
 
 const MAX_SAMPLES = 500;
+// Cap distinct error codes so a pathological caller can't grow the map unbounded.
+const MAX_ERROR_CODES = 50;
 
 export const metrics = {
   requestStarted() {
@@ -53,9 +58,19 @@ export const metrics = {
     state.success += 1;
     recordDuration(durationMs);
   },
-  failed(durationMs?: number) {
+  /**
+   * Record a failed request. Optionally attach a stable error `code` so the
+   * runtime-error aggregation (command center / metrics endpoint) can show what
+   * is failing, not just how often.
+   */
+  failed(durationMs?: number, code?: string) {
     state.failure += 1;
     if (typeof durationMs === "number") recordDuration(durationMs);
+    if (code) recordError(code);
+  },
+  /** Record a runtime error by code without counting a full request failure. */
+  errorRecorded(code: string) {
+    recordError(code);
   },
   snapshot(): MetricsSnapshot {
     const durations = state.durations;
@@ -72,10 +87,19 @@ export const metrics = {
       successRate: total ? Number((state.success / total).toFixed(4)) : 1,
       avgDurationMs: Math.round(avg),
       p95DurationMs: percentile(durations, 95),
+      errors: { ...state.errors },
       since: state.since,
     };
   },
 };
+
+function recordError(code: string) {
+  if (state.errors[code] === undefined && Object.keys(state.errors).length >= MAX_ERROR_CODES) {
+    state.errors.other = (state.errors.other ?? 0) + 1;
+    return;
+  }
+  state.errors[code] = (state.errors[code] ?? 0) + 1;
+}
 
 function recordDuration(ms: number) {
   state.durations.push(ms);

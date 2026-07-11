@@ -15,6 +15,7 @@ import { Route as SharpenImageRouteImport } from './routes/sharpen-image'
 import { Route as RestoreOldPhotoRouteImport } from './routes/restore-old-photo'
 import { Route as RemoveImageNoiseRouteImport } from './routes/remove-image-noise'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as OpsRouteImport } from './routes/ops'
 import { Route as IncreaseImageResolutionRouteImport } from './routes/increase-image-resolution'
 import { Route as ImageUpscalerRouteImport } from './routes/image-upscaler'
 import { Route as FixBlurryPhotoRouteImport } from './routes/fix-blurry-photo'
@@ -25,6 +26,8 @@ import { Route as AiImageEnhancerRouteImport } from './routes/ai-image-enhancer'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiEnhanceImageRouteImport } from './routes/api/enhance-image'
+import { Route as ApiPublicVitalsRouteImport } from './routes/api/public/vitals'
+import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
 import { Route as ApiPublicMetricsRouteImport } from './routes/api/public/metrics'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 
@@ -56,6 +59,11 @@ const RemoveImageNoiseRoute = RemoveImageNoiseRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpsRoute = OpsRouteImport.update({
+  id: '/ops',
+  path: '/ops',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IncreaseImageResolutionRoute = IncreaseImageResolutionRouteImport.update({
@@ -108,6 +116,16 @@ const ApiEnhanceImageRoute = ApiEnhanceImageRouteImport.update({
   path: '/api/enhance-image',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicVitalsRoute = ApiPublicVitalsRouteImport.update({
+  id: '/api/public/vitals',
+  path: '/api/public/vitals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicVersionRoute = ApiPublicVersionRouteImport.update({
+  id: '/api/public/version',
+  path: '/api/public/version',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicMetricsRoute = ApiPublicMetricsRouteImport.update({
   id: '/api/public/metrics',
   path: '/api/public/metrics',
@@ -129,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/fix-blurry-photo': typeof FixBlurryPhotoRoute
   '/image-upscaler': typeof ImageUpscalerRoute
   '/increase-image-resolution': typeof IncreaseImageResolutionRoute
+  '/ops': typeof OpsRoute
   '/privacy': typeof PrivacyRoute
   '/remove-image-noise': typeof RemoveImageNoiseRoute
   '/restore-old-photo': typeof RestoreOldPhotoRoute
@@ -138,6 +157,8 @@ export interface FileRoutesByFullPath {
   '/api/enhance-image': typeof ApiEnhanceImageRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
+  '/api/public/version': typeof ApiPublicVersionRoute
+  '/api/public/vitals': typeof ApiPublicVitalsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -149,6 +170,7 @@ export interface FileRoutesByTo {
   '/fix-blurry-photo': typeof FixBlurryPhotoRoute
   '/image-upscaler': typeof ImageUpscalerRoute
   '/increase-image-resolution': typeof IncreaseImageResolutionRoute
+  '/ops': typeof OpsRoute
   '/privacy': typeof PrivacyRoute
   '/remove-image-noise': typeof RemoveImageNoiseRoute
   '/restore-old-photo': typeof RestoreOldPhotoRoute
@@ -158,6 +180,8 @@ export interface FileRoutesByTo {
   '/api/enhance-image': typeof ApiEnhanceImageRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
+  '/api/public/version': typeof ApiPublicVersionRoute
+  '/api/public/vitals': typeof ApiPublicVitalsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -170,6 +194,7 @@ export interface FileRoutesById {
   '/fix-blurry-photo': typeof FixBlurryPhotoRoute
   '/image-upscaler': typeof ImageUpscalerRoute
   '/increase-image-resolution': typeof IncreaseImageResolutionRoute
+  '/ops': typeof OpsRoute
   '/privacy': typeof PrivacyRoute
   '/remove-image-noise': typeof RemoveImageNoiseRoute
   '/restore-old-photo': typeof RestoreOldPhotoRoute
@@ -179,6 +204,8 @@ export interface FileRoutesById {
   '/api/enhance-image': typeof ApiEnhanceImageRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
+  '/api/public/version': typeof ApiPublicVersionRoute
+  '/api/public/vitals': typeof ApiPublicVitalsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -192,6 +219,7 @@ export interface FileRouteTypes {
     | '/fix-blurry-photo'
     | '/image-upscaler'
     | '/increase-image-resolution'
+    | '/ops'
     | '/privacy'
     | '/remove-image-noise'
     | '/restore-old-photo'
@@ -201,6 +229,8 @@ export interface FileRouteTypes {
     | '/api/enhance-image'
     | '/api/public/health'
     | '/api/public/metrics'
+    | '/api/public/version'
+    | '/api/public/vitals'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -212,6 +242,7 @@ export interface FileRouteTypes {
     | '/fix-blurry-photo'
     | '/image-upscaler'
     | '/increase-image-resolution'
+    | '/ops'
     | '/privacy'
     | '/remove-image-noise'
     | '/restore-old-photo'
@@ -221,6 +252,8 @@ export interface FileRouteTypes {
     | '/api/enhance-image'
     | '/api/public/health'
     | '/api/public/metrics'
+    | '/api/public/version'
+    | '/api/public/vitals'
   id:
     | '__root__'
     | '/'
@@ -232,6 +265,7 @@ export interface FileRouteTypes {
     | '/fix-blurry-photo'
     | '/image-upscaler'
     | '/increase-image-resolution'
+    | '/ops'
     | '/privacy'
     | '/remove-image-noise'
     | '/restore-old-photo'
@@ -241,6 +275,8 @@ export interface FileRouteTypes {
     | '/api/enhance-image'
     | '/api/public/health'
     | '/api/public/metrics'
+    | '/api/public/version'
+    | '/api/public/vitals'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -253,6 +289,7 @@ export interface RootRouteChildren {
   FixBlurryPhotoRoute: typeof FixBlurryPhotoRoute
   ImageUpscalerRoute: typeof ImageUpscalerRoute
   IncreaseImageResolutionRoute: typeof IncreaseImageResolutionRoute
+  OpsRoute: typeof OpsRoute
   PrivacyRoute: typeof PrivacyRoute
   RemoveImageNoiseRoute: typeof RemoveImageNoiseRoute
   RestoreOldPhotoRoute: typeof RestoreOldPhotoRoute
@@ -262,6 +299,8 @@ export interface RootRouteChildren {
   ApiEnhanceImageRoute: typeof ApiEnhanceImageRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicMetricsRoute: typeof ApiPublicMetricsRoute
+  ApiPublicVersionRoute: typeof ApiPublicVersionRoute
+  ApiPublicVitalsRoute: typeof ApiPublicVitalsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -306,6 +345,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ops': {
+      id: '/ops'
+      path: '/ops'
+      fullPath: '/ops'
+      preLoaderRoute: typeof OpsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/increase-image-resolution': {
@@ -378,6 +424,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiEnhanceImageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/vitals': {
+      id: '/api/public/vitals'
+      path: '/api/public/vitals'
+      fullPath: '/api/public/vitals'
+      preLoaderRoute: typeof ApiPublicVitalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/version': {
+      id: '/api/public/version'
+      path: '/api/public/version'
+      fullPath: '/api/public/version'
+      preLoaderRoute: typeof ApiPublicVersionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/metrics': {
       id: '/api/public/metrics'
       path: '/api/public/metrics'
@@ -405,6 +465,7 @@ const rootRouteChildren: RootRouteChildren = {
   FixBlurryPhotoRoute: FixBlurryPhotoRoute,
   ImageUpscalerRoute: ImageUpscalerRoute,
   IncreaseImageResolutionRoute: IncreaseImageResolutionRoute,
+  OpsRoute: OpsRoute,
   PrivacyRoute: PrivacyRoute,
   RemoveImageNoiseRoute: RemoveImageNoiseRoute,
   RestoreOldPhotoRoute: RestoreOldPhotoRoute,
@@ -414,7 +475,19 @@ const rootRouteChildren: RootRouteChildren = {
   ApiEnhanceImageRoute: ApiEnhanceImageRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicMetricsRoute: ApiPublicMetricsRoute,
+  ApiPublicVersionRoute: ApiPublicVersionRoute,
+  ApiPublicVitalsRoute: ApiPublicVitalsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

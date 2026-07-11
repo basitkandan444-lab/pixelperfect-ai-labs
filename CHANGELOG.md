@@ -6,6 +6,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Observability & Operations (Developer Command Center)
+
+- **Developer Command Center (`/ops`):** a single live operational view of the
+  running deployment — service status (operational/degraded/outage), release
+  intelligence, reliability, runtime-error breakdown, Web Vitals field data and
+  bundle budgets. Polls the public telemetry endpoints every 5s. `noindex` and
+  disallowed in `robots.txt`; reads only PII-free public telemetry.
+- **Release intelligence:** build metadata (version, commit SHA, build time) is
+  baked in at build time via Vite `define` (`src/lib/build-info.ts`) and served
+  at `/api/public/version`. Commit SHA is read from CI env, so any deployment
+  reports exactly which build/commit is live.
+- **Deployment health check:** `/api/public/health` now returns liveness plus
+  the derived deployment status, release info, isolate uptime and readiness
+  checks (`server`, `ai_configured`) — while keeping the `{"status":"ok"}`
+  contract existing monitors depend on.
+- **Runtime error aggregation:** `src/lib/metrics.ts` now tallies failures by
+  stable error code (`ai_timeout`, `ai_failed`, `invalid_request`, …), wired
+  through the enhance endpoint. Surfaced on `/ops` and `/api/public/metrics`.
+- **Performance dashboards (Web Vitals RUM):** real Core Web Vitals (LCP, CLS,
+  INP, FCP, TTFB) are collected from actual sessions with Google's `web-vitals`
+  library (`src/lib/web-vitals.ts`), beaconed to `/api/public/vitals`, aggregated
+  into p75 + rating buckets per isolate (`src/lib/vitals-store.ts`), and also
+  forwarded to GA4.
+- **Bundle monitoring:** `bun run bundle:check`
+  (`scripts/check-bundle-size.mjs`) enforces client-payload budgets
+  (`BUNDLE_BUDGETS` in `src/lib/ops.ts`) and fails CI on regressions; a unit
+  test keeps the script and the shared budgets in sync. Added as a CI step after
+  the production build.
+- **Operational telemetry endpoint:** `/api/public/metrics` now returns the
+  deployment status, release, full reliability snapshot (with error breakdown)
+  and Web Vitals aggregate in one PII-free payload.
+- **Design tokens:** added semantic `status-ok` / `status-warn` / `status-bad`
+  color tokens (traffic-light) to the design system for the command center.
+- **Tests:** added `build-info`, `vitals-store`, and `ops` unit suites plus
+  error-aggregation coverage for `metrics`; extended the coverage gate to the
+  new business-logic modules (99 tests, ~98.6% line coverage).
+- **Docs:** new [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md) maps the whole
+  telemetry system; deployment verification steps updated.
+
 ### Testing
 
 - **Toast accessibility — real fix, not a suppression:** removed the sonner
