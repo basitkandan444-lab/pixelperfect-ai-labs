@@ -107,7 +107,7 @@ See [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) and
 ## Future browser-first architecture
 
 This is the project's intended long-term direction — **not yet implemented**.
-Today, image enhancement runs through the current enhancement pipeline (see
+Today, image enhancement runs through the current enhancement runtime (see
 [Tech stack](#tech-stack)). Future releases will progressively migrate image
 enhancement into the user's browser.
 
@@ -120,7 +120,8 @@ The long-term goal:
   graceful fallback to WebAssembly and CPU/GPU paths where unsupported.
 - **Graceful degradation** — unsupported browsers/devices still work.
 - **Centralized coordination only when required** — scalability depends
-  primarily on the user's device rather than centralized infrastructure.
+  primarily on the aggregate capability of users' devices rather than
+  centralized infrastructure, so every new user brings their own compute.
 - **Excellent privacy** — images can be processed locally without leaving the
   device.
 - **Scalable client-side performance** — browser performance, compatibility,
