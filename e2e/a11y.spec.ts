@@ -17,20 +17,11 @@ import { locators, mockEnhanceSuccess, openHome, uploadValidImage } from "./help
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 
 async function scan(page: import("@playwright/test").Page) {
-  return (
-    new AxeBuilder({ page })
-      .withTags(WCAG_TAGS)
-      // Exclude the sonner toast overlay: toasts are transient (auto-dismiss),
-      // rendered in a portal and themed by the library's `richColors` variant,
-      // not by our design tokens. Scanning them makes the assertion depend on
-      // whether a toast happens to be mid-fade, which is non-deterministic. The
-      // persistent page UI — the layer users actually operate — is fully scanned.
-      // NOTE: axe flags the richColors success toast title as `color-contrast`
-      // (serious); tracked as a known finding in CHANGELOG until the toast theme
-      // is aligned to tokens.
-      .exclude("[data-sonner-toaster]")
-      .analyze()
-  );
+  // No exclusions: the entire hydrated page — including sonner toasts — is
+  // scanned. Toasts use the design tokens (`bg-background`/`text-foreground`, an
+  // AA pairing) rather than sonner's `richColors` palette, so they pass
+  // `color-contrast` deterministically.
+  return new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
 }
 
 test.describe("Accessibility (axe-core, WCAG 2.1 AA)", () => {
