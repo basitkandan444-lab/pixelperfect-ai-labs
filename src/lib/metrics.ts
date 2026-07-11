@@ -1,4 +1,4 @@
-// In-memory aggregate metrics — a FOUNDATION for AI cost/reliability visibility.
+// In-memory aggregate metrics — a FOUNDATION for efficiency/reliability visibility.
 //
 // LIMITATION: like the rate limiter, counters are per worker isolate and reset on
 // cold start. They give a live, PII-free snapshot for one isolate and a place to
