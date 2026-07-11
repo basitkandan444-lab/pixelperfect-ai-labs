@@ -275,6 +275,7 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
       timeoutMs,
       maxRetries,
       fetchImpl,
+      signal: request.signal,
       onTimeout: () => metrics.aiTimeout(),
       body: {
         model: MODEL,
