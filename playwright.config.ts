@@ -20,9 +20,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   // CI emits an HTML report (browsable diagnostics, uploaded as an artifact) plus
   // the GitHub annotations and a line log; locally just the line reporter.
-  reporter: process.env.CI
-    ? [["github"], ["list"], ["html", { open: "never" }]]
-    : [["list"]],
+  reporter: process.env.CI ? [["github"], ["list"], ["html", { open: "never" }]] : [["list"]],
   use: {
     baseURL: BASE_URL,
     // Full trace + video are retained on retry so an intermittent CI failure is
