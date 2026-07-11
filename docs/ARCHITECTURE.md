@@ -11,7 +11,8 @@ v1** (TanStack Router + TanStack Query) and **Vite**, styled with **Tailwind
 CSS v4** and shadcn/ui primitives. It runs on a **Cloudflare Workers** edge
 runtime (`workerd`) via the Lovable Cloud platform. There is no persistent
 database — the product is stateless: an image is uploaded, enhanced through the
-AI Gateway, returned, and downloaded. Nothing is stored server-side.
+current enhancement engine (the AI Gateway), returned, and downloaded. Nothing
+is persisted after the request completes.
 
 > **Current state vs. future direction.** As described here, the current
 > enhancement engine runs enhancement on centralized infrastructure while
