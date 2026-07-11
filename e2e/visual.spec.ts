@@ -22,7 +22,7 @@ import {
 const VISUAL_PROJECTS = new Set(["desktop-chromium", "mobile-chrome"]);
 
 test.describe("Visual regression", () => {
-  test.beforeEach(({}, testInfo) => {
+  test.beforeEach(({ page: _page }, testInfo) => {
     test.skip(
       !VISUAL_PROJECTS.has(testInfo.project.name),
       "Visual baselines are scoped to desktop-chromium + mobile-chrome (see note above).",
