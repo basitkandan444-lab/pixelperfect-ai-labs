@@ -8,6 +8,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Testing
 
+- **Cross-engine browser matrix:** expanded Playwright projects from 2 to 5 —
+  `desktop-chromium`, `desktop-firefox`, `desktop-webkit`, `mobile-chrome`
+  (Pixel 5) and `mobile-safari` (iPhone 13). Functional + accessibility specs
+  run on all five so engine-specific rendering, upload, pointer, keyboard and
+  a11y differences (Blink/Gecko/WebKit) are caught. CI installs all three
+  engines with `playwright install --with-deps chromium firefox webkit`.
+- **Automated accessibility gate (`e2e/a11y.spec.ts`):** `@axe-core/playwright`
+  scans WCAG 2.1 A/AA on the hydrated app across every engine (landing,
+  uploaded and result states) plus explicit landmark, single-H1, keyboard-
+  operability and compare-slider ARIA checks. Transient sonner toasts are
+  excluded from the scan (portal-rendered, auto-dismissing, library-themed) so
+  the gate is deterministic. Known finding: the `richColors` success toast
+  title fails `color-contrast` (serious) — to be aligned to design tokens.
+- **Coverage gate:** `@vitest/coverage-v8` with enforceable thresholds (lines
+  90 / functions 90 / branches 85 / statements 90) scoped to the tested
+  business-logic modules (`enhance-image.core`, `rate-limit`, `metrics`,
+  `api-response`, `landing`). Current: 98.8% lines / 94.48% branches. Reports
+  (`text`, `html`, `lcov`) are uploaded as a CI artifact; `bun run
+test:coverage` runs it locally.
+- **HTTP integration & security suite (`enhance-image.http.test.ts`, 14 tests):**
+  drives the real `handleEnhanceImage(Request)` lifecycle over the Request/
+  Response boundary — malformed JSON, empty body, wrong content type, multipart,
+  oversized (`Content-Length` 413), SVG data URLs, unexpected MIME (gif),
+  path-traversal filenames, invalid scale enum — asserting safe failure AND that
+  no secret/key/upstream URL/model/stack ever leaks in the response. Plus
+  full-lifecycle success, `no-store` header, missing-key 500, upstream bad-JSON
+  502, no-image 502 and HTTP-layer rate limiting with `Retry-After` headers.
+- **Visual regression expansion:** added `workspace-ready` and `workspace-error`
+  states alongside the existing landing + result snapshots; baselines committed
+  for `desktop-chromium` and `mobile-chrome`. Visual baselines are intentionally
+  scoped to those two projects (skip guard in `visual.spec.ts`) since pixel-exact
+  snapshots are per-engine/per-OS and cross-engine baselines multiply flake for
+  little added signal — behaviour is covered cross-engine by the functional/a11y
+  suites.
+
 - **Missing desktop landing visual baseline:** restored the absent
   `e2e/visual.spec.ts-snapshots/landing-empty-desktop-chromium-linux.png`
   baseline. Root cause: the `desktop-chromium` landing snapshot was never
