@@ -77,6 +77,14 @@ describe("fetchWithTimeout", () => {
       });
     await expect(fetchWithTimeout("http://x", {}, 10, slow)).rejects.toBeInstanceOf(TimeoutError);
   });
+
+  it("throws ClientAbortError when the external signal is already aborted", async () => {
+    const spy = vi.fn();
+    await expect(
+      fetchWithTimeout("http://x", {}, 1000, spy as unknown as typeof fetch, AbortSignal.abort()),
+    ).rejects.toBeInstanceOf(ClientAbortError);
+    expect(spy).not.toHaveBeenCalled();
+  });
 });
 
 describe("handleEnhanceImage", () => {
