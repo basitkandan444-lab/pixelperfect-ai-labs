@@ -17,8 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-
-
 - **Mobile touch fix (Wave 2C/2D):** added `touch-none` to the `CompareSlider`
   drag handle. Dragging the before/after handle on touch devices no longer
   scrolls or zooms the page — matching shadcn's own slider convention. This is

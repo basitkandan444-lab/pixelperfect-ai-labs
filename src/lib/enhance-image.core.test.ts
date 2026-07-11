@@ -143,8 +143,6 @@ describe("handleEnhanceImage", () => {
     expect(spy).not.toHaveBeenCalled();
   });
 
-
-
   it("maps a timeout to 504", async () => {
     const slow: typeof fetch = (_url, init) =>
       new Promise((_resolve, reject) => {
