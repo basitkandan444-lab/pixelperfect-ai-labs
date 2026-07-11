@@ -20,7 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   functional E2E tests pass on desktop and mobile. No production behavior
   changed (marker is inert).
 
-
 - **Testing foundation expansion (Module 4, Waves 4A–4C):** after an audit that
   confirmed the enhancement core was already covered (validation, error mapping,
   timeout/retry, client-abort, rate limiting — 19 tests in
