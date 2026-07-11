@@ -8,6 +8,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Testing
 
+- **Toast accessibility — real fix, not a suppression:** removed the sonner
+  `richColors` variant (saturated fills with low-contrast title text that failed
+  axe `color-contrast`, serious). Toasts now use the design tokens
+  (`bg-background` / `text-foreground`, a WCAG AA pairing) with status conveyed
+  by a tinted icon + left accent border. The axe `.exclude("[data-sonner-toaster]")`
+  workaround was deleted, so `e2e/a11y.spec.ts` now scans the **entire** hydrated
+  page — including toasts — with zero violations. The previously "known"
+  contrast finding is resolved.
+- **Reduced-motion behavioural test (WCAG 2.3.3):** `e2e/a11y.spec.ts` now
+  emulates `prefers-reduced-motion: reduce` and asserts the ambient decorative
+  animations are actually collapsed (computed `animation-duration` < 1 frame),
+  so a regression that drops the CSS reset fails the build instead of silently
+  shipping vestibular-unsafe motion.
+- **Network-resilience suite (`e2e/network.spec.ts`):** flips the whole browser
+  context offline via CDP (`context.setOffline`) — the closest deterministic
+  analogue to real connectivity loss — and verifies the enhance flow degrades
+  gracefully (clear recovery message, workspace stays retryable) and then
+  succeeds end-to-end once connectivity is restored, proving no corrupt state is
+  left behind. Complements the route-level abort mock in `failure-scenarios`.
+- **CI diagnostics:** Playwright now emits an HTML report (uploaded as the
+  `playwright-report` artifact on **every** run, not just failures) plus video
+  `on-first-retry` alongside the existing trace, so both passing (timings) and
+  failing (trace/video/screenshots) runs are fully investigable.
+- **Repo hygiene:** git-ignored generated test output (`coverage/`,
+  `playwright-report/`, `blob-report/`, `test-results/`); committed visual
+  baselines under `e2e/**-snapshots/` remain tracked. Fixed an
+  ESLint `no-empty-pattern` error in `e2e/visual.spec.ts`.
+- **Testing documentation (`docs/TESTING.md`):** a single-source guide to the
+  testing philosophy, all test layers, the browser matrix, how to run/debug each
+  layer, the coverage gate and the CI pipeline.
+
 - **Cross-engine browser matrix:** expanded Playwright projects from 2 to 5 —
   `desktop-chromium`, `desktop-firefox`, `desktop-webkit`, `mobile-chrome`
   (Pixel 5) and `mobile-safari` (iPhone 13). Functional + accessibility specs

@@ -81,8 +81,10 @@ jobs:
       - name: Run end-to-end tests
         run: bun run test:e2e
 
-      - name: Upload report on failure
-        if: failure()
+      - name: Upload Playwright report
+        # Always upload: the HTML report is the primary diagnostic for both
+        # passing (timings) and failing (trace, video, screenshots) runs.
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
