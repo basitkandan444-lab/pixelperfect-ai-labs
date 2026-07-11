@@ -1,28 +1,17 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, Sparkles, Wand2 } from "lucide-react";
+import { ArrowRight, Wand2 } from "lucide-react";
 
 import { SITE } from "@/lib/site";
 import type { LandingContent } from "@/lib/landing";
+import { PageHeader } from "@/components/PageHeader";
+import { Section } from "@/components/Section";
 import { SiteFooter } from "@/components/SiteFooter";
 
 export function LandingPage({ data }: { data: LandingContent }) {
   return (
     <div className="min-h-screen bg-hero">
       <div className="relative mx-auto flex max-w-3xl flex-col px-5 pt-8 sm:px-8">
-        <header className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2" aria-label={`${SITE.name} home`}>
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-primary shadow-glow">
-              <Sparkles className="h-5 w-5 text-primary-foreground" aria-hidden="true" />
-            </span>
-            <span className="font-display text-lg font-bold tracking-tight">{SITE.name}</span>
-          </Link>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back to app
-          </Link>
-        </header>
+        <PageHeader />
 
         <main className="mt-12 pb-8">
           <article className="rounded-3xl glass p-6 shadow-elegant sm:p-10">
