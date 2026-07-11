@@ -48,4 +48,18 @@ describe("metrics", () => {
   it("exposes a stable 'since' timestamp for the snapshot window", () => {
     expect(() => new Date(metrics.snapshot().since).toISOString()).not.toThrow();
   });
+
+  it("aggregates runtime errors by code for the command center", () => {
+    const before = metrics.snapshot();
+    metrics.failed(100, "ai_timeout");
+    metrics.failed(100, "ai_timeout");
+    metrics.errorRecorded("ai_failed");
+    const after = metrics.snapshot();
+    expect((after.errors.ai_timeout ?? 0) - (before.errors.ai_timeout ?? 0)).toBe(2);
+    expect((after.errors.ai_failed ?? 0) - (before.errors.ai_failed ?? 0)).toBe(1);
+    // failed() without a code still counts a failure but no error code.
+    const mid = metrics.snapshot();
+    metrics.failed(50);
+    expect(metrics.snapshot().failure - mid.failure).toBe(1);
+  });
 });
