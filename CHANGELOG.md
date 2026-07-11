@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Mobile polish (Wave 2B):** replaced `min-h-screen` (100vh) with `min-h-dvh`
+  (dynamic viewport height) on every full-height page wrapper — home, landing,
+  content pages, and the 404/error boundaries. On mobile browsers this prevents
+  the layout gap/jump caused by the collapsing URL bar. No desktop visual change.
+
 - **Frontend architecture (Wave 2A):** extracted the duplicated per-route origin
   loader (`async () => ({ origin: await getRequestOrigin() })`) into a single
   shared `originLoader` in `src/lib/origin.functions.ts`, replacing 16 identical
