@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Security hardening (Wave 1D/1E):**
+  - `Content-Security-Policy` on all SSR/API responses with `object-src 'none'`,
+    `base-uri 'self'`, `frame-ancestors 'self'`, and `form-action 'self'`
+    (no `default-src`, so scripts/styles/images/analytics stay unaffected).
+  - `Cross-Origin-Opener-Policy: same-origin` for cross-origin process isolation.
+
 - **Repository hardening (Wave 1C):**
   - Centralized, fail-fast environment validation (`src/lib/env.ts`) with Zod;
     wired into analytics (client) and the enhance-image route (server).

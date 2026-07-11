@@ -44,12 +44,31 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+// Content-Security-Policy scoped to directives that harden injection,
+// clickjacking and data-exfiltration vectors WITHOUT a `default-src`. Omitting
+// default-src (and script-src/style-src/img-src) leaves those resource types
+// unrestricted, so inline JSON-LD, the analytics bootstrap, external analytics
+// and Tailwind styles keep working while these four directives still close real
+// attack surface:
+//   - object-src 'none'      -> no plugin/embed injection (Flash/PDF vectors)
+//   - base-uri 'self'        -> blocks <base> hijacking of relative URLs
+//   - frame-ancestors 'self' -> clickjacking defense (mirrors X-Frame-Options)
+//   - form-action 'self'     -> blocks form-based credential exfiltration
+const CONTENT_SECURITY_POLICY = [
+  "object-src 'none'",
+  "base-uri 'self'",
+  "frame-ancestors 'self'",
+  "form-action 'self'",
+].join("; ");
+
 const SECURITY_HEADERS: Record<string, string> = {
   "X-Content-Type-Options": "nosniff",
   "X-Frame-Options": "SAMEORIGIN",
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=(), interest-cohort=()",
   "X-XSS-Protection": "1; mode=block",
+  "Cross-Origin-Opener-Policy": "same-origin",
+  "Content-Security-Policy": CONTENT_SECURITY_POLICY,
 };
 
 function withSecurityHeaders(response: Response): Response {
