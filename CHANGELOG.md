@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Testing
 
+- **Mobile oversized-upload E2E stability:** eliminated the flaky
+  `mobile-chrome` "rejects an oversized image" spec. Root cause: the shared
+  `uploadImage` helper retried the entire upload until React hydration attached
+  the input's `onChange` handler, re-transferring the full 15 MB buffer over CDP
+  on every retry — under mobile parallel workers this exhausted the time budget
+  and raced the auto-dismissing toast. Fix: the upload `<input>` now emits a
+  `data-hydrated="true"` marker once hydrated, and the E2E helper waits for that
+  deterministic signal before transferring the file exactly once (new
+  `waitForHydration` helper). Verified stable across parallel repeats; all 16
+  functional E2E tests pass on desktop and mobile. No production behavior
+  changed (marker is inert).
+
+
 - **Testing foundation expansion (Module 4, Waves 4A–4C):** after an audit that
   confirmed the enhancement core was already covered (validation, error mapping,
   timeout/retry, client-abort, rate limiting — 19 tests in
