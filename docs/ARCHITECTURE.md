@@ -139,3 +139,41 @@ on leaf routes and the root default — never duplicated into a layout.
 bun run check   # typecheck + lint + format:check
 bun run build   # production build must succeed
 ```
+
+## Future browser-first architecture
+
+This section describes the project's intended long-term direction. It is **not
+yet implemented** — the current implementation enhances images server-side
+through the AI Gateway (see [System overview](#system-overview) and the AI
+enhancement request flow above). Future releases will progressively migrate
+image enhancement into the user's browser.
+
+**Vision.** Image enhancement executes inside the user's browser, on the user's
+own hardware, with minimal centralized processing:
+
+- **Browser-side execution** — enhancement runs on the client instead of a
+  centralized inference backend.
+- **User-owned hardware acceleration** — use **WebGPU** where available, with
+  graceful fallback to WebAssembly and CPU/GPU paths where WebGPU is
+  unsupported.
+- **Graceful degradation** — devices and browsers without acceleration still
+  work, trading speed for compatibility rather than failing.
+- **Minimal centralized processing** — scalability depends primarily on the
+  user's device rather than centralized inference infrastructure, so the
+  application scales with its user base at little marginal cost.
+- **Excellent privacy** — images can be processed locally without leaving the
+  device.
+- **Scalable client-side performance** — browser performance, compatibility,
+  responsiveness, and UX become the primary engineering priorities.
+
+**Engineering rationale that stays correct across the migration.** The design
+choices already in place — stopping abandoned requests immediately, avoiding
+redundant processing, bounded retries, and reliability/efficiency metrics —
+describe generic benefits (freeing processing resources, improving efficiency,
+improving responsiveness) that remain accurate whether enhancement runs on the
+server today or in the browser later.
+
+**Transition posture.** The current implementation may temporarily continue to
+use backend processing during development. Documentation should keep
+distinguishing the current server-side reality from the future browser-first
+model, and never present the browser-first model as already implemented.
