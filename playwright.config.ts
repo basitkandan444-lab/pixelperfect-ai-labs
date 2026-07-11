@@ -18,10 +18,18 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,
   workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI ? [["github"], ["list"]] : [["list"]],
+  // CI emits an HTML report (browsable diagnostics, uploaded as an artifact) plus
+  // the GitHub annotations and a line log; locally just the line reporter.
+  reporter: process.env.CI
+    ? [["github"], ["list"], ["html", { open: "never" }]]
+    : [["list"]],
   use: {
     baseURL: BASE_URL,
+    // Full trace + video are retained on retry so an intermittent CI failure is
+    // fully reproducible offline (network, DOM snapshots, console) rather than a
+    // bare stack. Screenshots are captured on every failure.
     trace: "on-first-retry",
+    video: "on-first-retry",
     screenshot: "only-on-failure",
   },
   // Visual snapshots are compared with a small tolerance; sub-pixel font
