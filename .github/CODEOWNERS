@@ -1,0 +1,16 @@
+# Code ownership for review routing.
+# Every PR touching these paths requests a review from the listed owners.
+# Replace the placeholder handle with your GitHub org/team before enabling
+# branch protection that requires code-owner review.
+
+# Default owner for everything in the repo.
+*                       @your-org/maintainers
+
+# Infrastructure & CI
+/.github/               @your-org/maintainers
+/docs/                  @your-org/maintainers
+
+# Server / API surface
+/src/routes/api/        @your-org/maintainers
+/src/server.ts          @your-org/maintainers
+/src/start.ts           @your-org/maintainers
