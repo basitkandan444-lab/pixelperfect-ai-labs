@@ -9,14 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Reliability
 
 - **Client-disconnect cancellation (Wave 3C/3D):** `/api/enhance-image` now
-  propagates the incoming request's abort signal into the upstream AI call. When
-  a client disconnects mid-enhancement (tab closed, navigation away, network
-  drop), the expensive Gateway subrequest is aborted instead of running to
-  completion unobserved — freeing worker compute and avoiding wasted AI credits.
-  A client abort is terminal (never retried) and returns `499`; it is tracked in
-  the new `clientAborted` metric rather than counted as a server `failure`, so
-  reliability metrics (`successRate`) stay accurate. Zero behaviour change for
-  normal requests.
+  propagates the incoming request's abort signal into the upstream enhancement
+  call. When a client disconnects mid-enhancement (tab closed, navigation away,
+  network drop), the in-flight processing is stopped immediately instead of
+  running to completion unobserved — freeing processing resources and preventing
+  unnecessary computation after the user leaves. A client abort is terminal
+  (never retried) and returns `499`; it is tracked in the new `clientAborted`
+  metric rather than counted as a server `failure`, so reliability metrics
+  (`successRate`) stay accurate. Zero behaviour change for normal requests.
 
 ### Security
 
