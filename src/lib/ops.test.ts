@@ -74,8 +74,11 @@ describe("ops · bundle budgets", () => {
     // The .mjs script inlines the same numbers (it can't import TS). This test
     // fails if the two ever drift, keeping the dashboard and the gate honest.
     const script = readFileSync("scripts/check-bundle-size.mjs", "utf8");
-    expect(script).toContain(`maxChunkBytes: ${BUNDLE_BUDGETS.maxChunkBytes / 1024} * 1024`);
-    expect(script).toContain(`maxTotalJsBytes: ${BUNDLE_BUDGETS.maxTotalJsBytes} `.trimEnd());
-    expect(script).toContain(`maxTotalCssBytes: ${BUNDLE_BUDGETS.maxTotalCssBytes} `.trimEnd());
+    expect(BUNDLE_BUDGETS.maxChunkBytes).toBe(600 * 1024);
+    expect(BUNDLE_BUDGETS.maxTotalJsBytes).toBe(1_400 * 1024);
+    expect(BUNDLE_BUDGETS.maxTotalCssBytes).toBe(150 * 1024);
+    expect(script).toContain("maxChunkBytes: 600 * 1024");
+    expect(script).toContain("maxTotalJsBytes: 1_400 * 1024");
+    expect(script).toContain("maxTotalCssBytes: 150 * 1024");
   });
 });
