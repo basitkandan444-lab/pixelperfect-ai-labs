@@ -15,6 +15,7 @@ import { Route as SharpenImageRouteImport } from './routes/sharpen-image'
 import { Route as RestoreOldPhotoRouteImport } from './routes/restore-old-photo'
 import { Route as RemoveImageNoiseRouteImport } from './routes/remove-image-noise'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as OpsRouteImport } from './routes/ops'
 import { Route as IncreaseImageResolutionRouteImport } from './routes/increase-image-resolution'
 import { Route as ImageUpscalerRouteImport } from './routes/image-upscaler'
 import { Route as FixBlurryPhotoRouteImport } from './routes/fix-blurry-photo'
@@ -58,6 +59,11 @@ const RemoveImageNoiseRoute = RemoveImageNoiseRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpsRoute = OpsRouteImport.update({
+  id: '/ops',
+  path: '/ops',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IncreaseImageResolutionRoute = IncreaseImageResolutionRouteImport.update({
@@ -141,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/fix-blurry-photo': typeof FixBlurryPhotoRoute
   '/image-upscaler': typeof ImageUpscalerRoute
   '/increase-image-resolution': typeof IncreaseImageResolutionRoute
+  '/ops': typeof OpsRoute
   '/privacy': typeof PrivacyRoute
   '/remove-image-noise': typeof RemoveImageNoiseRoute
   '/restore-old-photo': typeof RestoreOldPhotoRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByTo {
   '/fix-blurry-photo': typeof FixBlurryPhotoRoute
   '/image-upscaler': typeof ImageUpscalerRoute
   '/increase-image-resolution': typeof IncreaseImageResolutionRoute
+  '/ops': typeof OpsRoute
   '/privacy': typeof PrivacyRoute
   '/remove-image-noise': typeof RemoveImageNoiseRoute
   '/restore-old-photo': typeof RestoreOldPhotoRoute
@@ -186,6 +194,7 @@ export interface FileRoutesById {
   '/fix-blurry-photo': typeof FixBlurryPhotoRoute
   '/image-upscaler': typeof ImageUpscalerRoute
   '/increase-image-resolution': typeof IncreaseImageResolutionRoute
+  '/ops': typeof OpsRoute
   '/privacy': typeof PrivacyRoute
   '/remove-image-noise': typeof RemoveImageNoiseRoute
   '/restore-old-photo': typeof RestoreOldPhotoRoute
@@ -210,6 +219,7 @@ export interface FileRouteTypes {
     | '/fix-blurry-photo'
     | '/image-upscaler'
     | '/increase-image-resolution'
+    | '/ops'
     | '/privacy'
     | '/remove-image-noise'
     | '/restore-old-photo'
@@ -232,6 +242,7 @@ export interface FileRouteTypes {
     | '/fix-blurry-photo'
     | '/image-upscaler'
     | '/increase-image-resolution'
+    | '/ops'
     | '/privacy'
     | '/remove-image-noise'
     | '/restore-old-photo'
@@ -254,6 +265,7 @@ export interface FileRouteTypes {
     | '/fix-blurry-photo'
     | '/image-upscaler'
     | '/increase-image-resolution'
+    | '/ops'
     | '/privacy'
     | '/remove-image-noise'
     | '/restore-old-photo'
@@ -277,6 +289,7 @@ export interface RootRouteChildren {
   FixBlurryPhotoRoute: typeof FixBlurryPhotoRoute
   ImageUpscalerRoute: typeof ImageUpscalerRoute
   IncreaseImageResolutionRoute: typeof IncreaseImageResolutionRoute
+  OpsRoute: typeof OpsRoute
   PrivacyRoute: typeof PrivacyRoute
   RemoveImageNoiseRoute: typeof RemoveImageNoiseRoute
   RestoreOldPhotoRoute: typeof RestoreOldPhotoRoute
@@ -332,6 +345,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ops': {
+      id: '/ops'
+      path: '/ops'
+      fullPath: '/ops'
+      preLoaderRoute: typeof OpsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/increase-image-resolution': {
@@ -445,6 +465,7 @@ const rootRouteChildren: RootRouteChildren = {
   FixBlurryPhotoRoute: FixBlurryPhotoRoute,
   ImageUpscalerRoute: ImageUpscalerRoute,
   IncreaseImageResolutionRoute: IncreaseImageResolutionRoute,
+  OpsRoute: OpsRoute,
   PrivacyRoute: PrivacyRoute,
   RemoveImageNoiseRoute: RemoveImageNoiseRoute,
   RestoreOldPhotoRoute: RestoreOldPhotoRoute,
