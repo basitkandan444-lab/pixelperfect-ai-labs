@@ -249,6 +249,7 @@ function Index() {
                   accept={ACCEPT_ATTR}
                   className="sr-only"
                   aria-label="Upload an image to enhance"
+                  data-hydrated={hydrated ? "true" : undefined}
                   onChange={(e) => {
                     const f = e.target.files?.[0];
                     if (f) loadFile(f);
