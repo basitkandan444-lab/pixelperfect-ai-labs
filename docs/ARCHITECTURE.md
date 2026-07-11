@@ -14,7 +14,7 @@ database — the product is stateless: an image is uploaded, enhanced through th
 AI Gateway, returned, and downloaded. Nothing is stored server-side.
 
 > **Current implementation vs. future direction.** As described here, image
-> enhancement currently runs server-side through the AI Gateway while
+> enhancement currently runs through the current enhancement pipeline while
 > development continues. The long-term direction is a **browser-first execution
 > model** where enhancement runs on the user's own hardware. See
 > [Future browser-first architecture](#future-browser-first-architecture). Text
@@ -149,18 +149,20 @@ enhancement request flow above). Future releases will progressively migrate
 image enhancement into the user's browser.
 
 **Vision.** Image enhancement executes inside the user's browser, on the user's
-own hardware, with minimal centralized processing:
+own hardware, with centralized coordination only when required:
 
-- **Browser-side execution** — enhancement runs on the client instead of a
-  centralized inference backend.
+- **Local device execution** — enhancement runs on the user's device instead of
+  a centralized inference backend. Future execution targets may include WebGPU,
+  WebNN, WebAssembly, PWAs, and native wrappers (e.g. Electron, Tauri).
 - **User-owned hardware acceleration** — use **WebGPU** where available, with
   graceful fallback to WebAssembly and CPU/GPU paths where WebGPU is
   unsupported.
 - **Graceful degradation** — devices and browsers without acceleration still
   work, trading speed for compatibility rather than failing.
-- **Minimal centralized processing** — scalability depends primarily on the
-  user's device rather than centralized inference infrastructure, so the
-  application scales with its user base at little marginal cost.
+- **Centralized coordination only when required** — scalability depends
+  primarily on the user's device rather than centralized inference
+  infrastructure, so the application scales with its user base at little
+  marginal cost.
 - **Excellent privacy** — images can be processed locally without leaving the
   device.
 - **Scalable client-side performance** — browser performance, compatibility,

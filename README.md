@@ -107,19 +107,20 @@ See [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) and
 ## Future browser-first architecture
 
 This is the project's intended long-term direction — **not yet implemented**.
-Today, image enhancement runs server-side through the Lovable AI Gateway (see
+Today, image enhancement runs through the current enhancement pipeline (see
 [Tech stack](#tech-stack)). Future releases will progressively migrate image
 enhancement into the user's browser.
 
 The long-term goal:
 
-- **Browser-side execution** — enhancement runs on the client rather than a
-  centralized inference backend.
+- **Local device execution** — enhancement runs on the user's device rather than
+  a centralized inference backend. Future execution targets may include WebGPU,
+  WebNN, WebAssembly, PWAs, and native wrappers (e.g. Electron, Tauri).
 - **User-owned hardware acceleration** — **WebGPU** where available, with
   graceful fallback to WebAssembly and CPU/GPU paths where unsupported.
 - **Graceful degradation** — unsupported browsers/devices still work.
-- **Minimal centralized processing** — scalability depends primarily on the
-  user's device rather than centralized infrastructure.
+- **Centralized coordination only when required** — scalability depends
+  primarily on the user's device rather than centralized infrastructure.
 - **Excellent privacy** — images can be processed locally without leaving the
   device.
 - **Scalable client-side performance** — browser performance, compatibility,

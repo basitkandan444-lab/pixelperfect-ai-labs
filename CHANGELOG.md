@@ -10,9 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Browser-first future direction (docs only):** added a "Future browser-first
   architecture" section to `README.md` and `docs/ARCHITECTURE.md` describing the
-  long-term goal of running enhancement in the user's browser (WebGPU with
-  graceful fallback, user-owned hardware, minimal centralized processing,
-  privacy, client-side scalability), while clearly stating the current
+  long-term goal of running enhancement on the user's local device (WebGPU with
+  graceful fallback, user-owned hardware, centralized coordination only when
+  required, privacy, client-side scalability), while clearly stating the current
   implementation still enhances server-side. Reworded engineering comments,
   reports, and terminology to describe generic benefits (freeing processing
   resources, preventing unnecessary computation, improving efficiency) instead
