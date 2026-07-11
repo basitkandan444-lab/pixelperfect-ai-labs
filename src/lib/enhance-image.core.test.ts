@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   BodySchema,
+  ClientAbortError,
   extractImageUrl,
   fetchWithTimeout,
   handleEnhanceImage,
