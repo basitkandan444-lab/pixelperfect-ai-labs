@@ -35,8 +35,18 @@ test.describe("Network resilience", () => {
   });
 
   test("recovers and succeeds once connectivity is restored", async ({ page, context }) => {
-    // A deterministic success response for the retry (offline is toggled, not
-    // the route mock, so we install the mock up front and it applies on retry).
+    await openHome(page);
+    await uploadImage(page, validImageFile(), locators.imagePreview);
+
+    // First attempt fails offline (no route mock — the real fetch cannot leave
+    // the offline context, so the app's catch path runs).
+    await context.setOffline(true);
+    await locators.enhanceButton(page).click();
+    await expect(locators.toast(page, /Network error/i)).toBeVisible();
+
+    // Connectivity returns; install a deterministic success response for the
+    // retry and confirm the flow completes end-to-end with no residual state.
+    await context.setOffline(false);
     await page.route("**/api/enhance-image", async (route) => {
       await route.fulfill({
         status: 200,
@@ -51,17 +61,6 @@ test.describe("Network resilience", () => {
         }),
       });
     });
-
-    await openHome(page);
-    await uploadImage(page, validImageFile(), locators.imagePreview);
-
-    // First attempt fails offline...
-    await context.setOffline(true);
-    await locators.enhanceButton(page).click();
-    await expect(locators.toast(page, /Network error/i)).toBeVisible();
-
-    // ...then connectivity returns and the retry succeeds end-to-end.
-    await context.setOffline(false);
     await locators.enhanceButton(page).click();
     await expect(locators.compareSlider(page)).toBeVisible();
     await expect(locators.downloadButton(page)).toBeVisible();
