@@ -293,6 +293,13 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
     });
   } catch (err) {
     const durationMs = Date.now() - start;
+    // Client disconnected mid-flight: the upstream call was aborted. This is not
+    // a server failure, so don't pollute failure metrics — record it separately.
+    if (err instanceof ClientAbortError) {
+      metrics.clientAborted();
+      log.info("enhance.client.aborted", { requestId, durationMs });
+      return new Response(null, { status: 499 });
+    }
     metrics.failed(durationMs);
     if (err instanceof TimeoutError) {
       log.error("enhance.ai.timeout", { requestId, durationMs });
