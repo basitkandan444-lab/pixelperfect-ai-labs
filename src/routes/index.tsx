@@ -10,11 +10,11 @@ import { HomeContent } from "@/components/HomeContent";
 import { BeforeAfterGallery } from "@/components/BeforeAfterGallery";
 import { trackEvent } from "@/lib/analytics";
 import { SITE, FAQS, absoluteUrl } from "@/lib/site";
-import { getRequestOrigin } from "@/lib/origin.functions";
+import { originLoader } from "@/lib/origin.functions";
 
 export const Route = createFileRoute("/")({
   component: Index,
-  loader: async () => ({ origin: await getRequestOrigin() }),
+  loader: originLoader,
   head: ({ loaderData }) => {
     const canonical = absoluteUrl(loaderData?.origin, "/");
     return {

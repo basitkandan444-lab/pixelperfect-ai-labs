@@ -29,3 +29,13 @@ export const getRequestOrigin = createIsomorphicFn()
       return "";
     }
   });
+
+/**
+ * Shared route loader that exposes the request origin to a route's `head()`
+ * for building absolute canonical / og:url tags. Every page route shares the
+ * exact same origin-loading requirement, so this is the single source of
+ * truth instead of repeating the inline loader in each route file.
+ */
+export async function originLoader(): Promise<{ origin: string }> {
+  return { origin: await getRequestOrigin() };
+}

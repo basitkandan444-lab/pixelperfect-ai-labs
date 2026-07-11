@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Frontend architecture (Wave 2A):** extracted the duplicated per-route origin
+  loader (`async () => ({ origin: await getRequestOrigin() })`) into a single
+  shared `originLoader` in `src/lib/origin.functions.ts`, replacing 16 identical
+  inline loaders across the root and every page route. No behavior, UI, route,
+  API, or SEO change.
+
 ### Added
 
 - **Security hardening (Wave 1D/1E):**

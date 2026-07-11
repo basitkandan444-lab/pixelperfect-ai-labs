@@ -2,11 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { ContentPage, Section } from "@/components/ContentPage";
 import { SITE, absoluteUrl, breadcrumbSchema } from "@/lib/site";
-import { getRequestOrigin } from "@/lib/origin.functions";
+import { originLoader } from "@/lib/origin.functions";
 
 export const Route = createFileRoute("/privacy")({
   component: PrivacyPage,
-  loader: async () => ({ origin: await getRequestOrigin() }),
+  loader: originLoader,
   head: ({ loaderData }) => {
     const canonical = absoluteUrl(loaderData?.origin, "/privacy");
     return {
