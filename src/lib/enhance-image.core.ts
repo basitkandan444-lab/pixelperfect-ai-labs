@@ -201,7 +201,20 @@ export async function handleEnhanceImage(request: Request, deps: EnhanceDeps): P
     });
   }
 
-  // 3) Input validation — invalid requests never reach the AI provider.
+  // 3) Reject oversized bodies from the Content-Length header BEFORE buffering,
+  //    so a malicious multi-hundred-MB payload never gets read into memory.
+  const contentLength = Number(request.headers.get("content-length"));
+  if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
+    metrics.validationRejected();
+    metrics.failed(Date.now() - start);
+    log.warn("enhance.payload.too_large", { requestId, contentLength });
+    return jsonFail("payload_too_large", "Image is too large. Please upload a file under 15MB.", {
+      status: 413,
+      requestId,
+    });
+  }
+
+  // 4) Input validation — invalid requests never reach the AI provider.
   let parsed: EnhanceBody;
   try {
     const raw = await request.json();
