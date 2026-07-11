@@ -45,8 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Docs:** new [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md) maps the whole
   telemetry system; deployment verification steps updated.
 
-
-
 ### Testing
 
 - **Toast accessibility — real fix, not a suppression:** removed the sonner

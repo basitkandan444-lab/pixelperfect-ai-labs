@@ -14,10 +14,7 @@ export type ServiceStatus = "operational" | "degraded" | "outage";
  *   - degraded: success rate < 98% over a non-trivial sample
  *   - operational otherwise (including the zero-traffic warm-up window)
  */
-export function deploymentStatus(input: {
-  requests: number;
-  successRate: number;
-}): ServiceStatus {
+export function deploymentStatus(input: { requests: number; successRate: number }): ServiceStatus {
   // Below this sample size, ratios are too noisy to page on.
   if (input.requests < 10) return "operational";
   if (input.successRate < 0.8) return "outage";

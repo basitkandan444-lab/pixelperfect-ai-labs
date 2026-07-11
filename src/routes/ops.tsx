@@ -143,7 +143,8 @@ const TONE_CLASSES = {
 
 function StatusPill({ status }: { status: ServiceStatus }) {
   const meta = STATUS_META[status];
-  const Icon = status === "operational" ? CheckCircle2 : status === "degraded" ? AlertTriangle : XCircle;
+  const Icon =
+    status === "operational" ? CheckCircle2 : status === "degraded" ? AlertTriangle : XCircle;
   return (
     <span
       className={cn(
@@ -162,7 +163,12 @@ function StatusPill({ status }: { status: ServiceStatus }) {
 function ReleaseRow({ release, health }: { release: ReleaseInfo; health?: HealthResponse }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <StatCard icon={<Rocket className="h-4 w-4" />} label="Version" value={release.version} sub={release.mode} />
+      <StatCard
+        icon={<Rocket className="h-4 w-4" />}
+        label="Version"
+        value={release.version}
+        sub={release.mode}
+      />
       <StatCard
         icon={<GitCommit className="h-4 w-4" />}
         label="Commit"
@@ -178,8 +184,18 @@ function ReleaseRow({ release, health }: { release: ReleaseInfo; health?: Health
       <StatCard
         icon={<ShieldCheck className="h-4 w-4" />}
         label="Readiness checks"
-        value={health ? `${Object.values(health.checks).filter(Boolean).length}/${Object.keys(health.checks).length}` : "—"}
-        sub={health ? Object.entries(health.checks).map(([k, v]) => `${k}: ${v ? "ok" : "fail"}`).join(" · ") : ""}
+        value={
+          health
+            ? `${Object.values(health.checks).filter(Boolean).length}/${Object.keys(health.checks).length}`
+            : "—"
+        }
+        sub={
+          health
+            ? Object.entries(health.checks)
+                .map(([k, v]) => `${k}: ${v ? "ok" : "fail"}`)
+                .join(" · ")
+            : ""
+        }
       />
     </div>
   );
@@ -305,9 +321,7 @@ function BundleBudgets() {
         <CardTitle className="flex items-center gap-2 text-base">
           <Package className="h-4 w-4 text-primary" />
           Bundle budgets
-          <span className="ml-auto text-xs font-normal text-muted-foreground">
-            enforced in CI
-          </span>
+          <span className="ml-auto text-xs font-normal text-muted-foreground">enforced in CI</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-3">

@@ -24,12 +24,12 @@ PII-free telemetry, so it exposes nothing a monitor couldn't already scrape.
 
 ## Telemetry endpoints (`/api/public/*`)
 
-| Endpoint                | Method   | Purpose                                                        |
-| ----------------------- | -------- | ------------------------------------------------------------- |
-| `/api/public/health`    | GET      | Liveness (`status: ok`) + deployment status, checks, uptime.  |
-| `/api/public/version`   | GET      | Release intelligence: version, commit, build time & age.      |
-| `/api/public/metrics`   | GET      | Reliability + error breakdown + Web Vitals + release.         |
-| `/api/public/vitals`    | GET/POST | Aggregate Web Vitals (GET) / browser beacon ingestion (POST). |
+| Endpoint              | Method   | Purpose                                                       |
+| --------------------- | -------- | ------------------------------------------------------------- |
+| `/api/public/health`  | GET      | Liveness (`status: ok`) + deployment status, checks, uptime.  |
+| `/api/public/version` | GET      | Release intelligence: version, commit, build time & age.      |
+| `/api/public/metrics` | GET      | Reliability + error breakdown + Web Vitals + release.         |
+| `/api/public/vitals`  | GET/POST | Aggregate Web Vitals (GET) / browser beacon ingestion (POST). |
 
 All are under `/api/public/*` so uptime monitors and dashboards can scrape them
 without auth. They return only counts, durations and enums — never user content.

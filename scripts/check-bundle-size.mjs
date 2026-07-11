@@ -11,7 +11,6 @@
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-
 // --- Load budgets from the shared source (transpile-free: parse the literals) -
 // ops.ts is TS; importing it here would need a loader. Instead we read the same
 // numbers via a tiny inline mirror kept in sync by a unit test (ops.test.ts).

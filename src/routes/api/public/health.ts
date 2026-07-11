@@ -22,10 +22,7 @@ export const Route = createFileRoute("/api/public/health")({
       GET: async () => {
         const snap = metrics.snapshot();
         const aiConfigured = Boolean(process.env.LOVABLE_API_KEY);
-        const uptimeSeconds = Math.max(
-          0,
-          Math.floor((Date.now() - Date.parse(snap.since)) / 1000),
-        );
+        const uptimeSeconds = Math.max(0, Math.floor((Date.now() - Date.parse(snap.since)) / 1000));
 
         return Response.json(
           {
