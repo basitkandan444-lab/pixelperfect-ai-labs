@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- **Browser-first future direction (docs only):** added a "Future browser-first
+  architecture" section to `README.md` and `docs/ARCHITECTURE.md` describing the
+  long-term goal of running enhancement in the user's browser (WebGPU with
+  graceful fallback, user-owned hardware, minimal centralized processing,
+  privacy, client-side scalability), while clearly stating the current
+  implementation still enhances server-side. Reworded engineering comments,
+  reports, and terminology to describe generic benefits (freeing processing
+  resources, preventing unnecessary computation, improving efficiency) instead
+  of assuming permanent server-side inference costs. No functional, API, route,
+  test, or behaviour changes.
+
 ### Reliability
 
 - **Client-disconnect cancellation (Wave 3C/3D):** `/api/enhance-image` now
