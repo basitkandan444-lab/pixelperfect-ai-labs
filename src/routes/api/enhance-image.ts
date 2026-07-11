@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { handleEnhanceImage } from "@/lib/enhance-image.core";
+import { getServerEnv } from "@/lib/env";
 
 // Thin HTTP adapter. All validation, rate limiting, timeout/retry, logging and
 // response shaping live in `handleEnhanceImage` (src/lib/enhance-image.core.ts)
@@ -11,7 +12,8 @@ export const Route = createFileRoute("/api/enhance-image")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        return handleEnhanceImage(request, { apiKey: process.env.LOVABLE_API_KEY });
+        const { LOVABLE_API_KEY } = getServerEnv();
+        return handleEnhanceImage(request, { apiKey: LOVABLE_API_KEY });
       },
     },
   },
