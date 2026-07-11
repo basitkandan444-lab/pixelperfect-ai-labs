@@ -1,8 +1,12 @@
 // Lightweight analytics helpers. IDs are supplied via env vars at build time so
 // they can be added later without code changes. When an ID is absent, nothing loads.
 
+// GA4 measurement IDs are public (they ship in the client bundle either way).
+// The env var takes precedence so it can be overridden per environment.
+const GA4_DEFAULT = "G-NDDD496TZZ";
+
 export const ANALYTICS = {
-  ga4: import.meta.env.VITE_GA4_ID as string | undefined,
+  ga4: (import.meta.env.VITE_GA4_ID as string | undefined) || GA4_DEFAULT,
   clarity: import.meta.env.VITE_CLARITY_ID as string | undefined,
   gscVerification: import.meta.env.VITE_GSC_VERIFICATION as string | undefined,
 };
