@@ -33,7 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-
 - **Early payload-size guard (Wave 3A/3B):** `/api/enhance-image` now rejects
   oversized requests with `413 payload_too_large` by inspecting the
   `Content-Length` header **before** buffering the body. Previously the entire
