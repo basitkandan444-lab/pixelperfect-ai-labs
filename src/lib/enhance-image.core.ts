@@ -18,6 +18,11 @@ import { clientKeyFromRequest, createRateLimiter, type RateLimiter } from "./rat
 export const DATA_URL_RE = /^data:image\/(jpeg|jpg|png|webp);base64,[A-Za-z0-9+/=]+$/;
 // Base64 inflates bytes ~33%; ~20MB of base64 ≈ ~15MB decoded binary.
 export const MAX_BASE64_BYTES = 20 * 1024 * 1024;
+// Hard cap on the raw request body. The JSON envelope wraps the image string in
+// `{"image":"...","scale":"..."}`, so allow a small margin over the image cap.
+// Enforced from the Content-Length header BEFORE the body is buffered, so an
+// oversized payload is rejected without reading it into memory.
+export const MAX_BODY_BYTES = MAX_BASE64_BYTES + 1024;
 
 export const BodySchema = z.object({
   image: z
