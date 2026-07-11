@@ -10,7 +10,7 @@
 
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { pathToFileURL } from "node:url";
+
 
 // --- Load budgets from the shared source (transpile-free: parse the literals) -
 // ops.ts is TS; importing it here would need a loader. Instead we read the same
@@ -107,6 +107,3 @@ if (failures.length > 0) {
 }
 
 console.log("\n[bundle] ✅ all budgets within limits");
-
-// Keep the import graph honest even though we inline the numbers above.
-void pathToFileURL;
