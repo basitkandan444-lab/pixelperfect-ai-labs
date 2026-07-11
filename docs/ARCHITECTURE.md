@@ -22,17 +22,47 @@ is persisted after the request completes.
 > below describes the current implementation unless explicitly noted.
 
 ```text
-Browser (React 19)
-  │  upload image (data URL)
+User
+  │  selects a photo
   ▼
-POST /api/enhance-image   ── TanStack server route (edge)
-  │  builds prompt, validates input (zod)
+Frontend application (React 19, SSR + hydration)
+  │  reads file as data URL, checks type/size client-side,
+  │  POSTs { image, scale }
   ▼
-Lovable AI Gateway  ──  google/gemini-3-pro-image
+Backend processing layer  ── POST /api/enhance-image (TanStack server route, edge)
+  │  Content-Length guard → per-IP rate limit → request-id + structured log
+  ▼
+Validation (zod)
+  │  format regex + size cap, then scale-specific prompt build
+  ▼
+AI Gateway (Lovable)
+  │  timeout + bounded retry on transient 5xx/timeout,
+  │  abort propagation on client disconnect
+  ▼
+Gemini image model  ──  google/gemini-3-pro-image
   │  returns enhanced image
   ▼
-Browser  ──  CompareSlider + download
+Enhanced image response  ──  { image } envelope + metrics
+  ▼
+Frontend application  ──  CompareSlider + download
 ```
+
+**Where things happen today.**
+
+- **Processing** occurs on centralized edge infrastructure (Cloudflare
+  Workers) — the browser never runs the model; it uploads and displays.
+- **Validation** is layered: cheap client-side type/size checks for UX, then
+  authoritative server-side checks (Content-Length guard before buffering, then
+  zod format + size validation) that the client cannot bypass.
+- **Failures** map to typed responses: upstream `429`/`402`/`5xx` become clean
+  client errors, transient upstream failures are retried with bounded
+  exponential backoff, timeouts abort via `AbortController`, and client
+  disconnects return `499` (tracked separately, never retried).
+- **Request control**: per-IP rate limiting (15 req/min) with
+  `Retry-After` / `X-RateLimit-*` headers throttles abuse before any AI call.
+- **Infrastructure that exists today**: the edge runtime, the AI Gateway proxy,
+  in-memory rate-limit + metrics state, and structured logging. There is no
+  database, queue, or persistent store.
 
 ### Frontend architecture
 
@@ -140,6 +170,47 @@ on leaf routes and the root default — never duplicated into a layout.
 bun run check   # typecheck + lint + format:check
 bun run build   # production build must succeed
 ```
+
+## Architecture layers
+
+A single request touches five conceptual layers, all present today:
+
+- **Frontend layer** — React 19 SSR + hydration. Renders the enhancer UI,
+  performs client-side type/size pre-checks for fast feedback, and displays the
+  before/after result.
+- **Backend layer** — TanStack server routes on the edge. Owns authoritative
+  validation, rate limiting, request IDs, error mapping, and the AI proxy.
+- **AI processing layer** — the Lovable AI Gateway and the underlying image
+  model. Currently centralized; the [Future execution direction](#future-execution-direction)
+  describes moving this toward participant devices.
+- **Monitoring layer** — structured PII-free logging (`src/lib/logger.ts`),
+  aggregate reliability/efficiency metrics (`src/lib/metrics.ts`) at
+  `/api/public/metrics`, the `/api/public/health` probe, and client analytics.
+- **Security layer** — CSP and cross-origin isolation headers (`src/server.ts`),
+  fail-fast env validation (`src/lib/env.ts`), server-only secret access, and
+  payload-size guarding.
+
+## Engineering principles
+
+These principles guide changes and survive any future execution model:
+
+- **Reliability first** — correctness and predictable failure handling take
+  priority over new capability. Failures are typed, bounded, and observable.
+- **Measurable improvements only** — changes justify themselves with evidence
+  (metrics, tests, verification), not assumption.
+- **Avoid unnecessary complexity** — prefer the simplest design that meets the
+  requirement; no speculative infrastructure ahead of need.
+- **Verify before completion** — typecheck, lint, format, tests, and a
+  production build must pass before a change is considered done.
+
+## Future migration philosophy
+
+The system should evolve toward more efficient execution models **when
+technically and economically justified** — never as a premature commitment.
+Centralized processing is the current, correct choice; local device execution
+(see below) is a direction to move toward as browser/device capabilities mature.
+Each migration step must preserve the engineering principles above and keep the
+**Current state** and **Future direction** in documentation explicitly separate.
 
 ## Future execution direction
 
