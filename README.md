@@ -2,8 +2,10 @@
 
 Free AI image enhancer and photo upscaler. Upload a low-quality photo and the
 app sharpens blur, removes noise and upscales it to 4K or 8K — no signup, no
-watermark. Built with TanStack Start (React 19 + SSR) on Vite, styled with
-Tailwind CSS v4, and enhanced server-side through the Lovable AI Gateway.
+watermark. Built with TanStack Start (React 19 + SSR) on Vite and styled with
+Tailwind CSS v4. The current enhancement engine processes images through the
+Lovable AI Gateway (see [Future execution direction](#future-execution-direction)
+for where this is headed).
 
 ## Tech stack
 
