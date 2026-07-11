@@ -2,8 +2,10 @@
 
 Free AI image enhancer and photo upscaler. Upload a low-quality photo and the
 app sharpens blur, removes noise and upscales it to 4K or 8K — no signup, no
-watermark. Built with TanStack Start (React 19 + SSR) on Vite, styled with
-Tailwind CSS v4, and enhanced server-side through the Lovable AI Gateway.
+watermark. Built with TanStack Start (React 19 + SSR) on Vite and styled with
+Tailwind CSS v4. The current enhancement engine processes images through the
+Lovable AI Gateway (see [Future execution direction](#future-execution-direction)
+for where this is headed).
 
 ## Tech stack
 
@@ -104,32 +106,40 @@ See [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) and
 | 404 on refresh of a deep link                  | Confirm the route file exists under `src/routes/`; never edit `routeTree.gen.ts`. |
 | Health check                                   | `curl -fsS <url>/api/public/health` → `{"status":"ok",...}`.                      |
 
-## Future browser-first architecture
+## Future execution direction
 
-This is the project's intended long-term direction — **not yet implemented**.
-Today, image enhancement runs through the current enhancement runtime (see
-[Tech stack](#tech-stack)). Future releases will progressively migrate image
-enhancement into the user's browser.
+This describes the project's intended architectural direction — **not yet
+implemented**. The two states are kept explicitly separate.
 
-The long-term goal:
+**Current state.** The current enhancement engine processes images on
+centralized infrastructure through the Lovable AI Gateway (see
+[Tech stack](#tech-stack)). This is what exists today.
 
-- **Local device execution** — enhancement runs on the user's device rather than
-  a centralized inference backend. Future execution targets may include WebGPU,
-  WebNN, WebAssembly, PWAs, and native wrappers (e.g. Electron, Tauri).
-- **User-owned hardware acceleration** — **WebGPU** where available, with
-  graceful fallback to WebAssembly and CPU/GPU paths where unsupported.
-- **Graceful degradation** — unsupported browsers/devices still work.
-- **Centralized coordination only when required** — scalability depends
-  primarily on the aggregate capability of users' devices rather than
-  centralized infrastructure, so every new user brings their own compute.
-- **Excellent privacy** — images can be processed locally without leaving the
-  device.
-- **Scalable client-side performance** — browser performance, compatibility,
-  responsiveness, and UX become the primary engineering priorities.
+**Future direction.** The intended direction moves enhancement toward the
+participant's own device, using centralized coordination only when required:
 
-The current implementation may temporarily continue to use backend processing
-during development. See
-[`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md#future-browser-first-architecture)
+- **Local device execution** — enhancement runs on the participant's device
+  rather than on centralized infrastructure. Execution targets are examples, not
+  commitments; future targets may include WebGPU, WebNN, WebAssembly, ONNX
+  Runtime, TensorFlow.js, native acceleration, Electron/Tauri, PWAs, and future
+  browser or engine APIs.
+- **Hardware acceleration where available** — use whatever acceleration the
+  execution environment exposes, with graceful fallback to CPU paths. No single
+  accelerator is assumed permanent.
+- **Graceful degradation** — environments without acceleration still work.
+- **Scales with aggregate capability** — the system scales with the aggregate
+  capability of participating devices rather than with centralized
+  infrastructure, so each additional participant contributes its own
+  computational capacity.
+- **Strong privacy posture** — content can be processed locally without leaving
+  the device.
+- **Execution-environment performance** — responsiveness, compatibility, and UX
+  become primary engineering priorities.
+
+Hybrid, offline, edge, and centralized execution may coexist. The current
+implementation may continue to use centralized processing during development.
+See
+[`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md#future-execution-direction)
 for the full rationale.
 
 ## Deployment

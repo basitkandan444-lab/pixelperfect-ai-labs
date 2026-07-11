@@ -8,16 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 
-- **Browser-first future direction (docs only):** added a "Future browser-first
-  architecture" section to `README.md` and `docs/ARCHITECTURE.md` describing the
-  long-term goal of running enhancement on the user's local device (WebGPU with
-  graceful fallback, user-owned hardware, centralized coordination only when
-  required, privacy, client-side scalability), while clearly stating the current
-  implementation still enhances server-side. Reworded engineering comments,
-  reports, and terminology to describe generic benefits (freeing processing
-  resources, preventing unnecessary computation, improving efficiency) instead
-  of assuming permanent server-side inference costs. No functional, API, route,
-  test, or behaviour changes.
+- **Future-proof documentation & terminology (docs only):** added a "Future
+  execution direction" section to `README.md` and `docs/ARCHITECTURE.md` that
+  keeps **Current state** (enhancement runs on centralized infrastructure today)
+  and **Future direction** (moving enhancement toward participants' own devices,
+  with centralized coordination only when required) explicitly separated.
+  Execution targets are documented as interchangeable examples (WebGPU, WebNN,
+  WebAssembly, ONNX Runtime, TensorFlow.js, native/Electron/Tauri, PWAs) rather
+  than commitments, scalability is described as a property of the aggregate
+  capability of participating devices, and optimization language describes
+  engineering outcomes (freeing processing resources, reducing unnecessary
+  computation, improving responsiveness) rather than financial savings. No
+  functional, API, route, test, or behaviour changes.
 
 ### Reliability
 
