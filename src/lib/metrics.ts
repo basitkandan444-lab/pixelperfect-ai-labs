@@ -11,6 +11,7 @@ export type MetricsSnapshot = {
   failure: number;
   rejectedValidation: number;
   rejectedRateLimit: number;
+  clientAborted: number;
   aiTimeouts: number;
   successRate: number;
   avgDurationMs: number;
@@ -24,6 +25,7 @@ const state = {
   failure: 0,
   rejectedValidation: 0,
   rejectedRateLimit: 0,
+  clientAborted: 0,
   aiTimeouts: 0,
   durations: [] as number[],
   since: new Date().toISOString(),
