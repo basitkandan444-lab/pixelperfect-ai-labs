@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Mobile touch fix (Wave 2C/2D):** added `touch-none` to the `CompareSlider`
+  drag handle. Dragging the before/after handle on touch devices no longer
+  scrolls or zooms the page — matching shadcn's own slider convention. This is
+  the product's primary interaction; no visual or desktop behaviour change.
+
 - **Mobile polish (Wave 2B):** replaced `min-h-screen` (100vh) with `min-h-dvh`
   (dynamic viewport height) on every full-height page wrapper — home, landing,
   content pages, and the 404/error boundaries. On mobile browsers this prevents
