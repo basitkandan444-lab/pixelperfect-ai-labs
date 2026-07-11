@@ -14,7 +14,7 @@ database — the product is stateless: an image is uploaded, enhanced through th
 AI Gateway, returned, and downloaded. Nothing is stored server-side.
 
 > **Current implementation vs. future direction.** As described here, image
-> enhancement currently runs through the current enhancement pipeline while
+> enhancement currently runs through the current enhancement runtime while
 > development continues. The long-term direction is a **browser-first execution
 > model** where enhancement runs on the user's own hardware. See
 > [Future browser-first architecture](#future-browser-first-architecture). Text
@@ -160,9 +160,9 @@ own hardware, with centralized coordination only when required:
 - **Graceful degradation** — devices and browsers without acceleration still
   work, trading speed for compatibility rather than failing.
 - **Centralized coordination only when required** — scalability depends
-  primarily on the user's device rather than centralized inference
-  infrastructure, so the application scales with its user base at little
-  marginal cost.
+  primarily on the aggregate capability of users' devices rather than
+  centralized inference infrastructure, so every new user brings their own
+  compute and the application scales with its user base at little marginal cost.
 - **Excellent privacy** — images can be processed locally without leaving the
   device.
 - **Scalable client-side performance** — browser performance, compatibility,
