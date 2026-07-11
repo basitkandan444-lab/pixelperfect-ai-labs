@@ -15,7 +15,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@/components/Analytics";
 import { ANALYTICS } from "@/lib/analytics";
 import { SITE, KEYWORDS } from "@/lib/site";
-import { getRequestOrigin } from "@/lib/origin.functions";
+import { originLoader } from "@/lib/origin.functions";
 
 function NotFoundComponent() {
   return (
@@ -78,7 +78,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  loader: async () => ({ origin: await getRequestOrigin() }),
+  loader: originLoader,
   head: ({ loaderData }) => {
     const origin = loaderData?.origin ?? "";
     const ogImage = origin ? `${origin}${SITE.ogImage}` : SITE.ogImage;

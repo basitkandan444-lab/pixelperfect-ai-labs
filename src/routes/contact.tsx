@@ -6,11 +6,11 @@ import { toast } from "sonner";
 import { ContentPage, Section } from "@/components/ContentPage";
 import { Button } from "@/components/ui/button";
 import { SITE, absoluteUrl, breadcrumbSchema } from "@/lib/site";
-import { getRequestOrigin } from "@/lib/origin.functions";
+import { originLoader } from "@/lib/origin.functions";
 
 export const Route = createFileRoute("/contact")({
   component: ContactPage,
-  loader: async () => ({ origin: await getRequestOrigin() }),
+  loader: originLoader,
   head: ({ loaderData }) => {
     const canonical = absoluteUrl(loaderData?.origin, "/contact");
     return {
