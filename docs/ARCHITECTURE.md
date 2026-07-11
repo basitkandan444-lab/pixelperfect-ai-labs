@@ -86,7 +86,7 @@ on leaf routes and the root default — never duplicated into a layout.
 | Path                 | Responsibility                                                                 |
 | -------------------- | ------------------------------------------------------------------------------ |
 | `src/routes/`        | Pages + HTTP endpoints. Route config, `head()` metadata, route-specific logic. |
-| `src/routes/api/`    | Server routes (HTTP). `api/public/*` bypasses auth on published sites.          |
+| `src/routes/api/`    | Server routes (HTTP). `api/public/*` bypasses auth on published sites.         |
 | `src/components/`    | Reusable, presentational UI. No API calls, no env logic, no secrets.           |
 | `src/components/ui/` | shadcn/ui primitives. Treat as a vendored library; edit sparingly.             |
 | `src/hooks/`         | Reusable client-side behavior (e.g. `use-mobile`).                             |

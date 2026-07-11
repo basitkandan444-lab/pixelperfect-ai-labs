@@ -159,4 +159,3 @@ export function LandingPage({ data }: { data: LandingContent }) {
     </div>
   );
 }
-
