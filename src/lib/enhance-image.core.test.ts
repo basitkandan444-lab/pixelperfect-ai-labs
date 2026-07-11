@@ -6,6 +6,7 @@ import {
   fetchWithTimeout,
   handleEnhanceImage,
   MAX_BASE64_BYTES,
+  MAX_BODY_BYTES,
   TimeoutError,
 } from "@/lib/enhance-image.core";
 import { createRateLimiter } from "@/lib/rate-limit";
