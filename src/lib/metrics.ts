@@ -46,6 +46,9 @@ export const metrics = {
   aiTimeout() {
     state.aiTimeouts += 1;
   },
+  clientAborted() {
+    state.clientAborted += 1;
+  },
   succeeded(durationMs: number) {
     state.success += 1;
     recordDuration(durationMs);
