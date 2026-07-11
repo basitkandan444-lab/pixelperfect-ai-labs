@@ -171,7 +171,49 @@ bun run check   # typecheck + lint + format:check
 bun run build   # production build must succeed
 ```
 
+## Architecture layers
+
+A single request touches five conceptual layers, all present today:
+
+- **Frontend layer** — React 19 SSR + hydration. Renders the enhancer UI,
+  performs client-side type/size pre-checks for fast feedback, and displays the
+  before/after result.
+- **Backend layer** — TanStack server routes on the edge. Owns authoritative
+  validation, rate limiting, request IDs, error mapping, and the AI proxy.
+- **AI processing layer** — the Lovable AI Gateway and the underlying image
+  model. Currently centralized; the [Future execution direction](#future-execution-direction)
+  describes moving this toward participant devices.
+- **Monitoring layer** — structured PII-free logging (`src/lib/logger.ts`),
+  aggregate reliability/efficiency metrics (`src/lib/metrics.ts`) at
+  `/api/public/metrics`, the `/api/public/health` probe, and client analytics.
+- **Security layer** — CSP and cross-origin isolation headers (`src/server.ts`),
+  fail-fast env validation (`src/lib/env.ts`), server-only secret access, and
+  payload-size guarding.
+
+## Engineering principles
+
+These principles guide changes and survive any future execution model:
+
+- **Reliability first** — correctness and predictable failure handling take
+  priority over new capability. Failures are typed, bounded, and observable.
+- **Measurable improvements only** — changes justify themselves with evidence
+  (metrics, tests, verification), not assumption.
+- **Avoid unnecessary complexity** — prefer the simplest design that meets the
+  requirement; no speculative infrastructure ahead of need.
+- **Verify before completion** — typecheck, lint, format, tests, and a
+  production build must pass before a change is considered done.
+
+## Future migration philosophy
+
+The system should evolve toward more efficient execution models **when
+technically and economically justified** — never as a premature commitment.
+Centralized processing is the current, correct choice; local device execution
+(see below) is a direction to move toward as browser/device capabilities mature.
+Each migration step must preserve the engineering principles above and keep the
+**Current state** and **Future direction** in documentation explicitly separate.
+
 ## Future execution direction
+
 
 This section describes the project's intended architectural direction. It is
 **not yet implemented**.
