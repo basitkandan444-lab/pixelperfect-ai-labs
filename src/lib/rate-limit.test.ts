@@ -56,8 +56,7 @@ describe("createRateLimiter", () => {
 });
 
 describe("clientKeyFromRequest", () => {
-  const req = (headers: Record<string, string>) =>
-    new Request("http://x", { headers });
+  const req = (headers: Record<string, string>) => new Request("http://x", { headers });
 
   it("prefers cf-connecting-ip", () => {
     expect(
