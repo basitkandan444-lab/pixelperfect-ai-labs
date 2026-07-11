@@ -91,11 +91,12 @@ test.describe("Accessibility (axe-core, WCAG 2.1 AA)", () => {
 // regression that drops the media query fails the build instead of silently
 // shipping vestibular-unsafe motion.
 test.describe("Reduced motion (WCAG 2.3.3)", () => {
-  test.use({ reducedMotion: "reduce" });
-
   test("continuous decorative animations are collapsed when motion is reduced", async ({
     page,
   }) => {
+    // Emulate the OS-level preference before navigating so the media query is
+    // active during first paint.
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await openHome(page);
     const durationMs = await page
       .locator(".animate-glow-pulse")
