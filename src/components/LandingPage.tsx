@@ -160,11 +160,3 @@ export function LandingPage({ data }: { data: LandingContent }) {
   );
 }
 
-function Section({ heading, children }: { heading: string; children: React.ReactNode }) {
-  return (
-    <section className="flex flex-col gap-2">
-      <h2 className="font-display text-lg font-semibold text-foreground">{heading}</h2>
-      {children}
-    </section>
-  );
-}
