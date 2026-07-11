@@ -67,6 +67,7 @@ export const metrics = {
       failure: state.failure,
       rejectedValidation: state.rejectedValidation,
       rejectedRateLimit: state.rejectedRateLimit,
+      clientAborted: state.clientAborted,
       aiTimeouts: state.aiTimeouts,
       successRate: total ? Number((state.success / total).toFixed(4)) : 1,
       avgDurationMs: Math.round(avg),
