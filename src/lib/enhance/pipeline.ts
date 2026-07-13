@@ -242,6 +242,8 @@ export async function enhanceImageInBrowser(
   throwIfAborted(signal);
 
   const target = computeTarget(srcW, srcH, scale);
+  // Match the detail-recovery filter to the actual upscale factor applied.
+  const filter = filterFor(caps, target.factor);
 
   const onPass = (value: number) =>
     onProgress?.({
