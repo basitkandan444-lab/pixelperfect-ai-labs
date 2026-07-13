@@ -6,6 +6,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Phase 1: production-grade tiled neural inference
+
+- **Removed the fixed 512px neural input cap.** The Real-ESRGAN model now
+  processes the image at full resolution (bounded only by the output pixel
+  budget, i.e. the real browser memory limit) instead of a 512px downscaled
+  proxy, producing measurably higher detail retention. Same model, same
+  browser-first / offline / SSR-safe architecture — no server, no APIs.
+- **New pure module `src/lib/enhance/tiling.ts`** (fully unit-tested, no DOM):
+  - Overlapping tile planning (`planTiles`) with a deterministic, row-major
+    layout and the last row/column pinned flush to the far edge.
+  - Adaptive tile sizing from device memory/tier (`pickTileSize`) with
+    halving retry down to a 128px floor (`nextSmallerTile`) on GPU OOM.
+  - Configurable overlap clamped to 16–64px (`clampOverlap`).
+  - Feathered blend weights via symmetric smoothstep (`tileBlendWeights`),
+    normalised by an accumulated weight plane so seams vanish and output is
+    **identical regardless of tile order**.
+  - Gamma-correct blending: tiles are averaged in linear light
+    (`srgbToLinear`/`linearToSrgb`) to preserve colour across boundaries.
+- **`neural.ts` rewritten to a tiled pipeline:** sequential tile scheduling to
+  bound peak VRAM, per-tile buffer release + runtime yield between tiles,
+  `AbortSignal` cancellation between tiles, adaptive-size retry on memory
+  errors, and a single-tile fast path for small images (byte-for-byte the
+  previous behaviour — zero regression).
+- **Fallback order preserved:** WebGPU → WASM → classical fast engine.
+- **Validation:** 17 new tiling tests including a full reassembly simulation
+  proving seam-free reconstruction (max error < 1/255 across boundaries) and
+  order-independent determinism. Full suite 103/103, typecheck clean, SSR
+  bundle free of executable ML code, client JS 994.7 KB (within 1400 KB budget).
+
+
+
 ### Changed — Neural engine upgraded to Real-ESRGAN (evidence-based model swap)
 
 - **Replaced the Swin2SR (transformers.js) neural path with Real-ESRGAN

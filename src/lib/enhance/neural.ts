@@ -8,25 +8,37 @@
 // fur and skin at 4×), a GAN restorer synthesises plausible fine texture and is
 // the demonstrably stronger choice for real, degraded photos.
 //
-// Why this model (evidence-based, not popularity-based):
-//   - GAN vs transformer SR: on real/old/noisy photos and portraits at 4×,
-//     Real-ESRGAN recovers hair/skin/fabric texture that Swin2SR over-smooths
-//     (documented head-to-head comparison of Lanczos/Swin2SR/Real-ESRGAN).
-//   - Size: this compact "general x4 v3" checkpoint is 2.4 MB — ~20× smaller
-//     than the 47 MB Swin2SR weights — so the one-time download is trivial.
-//   - Speed: SRVGGNetCompact is a small conv net (verified ~0.18 s for a 96px
-//     tile on pure CPU); WebGPU is far faster, vs 8–15 s for Swin2SR.
-//   - Shape: the ONNX graph has a fully dynamic input (any H×W), so we can feed
-//     the whole capped image in one pass (no fixed-tile stitching artifacts).
+// PHASE 1 — TILED INFERENCE (this file's headline change):
+//   The previous implementation downscaled every input to a 512px proxy before
+//   the single forward pass, so "4K/8K" output was mostly a classical resample
+//   of a 4× upscale of a thumbnail. We now run the model over the FULL-RESOLUTION
+//   input (bounded only by the output pixel budget, which is the real browser
+//   memory limit) by splitting it into overlapping tiles, upscaling each tile
+//   independently, and reassembling them with a feathered, gamma-correct,
+//   normalised weighted average that is seam-free and deterministic regardless
+//   of tile order. Per-tile VRAM is bounded and tiles run sequentially, so peak
+//   memory stays low; if the GPU still OOMs we retry with smaller tiles.
 //
-// The weights are a first-party CDN asset (see the .asset.json import) and the
-// onnxruntime WASM binary is fetched once from a pinned CDN, then cached by the
-// browser. After that first fetch everything runs on-device and OFFLINE. There
-// is NO hosted inference, NO API call for image processing and NO credits.
+// Everything remains 100% on-device and OFFLINE after the first load: the
+// weights are a first-party asset and the onnxruntime WASM binary is fetched
+// once, then cached. There is NO hosted inference, NO API call for image
+// processing and NO credits.
 
 import type { EnhancePixelOptions } from "./filters";
 import { renderEnhanced, type CanvasLike, type RenderTarget } from "./render";
 import modelAsset from "./realesrgan-x4v3.onnx.asset.json";
+import {
+  clampOverlap,
+  DEFAULT_OVERLAP,
+  linearToSrgb,
+  nextSmallerTile,
+  pickTileSize,
+  planTiles,
+  srgbToLinear,
+  tileBlendWeights,
+  tileEdges,
+  type TileSizeHints,
+} from "./tiling";
 
 // onnxruntime-web is pinned so the JS glue and its WASM binary always agree.
 // The WebGPU "bundle" build co-locates its WASM as a fingerprinted asset that
@@ -37,11 +49,8 @@ const ORT_VERSION = "1.22.0";
 // The network upscales by exactly 4×.
 const MODEL_SCALE = 4;
 
-// Cap the long edge fed to the network. Neural SR cost is O(pixels); a compact
-// net is light, but a huge upload would still spike memory. We downscale big
-// inputs to this, let the model do a real 4× (real detail), then finish to the
-// requested 4K/8K target with the high-quality classical resampler.
-const NEURAL_MAX_INPUT = 512;
+// Feather band (in INPUT pixels) applied on tile edges that touch a neighbour.
+const TILE_OVERLAP = DEFAULT_OVERLAP;
 
 // Minimal structural types over the bits of the onnxruntime-web API we touch, so
 // a version bump can't break the typecheck.
@@ -116,7 +125,7 @@ async function getSession(
       if (!res.ok) throw new Error(`Failed to fetch model (${res.status}).`);
       const model = await res.arrayBuffer();
 
-      onProgress?.(0.34, "Starting GPU engine…");
+      onProgress?.(0.28, "Starting GPU engine…");
       let session: OrtSession;
       try {
         session = await ort.InferenceSession.create(model, {
@@ -143,6 +152,170 @@ export interface NeuralResult {
   height: number;
 }
 
+// A rejected forward pass is treated as a memory pressure signal (WebGPU device
+// lost / buffer allocation failure surface with varied, unstable messages), so
+// the caller retries at a smaller tile size before giving up on the neural path.
+function looksLikeMemoryError(err: unknown): boolean {
+  const m = (err instanceof Error ? err.message : String(err)).toLowerCase();
+  return (
+    m.includes("memory") ||
+    m.includes("oom") ||
+    m.includes("alloc") ||
+    m.includes("buffer") ||
+    m.includes("device lost") ||
+    m.includes("out of") ||
+    m.includes("exceeds")
+  );
+}
+
+function ctx2d(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
+  const c = canvas.getContext("2d");
+  if (!c) throw new Error("2D canvas context unavailable.");
+  return c;
+}
+
+/**
+ * Run the model over `inCanvas` (INPUT pixels) tile-by-tile and return a canvas
+ * at MODEL_SCALE× resolution. Tiles are processed sequentially (bounded peak
+ * memory), each tile's buffers are released immediately, and the results are
+ * combined with a normalised, gamma-correct feather blend so the output is
+ * seam-free and identical regardless of tile order.
+ */
+async function runTiled(
+  ort: OrtModule,
+  session: OrtSession,
+  inCanvas: HTMLCanvasElement,
+  inW: number,
+  inH: number,
+  tileSize: number,
+  onTileProgress: (done: number, total: number) => void,
+  throwIfAborted: () => void,
+): Promise<HTMLCanvasElement> {
+  const overlap = clampOverlap(TILE_OVERLAP, tileSize);
+  const tiles = planTiles(inW, inH, tileSize, overlap);
+  const outW = inW * MODEL_SCALE;
+  const outH = inH * MODEL_SCALE;
+
+  const ictx = ctx2d(inCanvas);
+
+  // FAST PATH — single tile (small images). No blending, no gamma round-trip:
+  // byte-for-byte the pre-tiling behaviour, guaranteeing zero regression.
+  if (tiles.length === 1) {
+    const rgba = ictx.getImageData(0, 0, inW, inH).data;
+    const out = await runModel(ort, session, rgba, inW, inH);
+    throwIfAborted();
+    const canvas = makeMainCanvas(outW, outH) as unknown as HTMLCanvasElement;
+    const octx = ctx2d(canvas);
+    const img = octx.createImageData(outW, outH);
+    const od = out.data;
+    const plane = outW * outH;
+    for (let p = 0, i = 0; p < plane; p++, i += 4) {
+      img.data[i] = clamp255(od[p] * 255);
+      img.data[i + 1] = clamp255(od[p + plane] * 255);
+      img.data[i + 2] = clamp255(od[p + 2 * plane] * 255);
+      img.data[i + 3] = 255;
+    }
+    octx.putImageData(img, 0, 0);
+    onTileProgress(1, 1);
+    return canvas;
+  }
+
+  // Accumulators in LINEAR light + a weight plane, so the final divide yields a
+  // gamma-correct, order-independent weighted average.
+  const accR = new Float32Array(outW * outH);
+  const accG = new Float32Array(outW * outH);
+  const accB = new Float32Array(outW * outH);
+  const accW = new Float32Array(outW * outH);
+
+  const band = overlap * MODEL_SCALE;
+
+  for (let t = 0; t < tiles.length; t++) {
+    throwIfAborted();
+    const tile = tiles[t];
+    const rgba = ictx.getImageData(tile.x, tile.y, tile.w, tile.h).data;
+    const out = await runModel(ort, session, rgba, tile.w, tile.h);
+    throwIfAborted();
+
+    const tOutW = out.dims[3] as number;
+    const tOutH = out.dims[2] as number;
+    const weights = tileBlendWeights(tOutW, tOutH, tileEdges(tile, inW, inH), band);
+    const od = out.data;
+    const tPlane = tOutW * tOutH;
+    const ox = tile.x * MODEL_SCALE;
+    const oy = tile.y * MODEL_SCALE;
+
+    for (let ly = 0; ly < tOutH; ly++) {
+      const gy = oy + ly;
+      if (gy >= outH) break;
+      const dstRow = gy * outW;
+      const srcRow = ly * tOutW;
+      for (let lx = 0; lx < tOutW; lx++) {
+        const gx = ox + lx;
+        if (gx >= outW) break;
+        const w = weights[srcRow + lx];
+        const s = srcRow + lx;
+        const d = dstRow + gx;
+        accR[d] += w * srgbToLinear(od[s]);
+        accG[d] += w * srgbToLinear(od[s + tPlane]);
+        accB[d] += w * srgbToLinear(od[s + 2 * tPlane]);
+        accW[d] += w;
+      }
+    }
+
+    // Release this tile's buffers before the next pass and yield so the GPU can
+    // reclaim memory and the UI thread stays responsive.
+    (out as { data: Float32Array | null }).data = null;
+    onTileProgress(t + 1, tiles.length);
+    await yieldToRuntime();
+  }
+
+  const canvas = makeMainCanvas(outW, outH) as unknown as HTMLCanvasElement;
+  const octx = ctx2d(canvas);
+  const img = octx.createImageData(outW, outH);
+  const dst = img.data;
+  const plane = outW * outH;
+  for (let p = 0, i = 0; p < plane; p++, i += 4) {
+    const wsum = accW[p] || 1;
+    dst[i] = clamp255(linearToSrgb(accR[p] / wsum) * 255);
+    dst[i + 1] = clamp255(linearToSrgb(accG[p] / wsum) * 255);
+    dst[i + 2] = clamp255(linearToSrgb(accB[p] / wsum) * 255);
+    dst[i + 3] = 255;
+  }
+  octx.putImageData(img, 0, 0);
+  return canvas;
+}
+
+function clamp255(v: number): number {
+  return v < 0 ? 0 : v > 255 ? 255 : v;
+}
+
+// Convert one RGBA tile (HWC 0..255) -> planar RGB (CHW 0..1), run the model,
+// and return the output tensor [1,3,H*4,W*4].
+async function runModel(
+  ort: OrtModule,
+  session: OrtSession,
+  rgba: Uint8ClampedArray,
+  w: number,
+  h: number,
+): Promise<OrtTensor> {
+  const plane = w * h;
+  const chw = new Float32Array(3 * plane);
+  for (let p = 0, i = 0; p < plane; p++, i += 4) {
+    chw[p] = rgba[i] / 255;
+    chw[p + plane] = rgba[i + 1] / 255;
+    chw[p + 2 * plane] = rgba[i + 2] / 255;
+  }
+  const feeds: Record<string, OrtTensor> = {
+    [session.inputNames[0]]: new ort.Tensor("float32", chw, [1, 3, h, w]),
+  };
+  const results = await session.run(feeds);
+  return results[session.outputNames[0]];
+}
+
+function yieldToRuntime(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
 /**
  * Enhance `dataUrl` with the neural model, then resample to `finalTarget`.
  * Rejects (so the caller can fall back to the classical engine) if the model or
@@ -154,6 +327,7 @@ export async function enhanceNeural(
   filter: EnhancePixelOptions,
   onProgress?: (value: number, message: string) => void,
   signal?: AbortSignal,
+  hints?: TileSizeHints,
 ): Promise<NeuralResult> {
   const throwIfAborted = () => {
     if (signal?.aborted) throw new DOMException("Enhancement cancelled.", "AbortError");
@@ -163,67 +337,76 @@ export async function enhanceNeural(
   const { ort, session } = await getSession(onProgress);
   throwIfAborted();
 
-  // Prepare the (possibly downscaled) input and read its RGBA pixels.
+  // Determine the INPUT resolution the model actually sees. We feed the image at
+  // full resolution, bounded only by the output pixel budget (the real browser
+  // memory limit): the model's 4× output must land within `finalTarget`, so cap
+  // the input long edge at finalTarget/4. Small images are fed at native
+  // resolution (never upscaled before the model). This replaces the old fixed
+  // 512px proxy — the model now processes real detail.
   const img = await loadImageElement(dataUrl);
-  const longEdge = Math.max(img.naturalWidth, img.naturalHeight);
-  const scaleDown = longEdge > NEURAL_MAX_INPUT ? NEURAL_MAX_INPUT / longEdge : 1;
-  const inW = Math.max(1, Math.round(img.naturalWidth * scaleDown));
-  const inH = Math.max(1, Math.round(img.naturalHeight * scaleDown));
+  const natW = img.naturalWidth;
+  const natH = img.naturalHeight;
+  const srcLong = Math.max(natW, natH);
+  const outCapLong = Math.max(finalTarget.width, finalTarget.height);
+  const inCapLong = Math.max(1, Math.floor(outCapLong / MODEL_SCALE));
+  const scaleDown = srcLong > inCapLong ? inCapLong / srcLong : 1;
+  const inW = Math.max(1, Math.round(natW * scaleDown));
+  const inH = Math.max(1, Math.round(natH * scaleDown));
 
   const inCanvas = makeMainCanvas(inW, inH) as unknown as HTMLCanvasElement;
-  const ictx = inCanvas.getContext("2d");
-  if (!ictx) throw new Error("2D canvas context unavailable.");
+  const ictx = ctx2d(inCanvas);
   ictx.imageSmoothingEnabled = true;
   ictx.imageSmoothingQuality = "high";
   ictx.drawImage(img, 0, 0, inW, inH);
-  const rgba = ictx.getImageData(0, 0, inW, inH).data;
   throwIfAborted();
 
-  // RGBA (HWC, 0..255) -> planar RGB (CHW, 0..1) float tensor [1,3,H,W].
-  const plane = inW * inH;
-  const chw = new Float32Array(3 * plane);
-  for (let p = 0, i = 0; p < plane; p++, i += 4) {
-    chw[p] = rgba[i] / 255;
-    chw[p + plane] = rgba[i + 1] / 255;
-    chw[p + 2 * plane] = rgba[i + 2] / 255;
+  // ADAPTIVE TILE SIZING + RETRY: pick an initial tile from device memory/tier;
+  // on a GPU OOM, halve the tile size and retry the whole tiled pass (bounded by
+  // MIN_TILE_SIZE) before surfacing failure to the caller's classical fallback.
+  let tileSize: number | null = pickTileSize(hints);
+  let outCanvas: HTMLCanvasElement | null = null;
+  let lastErr: unknown = null;
+
+  while (tileSize !== null) {
+    try {
+      onProgress?.(0.5, "Running neural super-resolution…");
+      outCanvas = await runTiled(
+        ort,
+        session,
+        inCanvas,
+        inW,
+        inH,
+        tileSize,
+        (done, total) =>
+          onProgress?.(
+            0.5 + (done / total) * 0.32,
+            total > 1 ? `Enhancing tile ${done}/${total}…` : "Running neural super-resolution…",
+          ),
+        throwIfAborted,
+      );
+      break;
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") throw err;
+      lastErr = err;
+      if (!looksLikeMemoryError(err)) throw err;
+      const smaller = nextSmallerTile(tileSize);
+      if (smaller === null) throw lastErr;
+      tileSize = smaller;
+      onProgress?.(0.5, "Reducing tile size to fit GPU memory…");
+      await yieldToRuntime();
+    }
   }
 
-  onProgress?.(0.5, "Running neural super-resolution…");
-  const feeds: Record<string, OrtTensor> = {
-    [session.inputNames[0]]: new ort.Tensor("float32", chw, [1, 3, inH, inW]),
-  };
-  const results = await session.run(feeds);
-  throwIfAborted();
+  if (!outCanvas) throw lastErr ?? new Error("Tiled inference failed.");
 
-  const out = results[session.outputNames[0]];
-  const outH = out.dims[2] as number;
-  const outW = out.dims[3] as number;
-  const outPlane = outW * outH;
-  const od = out.data;
-
-  // Planar RGB (CHW, 0..1) -> RGBA (HWC, 0..255) for a canvas.
-  const outCanvas = makeMainCanvas(outW, outH) as unknown as HTMLCanvasElement;
-  const octx = outCanvas.getContext("2d");
-  if (!octx) throw new Error("2D canvas context unavailable.");
-  const outImage = octx.createImageData(outW, outH);
-  const oData = outImage.data;
-  for (let p = 0, i = 0; p < outPlane; p++, i += 4) {
-    oData[i] = Math.max(0, Math.min(255, od[p] * 255));
-    oData[i + 1] = Math.max(0, Math.min(255, od[p + outPlane] * 255));
-    oData[i + 2] = Math.max(0, Math.min(255, od[p + 2 * outPlane] * 255));
-    oData[i + 3] = 255;
-  }
-  octx.putImageData(outImage, 0, 0);
-  void MODEL_SCALE;
-
-  onProgress?.(0.82, "Upscaling to target resolution…");
+  onProgress?.(0.86, "Upscaling to target resolution…");
   // Finish to the requested 4K/8K target with the high-quality resampler and a
   // GENTLE detail pass (the model already recovered real detail, so heavy
   // sharpening here would only add ringing on top of the synthesised texture).
   const finalCanvas = renderEnhanced(
     outCanvas as unknown as CanvasImageSource,
-    outW,
-    outH,
+    outCanvas.width,
+    outCanvas.height,
     finalTarget,
     filter,
     makeMainCanvas,

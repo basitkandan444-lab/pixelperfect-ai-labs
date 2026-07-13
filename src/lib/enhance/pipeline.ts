@@ -284,6 +284,7 @@ export async function enhanceImageInBrowser(
         (value, message) =>
           onProgress?.({ stage: "upscaling", value: Math.min(0.97, value), message }),
         signal,
+        { memoryGB: caps.memoryGB, tier: caps.tier },
       );
       blob = res.blob;
       usedPath = "neural";
