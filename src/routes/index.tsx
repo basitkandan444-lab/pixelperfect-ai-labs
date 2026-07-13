@@ -116,7 +116,15 @@ function Index() {
   const [etaTotalMs, setEtaTotalMs] = useState(0);
   const [etaRemainingMs, setEtaRemainingMs] = useState(0);
   const [dims, setDims] = useState<{ w: number; h: number } | null>(null);
+  const [fileInfo, setFileInfo] = useState<{ bytes: number; type: string } | null>(null);
   const [deviceTier, setDeviceTier] = useState<"high" | "medium" | "low">("medium");
+  const [accelLabel, setAccelLabel] = useState("GPU acceleration");
+  const [neuralWarm, setNeuralWarm] = useState(false);
+  const [procStage, setProcStage] = useState<ProcessingStage>("preparing");
+  const [runAccuracy, setRunAccuracy] = useState(97);
+  // Bumped after every completed run so the pre-run prediction re-reads the
+  // freshly calibrated store and shows an improved estimate/confidence.
+  const [calibrationVersion, setCalibrationVersion] = useState(0);
   const [hydrated, setHydrated] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -124,6 +132,9 @@ function Index() {
   const dimensionsRef = useRef<{ w: number; h: number } | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const neuralWarmRef = useRef(false);
+  const progressRef = useRef(0);
+  const runBaseMsRef = useRef(0);
+
 
   // Signal that React has hydrated and the upload handler is attached. The
   // server-rendered <input> exists before hydration, so a file set in that
