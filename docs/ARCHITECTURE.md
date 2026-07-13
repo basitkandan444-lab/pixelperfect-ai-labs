@@ -183,8 +183,6 @@ places a business HTTP endpoint outside `src/routes/api/`, the suite fails and
 the build is blocked. This converts every rule below into a guardrail that
 prevents architectural drift instead of merely describing it.
 
-
-
 ## Architecture layers
 
 A single request touches five conceptual layers, all present today:

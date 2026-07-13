@@ -23,10 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     banner (proves it was not hand-edited).
   - **Bounded contexts** — business HTTP endpoints must live under `src/routes/api/`
     (root web-standard files like `sitemap.xml` are explicitly exempt).
-  Verified the guardrail fails on injected drift and passes when restored.
+    Verified the guardrail fails on injected drift and passes when restored.
 
 ### Changed — Architecture / dependency hygiene
-
 
 - **Pruned dead UI surface and dependencies.** The template shipped all 46
   shadcn/ui primitives, but only 4 are used anywhere in the app (`badge`,
