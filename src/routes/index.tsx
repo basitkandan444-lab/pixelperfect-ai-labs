@@ -503,6 +503,18 @@ function Index() {
                           <p className="relative font-display font-semibold">
                             Enhancing to {scale.toUpperCase()}…
                           </p>
+                          {etaTotalMs > 0 && (
+                            <div
+                              className="relative flex items-center gap-2 rounded-full border border-border bg-background/60 px-3.5 py-1.5"
+                              aria-live="polite"
+                              data-testid="eta-countdown"
+                            >
+                              <Clock className="h-4 w-4 text-primary" aria-hidden="true" />
+                              <span className="font-display text-sm font-semibold tabular-nums">
+                                {formatRemaining(etaRemainingMs)}
+                              </span>
+                            </div>
+                          )}
                           <div
                             className="relative h-2 w-full max-w-xs overflow-hidden rounded-full bg-muted"
                             role="progressbar"
