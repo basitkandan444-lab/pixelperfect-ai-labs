@@ -32,11 +32,14 @@ export interface EnhanceProgress {
 export interface EnhanceOptions {
   scale: Scale;
   /**
-   * "classical" (default): instant, zero-download unsharp/Laplacian engine.
-   * "neural": lazy-loaded browser super-resolution model (real detail
-   * synthesis), with automatic fallback to classical if it can't run.
+   * "classical": instant, zero-download unsharp/Laplacian engine.
+   * "neural" (default when supported): lazy-loaded on-device super-resolution
+   * model (real detail synthesis), with automatic fallback to classical.
+   * "hosted": opt-in "Max" path — real generative restoration via the Lovable
+   * AI Gateway (reference-quality face/detail synthesis, uses AI credits). It
+   * does NOT silently fall back so the user sees the real reason on failure.
    */
-  engine?: "classical" | "neural";
+  engine?: "classical" | "neural" | "hosted";
   signal?: AbortSignal;
   onProgress?: (p: EnhanceProgress) => void;
   /** Injectable for tests; defaults to runtime detection. */
@@ -51,7 +54,7 @@ export interface EnhanceResult {
   height: number;
   scale: Scale;
   capabilities: EnhanceCapabilities;
-  path: "worker" | "main" | "neural";
+  path: "worker" | "main" | "neural" | "hosted";
   durationMs: number;
 }
 
