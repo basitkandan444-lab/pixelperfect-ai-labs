@@ -84,6 +84,7 @@ function Index() {
   } | null>(null);
   const [scale, setScale] = useState<Scale>("4k");
   const [engine, setEngine] = useState<"classical" | "neural">("classical");
+  const [neuralAvailable, setNeuralAvailable] = useState(false);
   const [zoom, setZoom] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [progress, setProgress] = useState(0);
