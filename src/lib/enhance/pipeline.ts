@@ -32,11 +32,14 @@ export interface EnhanceProgress {
 export interface EnhanceOptions {
   scale: Scale;
   /**
-   * "classical" (default): instant, zero-download unsharp/Laplacian engine.
-   * "neural": lazy-loaded browser super-resolution model (real detail
-   * synthesis), with automatic fallback to classical if it can't run.
+   * "classical": instant, zero-download unsharp/Laplacian engine.
+   * "neural" (default when supported): lazy-loaded on-device super-resolution
+   * model (real detail synthesis), with automatic fallback to classical.
+   * "hosted": opt-in "Max" path — real generative restoration via the Lovable
+   * AI Gateway (reference-quality face/detail synthesis, uses AI credits). It
+   * does NOT silently fall back so the user sees the real reason on failure.
    */
-  engine?: "classical" | "neural";
+  engine?: "classical" | "neural" | "hosted";
   signal?: AbortSignal;
   onProgress?: (p: EnhanceProgress) => void;
   /** Injectable for tests; defaults to runtime detection. */
@@ -51,7 +54,7 @@ export interface EnhanceResult {
   height: number;
   scale: Scale;
   capabilities: EnhanceCapabilities;
-  path: "worker" | "main" | "neural";
+  path: "worker" | "main" | "neural" | "hosted";
   durationMs: number;
 }
 
@@ -262,13 +265,35 @@ export async function enhanceImageInBrowser(
     });
 
   let blob: Blob;
-  let usedPath: "worker" | "main" | "neural" = "main";
+  let usedPath: "worker" | "main" | "neural" | "hosted" = "main";
+
+  // HOSTED "Max" path (opt-in): real generative restoration via the Lovable AI
+  // Gateway. This is the ONLY path that synthesises new detail (skin, hair,
+  // eyes) the way reference face-restoration tools do. It deliberately does NOT
+  // fall back to a local engine on failure — the user chose Max and needs to
+  // see the real reason (e.g. out of credits) rather than a silent downgrade.
+  let doneEarly = false;
+  if (opts.engine === "hosted") {
+    const { enhanceHosted } = await import("./hosted");
+    const res = await enhanceHosted(
+      dataUrl,
+      target,
+      neuralFilter(),
+      (value, message) =>
+        onProgress?.({ stage: "upscaling", value: Math.min(0.97, value), message }),
+      signal,
+    );
+    blob = res.blob;
+    usedPath = "hosted";
+    doneEarly = true;
+    bitmap?.close();
+  }
 
   // NEURAL path (opt-in): real super-resolution model, lazy-loaded in the
   // browser. Any non-abort failure (no WebGPU, model fetch failure, OOM) falls
   // back to the classical engine so the user always gets a result.
   let neuralDone = false;
-  if (opts.engine === "neural") {
+  if (!doneEarly && opts.engine === "neural") {
     try {
       const { enhanceNeural } = await import("./neural");
       const res = await enhanceNeural(
@@ -294,7 +319,7 @@ export async function enhanceImageInBrowser(
     }
   }
 
-  if (!neuralDone) {
+  if (!doneEarly && !neuralDone) {
     if (canWorker && bitmap) {
       try {
         blob = await runInWorker(bitmap, srcW, srcH, target, filter, signal, onPass);

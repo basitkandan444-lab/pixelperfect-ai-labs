@@ -57,6 +57,7 @@ export const Route = createFileRoute("/")({
 });
 
 type Scale = "4k" | "8k";
+type Engine = "classical" | "neural" | "hosted";
 type Stage = "idle" | "ready" | "loading" | "done";
 
 const MAX_BYTES = 15 * 1024 * 1024;
@@ -80,10 +81,10 @@ function Index() {
     width: number;
     height: number;
     durationMs: number;
-    path: "worker" | "main" | "neural";
+    path: "worker" | "main" | "neural" | "hosted";
   } | null>(null);
   const [scale, setScale] = useState<Scale>("4k");
-  const [engine, setEngine] = useState<"classical" | "neural">("classical");
+  const [engine, setEngine] = useState<Engine>("classical");
   const [neuralAvailable, setNeuralAvailable] = useState(false);
   const [zoom, setZoom] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -112,7 +113,11 @@ function Index() {
     let cancelled = false;
     import("@/lib/enhance/neural")
       .then(({ neuralSupported }) => {
-        if (!cancelled) setNeuralAvailable(neuralSupported());
+        if (cancelled) return;
+        const supported = neuralSupported();
+        setNeuralAvailable(supported);
+        // Neural (on-device AI) is the default when the device can run it.
+        if (supported) setEngine((e) => (e === "classical" ? "neural" : e));
       })
       .catch(() => {});
     return () => {
@@ -207,7 +212,11 @@ function Index() {
     } catch (err) {
       // A user-initiated cancel is not an error — reset() already handled UI.
       if (err instanceof DOMException && err.name === "AbortError") return;
-      if (err instanceof Error && err.name === "UnsupportedBrowserError") {
+      if (err instanceof Error && err.name === "HostedEnhanceError") {
+        // Surface the real reason from the server (e.g. out of credits, rate
+        // limited) so the user isn't left guessing.
+        toast.error(err.message);
+      } else if (err instanceof Error && err.name === "UnsupportedBrowserError") {
         toast.error("Your browser does not support this enhancement mode. Try a modern browser.");
       } else {
         toast.error("Enhancement failed. Please try a different image.");
@@ -386,7 +395,10 @@ function Index() {
                       {resultInfo && (
                         <p className="text-center text-sm text-muted-foreground" aria-live="polite">
                           Output verified: {resultInfo.width.toLocaleString()}×
-                          {resultInfo.height.toLocaleString()} PNG · local {resultInfo.path} engine
+                          {resultInfo.height.toLocaleString()} PNG ·{" "}
+                          {resultInfo.path === "hosted"
+                            ? "Studio AI restoration"
+                            : `local ${resultInfo.path} engine`}{" "}
                           · {(resultInfo.durationMs / 1000).toFixed(1)}s
                         </p>
                       )}
@@ -477,46 +489,61 @@ function Index() {
                     </fieldset>
                   )}
 
-                  {stage !== "done" && neuralAvailable && (
+                  {stage !== "done" && (
                     <fieldset
-                      className="grid grid-cols-2 gap-3 border-0 p-0"
+                      className="grid grid-cols-1 gap-3 border-0 p-0 sm:grid-cols-3"
                       disabled={stage === "loading"}
                     >
                       <legend className="sr-only">Choose enhancement engine</legend>
-                      {[
-                        {
-                          id: "classical" as const,
-                          title: "Fast",
-                          desc: "Instant · no download",
-                        },
-                        {
-                          id: "neural" as const,
-                          title: "Max quality (AI)",
-                          desc: "Neural model · downloads once",
-                        },
-                      ].map((e) => (
-                        <button
-                          key={e.id}
-                          type="button"
-                          aria-pressed={engine === e.id}
-                          onClick={() => setEngine(e.id)}
-                          className={`flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${
-                            engine === e.id
-                              ? "border-primary bg-primary/10 shadow-glow"
-                              : "border-border hover:border-primary/50"
-                          }`}
-                        >
-                          <span className="flex items-center gap-2 font-display font-bold">
-                            {e.id === "neural" ? (
-                              <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
-                            ) : (
-                              <Zap className="h-4 w-4 text-primary" aria-hidden="true" />
-                            )}
-                            {e.title}
-                          </span>
-                          <span className="text-xs text-muted-foreground">{e.desc}</span>
-                        </button>
-                      ))}
+                      {(
+                        [
+                          {
+                            id: "classical" as const,
+                            title: "Fast",
+                            desc: "Instant · on-device · free",
+                            icon: "zap" as const,
+                            show: true,
+                          },
+                          {
+                            id: "neural" as const,
+                            title: "Balanced (AI)",
+                            desc: "On-device neural · free · downloads once",
+                            icon: "spark" as const,
+                            show: neuralAvailable,
+                          },
+                          {
+                            id: "hosted" as const,
+                            title: "Max (Studio AI)",
+                            desc: "Reference-quality restoration · uses AI credits",
+                            icon: "spark" as const,
+                            show: true,
+                          },
+                        ] as const
+                      )
+                        .filter((e) => e.show)
+                        .map((e) => (
+                          <button
+                            key={e.id}
+                            type="button"
+                            aria-pressed={engine === e.id}
+                            onClick={() => setEngine(e.id)}
+                            className={`flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${
+                              engine === e.id
+                                ? "border-primary bg-primary/10 shadow-glow"
+                                : "border-border hover:border-primary/50"
+                            }`}
+                          >
+                            <span className="flex items-center gap-2 font-display font-bold">
+                              {e.icon === "spark" ? (
+                                <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
+                              ) : (
+                                <Zap className="h-4 w-4 text-primary" aria-hidden="true" />
+                              )}
+                              {e.title}
+                            </span>
+                            <span className="text-xs text-muted-foreground">{e.desc}</span>
+                          </button>
+                        ))}
                     </fieldset>
                   )}
 
