@@ -1,6 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Sparkles, UploadCloud, Wand2, Download, RotateCcw, Zap, Gauge } from "lucide-react";
+import {
+  Sparkles,
+  UploadCloud,
+  Wand2,
+  Download,
+  RotateCcw,
+  Zap,
+  Gauge,
+  Clock,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -11,9 +20,12 @@ import { BeforeAfterGallery } from "@/components/BeforeAfterGallery";
 import { trackEvent } from "@/lib/analytics";
 import { SITE, FAQS, absoluteUrl } from "@/lib/site";
 import { originLoader } from "@/lib/origin.functions";
+import { detectCapabilities } from "@/lib/enhance/capabilities";
+import { estimateEnhanceMs, formatEta, formatRemaining } from "@/lib/enhance/estimate";
 // The browser enhancement engine (+ its worker) is lazy-loaded on first use so
 // it never weighs down the initial page bundle — see the dynamic import in
 // `enhance()` below.
+
 
 export const Route = createFileRoute("/")({
   component: Index,
