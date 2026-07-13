@@ -57,7 +57,7 @@ export const Route = createFileRoute("/")({
 });
 
 type Scale = "4k" | "8k";
-type Engine = "classical" | "neural" | "hosted";
+type Engine = "classical" | "neural";
 type Stage = "idle" | "ready" | "loading" | "done";
 
 const MAX_BYTES = 15 * 1024 * 1024;
@@ -81,7 +81,7 @@ function Index() {
     width: number;
     height: number;
     durationMs: number;
-    path: "worker" | "main" | "neural" | "hosted";
+    path: "worker" | "main" | "neural";
   } | null>(null);
   const [scale, setScale] = useState<Scale>("4k");
   const [engine, setEngine] = useState<Engine>("classical");
@@ -212,11 +212,7 @@ function Index() {
     } catch (err) {
       // A user-initiated cancel is not an error — reset() already handled UI.
       if (err instanceof DOMException && err.name === "AbortError") return;
-      if (err instanceof Error && err.name === "HostedEnhanceError") {
-        // Surface the real reason from the server (e.g. out of credits, rate
-        // limited) so the user isn't left guessing.
-        toast.error(err.message);
-      } else if (err instanceof Error && err.name === "UnsupportedBrowserError") {
+      if (err instanceof Error && err.name === "UnsupportedBrowserError") {
         toast.error("Your browser does not support this enhancement mode. Try a modern browser.");
       } else {
         toast.error("Enhancement failed. Please try a different image.");
@@ -396,9 +392,9 @@ function Index() {
                         <p className="text-center text-sm text-muted-foreground" aria-live="polite">
                           Output verified: {resultInfo.width.toLocaleString()}×
                           {resultInfo.height.toLocaleString()} PNG ·{" "}
-                          {resultInfo.path === "hosted"
-                            ? "Studio AI restoration"
-                            : `local ${resultInfo.path} engine`}{" "}
+                          {resultInfo.path === "neural"
+                            ? "on-device neural engine"
+                            : `on-device ${resultInfo.path} engine`}{" "}
                           · {(resultInfo.durationMs / 1000).toFixed(1)}s
                         </p>
                       )}
