@@ -236,9 +236,11 @@ function Index() {
           .then(({ warmUpNeural }) => warmUpNeural())
           .then((ok) => {
             neuralWarmRef.current = ok;
+            setNeuralWarm(ok);
           })
           .catch(() => {});
       }
+
     };
     reader.readAsDataURL(file);
   }, []);
