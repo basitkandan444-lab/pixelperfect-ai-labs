@@ -83,6 +83,7 @@ function Index() {
     path: "worker" | "main";
   } | null>(null);
   const [scale, setScale] = useState<Scale>("4k");
+  const [zoom, setZoom] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [progress, setProgress] = useState(0);
   const [statusMessage, setStatusMessage] = useState("Preparing local AI engine…");
@@ -159,6 +160,7 @@ function Index() {
       resultUrlRef.current = res.image;
       setProgress(100);
       setResult(res.image);
+      setZoom(false);
       setResultInfo({
         width: res.width,
         height: res.height,
@@ -194,6 +196,7 @@ function Index() {
     setOriginal(null);
     setResult(null);
     setResultInfo(null);
+    setZoom(false);
     setStage("idle");
     setProgress(0);
     if (inputRef.current) inputRef.current.value = "";
@@ -318,11 +321,39 @@ function Index() {
                 <div className="relative">
                   {stage === "done" && result ? (
                     <div className="space-y-3">
-                      <CompareSlider
-                        before={original}
-                        after={result}
-                        afterAlt={`Enhanced ${scale.toUpperCase()} result`}
-                      />
+                      {zoom ? (
+                        <div className="relative max-h-[70vh] overflow-auto rounded-2xl border border-border bg-muted/20">
+                          <img
+                            src={result}
+                            alt={`Enhanced ${scale.toUpperCase()} result at actual pixels`}
+                            className="block max-w-none"
+                            style={{
+                              width: resultInfo ? `${resultInfo.width}px` : "auto",
+                            }}
+                            draggable={false}
+                            decoding="async"
+                          />
+                          <span className="pointer-events-none sticky left-3 top-3 float-left rounded-full bg-background/80 px-2.5 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
+                            Actual pixels · scroll to explore
+                          </span>
+                        </div>
+                      ) : (
+                        <CompareSlider
+                          before={original}
+                          after={result}
+                          afterAlt={`Enhanced ${scale.toUpperCase()} result`}
+                        />
+                      )}
+                      <div className="flex items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={() => setZoom((z) => !z)}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          aria-pressed={zoom}
+                        >
+                          {zoom ? "Fit to screen" : "View actual pixels (100%)"}
+                        </button>
+                      </div>
                       {resultInfo && (
                         <p className="text-center text-sm text-muted-foreground" aria-live="polite">
                           Output verified: {resultInfo.width.toLocaleString()}×
