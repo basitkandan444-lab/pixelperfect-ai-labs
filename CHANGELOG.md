@@ -6,7 +6,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — premium self-calibrating prediction engine + processing UI
+
+- **Self-calibrating prediction engine (`src/lib/enhance/predictor.ts`).** A new
+  pure, SSR-safe module that wraps the physics estimate with (a) richer signals
+  (megapixels, output pixels, file bytes/format decode term, actual neural tile
+  count, warm state, device tier) and (b) **per-device calibration**: after every
+  completed run it compares predicted vs. actual time and updates a small,
+  per-engine correction factor persisted in `localStorage`, so estimates get more
+  accurate the more the user enhances on that device. Exposes `predict`,
+  `recordOutcome`, `adjustRemainingMs`, `confidencePercent`, `countTiles`,
+  `stageForProgress`. Fully unit-tested (18 cases) with an injectable storage.
+- **AI Analysis Card (`src/components/AnalysisCard.tsx`).** Before enhancing, a
+  desktop-app-style card surfaces every signal: resolution, megapixels, file
+  type, processing mode + acceleration, device tier, neural engine status
+  (Ready / Warming), estimated time, and a live **prediction accuracy** score.
+- **Premium processing overlay (`src/components/ProcessingOverlay.tsx`).**
+  Replaces the plain spinner with a large animated ETA countdown, a smooth
+  progress bar, and a five-stage pipeline tracker (Preparing → AI Analysis →
+  Neural Enhancement → Blending → Finalizing).
+- **Dynamic, non-expiring ETA.** During processing the ETA is recomputed from
+  real progress via `adjustRemainingMs`: if a run is behind schedule the clock
+  extends rather than hitting zero early, and collapses smoothly as it completes.
+
+### Changed
+
+- `src/routes/index.tsx` now drives the prediction engine, captures file
+  size/format on upload, tracks reactive neural-warm state, feeds each run's
+  real duration back into the calibrator, and renders the new card + overlay.
+  Kept 100% browser-first, offline-after-first-load, deterministic and SSR-safe;
+  no change to enhancement quality or performance.
+
 ### Added — live time-to-complete countdown + faster first enhance
+
 
 - **Live ETA countdown.** When the user presses Enhance, a clock now shows a
   realistic "Ns remaining" countdown for their device, plus an up-front

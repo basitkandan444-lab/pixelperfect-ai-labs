@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Sparkles,
   UploadCloud,
@@ -8,8 +8,8 @@ import {
   RotateCcw,
   Zap,
   Gauge,
-  Clock,
 } from "lucide-react";
+
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -17,14 +17,25 @@ import { CompareSlider } from "@/components/CompareSlider";
 import { SiteFooter } from "@/components/SiteFooter";
 import { HomeContent } from "@/components/HomeContent";
 import { BeforeAfterGallery } from "@/components/BeforeAfterGallery";
+import { AnalysisCard } from "@/components/AnalysisCard";
+import { ProcessingOverlay } from "@/components/ProcessingOverlay";
 import { trackEvent } from "@/lib/analytics";
 import { SITE, FAQS, absoluteUrl } from "@/lib/site";
 import { originLoader } from "@/lib/origin.functions";
 import { detectCapabilities } from "@/lib/enhance/capabilities";
-import { estimateEnhanceMs, formatEta, formatRemaining } from "@/lib/enhance/estimate";
+
+import {
+  predict,
+  recordOutcome,
+  adjustRemainingMs,
+  confidencePercent,
+  stageForProgress,
+  type ProcessingStage,
+} from "@/lib/enhance/predictor";
 // The browser enhancement engine (+ its worker) is lazy-loaded on first use so
 // it never weighs down the initial page bundle — see the dynamic import in
 // `enhance()` below.
+
 
 
 export const Route = createFileRoute("/")({
@@ -105,7 +116,15 @@ function Index() {
   const [etaTotalMs, setEtaTotalMs] = useState(0);
   const [etaRemainingMs, setEtaRemainingMs] = useState(0);
   const [dims, setDims] = useState<{ w: number; h: number } | null>(null);
+  const [fileInfo, setFileInfo] = useState<{ bytes: number; type: string } | null>(null);
   const [deviceTier, setDeviceTier] = useState<"high" | "medium" | "low">("medium");
+  const [accelLabel, setAccelLabel] = useState("GPU acceleration");
+  const [neuralWarm, setNeuralWarm] = useState(false);
+  const [procStage, setProcStage] = useState<ProcessingStage>("preparing");
+  const [runAccuracy, setRunAccuracy] = useState(97);
+  // Bumped after every completed run so the pre-run prediction re-reads the
+  // freshly calibrated store and shows an improved estimate/confidence.
+  const [calibrationVersion, setCalibrationVersion] = useState(0);
   const [hydrated, setHydrated] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -113,6 +132,9 @@ function Index() {
   const dimensionsRef = useRef<{ w: number; h: number } | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const neuralWarmRef = useRef(false);
+  const progressRef = useRef(0);
+  const runBaseMsRef = useRef(0);
+
 
   // Signal that React has hydrated and the upload handler is attached. The
   // server-rendered <input> exists before hydration, so a file set in that
@@ -120,8 +142,11 @@ function Index() {
   // marker instead of retrying the whole upload.
   useEffect(() => {
     setHydrated(true);
-    setDeviceTier(detectCapabilities().tier);
+    const caps = detectCapabilities();
+    setDeviceTier(caps.tier);
+    setAccelLabel(caps.accelLabel);
   }, []);
+
 
   // Detect whether the neural (GPU) engine can run acceptably in this browser.
   // Client-only: navigator.gpu is not present during SSR. When unavailable we
@@ -187,8 +212,10 @@ function Index() {
       setResult(null);
       setResultInfo(null);
       setStage("ready");
+      setFileInfo({ bytes: file.size, type: file.type || "" });
       toast.success("Image ready. Choose a quality and enhance it.");
       trackEvent("upload", { format: file.type, size: file.size });
+
 
       // Capture natural dimensions so we can estimate the enhancement time as
       // soon as the user presses Enhance (used by the live countdown clock).
@@ -209,9 +236,11 @@ function Index() {
           .then(({ warmUpNeural }) => warmUpNeural())
           .then((ok) => {
             neuralWarmRef.current = ok;
+            setNeuralWarm(ok);
           })
           .catch(() => {});
       }
+
     };
     reader.readAsDataURL(file);
   }, []);
@@ -227,33 +256,47 @@ function Index() {
     const controller = new AbortController();
     abortRef.current = controller;
     setProgress(4);
+    progressRef.current = 4;
+    setProcStage("preparing");
     setStatusMessage("Preparing local AI engine…");
     setStage("loading");
     trackEvent("enhance_start", { scale, engine });
 
-    // Estimate how long this will take on THIS device and start a live
-    // countdown so the user knows the wait up-front instead of staring at an
-    // open-ended spinner. The estimate uses the real image dimensions, chosen
-    // quality/engine and detected device tier.
+    // Predict how long this will take on THIS device using the self-calibrating
+    // prediction engine, then start a live countdown so the user knows the wait
+    // up-front instead of staring at an open-ended spinner. The prediction folds
+    // in the real dimensions, chosen quality/engine, device tier, warm state,
+    // file size and the learned per-device correction factor.
     const dims = dimensionsRef.current;
     const caps = detectCapabilities();
-    const estimatedMs = dims
-      ? estimateEnhanceMs({
+    const prediction = dims
+      ? predict({
           srcW: dims.w,
           srcH: dims.h,
           scale,
           engine,
           tier: caps.tier,
           warm: engine === "neural" ? neuralWarmRef.current : true,
+          fileBytes: fileInfo?.bytes,
+          format: fileInfo?.type,
         })
-      : 8000;
+      : null;
+    const estimatedMs = prediction?.estimateMs ?? 8000;
+    runBaseMsRef.current = prediction?.baseMs ?? estimatedMs;
+    setRunAccuracy(prediction ? confidencePercent(prediction.confidence) : 97);
     const startedAt = Date.now();
     setEtaTotalMs(estimatedMs);
     setEtaRemainingMs(estimatedMs);
     stopCountdown();
+    // Dynamically adjust the ETA from real progress so it never expires early:
+    // if the run is behind schedule the clock extends rather than hitting zero.
     countdownRef.current = setInterval(() => {
-      const remaining = estimatedMs - (Date.now() - startedAt);
-      setEtaRemainingMs(remaining > 0 ? remaining : 0);
+      const remaining = adjustRemainingMs({
+        estimateMs: estimatedMs,
+        elapsedMs: Date.now() - startedAt,
+        progress: progressRef.current / 100,
+      });
+      setEtaRemainingMs(remaining);
     }, 250);
     try {
       // Lazy-load the local engine (and its worker) on first use so it never
@@ -265,13 +308,18 @@ function Index() {
         engine,
         signal: controller.signal,
         onProgress: (p) => {
-          setProgress(Math.round(p.value * 100));
+          const pct = Math.round(p.value * 100);
+          setProgress(pct);
+          progressRef.current = pct;
+          setProcStage(stageForProgress(p.value));
           setStatusMessage(p.message);
         },
       });
       clearResultUrl();
       resultUrlRef.current = res.image;
       setProgress(100);
+      progressRef.current = 100;
+      setProcStage("finalizing");
       setResult(res.image);
       setZoom(false);
       setResultInfo({
@@ -281,6 +329,10 @@ function Index() {
         path: res.path,
       });
       setStage("done");
+      // Feed the real duration back into the per-device predictor so the next
+      // estimate on this device is more accurate. Purely local (localStorage).
+      recordOutcome({ engine, baseMs: runBaseMsRef.current, actualMs: res.durationMs });
+      setCalibrationVersion((v) => v + 1);
       toast.success(`Enhanced to ${scale.toUpperCase()} quality!`);
       trackEvent("enhance_complete", {
         scale,
@@ -301,7 +353,8 @@ function Index() {
       stopCountdown();
       if (abortRef.current === controller) abortRef.current = null;
     }
-  }, [clearResultUrl, original, scale, engine, stopCountdown]);
+  }, [clearResultUrl, original, scale, engine, fileInfo, stopCountdown]);
+
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
@@ -314,12 +367,34 @@ function Index() {
     setZoom(false);
     setStage("idle");
     setProgress(0);
+    progressRef.current = 0;
+    setProcStage("preparing");
     setEtaTotalMs(0);
     setEtaRemainingMs(0);
     dimensionsRef.current = null;
     setDims(null);
+    setFileInfo(null);
     if (inputRef.current) inputRef.current.value = "";
   }, [clearResultUrl, stopCountdown]);
+
+  // Pre-run prediction shown in the AI Analysis Card. Recomputed when inputs or
+  // the learned calibration change. SSR-safe: predict() guards localStorage.
+  const prediction = useMemo(() => {
+    if (!dims) return null;
+    return predict({
+      srcW: dims.w,
+      srcH: dims.h,
+      scale,
+      engine,
+      tier: deviceTier,
+      warm: engine === "neural" ? neuralWarm : true,
+      fileBytes: fileInfo?.bytes,
+      format: fileInfo?.type,
+    });
+    // calibrationVersion is an intentional recompute trigger after each run.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dims, scale, engine, deviceTier, neuralWarm, fileInfo, calibrationVersion]);
+
 
   const download = useCallback(() => {
     if (!result) return;
@@ -493,59 +568,17 @@ function Index() {
                       />
 
                       {stage === "loading" && (
-                        <div
-                          className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/70 px-6 backdrop-blur-sm"
-                          role="status"
-                          aria-live="polite"
-                        >
-                          <div
-                            className="shimmer absolute inset-0 h-full w-full"
-                            aria-hidden="true"
-                          />
-                          <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow">
-                            <Wand2
-                              className="h-7 w-7 animate-pulse text-primary-foreground"
-                              aria-hidden="true"
-                            />
-                          </div>
-                          <p className="relative font-display font-semibold">
-                            Enhancing to {scale.toUpperCase()}…
-                          </p>
-                          {etaTotalMs > 0 && (
-                            <div
-                              className="relative flex items-center gap-2 rounded-full border border-border bg-background/60 px-3.5 py-1.5"
-                              aria-live="polite"
-                              data-testid="eta-countdown"
-                            >
-                              <Clock className="h-4 w-4 text-primary" aria-hidden="true" />
-                              <span className="font-display text-sm font-semibold tabular-nums">
-                                {formatRemaining(etaRemainingMs)}
-                              </span>
-                            </div>
-                          )}
-                          <div
-                            className="relative h-2 w-full max-w-xs overflow-hidden rounded-full bg-muted"
-                            role="progressbar"
-                            aria-valuenow={Math.round(progress)}
-                            aria-valuemin={0}
-                            aria-valuemax={100}
-                            aria-label="Enhancement progress"
-                          >
-                            <div
-                              className="h-full bg-gradient-primary transition-all duration-500"
-                              style={{ width: `${progress}%` }}
-                            />
-                          </div>
-                          <p className="relative text-sm text-muted-foreground">{statusMessage}</p>
-                          <button
-                            type="button"
-                            onClick={reset}
-                            className="relative mt-1 rounded-full px-3 py-1 text-xs text-muted-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                          >
-                            Cancel
-                          </button>
-                        </div>
+                        <ProcessingOverlay
+                          scale={scale}
+                          progress={progress}
+                          statusMessage={statusMessage}
+                          etaRemainingMs={etaRemainingMs}
+                          stage={procStage}
+                          accuracy={runAccuracy}
+                          onCancel={reset}
+                        />
                       )}
+
                     </div>
                   )}
                 </div>
@@ -633,27 +666,22 @@ function Index() {
                     </fieldset>
                   )}
 
-                  {stage === "ready" && dims && (
-                    <p
-                      className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground"
-                      aria-live="polite"
-                    >
-                      <Clock className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-                      Estimated time on your device:{" "}
-                      <span className="font-medium text-foreground">
-                        {formatEta(
-                          estimateEnhanceMs({
-                            srcW: dims.w,
-                            srcH: dims.h,
-                            scale,
-                            engine,
-                            tier: deviceTier,
-                            warm: engine === "neural" ? neuralWarmRef.current : true,
-                          }),
-                        )}
-                      </span>
-                    </p>
+                  {stage === "ready" && dims && prediction && (
+                    <AnalysisCard
+                      prediction={prediction}
+                      width={dims.w}
+                      height={dims.h}
+                      format={fileInfo?.type ?? null}
+                      engine={engine}
+                      scale={scale}
+                      tier={deviceTier}
+                      accelLabel={accelLabel}
+                      neuralAvailable={neuralAvailable}
+                      neuralWarm={neuralWarm}
+                    />
                   )}
+
+
 
 
 
