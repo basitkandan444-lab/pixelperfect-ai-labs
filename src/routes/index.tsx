@@ -367,12 +367,34 @@ function Index() {
     setZoom(false);
     setStage("idle");
     setProgress(0);
+    progressRef.current = 0;
+    setProcStage("preparing");
     setEtaTotalMs(0);
     setEtaRemainingMs(0);
     dimensionsRef.current = null;
     setDims(null);
+    setFileInfo(null);
     if (inputRef.current) inputRef.current.value = "";
   }, [clearResultUrl, stopCountdown]);
+
+  // Pre-run prediction shown in the AI Analysis Card. Recomputed when inputs or
+  // the learned calibration change. SSR-safe: predict() guards localStorage.
+  const prediction = useMemo(() => {
+    if (!dims) return null;
+    return predict({
+      srcW: dims.w,
+      srcH: dims.h,
+      scale,
+      engine,
+      tier: deviceTier,
+      warm: engine === "neural" ? neuralWarm : true,
+      fileBytes: fileInfo?.bytes,
+      format: fileInfo?.type,
+    });
+    // calibrationVersion is an intentional recompute trigger after each run.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dims, scale, engine, deviceTier, neuralWarm, fileInfo, calibrationVersion]);
+
 
   const download = useCallback(() => {
     if (!result) return;
