@@ -80,9 +80,10 @@ function Index() {
     width: number;
     height: number;
     durationMs: number;
-    path: "worker" | "main";
+    path: "worker" | "main" | "neural";
   } | null>(null);
   const [scale, setScale] = useState<Scale>("4k");
+  const [engine, setEngine] = useState<"classical" | "neural">("classical");
   const [zoom, setZoom] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -142,7 +143,7 @@ function Index() {
     setProgress(4);
     setStatusMessage("Preparing local AI engine…");
     setStage("loading");
-    trackEvent("enhance_start", { scale });
+    trackEvent("enhance_start", { scale, engine });
     try {
       // Lazy-load the local engine (and its worker) on first use so it never
       // bloats the initial page load. All inference runs on the user's own
@@ -150,6 +151,7 @@ function Index() {
       const { enhanceImageInBrowser } = await import("@/lib/enhance/pipeline");
       const res = await enhanceImageInBrowser(original, {
         scale,
+        engine,
         signal: controller.signal,
         onProgress: (p) => {
           setProgress(Math.round(p.value * 100));
@@ -187,7 +189,7 @@ function Index() {
     } finally {
       if (abortRef.current === controller) abortRef.current = null;
     }
-  }, [clearResultUrl, original, scale]);
+  }, [clearResultUrl, original, scale, engine]);
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
@@ -447,6 +449,52 @@ function Index() {
                       ))}
                     </fieldset>
                   )}
+
+                  {stage !== "done" && (
+                    <fieldset
+                      className="grid grid-cols-2 gap-3 border-0 p-0"
+                      disabled={stage === "loading"}
+                    >
+                      <legend className="sr-only">Choose enhancement engine</legend>
+                      {(
+                        [
+                          {
+                            id: "classical" as const,
+                            title: "Fast",
+                            desc: "Instant · no download",
+                          },
+                          {
+                            id: "neural" as const,
+                            title: "Max quality (AI)",
+                            desc: "Neural model · downloads once",
+                          },
+                        ]
+                      ).map((e) => (
+                        <button
+                          key={e.id}
+                          type="button"
+                          aria-pressed={engine === e.id}
+                          onClick={() => setEngine(e.id)}
+                          className={`flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${
+                            engine === e.id
+                              ? "border-primary bg-primary/10 shadow-glow"
+                              : "border-border hover:border-primary/50"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2 font-display font-bold">
+                            {e.id === "neural" ? (
+                              <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
+                            ) : (
+                              <Zap className="h-4 w-4 text-primary" aria-hidden="true" />
+                            )}
+                            {e.title}
+                          </span>
+                          <span className="text-xs text-muted-foreground">{e.desc}</span>
+                        </button>
+                      ))}
+                    </fieldset>
+                  )}
+
 
                   <div className="flex flex-col gap-3 sm:flex-row">
                     {stage !== "done" ? (
