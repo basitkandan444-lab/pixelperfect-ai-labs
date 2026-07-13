@@ -24,7 +24,7 @@ export interface EnhanceCapabilities {
   cores: number;
   /** Device memory in GB (navigator.deviceMemory), or null if unknown. */
   memoryGB: number | null;
-  /** Whether any hosted enhancement is supported at all in this browser. */
+  /** Whether on-device enhancement is supported at all in this browser. */
   supported: boolean;
   /** Chosen execution path. */
   path: ExecutionPath;
