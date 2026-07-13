@@ -76,6 +76,12 @@ function Index() {
   const [stage, setStage] = useState<Stage>("idle");
   const [original, setOriginal] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
+  const [resultInfo, setResultInfo] = useState<{
+    width: number;
+    height: number;
+    durationMs: number;
+    path: "worker" | "main";
+  } | null>(null);
   const [scale, setScale] = useState<Scale>("4k");
   const [dragOver, setDragOver] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -83,6 +89,7 @@ function Index() {
   const [hydrated, setHydrated] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const resultUrlRef = useRef<string | null>(null);
 
   // Signal that React has hydrated and the upload handler is attached. The
   // server-rendered <input> exists before hydration, so a file set in that
@@ -91,7 +98,18 @@ function Index() {
   useEffect(() => setHydrated(true), []);
 
   // Abort any in-flight enhancement if the component unmounts.
-  useEffect(() => () => abortRef.current?.abort(), []);
+  useEffect(
+    () => () => {
+      abortRef.current?.abort();
+      if (resultUrlRef.current) URL.revokeObjectURL(resultUrlRef.current);
+    },
+    [],
+  );
+
+  const clearResultUrl = useCallback(() => {
+    if (resultUrlRef.current) URL.revokeObjectURL(resultUrlRef.current);
+    resultUrlRef.current = null;
+  }, []);
 
   const loadFile = useCallback((file: File) => {
     if (!isAcceptedImage(file)) {
@@ -106,7 +124,9 @@ function Index() {
     reader.onerror = () => toast.error("Could not read that file. Please try another image.");
     reader.onload = () => {
       setOriginal(reader.result as string);
+      clearResultUrl();
       setResult(null);
+      setResultInfo(null);
       setStage("ready");
       toast.success("Image ready. Choose a quality and enhance it.");
       trackEvent("upload", { format: file.type, size: file.size });
@@ -135,8 +155,16 @@ function Index() {
           setStatusMessage(p.message);
         },
       });
+      clearResultUrl();
+      resultUrlRef.current = res.image;
       setProgress(100);
       setResult(res.image);
+      setResultInfo({
+        width: res.width,
+        height: res.height,
+        durationMs: res.durationMs,
+        path: res.path,
+      });
       setStage("done");
       toast.success(`Enhanced to ${scale.toUpperCase()} quality!`);
       trackEvent("enhance_complete", {
@@ -157,17 +185,19 @@ function Index() {
     } finally {
       if (abortRef.current === controller) abortRef.current = null;
     }
-  }, [original, scale]);
+  }, [clearResultUrl, original, scale]);
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
+    clearResultUrl();
     setOriginal(null);
     setResult(null);
+    setResultInfo(null);
     setStage("idle");
     setProgress(0);
     if (inputRef.current) inputRef.current.value = "";
-  }, []);
+  }, [clearResultUrl]);
 
   const download = useCallback(() => {
     if (!result) return;
@@ -287,11 +317,20 @@ function Index() {
               <div className="flex flex-col gap-6">
                 <div className="relative">
                   {stage === "done" && result ? (
-                    <CompareSlider
-                      before={original}
-                      after={result}
-                      afterAlt={`Enhanced ${scale.toUpperCase()} result`}
-                    />
+                    <div className="space-y-3">
+                      <CompareSlider
+                        before={original}
+                        after={result}
+                        afterAlt={`Enhanced ${scale.toUpperCase()} result`}
+                      />
+                      {resultInfo && (
+                        <p className="text-center text-sm text-muted-foreground" aria-live="polite">
+                          Output verified: {resultInfo.width.toLocaleString()}×
+                          {resultInfo.height.toLocaleString()} PNG · local {resultInfo.path} engine ·{" "}
+                          {(resultInfo.durationMs / 1000).toFixed(1)}s
+                        </p>
+                      )}
+                    </div>
                   ) : (
                     <div className="relative flex min-h-[240px] items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted/20">
                       <img

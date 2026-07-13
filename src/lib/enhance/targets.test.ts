@@ -22,7 +22,16 @@ describe("computeTarget", () => {
   it("clamps the upscale factor to the per-scale cap", () => {
     const t = computeTarget(10, 10, "4k");
     expect(t.factor).toBe(MAX_UPSCALE_FACTOR["4k"]);
-    expect(t.width).toBe(40);
+    expect(t.width).toBe(120);
+  });
+
+  it("reaches the advertised 4K and 8K long edge for normal 16:9 uploads", () => {
+    const fourK = computeTarget(640, 360, "4k");
+    const eightK = computeTarget(640, 360, "8k");
+    expect(fourK.width).toBe(3840);
+    expect(fourK.height).toBe(2160);
+    expect(eightK.width).toBe(7680);
+    expect(eightK.height).toBe(4320);
   });
 
   it("respects the max-pixel ceiling for 8K", () => {

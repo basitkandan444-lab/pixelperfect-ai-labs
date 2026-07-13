@@ -38,7 +38,9 @@ export interface EnhanceOptions {
 }
 
 export interface EnhanceResult {
+  /** Browser object URL for the enhanced PNG blob. Caller should revoke it. */
   image: string;
+  blob: Blob;
   width: number;
   height: number;
   scale: Scale;
@@ -68,12 +70,12 @@ function throwIfAborted(signal?: AbortSignal) {
 // soft edges interpolation produces (a fixed 1px radius is below that scale and
 // is imperceptible on a 4×/8× upscale). Higher tiers push sharpening harder.
 function filterFor(caps: EnhanceCapabilities, factor: number): EnhancePixelOptions {
-  const amount = caps.tier === "high" ? 1.1 : caps.tier === "medium" ? 0.95 : 0.8;
-  const radius = Math.max(1, Math.min(6, Math.round(factor)));
+  const amount = caps.tier === "high" ? 2.35 : caps.tier === "medium" ? 2.05 : 1.75;
+  const radius = Math.max(2, Math.min(18, Math.round(factor)));
   return {
     amount,
     radius,
-    denoise: caps.tier === "low" ? 0.4 : 0.25,
+    denoise: caps.tier === "low" ? 0.28 : 0.16,
   };
 }
 
@@ -89,15 +91,6 @@ function loadImageElement(dataUrl: string): Promise<HTMLImageElement> {
     img.onload = () => resolve(img);
     img.onerror = () => reject(new Error("Could not decode the image."));
     img.src = dataUrl;
-  });
-}
-
-function blobToDataUrl(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(new Error("Could not read the enhanced image."));
-    reader.readAsDataURL(blob);
   });
 }
 
@@ -190,7 +183,9 @@ async function runOnMainThread(
 
 /**
  * Enhance an image entirely in the browser. Resolves with a PNG data URL and
- * metadata about how the work was performed. Rejects with:
+ * metadata about how the work was performed. The `image` field is a Blob URL,
+ * not a base64 data URL; keeping a 4K/8K PNG as a giant string can freeze the
+ * preview and make downloads unreliable. Rejects with:
  *   - `UnsupportedBrowserError` if no rasteriser is available,
  *   - a `DOMException("AbortError")` if `signal` is aborted,
  *   - a generic `Error` on decode/encode failure.
@@ -262,6 +257,7 @@ export async function enhanceImageInBrowser(
     } catch (err) {
       // A genuine cancel propagates; anything else falls back to the main thread.
       if (err instanceof DOMException && err.name === "AbortError") throw err;
+      console.warn("Enhancement worker failed; falling back to main-thread canvas.", err);
       bitmap?.close();
       const res = await runOnMainThread(dataUrl, target, filter, signal, onPass);
       blob = res.blob;
@@ -274,11 +270,12 @@ export async function enhanceImageInBrowser(
   throwIfAborted(signal);
 
   onProgress?.({ stage: "finishing", value: 0.97, message: "Finishing up…" });
-  const image = await blobToDataUrl(blob);
+  const image = URL.createObjectURL(blob);
   onProgress?.({ stage: "done", value: 1, message: "Done" });
 
   return {
     image,
+    blob,
     width: target.width,
     height: target.height,
     scale,
