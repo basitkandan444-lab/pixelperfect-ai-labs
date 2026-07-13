@@ -568,59 +568,17 @@ function Index() {
                       />
 
                       {stage === "loading" && (
-                        <div
-                          className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/70 px-6 backdrop-blur-sm"
-                          role="status"
-                          aria-live="polite"
-                        >
-                          <div
-                            className="shimmer absolute inset-0 h-full w-full"
-                            aria-hidden="true"
-                          />
-                          <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow">
-                            <Wand2
-                              className="h-7 w-7 animate-pulse text-primary-foreground"
-                              aria-hidden="true"
-                            />
-                          </div>
-                          <p className="relative font-display font-semibold">
-                            Enhancing to {scale.toUpperCase()}…
-                          </p>
-                          {etaTotalMs > 0 && (
-                            <div
-                              className="relative flex items-center gap-2 rounded-full border border-border bg-background/60 px-3.5 py-1.5"
-                              aria-live="polite"
-                              data-testid="eta-countdown"
-                            >
-                              <Clock className="h-4 w-4 text-primary" aria-hidden="true" />
-                              <span className="font-display text-sm font-semibold tabular-nums">
-                                {formatRemaining(etaRemainingMs)}
-                              </span>
-                            </div>
-                          )}
-                          <div
-                            className="relative h-2 w-full max-w-xs overflow-hidden rounded-full bg-muted"
-                            role="progressbar"
-                            aria-valuenow={Math.round(progress)}
-                            aria-valuemin={0}
-                            aria-valuemax={100}
-                            aria-label="Enhancement progress"
-                          >
-                            <div
-                              className="h-full bg-gradient-primary transition-all duration-500"
-                              style={{ width: `${progress}%` }}
-                            />
-                          </div>
-                          <p className="relative text-sm text-muted-foreground">{statusMessage}</p>
-                          <button
-                            type="button"
-                            onClick={reset}
-                            className="relative mt-1 rounded-full px-3 py-1 text-xs text-muted-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                          >
-                            Cancel
-                          </button>
-                        </div>
+                        <ProcessingOverlay
+                          scale={scale}
+                          progress={progress}
+                          statusMessage={statusMessage}
+                          etaRemainingMs={etaRemainingMs}
+                          stage={procStage}
+                          accuracy={runAccuracy}
+                          onCancel={reset}
+                        />
                       )}
+
                     </div>
                   )}
                 </div>
