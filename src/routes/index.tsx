@@ -194,7 +194,9 @@ function Index() {
       // soon as the user presses Enhance (used by the live countdown clock).
       const probe = new Image();
       probe.onload = () => {
-        dimensionsRef.current = { w: probe.naturalWidth, h: probe.naturalHeight };
+        const d = { w: probe.naturalWidth, h: probe.naturalHeight };
+        dimensionsRef.current = d;
+        setDims(d);
       };
       probe.src = dataUrl;
 
