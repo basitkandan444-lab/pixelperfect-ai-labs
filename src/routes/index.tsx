@@ -142,8 +142,11 @@ function Index() {
   // marker instead of retrying the whole upload.
   useEffect(() => {
     setHydrated(true);
-    setDeviceTier(detectCapabilities().tier);
+    const caps = detectCapabilities();
+    setDeviceTier(caps.tier);
+    setAccelLabel(caps.accelLabel);
   }, []);
+
 
   // Detect whether the neural (GPU) engine can run acceptably in this browser.
   // Client-only: navigator.gpu is not present during SSR. When unavailable we
