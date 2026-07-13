@@ -299,6 +299,7 @@ function Index() {
   const reset = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
+    stopCountdown();
     clearResultUrl();
     setOriginal(null);
     setResult(null);
@@ -306,8 +307,11 @@ function Index() {
     setZoom(false);
     setStage("idle");
     setProgress(0);
+    setEtaTotalMs(0);
+    setEtaRemainingMs(0);
+    dimensionsRef.current = null;
     if (inputRef.current) inputRef.current.value = "";
-  }, [clearResultUrl]);
+  }, [clearResultUrl, stopCountdown]);
 
   const download = useCallback(() => {
     if (!result) return;
