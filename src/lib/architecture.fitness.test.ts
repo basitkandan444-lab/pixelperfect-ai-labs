@@ -92,6 +92,9 @@ describe("architecture fitness · secret & environment boundary", () => {
     const offenders: string[] = [];
     for (const file of ALL_FILES) {
       if (allowed(file)) continue;
+      // Test files run under Node (not shipped to the browser) and legitimately
+      // reference these tokens while asserting the rules themselves.
+      if (/\.test\.tsx?$/.test(file)) continue;
       if (/\bprocess\.env\b/.test(read(file))) offenders.push(relative(SRC, file));
     }
     expect(offenders, `process.env used in client-reachable modules:\n${offenders.join("\n")}`).toEqual([]);
