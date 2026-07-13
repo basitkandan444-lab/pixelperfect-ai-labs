@@ -30,6 +30,7 @@ export interface RenderTarget {
   width: number;
   height: number;
   passes: number;
+  factor: number;
 }
 
 function ctxOf(canvas: CanvasLike): Ctx2D {
@@ -60,27 +61,30 @@ export function renderEnhanced(
 
   const passes = Math.max(1, target.passes);
   for (let i = 1; i <= passes; i++) {
-    const t = i / passes;
-    // Interpolate the intermediate size linearly toward the target; the final
-    // pass lands exactly on the target dimensions.
-    const w = Math.max(1, Math.round(srcW + (target.width - srcW) * t));
-    const h = Math.max(1, Math.round(srcH + (target.height - srcH) * t));
+    // True progressive resampling: grow by roughly 2× each pass, then land on
+    // the exact target. The old linear interpolation jumped 640px → 1600px on
+    // the first pass of a 4× job, baking in softness before the detail filter.
+    const finalPass = i === passes;
+    const stepScale = finalPass ? Infinity : 2;
+    const w = finalPass ? target.width : Math.min(target.width, Math.round(current.width * stepScale));
+    const h = finalPass
+      ? target.height
+      : Math.min(target.height, Math.round(current.height * stepScale));
     const next = makeCanvas(w, h);
     const nctx = ctxOf(next);
     nctx.imageSmoothingEnabled = true;
     nctx.imageSmoothingQuality = "high";
     nctx.drawImage(current as unknown as CanvasImageSource, 0, 0, w, h);
     current = next;
-    onProgress?.(0.1 + t * 0.7);
+    onProgress?.(0.1 + (i / passes) * 0.7);
   }
 
   // Detail-recovery pass on the final, full-resolution buffer.
   const fctx = ctxOf(current);
   const image = fctx.getImageData(0, 0, current.width, current.height);
   const enhanced = enhancePixels(image.data, current.width, current.height, filter);
-  const outImage = fctx.createImageData(current.width, current.height);
-  outImage.data.set(enhanced);
-  fctx.putImageData(outImage, 0, 0);
+  image.data.set(enhanced);
+  fctx.putImageData(image, 0, 0);
   onProgress?.(0.98);
 
   return current;

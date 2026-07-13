@@ -86,6 +86,51 @@ describe("enhancePixels (unsharp mask)", () => {
     expect(matchedGain).toBeGreaterThan(smallGain * 2);
   });
 
+  it("creates a measurable enhancement rather than a near-identical resize", () => {
+    const w = 96;
+    const h = 48;
+    const soft = gray(w, h, (x, y) => {
+      const band = x < 28 ? 70 : x > 68 ? 190 : 70 + ((x - 28) / 40) * 120;
+      const texture = Math.sin(x / 5) * 5 + Math.cos(y / 4) * 4;
+      return Math.max(0, Math.min(255, band + texture));
+    });
+    const out = enhancePixels(soft, w, h, { amount: 2.1, radius: 6, denoise: 0.12 });
+
+    let diff = 0;
+    let changed = 0;
+    const lapVariance = (buf: Uint8ClampedArray) => {
+      let sum = 0;
+      let sumSq = 0;
+      let n = 0;
+      for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+          const i = (y * w + x) * 4;
+          const lap =
+            4 * buf[i] -
+            buf[(y * w + x - 1) * 4] -
+            buf[(y * w + x + 1) * 4] -
+            buf[((y - 1) * w + x) * 4] -
+            buf[((y + 1) * w + x) * 4];
+          sum += lap;
+          sumSq += lap * lap;
+          n++;
+        }
+      }
+      const mean = sum / n;
+      return sumSq / n - mean * mean;
+    };
+
+    for (let i = 0; i < soft.length; i += 4) {
+      const d = Math.abs(out[i] - soft[i]);
+      diff += d;
+      if (d > 2) changed++;
+    }
+
+    expect(diff / (soft.length / 4)).toBeGreaterThan(3);
+    expect(changed / (soft.length / 4)).toBeGreaterThan(0.25);
+    expect(lapVariance(out)).toBeGreaterThan(lapVariance(soft) * 2.5);
+  });
+
   it("returns a copy (does not mutate the source) when amount is 0", () => {
     const src = gray(4, 4, () => 80);
     const out = enhancePixels(src, 4, 4, { amount: 0, radius: 1, denoise: 0 });

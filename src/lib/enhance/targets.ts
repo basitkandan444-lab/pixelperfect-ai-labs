@@ -21,12 +21,14 @@ export const MAX_OUTPUT_PIXELS: Record<Scale, number> = {
   "8k": 7680 * 4320, // ~33.2M px
 };
 
-// We never upscale beyond this factor — pushing a tiny thumbnail to 8K produces
-// mush, not detail, and wastes memory. Beyond the cap we still upscale, just not
-// to the nominal long edge.
+// We still cap pathological thumbnails, but the cap must not prevent normal
+// phone/web images from reaching the advertised 4K/8K long edge. The previous
+// 4×/6× caps made a 640×360 upload produce only 2560×1440 for “4K” and only
+// 3840×2160 for “8K”, which made the product promise false before filtering
+// even began.
 export const MAX_UPSCALE_FACTOR: Record<Scale, number> = {
-  "4k": 4,
-  "8k": 6,
+  "4k": 12,
+  "8k": 24,
 };
 
 export interface TargetDimensions {

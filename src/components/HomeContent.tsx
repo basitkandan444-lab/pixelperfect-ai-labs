@@ -71,7 +71,7 @@ const BENEFITS = [
     title: "Works on the device you already have",
     problem: "Powerful editing tools often demand a desktop and a strong graphics card.",
     outcome:
-      "Everything runs in the browser and the heavy processing happens server-side, so a phone or an older laptop is enough.",
+      "Everything runs locally in the browser with a worker-powered enhancement engine, so there is no upload-to-server processing step.",
   },
   {
     title: "Free, with nothing to sign up for",
@@ -170,11 +170,11 @@ const SEARCH_INTENT = [
 const TRUST = [
   {
     title: "Your privacy",
-    desc: "Images are sent securely to the AI only to create your enhanced result. They are not added to a public gallery, used for advertising or sold.",
+    desc: "Images are enhanced locally in your browser. They are not added to a public gallery, used for advertising or sold.",
   },
   {
     title: "How processing works",
-    desc: "The heavy work runs server-side for a single request, then returns the result to your browser. Nothing is published on your behalf.",
+    desc: "The heavy work runs inside your browser using local canvas and worker processing. Nothing is published on your behalf.",
   },
   {
     title: "You own your content",
