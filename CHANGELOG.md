@@ -6,7 +6,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Architecture fitness functions (drift guardrails)
+
+- **Executable architecture fitness functions** (`src/lib/architecture.fitness.test.ts`).
+  The layering rules previously documented only as prose in `docs/ARCHITECTURE.md`
+  are now enforced automatically in the standard test gate (`bun run check` + CI),
+  so the architecture cannot silently drift. Enforced invariants:
+  - **Dependency direction** — `src/lib`, `src/components`, `src/hooks` must never
+    import from `src/routes` (routes are edge adapters; the core stays stable).
+  - **Framework-agnostic core** — `*.core.ts` logic must not import
+    `@tanstack/react-router`/`react-start`, keeping it unit-testable in isolation.
+  - **Secret/env boundary** — `process.env` is confined to server-only surfaces
+    (`src/routes/**`, `src/lib/env.ts`, `src/server.ts`, `src/start.ts`, `*.server.ts`);
+    presentational components may not touch env or secrets.
+  - **Generated-file integrity** — `routeTree.gen.ts` must retain its generated
+    banner (proves it was not hand-edited).
+  - **Bounded contexts** — business HTTP endpoints must live under `src/routes/api/`
+    (root web-standard files like `sitemap.xml` are explicitly exempt).
+  Verified the guardrail fails on injected drift and passes when restored.
+
 ### Changed — Architecture / dependency hygiene
+
 
 - **Pruned dead UI surface and dependencies.** The template shipped all 46
   shadcn/ui primitives, but only 4 are used anywhere in the app (`badge`,
