@@ -6,6 +6,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — Restored pure browser-first architecture (removed all hosted AI)
+
+- **Removed the hosted "Max (Studio AI)" path entirely.** Deleted the server
+  route `src/routes/api/enhance-max.ts` and the client helper
+  `src/lib/enhance/hosted.ts`, and dropped the `"hosted"` engine from the
+  pipeline, UI selector, result labels and types. There is now **zero hosted
+  inference, zero API calls for image processing, zero credits, and zero
+  external GPU servers** — every enhancement runs on the user's own device and
+  works fully offline after assets download. This reverts the opt-in cloud tier
+  and re-commits to the project's non-negotiable browser-first philosophy.
+- **Upgraded the on-device neural engine to a stronger, evidence-based model.**
+  Switched `src/lib/enhance/neural.ts` from `Xenova/swin2SR-lightweight-x2-64`
+  (bicubic-only, x2) to `Xenova/swin2SR-realworld-sr-x4-64-bsrgan-psnr`
+  (real-world x4, trained on BSRGAN blur/noise/JPEG degradations). Real uploads
+  are degraded photos, so a real-world checkpoint removes compression artifacts
+  and reconstructs edges instead of amplifying them, and performs 4× of the
+  upscale in the neural domain (vs 2×) for sharper large outputs. Input cap
+  lowered to 512px long-edge to keep x4 memory in budget on-device.
+- Both engines remain 100% browser-first: classical (instant, zero-download)
+  and neural (lazy-loaded WebGPU, one-time weight download, then offline).
+
 ### Added — Hybrid enhancement engine (classical + opt-in neural super-resolution)
 
 - **Forensic finding (evidence, not assumption):** a real browser-driven audit
