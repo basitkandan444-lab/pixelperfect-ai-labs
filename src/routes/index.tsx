@@ -223,6 +223,31 @@ function Index() {
     setStatusMessage("Preparing local AI engine…");
     setStage("loading");
     trackEvent("enhance_start", { scale, engine });
+
+    // Estimate how long this will take on THIS device and start a live
+    // countdown so the user knows the wait up-front instead of staring at an
+    // open-ended spinner. The estimate uses the real image dimensions, chosen
+    // quality/engine and detected device tier.
+    const dims = dimensionsRef.current;
+    const caps = detectCapabilities();
+    const estimatedMs = dims
+      ? estimateEnhanceMs({
+          srcW: dims.w,
+          srcH: dims.h,
+          scale,
+          engine,
+          tier: caps.tier,
+          warm: engine === "neural" ? neuralWarmRef.current : true,
+        })
+      : 8000;
+    const startedAt = Date.now();
+    setEtaTotalMs(estimatedMs);
+    setEtaRemainingMs(estimatedMs);
+    stopCountdown();
+    countdownRef.current = setInterval(() => {
+      const remaining = estimatedMs - (Date.now() - startedAt);
+      setEtaRemainingMs(remaining > 0 ? remaining : 0);
+    }, 250);
     try {
       // Lazy-load the local engine (and its worker) on first use so it never
       // bloats the initial page load. All inference runs on the user's own
