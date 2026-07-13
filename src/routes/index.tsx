@@ -100,6 +100,21 @@ function Index() {
   // marker instead of retrying the whole upload.
   useEffect(() => setHydrated(true), []);
 
+  // Detect whether the neural (GPU) engine can run acceptably in this browser.
+  // Client-only: navigator.gpu is not present during SSR. When unavailable we
+  // never offer neural (the WASM fallback is too slow to be worth surfacing).
+  useEffect(() => {
+    let cancelled = false;
+    import("@/lib/enhance/neural")
+      .then(({ neuralSupported }) => {
+        if (!cancelled) setNeuralAvailable(neuralSupported());
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // Abort any in-flight enhancement if the component unmounts.
   useEffect(
     () => () => {
