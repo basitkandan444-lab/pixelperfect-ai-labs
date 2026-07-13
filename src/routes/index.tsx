@@ -62,6 +62,15 @@ type Stage = "idle" | "ready" | "loading" | "done";
 const MAX_BYTES = 15 * 1024 * 1024;
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
 const ACCEPT_ATTR = ".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp";
+const ACCEPTED_EXT = /\.(jpe?g|png|webp)$/i;
+
+// Whether a picked file is an accepted image. Safari/WebKit (and some OS file
+// pickers / drag-drop sources) report an empty `file.type`, so fall back to the
+// filename extension instead of rejecting a perfectly valid image.
+function isAcceptedImage(file: File): boolean {
+  if (file.type) return ACCEPTED.includes(file.type);
+  return ACCEPTED_EXT.test(file.name);
+}
 
 function Index() {
   const [stage, setStage] = useState<Stage>("idle");
@@ -85,7 +94,7 @@ function Index() {
   useEffect(() => () => abortRef.current?.abort(), []);
 
   const loadFile = useCallback((file: File) => {
-    if (!ACCEPTED.includes(file.type)) {
+    if (!isAcceptedImage(file)) {
       toast.error("Unsupported format. Please upload a JPG, PNG or WEBP image.");
       return;
     }
