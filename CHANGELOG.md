@@ -23,8 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   intermittent timeouts. Baselines for the affected workspace states were
   regenerated for the taller preview frame.
 
-
-
 ### Observability & Operations (Developer Command Center)
 
 - **Developer Command Center (`/ops`):** a single live operational view of the
