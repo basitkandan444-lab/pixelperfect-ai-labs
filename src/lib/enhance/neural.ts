@@ -38,9 +38,19 @@ type ProgressEvent = { status: string; progress?: number; file?: string };
 
 let upscalerPromise: Promise<Upscaler> | null = null;
 
-/** Whether the neural path can even be attempted in this runtime. */
+/**
+ * Whether the neural path can run *acceptably* here. It requires a canvas plus
+ * WebGPU: the CPU/WASM backend is functional but so slow (tens of seconds to
+ * minutes for a single image) that it is a worse experience than the classical
+ * engine, so we only surface neural when the GPU path is available.
+ */
 export function neuralSupported(): boolean {
-  return typeof document !== "undefined" && typeof createImageBitmap === "function";
+  return (
+    typeof document !== "undefined" &&
+    typeof createImageBitmap === "function" &&
+    typeof navigator !== "undefined" &&
+    Boolean((navigator as unknown as { gpu?: unknown }).gpu)
+  );
 }
 
 async function getUpscaler(onLoad?: (p: ProgressEvent) => void): Promise<Upscaler> {
