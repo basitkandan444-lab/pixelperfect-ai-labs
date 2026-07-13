@@ -151,3 +151,93 @@ describe("tileBlendWeights", () => {
     }
   });
 });
+
+// End-to-end reassembly simulation: mirror the exact accumulate → normalise
+// blend that neural.ts performs, but with a synthetic "ground truth" image in
+// place of the GPU model, so we can assert the reconstruction is seam-free and
+// deterministic without a real WebGPU device.
+describe("tiled reassembly (blend simulation)", () => {
+  const W = 220;
+  const H = 140;
+  const scale = 1; // model output == input for the simulation
+  const overlap = 24;
+
+  // A smooth 3-channel gradient — any seam or gamma error shows up as a
+  // discontinuity we can measure against this ground truth.
+  function groundTruth(): Float32Array {
+    const g = new Float32Array(W * H * 3);
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const i = (y * W + x) * 3;
+        g[i] = x / (W - 1);
+        g[i + 1] = y / (H - 1);
+        g[i + 2] = (x + y) / (W + H - 2);
+      }
+    }
+    return g;
+  }
+
+  function reconstruct(gt: Float32Array, tileSize: number, order: number[]): Float32Array {
+    const tiles = planTiles(W, H, tileSize, overlap);
+    const accR = new Float32Array(W * H);
+    const accG = new Float32Array(W * H);
+    const accB = new Float32Array(W * H);
+    const accW = new Float32Array(W * H);
+    const band = overlap * scale;
+
+    for (const t of order) {
+      const tile = tiles[t];
+      const tOutW = tile.w * scale;
+      const tOutH = tile.h * scale;
+      const weights = tileBlendWeights(tOutW, tOutH, tileEdges(tile, W, H), band);
+      for (let ly = 0; ly < tOutH; ly++) {
+        const gy = tile.y * scale + ly;
+        for (let lx = 0; lx < tOutW; lx++) {
+          const gx = tile.x * scale + lx;
+          const w = weights[ly * tOutW + lx];
+          const src = (gy * W + gx) * 3;
+          const d = gy * W + gx;
+          accR[d] += w * srgbToLinear(gt[src]);
+          accG[d] += w * srgbToLinear(gt[src + 1]);
+          accB[d] += w * srgbToLinear(gt[src + 2]);
+          accW[d] += w;
+        }
+      }
+    }
+
+    const out = new Float32Array(W * H * 3);
+    for (let p = 0; p < W * H; p++) {
+      const wsum = accW[p] || 1;
+      out[p * 3] = linearToSrgb(accR[p] / wsum);
+      out[p * 3 + 1] = linearToSrgb(accG[p] / wsum);
+      out[p * 3 + 2] = linearToSrgb(accB[p] / wsum);
+    }
+    return out;
+  }
+
+  it("reconstructs the image seam-free (max error is tiny across tile boundaries)", () => {
+    const gt = groundTruth();
+    const tiles = planTiles(W, H, 96, overlap);
+    expect(tiles.length).toBeGreaterThan(1); // genuinely multi-tile
+    const order = tiles.map((_, i) => i);
+    const recon = reconstruct(gt, 96, order);
+
+    let maxErr = 0;
+    for (let i = 0; i < gt.length; i++) maxErr = Math.max(maxErr, Math.abs(gt[i] - recon[i]));
+    // sub-1/255 everywhere → no visible seam and gamma-correct colour.
+    expect(maxErr).toBeLessThan(1 / 255);
+  });
+
+  it("is deterministic regardless of tile processing order", () => {
+    const gt = groundTruth();
+    const tiles = planTiles(W, H, 96, overlap);
+    const forward = tiles.map((_, i) => i);
+    const reversed = [...forward].reverse();
+    const a = reconstruct(gt, 96, forward);
+    const b = reconstruct(gt, 96, reversed);
+    let maxDiff = 0;
+    for (let i = 0; i < a.length; i++) maxDiff = Math.max(maxDiff, Math.abs(a[i] - b[i]));
+    expect(maxDiff).toBeLessThan(1e-6);
+  });
+});
+
