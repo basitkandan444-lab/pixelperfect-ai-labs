@@ -31,6 +31,12 @@ export interface EnhanceProgress {
 
 export interface EnhanceOptions {
   scale: Scale;
+  /**
+   * "classical" (default): instant, zero-download unsharp/Laplacian engine.
+   * "neural": lazy-loaded browser super-resolution model (real detail
+   * synthesis), with automatic fallback to classical if it can't run.
+   */
+  engine?: "classical" | "neural";
   signal?: AbortSignal;
   onProgress?: (p: EnhanceProgress) => void;
   /** Injectable for tests; defaults to runtime detection. */
@@ -45,7 +51,7 @@ export interface EnhanceResult {
   height: number;
   scale: Scale;
   capabilities: EnhanceCapabilities;
-  path: "worker" | "main";
+  path: "worker" | "main" | "neural";
   durationMs: number;
 }
 
@@ -77,6 +83,14 @@ function filterFor(caps: EnhanceCapabilities, factor: number): EnhancePixelOptio
     radius,
     denoise: caps.tier === "low" ? 0.18 : 0.1,
   };
+}
+
+// Gentle finishing filter for the neural path: the model has already recovered
+// real detail, so we only need a light micro-contrast pass to land the resample
+// crisply. Heavy sharpening here would re-introduce ringing on top of the
+// synthesised detail.
+function neuralFilter(): EnhancePixelOptions {
+  return { amount: 0.55, radius: 2, denoise: 0 };
 }
 
 async function loadBitmap(dataUrl: string): Promise<ImageBitmap> {
@@ -248,34 +262,66 @@ export async function enhanceImageInBrowser(
     });
 
   let blob: Blob;
-  let usedPath: "worker" | "main" = "main";
+  let usedPath: "worker" | "main" | "neural" = "main";
 
-  if (canWorker && bitmap) {
+  // NEURAL path (opt-in): real super-resolution model, lazy-loaded in the
+  // browser. Any non-abort failure (no WebGPU, model fetch failure, OOM) falls
+  // back to the classical engine so the user always gets a result.
+  let neuralDone = false;
+  if (opts.engine === "neural") {
     try {
-      blob = await runInWorker(bitmap, srcW, srcH, target, filter, signal, onPass);
-      usedPath = "worker";
+      const { enhanceNeural } = await import("./neural");
+      const res = await enhanceNeural(
+        dataUrl,
+        target,
+        neuralFilter(),
+        (value, message) =>
+          onProgress?.({ stage: "upscaling", value: Math.min(0.97, value), message }),
+        signal,
+      );
+      blob = res.blob;
+      usedPath = "neural";
+      neuralDone = true;
+      bitmap?.close();
     } catch (err) {
-      // A genuine cancel propagates; anything else falls back to the main thread.
       if (err instanceof DOMException && err.name === "AbortError") throw err;
-      console.warn("Enhancement worker failed; falling back to main-thread canvas.", err);
+      console.warn("Neural engine unavailable; falling back to classical engine.", err);
+      onProgress?.({
+        stage: "upscaling",
+        value: 0.1,
+        message: "Neural model unavailable — using fast engine…",
+      });
+    }
+  }
+
+  if (!neuralDone) {
+    if (canWorker && bitmap) {
+      try {
+        blob = await runInWorker(bitmap, srcW, srcH, target, filter, signal, onPass);
+        usedPath = "worker";
+      } catch (err) {
+        // A genuine cancel propagates; anything else falls back to the main thread.
+        if (err instanceof DOMException && err.name === "AbortError") throw err;
+        console.warn("Enhancement worker failed; falling back to main-thread canvas.", err);
+        bitmap?.close();
+        const res = await runOnMainThread(dataUrl, target, filter, signal, onPass);
+        blob = res.blob;
+      }
+    } else {
       bitmap?.close();
       const res = await runOnMainThread(dataUrl, target, filter, signal, onPass);
       blob = res.blob;
     }
-  } else {
-    bitmap?.close();
-    const res = await runOnMainThread(dataUrl, target, filter, signal, onPass);
-    blob = res.blob;
   }
   throwIfAborted(signal);
 
-  onProgress?.({ stage: "finishing", value: 0.97, message: "Finishing up…" });
-  const image = URL.createObjectURL(blob);
+  onProgress?.({ stage: "finishing", value: 0.98, message: "Finishing up…" });
+  const image = URL.createObjectURL(blob!);
   onProgress?.({ stage: "done", value: 1, message: "Done" });
 
   return {
     image,
-    blob,
+    blob: blob!,
     width: target.width,
     height: target.height,
     scale,

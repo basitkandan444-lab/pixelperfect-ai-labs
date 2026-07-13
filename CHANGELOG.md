@@ -6,6 +6,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Hybrid enhancement engine (classical + opt-in neural super-resolution)
+
+- **Forensic finding (evidence, not assumption):** a real browser-driven audit
+  proved the classical engine *does* modify the download substantially
+  (mean abs diff 8.27/255, 75% of pixels changed, ~180× the edge energy of a
+  bicubic resize, 0 hosted-inference requests). The "looks the same" report had
+  two real causes: (1) the compare slider/preview downscaled the 4K output to
+  the viewport, discarding the upscaled resolution; (2) classical sharpening
+  cannot synthesise genuinely new detail.
+- **Actual-pixels view:** the result now has a "View actual pixels (100%)"
+  toggle (`src/routes/index.tsx`) so the enhanced resolution is visible instead
+  of a shrunk-to-fit preview.
+- **Neural super-resolution (opt-in):** new "Max quality (AI)" engine
+  (`src/lib/enhance/neural.ts`) runs a real learned model
+  (`Xenova/swin2SR-lightweight-x2-64`) entirely in the browser via
+  transformers.js + WebGPU. Lazy-loaded on first use (own ~244 KB gzip chunk,
+  never in the initial bundle; model weights fetched once from CDN and cached).
+  Still zero hosted inference / zero credits. Verified in Node that it recovers
+  cleaner detail than bicubic (edge energy 83 vs 70, no ringing).
+- **Graceful degradation:** neural is only surfaced when WebGPU is present (the
+  WASM backend is too slow to be worth offering); any neural failure
+  (no adapter, fetch/OOM) falls back to the classical engine so the user always
+  gets a result. Verified end-to-end in a headless browser.
+- **Default unchanged:** the instant, zero-download classical engine remains the
+  default ("Fast").
+
+
+
 ### Fixed — Enhancement produced visually identical output
 
 - **Detail-recovery pass was perceptually a no-op.** A forensic pixel-level
