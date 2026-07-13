@@ -120,7 +120,6 @@ function Index() {
     };
   }, []);
 
-
   // Abort any in-flight enhancement if the component unmounts.
   useEffect(
     () => () => {
@@ -387,8 +386,8 @@ function Index() {
                       {resultInfo && (
                         <p className="text-center text-sm text-muted-foreground" aria-live="polite">
                           Output verified: {resultInfo.width.toLocaleString()}×
-                          {resultInfo.height.toLocaleString()} PNG · local {resultInfo.path} engine ·{" "}
-                          {(resultInfo.durationMs / 1000).toFixed(1)}s
+                          {resultInfo.height.toLocaleString()} PNG · local {resultInfo.path} engine
+                          · {(resultInfo.durationMs / 1000).toFixed(1)}s
                         </p>
                       )}
                     </div>
@@ -484,20 +483,18 @@ function Index() {
                       disabled={stage === "loading"}
                     >
                       <legend className="sr-only">Choose enhancement engine</legend>
-                      {(
-                        [
-                          {
-                            id: "classical" as const,
-                            title: "Fast",
-                            desc: "Instant · no download",
-                          },
-                          {
-                            id: "neural" as const,
-                            title: "Max quality (AI)",
-                            desc: "Neural model · downloads once",
-                          },
-                        ]
-                      ).map((e) => (
+                      {[
+                        {
+                          id: "classical" as const,
+                          title: "Fast",
+                          desc: "Instant · no download",
+                        },
+                        {
+                          id: "neural" as const,
+                          title: "Max quality (AI)",
+                          desc: "Neural model · downloads once",
+                        },
+                      ].map((e) => (
                         <button
                           key={e.id}
                           type="button"
@@ -522,7 +519,6 @@ function Index() {
                       ))}
                     </fieldset>
                   )}
-
 
                   <div className="flex flex-col gap-3 sm:flex-row">
                     {stage !== "done" ? (

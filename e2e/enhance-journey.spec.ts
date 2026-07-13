@@ -52,7 +52,8 @@ function degradedQualityImageFile() {
       const i = (y * width + x) * 4;
       const left = x < 92 ? 70 : x > 228 ? 190 : 70 + ((x - 92) / 136) * 120;
       const bars = Math.abs((x % 28) - 14) < 2 || Math.abs((y % 24) - 12) < 2 ? 32 : 0;
-      const diagonal = Math.abs(x - y * 1.35 - 36) < 3 || Math.abs(width - x - y * 1.1 - 26) < 3 ? 46 : 0;
+      const diagonal =
+        Math.abs(x - y * 1.35 - 36) < 3 || Math.abs(width - x - y * 1.1 - 26) < 3 ? 46 : 0;
       const texture = Math.sin(x / 4) * 8 + Math.cos(y / 5) * 7;
       const v = Math.max(0, Math.min(255, left + bars + diagonal + texture));
       rgba[i] = Math.max(0, Math.min(255, v + 10));

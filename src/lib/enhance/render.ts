@@ -66,7 +66,9 @@ export function renderEnhanced(
     // the first pass of a 4× job, baking in softness before the detail filter.
     const finalPass = i === passes;
     const stepScale = finalPass ? Infinity : 2;
-    const w = finalPass ? target.width : Math.min(target.width, Math.round(current.width * stepScale));
+    const w = finalPass
+      ? target.width
+      : Math.min(target.width, Math.round(current.width * stepScale));
     const h = finalPass
       ? target.height
       : Math.min(target.height, Math.round(current.height * stepScale));
