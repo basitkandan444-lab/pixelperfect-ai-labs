@@ -487,7 +487,7 @@ function Index() {
 
                   {stage !== "done" && (
                     <fieldset
-                      className="grid grid-cols-1 gap-3 border-0 p-0 sm:grid-cols-3"
+                      className="grid grid-cols-1 gap-3 border-0 p-0 sm:grid-cols-2"
                       disabled={stage === "loading"}
                     >
                       <legend className="sr-only">Choose enhancement engine</legend>
