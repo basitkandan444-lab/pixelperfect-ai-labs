@@ -49,27 +49,9 @@ function parseClientEnv(): ClientEnv {
 export const clientEnv = parseClientEnv();
 
 // ---- Server (secret) env ---------------------------------------------------
-
-const serverSchema = z.object({
-  // Server key for the AI enhancement gateway. Optional at boot: when absent,
-  // the enhance endpoint returns a clear `ai_unconfigured` error instead of
-  // crashing. Validated for shape (non-empty) when present.
-  LOVABLE_API_KEY: z.string().min(1, "LOVABLE_API_KEY cannot be empty").optional(),
-});
-
-export type ServerEnv = z.infer<typeof serverSchema>;
-
-/**
- * Reads and validates server env. Call INSIDE a request handler, never at
- * module scope — edge env vars are injected per-request. Throws on malformed
- * values so misconfiguration fails fast rather than silently.
- */
-export function getServerEnv(): ServerEnv {
-  const parsed = serverSchema.safeParse({ LOVABLE_API_KEY: process.env.LOVABLE_API_KEY });
-  if (!parsed.success) {
-    throw new Error(
-      `Invalid server environment: ${JSON.stringify(parsed.error.flatten().fieldErrors)}`,
-    );
-  }
-  return parsed.data;
-}
+//
+// The app performs ALL image enhancement in the user's browser, so there are no
+// server secrets required for the core product (no AI gateway key, no hosted
+// inference credentials). This section is intentionally empty. If a future
+// server secret is introduced, validate it here and read it INSIDE a request
+// handler (edge env is injected per-request), never at module scope.

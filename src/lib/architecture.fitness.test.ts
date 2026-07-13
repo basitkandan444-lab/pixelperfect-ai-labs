@@ -64,8 +64,15 @@ describe("architecture fitness · dependency direction", () => {
     ).toEqual([]);
   });
 
-  it("core logic stays framework-agnostic (no router/start imports in *.core.ts)", () => {
-    const coreFiles = ALL_FILES.filter((f) => /\.core\.ts$/.test(f));
+  it("core logic stays framework-agnostic (no router/start imports in core modules)", () => {
+    // "Core" = files named *.core.ts PLUS the browser enhancement engine under
+    // src/lib/enhance/ (targets/filters/capabilities/render/pipeline/worker),
+    // which is the framework-agnostic compute core of the product.
+    const coreFiles = ALL_FILES.filter(
+      (f) =>
+        /\.core\.ts$/.test(f) ||
+        (/[\\/]lib[\\/]enhance[\\/]/.test(f) && /\.ts$/.test(f) && !/\.test\.ts$/.test(f)),
+    );
     // Core files must exist and must be testable without the framework.
     expect(coreFiles.length).toBeGreaterThan(0);
     const offenders: string[] = [];
