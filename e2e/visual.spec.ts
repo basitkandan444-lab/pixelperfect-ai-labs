@@ -1,12 +1,7 @@
 import { test, expect } from "@playwright/test";
 
-import {
-  locators,
-  mockEnhanceError,
-  mockEnhanceSuccess,
-  openHome,
-  uploadValidImage,
-} from "./helpers";
+import { locators, openHome, uploadValidImage } from "./helpers";
+
 
 // MODULE 4E — visual regression protection. Pixel-exact snapshots are inherently
 // per-engine and per-OS, so baselines are maintained for a scoped set of
