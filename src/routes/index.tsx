@@ -114,8 +114,10 @@ function Index() {
     setStage("loading");
     trackEvent("enhance_start", { scale });
     try {
-      // All inference runs on the user's own device — no server, no API, no
-      // credits. Progress + status stream back from the local engine.
+      // Lazy-load the local engine (and its worker) on first use so it never
+      // bloats the initial page load. All inference runs on the user's own
+      // device — no server, no API, no credits.
+      const { enhanceImageInBrowser } = await import("@/lib/enhance/pipeline");
       const res = await enhanceImageInBrowser(original, {
         scale,
         signal: controller.signal,
@@ -137,7 +139,7 @@ function Index() {
     } catch (err) {
       // A user-initiated cancel is not an error — reset() already handled UI.
       if (err instanceof DOMException && err.name === "AbortError") return;
-      if (err instanceof UnsupportedBrowserError) {
+      if (err instanceof Error && err.name === "UnsupportedBrowserError") {
         toast.error("Your browser does not support this enhancement mode. Try a modern browser.");
       } else {
         toast.error("Enhancement failed. Please try a different image.");
