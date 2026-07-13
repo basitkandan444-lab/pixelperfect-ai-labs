@@ -212,8 +212,10 @@ function Index() {
       setResult(null);
       setResultInfo(null);
       setStage("ready");
+      setFileInfo({ bytes: file.size, type: file.type || "" });
       toast.success("Image ready. Choose a quality and enhance it.");
       trackEvent("upload", { format: file.type, size: file.size });
+
 
       // Capture natural dimensions so we can estimate the enhancement time as
       // soon as the user presses Enhance (used by the live countdown clock).
