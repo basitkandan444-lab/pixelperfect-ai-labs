@@ -14,7 +14,9 @@ import {
 // UI state at every step rather than internal implementation details.
 test.describe("Image enhancement journey", () => {
   test("upload → preview → enhance → result → compare → download", async ({ page }) => {
-    await mockEnhanceSuccess(page);
+    // A short mocked round-trip keeps the transient "loading" stage observable
+    // (live region + progressbar) without materially slowing the suite.
+    await mockEnhanceSuccess(page, 600);
 
     // 1) User opens the application.
     await openHome(page);
