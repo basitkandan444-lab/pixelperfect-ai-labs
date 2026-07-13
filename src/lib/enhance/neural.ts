@@ -28,10 +28,11 @@ import type { EnhancePixelOptions } from "./filters";
 import { renderEnhanced, type CanvasLike, type RenderTarget } from "./render";
 import modelAsset from "./realesrgan-x4v3.onnx.asset.json";
 
-// Pinned onnxruntime-web version — its WASM binary is loaded from this CDN and
-// MUST match the installed package version so the JS glue and WASM agree.
+// onnxruntime-web is pinned so the JS glue and its WASM binary always agree.
+// The WebGPU "bundle" build co-locates its WASM as a fingerprinted asset that
+// Vite emits into the client output, so the runtime self-locates it from our
+// own deploy (first-party, offline after the first load) — no CDN, no config.
 const ORT_VERSION = "1.22.0";
-const ORT_WASM_BASE = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/`;
 
 // The network upscales by exactly 4×.
 const MODEL_SCALE = 4;
