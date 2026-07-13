@@ -160,6 +160,7 @@ function Index() {
       resultUrlRef.current = res.image;
       setProgress(100);
       setResult(res.image);
+      setZoom(false);
       setResultInfo({
         width: res.width,
         height: res.height,
