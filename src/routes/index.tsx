@@ -104,6 +104,8 @@ function Index() {
   const [statusMessage, setStatusMessage] = useState("Preparing local AI engine…");
   const [etaTotalMs, setEtaTotalMs] = useState(0);
   const [etaRemainingMs, setEtaRemainingMs] = useState(0);
+  const [dims, setDims] = useState<{ w: number; h: number } | null>(null);
+  const [deviceTier, setDeviceTier] = useState<"high" | "medium" | "low">("medium");
   const [hydrated, setHydrated] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
