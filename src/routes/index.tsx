@@ -317,6 +317,7 @@ function Index() {
     setEtaTotalMs(0);
     setEtaRemainingMs(0);
     dimensionsRef.current = null;
+    setDims(null);
     if (inputRef.current) inputRef.current.value = "";
   }, [clearResultUrl, stopCountdown]);
 
