@@ -59,6 +59,33 @@ describe("enhancePixels (unsharp mask)", () => {
     for (let i = 3; i < out.length; i += 4) expect(out[i]).toBe(255);
   });
 
+  // Regression: an interpolated 4× upscale spreads an edge over ~4px. A fixed
+  // 1px unsharp radius operates below that scale and is imperceptible; the
+  // radius MUST scale with the upscale factor to actually recover detail.
+  // This guards against the "visually identical output" bug.
+  it("sharpens a factor-scaled soft edge far more with a matched radius", () => {
+    // A soft ramp edge ~4px wide (as produced by a 4× interpolated upscale).
+    const w = 16;
+    const h = 1;
+    const ramp = gray(w, h, (x) => {
+      if (x <= 6) return 80;
+      if (x >= 10) return 180;
+      return 80 + ((x - 6) / 4) * 100; // 4px transition
+    });
+    const gradientAt = (buf: Uint8ClampedArray, x: number) =>
+      Math.abs(buf[(x + 1) * 4] - buf[(x - 1) * 4]);
+
+    const small = enhancePixels(ramp, w, h, { amount: 1, radius: 1, denoise: 0 });
+    const matched = enhancePixels(ramp, w, h, { amount: 1, radius: 4, denoise: 0 });
+
+    const base = gradientAt(ramp, 8);
+    const smallGain = gradientAt(small, 8) - base;
+    const matchedGain = gradientAt(matched, 8) - base;
+
+    // The factor-matched radius must produce a substantially stronger edge.
+    expect(matchedGain).toBeGreaterThan(smallGain * 2);
+  });
+
   it("returns a copy (does not mutate the source) when amount is 0", () => {
     const src = gray(4, 4, () => 80);
     const out = enhancePixels(src, 4, 4, { amount: 0, radius: 1, denoise: 0 });
