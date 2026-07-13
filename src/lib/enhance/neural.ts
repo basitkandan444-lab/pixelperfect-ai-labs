@@ -50,10 +50,7 @@ async function getUpscaler(onLoad?: (p: ProgressEvent) => void): Promise<Upscale
       // Always fetch from the CDN (no local models bundled) and cache in the
       // browser so repeat runs skip the download.
       env.allowLocalModels = false;
-      const device =
-        typeof navigator !== "undefined" && (navigator as unknown as { gpu?: unknown }).gpu
-          ? "webgpu"
-          : "wasm";
+      const device = "wasm";
       try {
         return (await pipeline("image-to-image", MODEL_ID, {
           device,
