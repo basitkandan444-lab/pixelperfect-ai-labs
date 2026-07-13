@@ -118,7 +118,10 @@ function Index() {
   // server-rendered <input> exists before hydration, so a file set in that
   // window is silently dropped; consumers (and E2E specs) can wait for this
   // marker instead of retrying the whole upload.
-  useEffect(() => setHydrated(true), []);
+  useEffect(() => {
+    setHydrated(true);
+    setDeviceTier(detectCapabilities().tier);
+  }, []);
 
   // Detect whether the neural (GPU) engine can run acceptably in this browser.
   // Client-only: navigator.gpu is not present during SSR. When unavailable we
