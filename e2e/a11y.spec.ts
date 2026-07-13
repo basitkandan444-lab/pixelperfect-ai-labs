@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-import { locators, mockEnhanceSuccess, openHome, uploadValidImage } from "./helpers";
+import { locators, openHome, uploadValidImage } from "./helpers";
 
 // MODULE 4F — automated accessibility validation.
 //
