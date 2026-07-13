@@ -25,7 +25,6 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AiImageEnhancerRouteImport } from './routes/ai-image-enhancer'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiEnhanceMaxRouteImport } from './routes/api/enhance-max'
 import { Route as ApiPublicVitalsRouteImport } from './routes/api/public/vitals'
 import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
 import { Route as ApiPublicMetricsRouteImport } from './routes/api/public/metrics'
@@ -111,11 +110,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiEnhanceMaxRoute = ApiEnhanceMaxRouteImport.update({
-  id: '/api/enhance-max',
-  path: '/api/enhance-max',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicVitalsRoute = ApiPublicVitalsRouteImport.update({
   id: '/api/public/vitals',
   path: '/api/public/vitals',
@@ -154,7 +148,6 @@ export interface FileRoutesByFullPath {
   '/sharpen-image': typeof SharpenImageRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
-  '/api/enhance-max': typeof ApiEnhanceMaxRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
   '/api/public/version': typeof ApiPublicVersionRoute
@@ -177,7 +170,6 @@ export interface FileRoutesByTo {
   '/sharpen-image': typeof SharpenImageRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
-  '/api/enhance-max': typeof ApiEnhanceMaxRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
   '/api/public/version': typeof ApiPublicVersionRoute
@@ -201,7 +193,6 @@ export interface FileRoutesById {
   '/sharpen-image': typeof SharpenImageRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
-  '/api/enhance-max': typeof ApiEnhanceMaxRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
   '/api/public/version': typeof ApiPublicVersionRoute
@@ -226,7 +217,6 @@ export interface FileRouteTypes {
     | '/sharpen-image'
     | '/sitemap.xml'
     | '/terms'
-    | '/api/enhance-max'
     | '/api/public/health'
     | '/api/public/metrics'
     | '/api/public/version'
@@ -249,7 +239,6 @@ export interface FileRouteTypes {
     | '/sharpen-image'
     | '/sitemap.xml'
     | '/terms'
-    | '/api/enhance-max'
     | '/api/public/health'
     | '/api/public/metrics'
     | '/api/public/version'
@@ -272,7 +261,6 @@ export interface FileRouteTypes {
     | '/sharpen-image'
     | '/sitemap.xml'
     | '/terms'
-    | '/api/enhance-max'
     | '/api/public/health'
     | '/api/public/metrics'
     | '/api/public/version'
@@ -296,7 +284,6 @@ export interface RootRouteChildren {
   SharpenImageRoute: typeof SharpenImageRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
-  ApiEnhanceMaxRoute: typeof ApiEnhanceMaxRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicMetricsRoute: typeof ApiPublicMetricsRoute
   ApiPublicVersionRoute: typeof ApiPublicVersionRoute
@@ -417,13 +404,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/enhance-max': {
-      id: '/api/enhance-max'
-      path: '/api/enhance-max'
-      fullPath: '/api/enhance-max'
-      preLoaderRoute: typeof ApiEnhanceMaxRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/vitals': {
       id: '/api/public/vitals'
       path: '/api/public/vitals'
@@ -472,7 +452,6 @@ const rootRouteChildren: RootRouteChildren = {
   SharpenImageRoute: SharpenImageRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
-  ApiEnhanceMaxRoute: ApiEnhanceMaxRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicMetricsRoute: ApiPublicMetricsRoute,
   ApiPublicVersionRoute: ApiPublicVersionRoute,
@@ -481,13 +460,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

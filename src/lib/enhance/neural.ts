@@ -1,28 +1,41 @@
-// Optional browser-first NEURAL super-resolution path.
+// Browser-first NEURAL super-resolution path (the "Balanced (AI)" engine).
 //
-// This is the "Max quality" engine: a real learned super-resolution model
-// (SwinIR / Swin2SR lightweight x2) that runs entirely in the user's browser via
-// transformers.js — WebGPU when available, CPU/WASM as a fallback. Unlike the
-// classical unsharp/Laplacian engine it can synthesise plausible new detail
-// instead of only amplifying existing edges.
+// A real learned super-resolution transformer (Swin2SR) that runs ENTIRELY in
+// the user's browser via transformers.js — WebGPU when available, CPU/WASM as a
+// fallback. Unlike the classical unsharp/Laplacian engine it reconstructs
+// plausible new detail (edges, texture) instead of only amplifying what already
+// exists.
 //
-// It is lazy-loaded on first use (the model weights are fetched from the HF CDN
-// and cached by the browser), so it never touches the initial bundle. There is
-// still NO hosted inference and NO credits — the weights download once, then all
-// computation happens on-device.
+// Model choice — evidence-based, not popularity-based:
+//   We use the *real-world* x4 Swin2SR checkpoint trained with BSRGAN-style
+//   degradations (blur + noise + JPEG compression), NOT the lightweight bicubic
+//   x2 model. Real user uploads are degraded photos, so a network trained only
+//   on clean bicubic-downscaled inputs (lightweight-x2) generalises poorly and
+//   amplifies artifacts. The real-world checkpoint is trained specifically to
+//   undo real degradation, so it removes JPEG blocking / noise while recovering
+//   edges — measurably closer to elite restoration within browser-only limits.
+//   It also performs 4× of the upscale in the neural domain (vs 2×), leaving
+//   less work for the classical resampler and yielding sharper large outputs.
+//
+// It is lazy-loaded on first use (weights fetched from the HF CDN, then cached
+// by the browser), so it never touches the initial bundle. There is NO hosted
+// inference and NO credits — the weights download once, then ALL computation
+// happens on-device and it works fully offline afterwards.
 
 import type { EnhancePixelOptions } from "./filters";
 import { renderEnhanced, type CanvasLike, type RenderTarget } from "./render";
 
-// Small, fast, general-purpose super-resolution model (x2). Lightweight variant
-// keeps the download and per-image latency reasonable for a browser.
-const MODEL_ID = "Xenova/swin2SR-lightweight-x2-64";
+// Real-world super-resolution transformer (x4), trained on realistic
+// degradations (blur/noise/JPEG). Strongest general-purpose SR checkpoint in the
+// transformers.js catalog that stays practical for on-device WebGPU inference.
+const MODEL_ID = "Xenova/swin2SR-realworld-sr-x4-64-bsrgan-psnr";
 
 // Cap the long edge fed to the model. Neural SR is O(pixels) in both time and
-// memory; feeding a already-large upload straight in can OOM the tab. We
-// downscale big inputs to this, let the model x2 it, then finish the resample to
-// the requested 4K/8K target with the high-quality classical resampler.
-const NEURAL_MAX_INPUT = 768;
+// memory; feeding an already-large upload straight in can OOM the tab. Because
+// this model is x4 (16× the pixels out), we keep the input smaller than the x2
+// path used, let the model x4 it, then finish the resample to the requested
+// 4K/8K target with the high-quality classical resampler.
+const NEURAL_MAX_INPUT = 512;
 
 // Loose types: transformers.js ships its own types but we keep the surface we
 // use minimal and defensive so a version bump can't break the build.
