@@ -167,9 +167,23 @@ on leaf routes and the root default — never duplicated into a layout.
 **Quality gate** (must pass before merge):
 
 ```bash
-bun run check   # typecheck + lint + format:check
+bun run check   # typecheck + lint + format:check + tests
 bun run build   # production build must succeed
 ```
+
+**Architecture fitness functions** (enforced, not aspirational)
+
+The architecture rules above are not just guidance — they are executed as
+automated invariants in `src/lib/architecture.fitness.test.ts`, which runs in
+the standard test gate (`bun run check` and CI). If a change inverts the
+dependency direction (lib/components importing routes), leaks `process.env`
+into a client-reachable module, reads secrets from a component, pulls the
+router framework into `*.core.ts` logic, hand-edits `routeTree.gen.ts`, or
+places a business HTTP endpoint outside `src/routes/api/`, the suite fails and
+the build is blocked. This converts every rule below into a guardrail that
+prevents architectural drift instead of merely describing it.
+
+
 
 ## Architecture layers
 
