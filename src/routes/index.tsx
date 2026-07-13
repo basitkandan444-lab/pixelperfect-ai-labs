@@ -666,27 +666,22 @@ function Index() {
                     </fieldset>
                   )}
 
-                  {stage === "ready" && dims && (
-                    <p
-                      className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground"
-                      aria-live="polite"
-                    >
-                      <Clock className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-                      Estimated time on your device:{" "}
-                      <span className="font-medium text-foreground">
-                        {formatEta(
-                          estimateEnhanceMs({
-                            srcW: dims.w,
-                            srcH: dims.h,
-                            scale,
-                            engine,
-                            tier: deviceTier,
-                            warm: engine === "neural" ? neuralWarmRef.current : true,
-                          }),
-                        )}
-                      </span>
-                    </p>
+                  {stage === "ready" && dims && prediction && (
+                    <AnalysisCard
+                      prediction={prediction}
+                      width={dims.w}
+                      height={dims.h}
+                      format={fileInfo?.type ?? null}
+                      engine={engine}
+                      scale={scale}
+                      tier={deviceTier}
+                      accelLabel={accelLabel}
+                      neuralAvailable={neuralAvailable}
+                      neuralWarm={neuralWarm}
+                    />
                   )}
+
+
 
 
 
