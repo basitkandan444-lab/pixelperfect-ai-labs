@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-import { locators, mockEnhanceSuccess, openHome, uploadValidImage } from "./helpers";
+import { locators, openHome, uploadValidImage } from "./helpers";
 
 // MODULE 4F — automated accessibility validation.
 //
@@ -40,7 +40,6 @@ test.describe("Accessibility (axe-core, WCAG 2.1 AA)", () => {
   });
 
   test("successful result / compare state has no violations", async ({ page }) => {
-    await mockEnhanceSuccess(page);
     await uploadValidImage(page);
     await locators.enhanceButton(page).click();
     await expect(locators.compareSlider(page)).toBeVisible();
@@ -64,7 +63,6 @@ test.describe("Accessibility (axe-core, WCAG 2.1 AA)", () => {
   test("compare slider exposes ARIA slider semantics and is keyboard-focusable", async ({
     page,
   }) => {
-    await mockEnhanceSuccess(page);
     await uploadValidImage(page);
     await locators.enhanceButton(page).click();
     const slider = locators.compareSlider(page);

@@ -1,16 +1,18 @@
-import { type Page, type Route, expect } from "@playwright/test";
+import { type Page, expect } from "@playwright/test";
 
-// Reusable end-to-end helpers. Centralising selectors and the API mock keeps the
-// specs readable and means a UI change is fixed in ONE place, not across files.
-// Selectors are intentionally role/label based (accessibility-first, stable)
-// rather than brittle CSS or text-position selectors.
+// Reusable end-to-end helpers. Centralising selectors keeps the specs readable
+// and means a UI change is fixed in ONE place, not across files. Selectors are
+// intentionally role/label based (accessibility-first, stable) rather than
+// brittle CSS or text-position selectors.
+//
+// NOTE: enhancement now runs entirely in the browser (no network round-trip),
+// so there are no request mocks here — the specs exercise the REAL local engine.
 
 // A real 1x1 PNG — small enough to keep tests fast, valid enough that the
-// browser's FileReader produces a usable data URL and the preview renders.
+// browser's FileReader produces a usable data URL and the preview renders, and
+// that the local upscaler can process it end-to-end.
 const TINY_PNG_BASE64 =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
-
-export const ENHANCE_ROUTE = "**/api/enhance-image";
 
 /** A valid in-memory image file for `setInputFiles`. */
 export function validImageFile(name = "photo.png") {
@@ -37,51 +39,6 @@ export function oversizedImageFile() {
     mimeType: "image/png",
     buffer: Buffer.alloc(15 * 1024 * 1024 + 1024, 1),
   };
-}
-
-/** A successful enhancement response in the standardized API envelope. */
-export async function mockEnhanceSuccess(page: Page, delayMs = 400) {
-  await page.route(ENHANCE_ROUTE, async (route: Route) => {
-    // A small delay so the transient processing state is observable (mirrors a
-    // real AI round-trip); without it the result would appear instantly.
-    if (delayMs) await new Promise((r) => setTimeout(r, delayMs));
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        success: true,
-        data: {
-          image: `data:image/png;base64,${TINY_PNG_BASE64}`,
-          scale: "4k",
-        },
-      }),
-    });
-  });
-}
-
-/** A failing enhancement response with a given status + typed error. */
-export async function mockEnhanceError(
-  page: Page,
-  status: number,
-  code: string,
-  message: string,
-  headers: Record<string, string> = {},
-) {
-  await page.route(ENHANCE_ROUTE, async (route: Route) => {
-    await route.fulfill({
-      status,
-      headers,
-      contentType: "application/json",
-      body: JSON.stringify({ success: false, error: { code, message } }),
-    });
-  });
-}
-
-/** Simulate a dropped connection / client abort mid-request. */
-export async function mockEnhanceNetworkFailure(page: Page) {
-  await page.route(ENHANCE_ROUTE, async (route: Route) => {
-    await route.abort("connectionaborted");
-  });
 }
 
 // ---- Stable locators -------------------------------------------------------

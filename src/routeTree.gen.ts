@@ -25,7 +25,6 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AiImageEnhancerRouteImport } from './routes/ai-image-enhancer'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiEnhanceImageRouteImport } from './routes/api/enhance-image'
 import { Route as ApiPublicVitalsRouteImport } from './routes/api/public/vitals'
 import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
 import { Route as ApiPublicMetricsRouteImport } from './routes/api/public/metrics'
@@ -111,11 +110,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiEnhanceImageRoute = ApiEnhanceImageRouteImport.update({
-  id: '/api/enhance-image',
-  path: '/api/enhance-image',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicVitalsRoute = ApiPublicVitalsRouteImport.update({
   id: '/api/public/vitals',
   path: '/api/public/vitals',
@@ -154,7 +148,6 @@ export interface FileRoutesByFullPath {
   '/sharpen-image': typeof SharpenImageRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
-  '/api/enhance-image': typeof ApiEnhanceImageRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
   '/api/public/version': typeof ApiPublicVersionRoute
@@ -177,7 +170,6 @@ export interface FileRoutesByTo {
   '/sharpen-image': typeof SharpenImageRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
-  '/api/enhance-image': typeof ApiEnhanceImageRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
   '/api/public/version': typeof ApiPublicVersionRoute
@@ -201,7 +193,6 @@ export interface FileRoutesById {
   '/sharpen-image': typeof SharpenImageRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
-  '/api/enhance-image': typeof ApiEnhanceImageRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
   '/api/public/version': typeof ApiPublicVersionRoute
@@ -226,7 +217,6 @@ export interface FileRouteTypes {
     | '/sharpen-image'
     | '/sitemap.xml'
     | '/terms'
-    | '/api/enhance-image'
     | '/api/public/health'
     | '/api/public/metrics'
     | '/api/public/version'
@@ -249,7 +239,6 @@ export interface FileRouteTypes {
     | '/sharpen-image'
     | '/sitemap.xml'
     | '/terms'
-    | '/api/enhance-image'
     | '/api/public/health'
     | '/api/public/metrics'
     | '/api/public/version'
@@ -272,7 +261,6 @@ export interface FileRouteTypes {
     | '/sharpen-image'
     | '/sitemap.xml'
     | '/terms'
-    | '/api/enhance-image'
     | '/api/public/health'
     | '/api/public/metrics'
     | '/api/public/version'
@@ -296,7 +284,6 @@ export interface RootRouteChildren {
   SharpenImageRoute: typeof SharpenImageRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
-  ApiEnhanceImageRoute: typeof ApiEnhanceImageRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicMetricsRoute: typeof ApiPublicMetricsRoute
   ApiPublicVersionRoute: typeof ApiPublicVersionRoute
@@ -417,13 +404,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/enhance-image': {
-      id: '/api/enhance-image'
-      path: '/api/enhance-image'
-      fullPath: '/api/enhance-image'
-      preLoaderRoute: typeof ApiEnhanceImageRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/vitals': {
       id: '/api/public/vitals'
       path: '/api/public/vitals'
@@ -472,7 +452,6 @@ const rootRouteChildren: RootRouteChildren = {
   SharpenImageRoute: SharpenImageRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
-  ApiEnhanceImageRoute: ApiEnhanceImageRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicMetricsRoute: ApiPublicMetricsRoute,
   ApiPublicVersionRoute: ApiPublicVersionRoute,

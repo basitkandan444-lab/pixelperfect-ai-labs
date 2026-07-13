@@ -11,6 +11,9 @@ import { BeforeAfterGallery } from "@/components/BeforeAfterGallery";
 import { trackEvent } from "@/lib/analytics";
 import { SITE, FAQS, absoluteUrl } from "@/lib/site";
 import { originLoader } from "@/lib/origin.functions";
+// The browser enhancement engine (+ its worker) is lazy-loaded on first use so
+// it never weighs down the initial page bundle — see the dynamic import in
+// `enhance()` below.
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -67,8 +70,10 @@ function Index() {
   const [scale, setScale] = useState<Scale>("4k");
   const [dragOver, setDragOver] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [statusMessage, setStatusMessage] = useState("Preparing local AI engine…");
   const [hydrated, setHydrated] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   // Signal that React has hydrated and the upload handler is attached. The
   // server-rendered <input> exists before hydration, so a file set in that
@@ -76,15 +81,8 @@ function Index() {
   // marker instead of retrying the whole upload.
   useEffect(() => setHydrated(true), []);
 
-  // Simulated progress while the AI works (the API returns a single result).
-  useEffect(() => {
-    if (stage !== "loading") return;
-    setProgress(8);
-    const id = setInterval(() => {
-      setProgress((p) => (p < 92 ? p + Math.max(1, (95 - p) * 0.06) : p));
-    }, 400);
-    return () => clearInterval(id);
-  }, [stage]);
+  // Abort any in-flight enhancement if the component unmounts.
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   const loadFile = useCallback((file: File) => {
     if (!ACCEPTED.includes(file.type)) {
@@ -109,41 +107,52 @@ function Index() {
 
   const enhance = useCallback(async () => {
     if (!original) return;
+    const controller = new AbortController();
+    abortRef.current = controller;
+    setProgress(4);
+    setStatusMessage("Preparing local AI engine…");
     setStage("loading");
     trackEvent("enhance_start", { scale });
     try {
-      const res = await fetch("/api/enhance-image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: original, scale }),
+      // Lazy-load the local engine (and its worker) on first use so it never
+      // bloats the initial page load. All inference runs on the user's own
+      // device — no server, no API, no credits.
+      const { enhanceImageInBrowser } = await import("@/lib/enhance/pipeline");
+      const res = await enhanceImageInBrowser(original, {
+        scale,
+        signal: controller.signal,
+        onProgress: (p) => {
+          setProgress(Math.round(p.value * 100));
+          setStatusMessage(p.message);
+        },
       });
-      // Standardized envelope: { success, data: { image }, error: { message } }.
-      // Falls back to the legacy flat shape for resilience during rollout.
-      const data = (await res.json()) as {
-        success?: boolean;
-        data?: { image?: string };
-        error?: { message?: string } | string;
-        image?: string;
-      };
-      const image = data.data?.image ?? data.image;
-      const errorMessage = typeof data.error === "string" ? data.error : data.error?.message;
-      if (!res.ok || !image) {
-        toast.error(errorMessage ?? "Enhancement failed. Please try again.");
-        setStage("ready");
-        return;
-      }
       setProgress(100);
-      setResult(image);
+      setResult(res.image);
       setStage("done");
       toast.success(`Enhanced to ${scale.toUpperCase()} quality!`);
-      trackEvent("enhance_complete", { scale });
-    } catch {
-      toast.error("Network error. Please check your connection and try again.");
+      trackEvent("enhance_complete", {
+        scale,
+        engine: res.path,
+        accel: res.capabilities.accel,
+        durationMs: res.durationMs,
+      });
+    } catch (err) {
+      // A user-initiated cancel is not an error — reset() already handled UI.
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      if (err instanceof Error && err.name === "UnsupportedBrowserError") {
+        toast.error("Your browser does not support this enhancement mode. Try a modern browser.");
+      } else {
+        toast.error("Enhancement failed. Please try a different image.");
+      }
       setStage("ready");
+    } finally {
+      if (abortRef.current === controller) abortRef.current = null;
     }
   }, [original, scale]);
 
   const reset = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
     setOriginal(null);
     setResult(null);
     setStage("idle");
@@ -314,9 +323,14 @@ function Index() {
                               style={{ width: `${progress}%` }}
                             />
                           </div>
-                          <p className="relative text-sm text-muted-foreground">
-                            Reconstructing fine detail with AI
-                          </p>
+                          <p className="relative text-sm text-muted-foreground">{statusMessage}</p>
+                          <button
+                            type="button"
+                            onClick={reset}
+                            className="relative mt-1 rounded-full px-3 py-1 text-xs text-muted-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          >
+                            Cancel
+                          </button>
                         </div>
                       )}
                     </div>

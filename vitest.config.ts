@@ -30,7 +30,9 @@ export default defineConfig({
       // Playwright (e2e), not Vitest, so counting them here would produce a
       // misleading number and a threshold that punishes the wrong layer.
       include: [
-        "src/lib/enhance-image.core.ts",
+        "src/lib/enhance/targets.ts",
+        "src/lib/enhance/filters.ts",
+        "src/lib/enhance/capabilities.ts",
         "src/lib/rate-limit.ts",
         "src/lib/metrics.ts",
         "src/lib/api-response.ts",

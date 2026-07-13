@@ -6,6 +6,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — Browser-first enhancement engine (zero hosted inference, zero credits)
+
+- **Removed all hosted AI inference.** Deleted the server route
+  `src/routes/api/enhance-image.ts`, its orchestrator `src/lib/enhance-image.core.ts`,
+  and the three associated test files. The app no longer calls the Lovable AI
+  Gateway (`ai.gateway.lovable.dev`), consumes credits, or requires
+  `LOVABLE_API_KEY` (dropped from `src/lib/env.ts`, `.env.example`, and the
+  `/api/public/health` readiness probe).
+- **New in-browser engine** under `src/lib/enhance/`: `capabilities.ts`
+  (WebGPU/WebGL/OffscreenCanvas/Worker/cores/memory detection + tier), `targets.ts`
+  (target-dimension math), `filters.ts` (box blur, unsharp-mask + denoise),
+  `render.ts` (progressive high-quality resampling + detail recovery),
+  `enhance.worker.ts` (off-main-thread OffscreenCanvas), and `pipeline.ts`
+  (orchestrator with worker path + main-thread fallback, cancellation, staged
+  progress). All inference runs on the user's own CPU/GPU.
+- **Client UX** (`src/routes/index.tsx`): enhancement is lazy-loaded on first
+  click (kept out of the initial bundle), streams human status ("Preparing local
+  AI engine…", "Using GPU/CPU acceleration…"), supports Cancel, and never
+  mentions credits/billing/quota. Works fully offline.
+- **Tests**: added `targets.test.ts`, `filters.test.ts`, `capabilities.test.ts`
+  (17 unit tests); migrated the e2e suite off network mocks to the real local
+  engine, added offline-success and no-inference-request proofs, and retired the
+  now-nondeterministic result/error visual baselines.
+- **Bundle budget**: `maxChunkBytes` raised 600→640 KB (documented) — the
+  largest chunk is the TanStack Router vendor bundle (~612 KB raw / ~139 KB
+  gzip), a single unsplittable dependency; the engine + worker are separate lazy
+  chunks.
+
+
+
 ### Added — Architecture fitness functions (drift guardrails)
 
 - **Executable architecture fitness functions** (`src/lib/architecture.fitness.test.ts`).

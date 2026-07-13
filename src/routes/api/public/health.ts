@@ -21,7 +21,6 @@ export const Route = createFileRoute("/api/public/health")({
     handlers: {
       GET: async () => {
         const snap = metrics.snapshot();
-        const aiConfigured = Boolean(process.env.LOVABLE_API_KEY);
         const uptimeSeconds = Math.max(0, Math.floor((Date.now() - Date.parse(snap.since)) / 1000));
 
         return Response.json(
@@ -38,7 +37,9 @@ export const Route = createFileRoute("/api/public/health")({
             uptimeSeconds,
             checks: {
               server: true,
-              ai_configured: aiConfigured,
+              // Enhancement runs entirely in the user's browser — there is no
+              // server-side AI dependency to probe. Always ready.
+              engine: "browser",
             },
             timestamp: new Date().toISOString(),
           },

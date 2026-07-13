@@ -1,23 +1,17 @@
 import { test, expect } from "@playwright/test";
 
-import {
-  locators,
-  mockEnhanceSuccess,
-  openHome,
-  uploadImage,
-  uploadValidImage,
-  validImageFile,
-} from "./helpers";
+import { locators, openHome, uploadImage, uploadValidImage, validImageFile } from "./helpers";
 
 // MODULE 4D — the complete, happy-path Image Enhancement Journey.
 // One test walks the entire experience a real user has, asserting the visible
 // UI state at every step rather than internal implementation details.
+//
+// Enhancement runs entirely in the browser (local engine) — there is no network
+// mock. The transient "loading" stage is naturally observable because the
+// pipeline yields across async boundaries (image decode, worker round-trip,
+// blob → data URL) before the result appears.
 test.describe("Image enhancement journey", () => {
   test("upload → preview → enhance → result → compare → download", async ({ page }) => {
-    // A short mocked round-trip keeps the transient "loading" stage observable
-    // (live region + progressbar) without materially slowing the suite.
-    await mockEnhanceSuccess(page, 600);
-
     // 1) User opens the application.
     await openHome(page);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
@@ -55,7 +49,6 @@ test.describe("Image enhancement journey", () => {
   });
 
   test("user can start over with New Image after a result", async ({ page }) => {
-    await mockEnhanceSuccess(page);
     await uploadValidImage(page);
 
     await locators.enhanceButton(page).click();
@@ -66,5 +59,20 @@ test.describe("Image enhancement journey", () => {
     // Back to the empty upload state — no lingering result.
     await expect(locators.uploadInput(page)).toBeAttached();
     await expect(locators.compareSlider(page)).toHaveCount(0);
+  });
+
+  test("multiple consecutive enhancements succeed (no credits, no exhaustion)", async ({
+    page,
+  }) => {
+    await uploadValidImage(page);
+
+    for (let i = 0; i < 3; i++) {
+      await locators.enhanceButton(page).click();
+      await expect(locators.compareSlider(page)).toBeVisible();
+      // The result must never say anything about credits/billing/quota.
+      await expect(page.getByText(/credit|billing|quota/i)).toHaveCount(0);
+      await locators.resetButton(page).click();
+      await uploadImage(page, validImageFile(), locators.imagePreview);
+    }
   });
 });

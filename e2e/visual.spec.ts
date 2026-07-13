@@ -1,12 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-import {
-  locators,
-  mockEnhanceError,
-  mockEnhanceSuccess,
-  openHome,
-  uploadValidImage,
-} from "./helpers";
+import { locators, openHome, uploadValidImage } from "./helpers";
 
 // MODULE 4E — visual regression protection. Pixel-exact snapshots are inherently
 // per-engine and per-OS, so baselines are maintained for a scoped set of
@@ -58,26 +52,10 @@ test.describe("Visual regression", () => {
     await expect(workspace).toHaveScreenshot("workspace-ready.png");
   });
 
-  test("workspace — successful result state", async ({ page }) => {
-    await mockEnhanceSuccess(page);
-    await uploadValidImage(page);
-    await locators.enhanceButton(page).click();
-    await expect(locators.compareSlider(page)).toBeVisible();
-
-    // Snapshot just the workspace card to keep the assertion focused and stable.
-    const workspace = page.locator("#workspace");
-    await expect(workspace).toHaveScreenshot("workspace-result.png");
-  });
-
-  test("workspace — recoverable error state", async ({ page }) => {
-    // A typed upstream error leaves the workspace intact and re-enhanceable —
-    // the experience is never broken. Snapshot the recovered, retryable layout.
-    await mockEnhanceError(page, 502, "ai_failed", "Enhancement failed. Please try again.");
-    await uploadValidImage(page);
-    await locators.enhanceButton(page).click();
-    // The enhance CTA returns (retry is possible) once the request settles.
-    await expect(locators.enhanceButton(page)).toBeEnabled();
-    const workspace = page.locator("#workspace");
-    await expect(workspace).toHaveScreenshot("workspace-error.png");
-  });
+  // The successful-result and error-state snapshots were retired with the
+  // browser-first migration: the result image is now produced by the LOCAL
+  // engine (device/GPU-dependent pixels, not a fixed mock), so a pixel-exact
+  // baseline would be non-deterministic across machines. The result flow is
+  // fully covered functionally in enhance-journey.spec.ts, and the recoverable
+  // server-error state no longer exists (there is no server request to fail).
 });
