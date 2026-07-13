@@ -57,6 +57,7 @@ export const Route = createFileRoute("/")({
 });
 
 type Scale = "4k" | "8k";
+type Engine = "classical" | "neural" | "hosted";
 type Stage = "idle" | "ready" | "loading" | "done";
 
 const MAX_BYTES = 15 * 1024 * 1024;
@@ -80,10 +81,10 @@ function Index() {
     width: number;
     height: number;
     durationMs: number;
-    path: "worker" | "main" | "neural";
+    path: "worker" | "main" | "neural" | "hosted";
   } | null>(null);
   const [scale, setScale] = useState<Scale>("4k");
-  const [engine, setEngine] = useState<"classical" | "neural">("classical");
+  const [engine, setEngine] = useState<Engine>("classical");
   const [neuralAvailable, setNeuralAvailable] = useState(false);
   const [zoom, setZoom] = useState(false);
   const [dragOver, setDragOver] = useState(false);
