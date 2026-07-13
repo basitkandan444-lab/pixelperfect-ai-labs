@@ -208,7 +208,6 @@ export async function enhanceImageInBrowser(
 
   if (!caps.supported) throw new UnsupportedBrowserError();
 
-  const filter = filterFor(caps, scale);
   onProgress?.({
     stage: "preparing",
     value: 0.05,
