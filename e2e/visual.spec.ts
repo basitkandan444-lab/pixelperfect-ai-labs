@@ -37,9 +37,15 @@ test.describe("Visual regression", () => {
   test("landing page — empty upload state", async ({ page }) => {
     await openHome(page);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    // Wait for fonts to finish swapping, then give the tall page a realistic
+    // window to reach two identical frames. A full-page snapshot of a long
+    // marketing page needs more than the tight 5s default to stabilize on a
+    // cold run (font swap + eager media), which was the source of the flake.
+    await page.evaluate(() => document.fonts.ready);
     await expect(page).toHaveScreenshot("landing-empty.png", {
       fullPage: true,
       mask: [ambientGlow(page)],
+      timeout: 20_000,
     });
   });
 

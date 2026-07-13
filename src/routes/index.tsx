@@ -275,12 +275,13 @@ function Index() {
                       afterAlt={`Enhanced ${scale.toUpperCase()} result`}
                     />
                   ) : (
-                    <div className="relative overflow-hidden rounded-2xl border border-border">
+                    <div className="relative flex min-h-[240px] items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted/20">
                       <img
                         src={original}
                         alt="Your uploaded image preview"
-                        className="block w-full"
+                        className="block max-h-[70vh] w-full object-contain"
                       />
+
                       {stage === "loading" && (
                         <div
                           className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/70 px-6 backdrop-blur-sm"

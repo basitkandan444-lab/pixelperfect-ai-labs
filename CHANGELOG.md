@@ -6,6 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Cross-engine reliability of the enhance journey (Firefox/WebKit):** the image
+  preview frame now has a minimum height and centers the image
+  (`min-h-[240px]` + `object-contain`). Previously a small/thin image collapsed
+  the `overflow-hidden` preview container to ~1px on Gecko, so the absolutely
+  positioned "Enhancing…" overlay — including its accessible `progressbar` — had
+  no visible height and rendered clipped/broken. This was surfaced by the E2E
+  journey test failing only on Firefox; it is a genuine responsive defect for
+  small images, not a test artifact. Real UX for tiny previews is also fixed.
+- **Flaky landing visual snapshot:** the full-page `landing-empty` snapshot now
+  waits for `document.fonts.ready` and uses a realistic 20s stabilization
+  timeout. The tall marketing page could not reach two identical frames within
+  the tight 5s default on cold runs (font swap + eager media), causing
+  intermittent timeouts. Baselines for the affected workspace states were
+  regenerated for the taller preview frame.
+
 ### Observability & Operations (Developer Command Center)
 
 - **Developer Command Center (`/ops`):** a single live operational view of the
