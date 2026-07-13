@@ -137,6 +137,7 @@ async function getSession(
           executionProviders: ["wasm"],
         });
       }
+      sessionReady = true;
       return { ort, session };
     })().catch((err) => {
       sessionPromise = null; // allow a later retry
