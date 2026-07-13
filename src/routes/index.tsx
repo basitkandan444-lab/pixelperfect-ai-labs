@@ -83,6 +83,7 @@ function Index() {
     path: "worker" | "main";
   } | null>(null);
   const [scale, setScale] = useState<Scale>("4k");
+  const [zoom, setZoom] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [progress, setProgress] = useState(0);
   const [statusMessage, setStatusMessage] = useState("Preparing local AI engine…");
