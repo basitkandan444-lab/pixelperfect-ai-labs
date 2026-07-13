@@ -196,6 +196,7 @@ function Index() {
     setOriginal(null);
     setResult(null);
     setResultInfo(null);
+    setZoom(false);
     setStage("idle");
     setProgress(0);
     if (inputRef.current) inputRef.current.value = "";
