@@ -102,10 +102,15 @@ function Index() {
   const [dragOver, setDragOver] = useState(false);
   const [progress, setProgress] = useState(0);
   const [statusMessage, setStatusMessage] = useState("Preparing local AI engine…");
+  const [etaTotalMs, setEtaTotalMs] = useState(0);
+  const [etaRemainingMs, setEtaRemainingMs] = useState(0);
   const [hydrated, setHydrated] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const resultUrlRef = useRef<string | null>(null);
+  const dimensionsRef = useRef<{ w: number; h: number } | null>(null);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const neuralWarmRef = useRef(false);
 
   // Signal that React has hydrated and the upload handler is attached. The
   // server-rendered <input> exists before hydration, so a file set in that
