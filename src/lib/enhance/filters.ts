@@ -198,7 +198,7 @@ export function enhancePixels(
 ): Uint8ClampedArray {
   const { amount, radius, denoise } = opts;
 
-  let base = edgeAwareDenoise(src, width, height, denoise);
+  const base = edgeAwareDenoise(src, width, height, denoise);
 
   if (amount <= 0) return base === src ? src.slice() : base;
 
@@ -207,7 +207,13 @@ export function enhancePixels(
   // crispness. This is intentionally stronger than a photo-editor default
   // because the product promise is enhancement/upscaling, not a neutral resize.
   const coarse = unsharpMask(base, width, height, radius, amount);
-  const mid = unsharpMask(coarse, width, height, Math.max(1, Math.round(radius / 3)), amount * 0.55);
+  const mid = unsharpMask(
+    coarse,
+    width,
+    height,
+    Math.max(1, Math.round(radius / 3)),
+    amount * 0.55,
+  );
   const fine = unsharpMask(mid, width, height, 1, amount * 0.3);
   return edgeCrispen(fine, width, height, 0.18 + amount * 0.14 + Math.min(radius, 12) * 0.018);
 }
