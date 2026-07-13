@@ -6,6 +6,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — Neural engine upgraded to Real-ESRGAN (evidence-based model swap)
+
+- **Replaced the Swin2SR (transformers.js) neural path with Real-ESRGAN
+  general-x4v3 (SRVGGNetCompact) running on `onnxruntime-web/webgpu`.** Swept
+  the browser-compatible model ecosystem (Lanczos, Swin2SR variants,
+  Real-ESRGAN/Real-CUGAN, GFPGAN/CodeFormer/GPEN face restorers) and chose the
+  demonstrably superior browser-first option for this app's real-photo
+  restoration use case:
+  - **Quality:** GAN-based SR recovers hair/skin/fabric texture that
+    PSNR-oriented transformer SR (Swin2SR) over-smooths at 4×; stronger on old,
+    noisy and compressed photos (per documented head-to-head comparison).
+  - **Verified detail gain:** CPU inference on a degraded 96px test tile
+    produced an exact 4× output with **2.33× the Laplacian (edge) variance of a
+    bicubic upscale** — real synthesised detail, not resampling.
+  - **Size:** 2.4 MB weights (vendored as a first-party Lovable CDN asset) vs
+    47 MB for Swin2SR — ~20× smaller one-time download.
+  - **Speed:** ~0.18 s for a 96px tile on pure CPU (far faster on WebGPU) vs
+    8–15 s for Swin2SR.
+  - **Shape:** fully dynamic ONNX input, so the whole capped image runs in one
+    pass (no fixed-tile stitching seams).
+- **Runtime:** pinned `onnxruntime-web@1.22.0`; removed `@huggingface/transformers`.
+  The WebGPU "bundle" build self-locates its co-located ~22 MB WASM asset from
+  our own deploy (first-party, offline after first load — no CDN). Runs
+  single-threaded (no COOP/COEP requirement); falls back WebGPU → WASM →
+  (pipeline) classical on any failure.
+- **Bundle:** total client JS **dropped 1113 KB → 992 KB**; SSR/worker bundle
+  verified free of onnxruntime; 86/86 tests and typecheck green.
+
+
+
 ### Changed — Restored pure browser-first architecture (removed all hosted AI)
 
 - **Removed the hosted "Max (Studio AI)" path entirely.** Deleted the server

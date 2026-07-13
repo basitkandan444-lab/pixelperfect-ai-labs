@@ -503,7 +503,7 @@ function Index() {
                           {
                             id: "neural" as const,
                             title: "Balanced (AI)",
-                            desc: "On-device neural · WebGPU · free · downloads once",
+                            desc: "On-device Real-ESRGAN · WebGPU · free · 2.4MB one-time",
                             icon: "spark" as const,
                             show: neuralAvailable,
                           },
