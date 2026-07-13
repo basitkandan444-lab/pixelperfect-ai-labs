@@ -176,13 +176,35 @@ function Index() {
     const reader = new FileReader();
     reader.onerror = () => toast.error("Could not read that file. Please try another image.");
     reader.onload = () => {
-      setOriginal(reader.result as string);
+      const dataUrl = reader.result as string;
+      setOriginal(dataUrl);
       clearResultUrl();
       setResult(null);
       setResultInfo(null);
       setStage("ready");
       toast.success("Image ready. Choose a quality and enhance it.");
       trackEvent("upload", { format: file.type, size: file.size });
+
+      // Capture natural dimensions so we can estimate the enhancement time as
+      // soon as the user presses Enhance (used by the live countdown clock).
+      const probe = new Image();
+      probe.onload = () => {
+        dimensionsRef.current = { w: probe.naturalWidth, h: probe.naturalHeight };
+      };
+      probe.src = dataUrl;
+
+      // Warm the neural engine in the background right after upload: this pays
+      // the one-time model + runtime download/init cost NOW (while the user is
+      // choosing options) instead of during the enhancement wait, so pressing
+      // Enhance goes straight to inference. Purely on-device; failures are safe.
+      if (!import.meta.env.SSR && !neuralWarmRef.current) {
+        import("@/lib/enhance/neural")
+          .then(({ warmUpNeural }) => warmUpNeural())
+          .then((ok) => {
+            neuralWarmRef.current = ok;
+          })
+          .catch(() => {});
+      }
     };
     reader.readAsDataURL(file);
   }, []);
