@@ -63,16 +63,17 @@ function throwIfAborted(signal?: AbortSignal) {
   if (signal?.aborted) throw abortError();
 }
 
-// Tune the detail filter by quality tier + target scale. Higher tiers can push
-// sharpening a touch harder; 8K gets a slightly larger radius since detail is
-// spread over more pixels.
-function filterFor(caps: EnhanceCapabilities, scale: Scale): EnhancePixelOptions {
-  const strong = scale === "8k";
-  const amount = caps.tier === "high" ? 0.95 : caps.tier === "medium" ? 0.8 : 0.65;
+// Tune the detail filter by quality tier + the actual upscale factor. The
+// coarse unsharp radius is matched to the upscale factor so it sharpens the
+// soft edges interpolation produces (a fixed 1px radius is below that scale and
+// is imperceptible on a 4×/8× upscale). Higher tiers push sharpening harder.
+function filterFor(caps: EnhanceCapabilities, factor: number): EnhancePixelOptions {
+  const amount = caps.tier === "high" ? 1.1 : caps.tier === "medium" ? 0.95 : 0.8;
+  const radius = Math.max(1, Math.min(6, Math.round(factor)));
   return {
-    amount: strong ? amount + 0.1 : amount,
-    radius: strong ? 2 : 1,
-    denoise: caps.tier === "low" ? 0.35 : 0.2,
+    amount,
+    radius,
+    denoise: caps.tier === "low" ? 0.4 : 0.25,
   };
 }
 
@@ -207,7 +208,6 @@ export async function enhanceImageInBrowser(
 
   if (!caps.supported) throw new UnsupportedBrowserError();
 
-  const filter = filterFor(caps, scale);
   onProgress?.({
     stage: "preparing",
     value: 0.05,
@@ -242,6 +242,8 @@ export async function enhanceImageInBrowser(
   throwIfAborted(signal);
 
   const target = computeTarget(srcW, srcH, scale);
+  // Match the detail-recovery filter to the actual upscale factor applied.
+  const filter = filterFor(caps, target.factor);
 
   const onPass = (value: number) =>
     onProgress?.({

@@ -74,13 +74,38 @@ export interface EnhancePixelOptions {
 }
 
 /**
- * Detail-recovery pass: an optional light denoise followed by an unsharp mask.
+ * Single unsharp-mask pass: out = base + amount * (base - blur(base)).
+ * Returns a new buffer; the input is not mutated.
+ */
+function unsharpMask(
+  base: Uint8ClampedArray,
+  width: number,
+  height: number,
+  radius: number,
+  amount: number,
+): Uint8ClampedArray {
+  const low = boxBlur(base, width, height, Math.max(1, Math.round(radius)));
+  const out = new Uint8ClampedArray(base.length);
+  for (let i = 0; i < base.length; i += 4) {
+    for (let c = 0; c < 3; c++) {
+      const detail = base[i + c] - low[i + c];
+      out[i + c] = base[i + c] + amount * detail;
+    }
+    out[i + 3] = base[i + 3];
+  }
+  return out;
+}
+
+/**
+ * Detail-recovery pass: an optional light denoise, then a two-scale unsharp
+ * mask — a coarse pass whose `radius` is matched to the upscale factor (so it
+ * actually sharpens the soft edges an interpolated upscale produces) plus a
+ * fine radius-1 micro-contrast pass for crispness.
  *
- * out = base + amount * (base - blur(base))
- *
- * where `base` is the (optionally denoised) source. This is the classic,
- * artifact-free way to recover perceived sharpness after an interpolated
- * upscale. Returns a new buffer; the input is not mutated.
+ * Matching the coarse radius to the upscale factor is the critical detail: a
+ * fixed 1px radius operates below the interpolation-blur scale of a 4×/8×
+ * upscale and produces no perceptible change. Returns a new buffer; the input
+ * is not mutated.
  */
 export function enhancePixels(
   src: Uint8ClampedArray,
@@ -105,14 +130,7 @@ export function enhancePixels(
 
   if (amount <= 0) return base === src ? src.slice() : base;
 
-  const low = boxBlur(base, width, height, Math.max(1, Math.round(radius)));
-  const out = new Uint8ClampedArray(src.length);
-  for (let i = 0; i < src.length; i += 4) {
-    for (let c = 0; c < 3; c++) {
-      const detail = base[i + c] - low[i + c];
-      out[i + c] = base[i + c] + amount * detail;
-    }
-    out[i + 3] = base[i + 3];
-  }
-  return out;
+  // Coarse pass at the interpolation-blur scale, then a fine micro-contrast pass.
+  const coarse = unsharpMask(base, width, height, radius, amount);
+  return unsharpMask(coarse, width, height, 1, amount * 0.5);
 }
