@@ -146,6 +146,33 @@ async function getSession(
   return sessionPromise;
 }
 
+/** Whether the neural session is already created (warmed) in this tab. */
+let sessionReady = false;
+
+/** True once the model + runtime have been downloaded and the session created. */
+export function neuralWarm(): boolean {
+  return sessionReady;
+}
+
+/**
+ * Eagerly download the model + onnxruntime WASM and create the WebGPU session in
+ * the background (e.g. right after the user uploads an image). This moves the
+ * one-time cold-start cost OUT of the enhancement wait, so pressing Enhance goes
+ * straight to inference. Safe to call repeatedly; failures are swallowed because
+ * the pipeline still falls back to the classical engine on demand. Never runs
+ * during SSR.
+ */
+export async function warmUpNeural(): Promise<boolean> {
+  if (typeof window === "undefined" || !neuralSupported()) return false;
+  try {
+    await getSession();
+    sessionReady = true;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export interface NeuralResult {
   blob: Blob;
   width: number;
