@@ -2,7 +2,6 @@ import { test, expect } from "@playwright/test";
 
 import { locators, openHome, uploadValidImage } from "./helpers";
 
-
 // MODULE 4E — visual regression protection. Pixel-exact snapshots are inherently
 // per-engine and per-OS, so baselines are maintained for a scoped set of
 // projects (desktop Chromium + Pixel 5). Firefox/WebKit run the functional and
@@ -59,5 +58,4 @@ test.describe("Visual regression", () => {
   // baseline would be non-deterministic across machines. The result flow is
   // fully covered functionally in enhance-journey.spec.ts, and the recoverable
   // server-error state no longer exists (there is no server request to fail).
-
 });

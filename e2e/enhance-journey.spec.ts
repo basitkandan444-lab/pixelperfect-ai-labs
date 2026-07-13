@@ -51,7 +51,6 @@ test.describe("Image enhancement journey", () => {
   test("user can start over with New Image after a result", async ({ page }) => {
     await uploadValidImage(page);
 
-
     await locators.enhanceButton(page).click();
     await expect(locators.compareSlider(page)).toBeVisible();
 

@@ -31,7 +31,9 @@ test.describe("Offline resilience", () => {
     const inferenceRequests: string[] = [];
     page.on("request", (req) => {
       const url = req.url();
-      if (/enhance-image|gateway\.lovable|openai|replicate|fal\.|huggingface|inference/i.test(url)) {
+      if (
+        /enhance-image|gateway\.lovable|openai|replicate|fal\.|huggingface|inference/i.test(url)
+      ) {
         inferenceRequests.push(url);
       }
     });

@@ -41,7 +41,6 @@ export function oversizedImageFile() {
   };
 }
 
-
 // ---- Stable locators -------------------------------------------------------
 
 export const locators = {
