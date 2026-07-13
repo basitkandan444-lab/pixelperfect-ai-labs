@@ -104,6 +104,11 @@ function Index() {
   // Client-only: navigator.gpu is not present during SSR. When unavailable we
   // never offer neural (the WASM fallback is too slow to be worth surfacing).
   useEffect(() => {
+    // Never trace the neural engine (and its heavy WASM/onnxruntime deps) into
+    // the SSR / Cloudflare Worker bundle: `import.meta.env.SSR` is a build-time
+    // constant, so Rollup dead-code-eliminates this dynamic import from the
+    // server build. workerd cannot initialise onnxruntime-web and would 500.
+    if (import.meta.env.SSR) return;
     let cancelled = false;
     import("@/lib/enhance/neural")
       .then(({ neuralSupported }) => {
@@ -114,6 +119,7 @@ function Index() {
       cancelled = true;
     };
   }, []);
+
 
   // Abort any in-flight enhancement if the component unmounts.
   useEffect(
@@ -153,7 +159,13 @@ function Index() {
   }, []);
 
   const enhance = useCallback(async () => {
+    // Client-only: keep the enhancement engine (canvas/worker + optional neural
+    // WASM) out of the SSR / Cloudflare Worker bundle. Guarding with the
+    // build-time `import.meta.env.SSR` constant lets Rollup drop the dynamic
+    // `import()` below from the server build so workerd never tries to load it.
+    if (import.meta.env.SSR) return;
     if (!original) return;
+
     const controller = new AbortController();
     abortRef.current = controller;
     setProgress(4);
