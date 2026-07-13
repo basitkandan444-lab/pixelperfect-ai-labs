@@ -395,7 +395,10 @@ function Index() {
                       {resultInfo && (
                         <p className="text-center text-sm text-muted-foreground" aria-live="polite">
                           Output verified: {resultInfo.width.toLocaleString()}×
-                          {resultInfo.height.toLocaleString()} PNG · local {resultInfo.path} engine
+                          {resultInfo.height.toLocaleString()} PNG ·{" "}
+                          {resultInfo.path === "hosted"
+                            ? "Studio AI restoration"
+                            : `local ${resultInfo.path} engine`}{" "}
                           · {(resultInfo.durationMs / 1000).toFixed(1)}s
                         </p>
                       )}
