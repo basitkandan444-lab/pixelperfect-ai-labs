@@ -23,7 +23,7 @@ import { trackEvent } from "@/lib/analytics";
 import { SITE, FAQS, absoluteUrl } from "@/lib/site";
 import { originLoader } from "@/lib/origin.functions";
 import { detectCapabilities } from "@/lib/enhance/capabilities";
-import { formatEta } from "@/lib/enhance/estimate";
+
 import {
   predict,
   recordOutcome,
