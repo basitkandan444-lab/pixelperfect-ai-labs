@@ -256,33 +256,47 @@ function Index() {
     const controller = new AbortController();
     abortRef.current = controller;
     setProgress(4);
+    progressRef.current = 4;
+    setProcStage("preparing");
     setStatusMessage("Preparing local AI engine…");
     setStage("loading");
     trackEvent("enhance_start", { scale, engine });
 
-    // Estimate how long this will take on THIS device and start a live
-    // countdown so the user knows the wait up-front instead of staring at an
-    // open-ended spinner. The estimate uses the real image dimensions, chosen
-    // quality/engine and detected device tier.
+    // Predict how long this will take on THIS device using the self-calibrating
+    // prediction engine, then start a live countdown so the user knows the wait
+    // up-front instead of staring at an open-ended spinner. The prediction folds
+    // in the real dimensions, chosen quality/engine, device tier, warm state,
+    // file size and the learned per-device correction factor.
     const dims = dimensionsRef.current;
     const caps = detectCapabilities();
-    const estimatedMs = dims
-      ? estimateEnhanceMs({
+    const prediction = dims
+      ? predict({
           srcW: dims.w,
           srcH: dims.h,
           scale,
           engine,
           tier: caps.tier,
           warm: engine === "neural" ? neuralWarmRef.current : true,
+          fileBytes: fileInfo?.bytes,
+          format: fileInfo?.type,
         })
-      : 8000;
+      : null;
+    const estimatedMs = prediction?.estimateMs ?? 8000;
+    runBaseMsRef.current = prediction?.baseMs ?? estimatedMs;
+    setRunAccuracy(prediction ? confidencePercent(prediction.confidence) : 97);
     const startedAt = Date.now();
     setEtaTotalMs(estimatedMs);
     setEtaRemainingMs(estimatedMs);
     stopCountdown();
+    // Dynamically adjust the ETA from real progress so it never expires early:
+    // if the run is behind schedule the clock extends rather than hitting zero.
     countdownRef.current = setInterval(() => {
-      const remaining = estimatedMs - (Date.now() - startedAt);
-      setEtaRemainingMs(remaining > 0 ? remaining : 0);
+      const remaining = adjustRemainingMs({
+        estimateMs: estimatedMs,
+        elapsedMs: Date.now() - startedAt,
+        progress: progressRef.current / 100,
+      });
+      setEtaRemainingMs(remaining);
     }, 250);
     try {
       // Lazy-load the local engine (and its worker) on first use so it never
@@ -294,13 +308,18 @@ function Index() {
         engine,
         signal: controller.signal,
         onProgress: (p) => {
-          setProgress(Math.round(p.value * 100));
+          const pct = Math.round(p.value * 100);
+          setProgress(pct);
+          progressRef.current = pct;
+          setProcStage(stageForProgress(p.value));
           setStatusMessage(p.message);
         },
       });
       clearResultUrl();
       resultUrlRef.current = res.image;
       setProgress(100);
+      progressRef.current = 100;
+      setProcStage("finalizing");
       setResult(res.image);
       setZoom(false);
       setResultInfo({
@@ -310,6 +329,10 @@ function Index() {
         path: res.path,
       });
       setStage("done");
+      // Feed the real duration back into the per-device predictor so the next
+      // estimate on this device is more accurate. Purely local (localStorage).
+      recordOutcome({ engine, baseMs: runBaseMsRef.current, actualMs: res.durationMs });
+      setCalibrationVersion((v) => v + 1);
       toast.success(`Enhanced to ${scale.toUpperCase()} quality!`);
       trackEvent("enhance_complete", {
         scale,
@@ -330,7 +353,8 @@ function Index() {
       stopCountdown();
       if (abortRef.current === controller) abortRef.current = null;
     }
-  }, [clearResultUrl, original, scale, engine, stopCountdown]);
+  }, [clearResultUrl, original, scale, engine, fileInfo, stopCountdown]);
+
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
