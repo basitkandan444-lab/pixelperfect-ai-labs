@@ -58,7 +58,10 @@ describe("architecture fitness · dependency direction", () => {
         offenders.push(relative(SRC, file));
       }
     }
-    expect(offenders, `these files import from routes/ (illegal inward dependency):\n${offenders.join("\n")}`).toEqual([]);
+    expect(
+      offenders,
+      `these files import from routes/ (illegal inward dependency):\n${offenders.join("\n")}`,
+    ).toEqual([]);
   });
 
   it("core logic stays framework-agnostic (no router/start imports in *.core.ts)", () => {
@@ -72,7 +75,10 @@ describe("architecture fitness · dependency direction", () => {
         offenders.push(relative(SRC, file));
       }
     }
-    expect(offenders, `core logic must not import the router/start framework:\n${offenders.join("\n")}`).toEqual([]);
+    expect(
+      offenders,
+      `core logic must not import the router/start framework:\n${offenders.join("\n")}`,
+    ).toEqual([]);
   });
 });
 
@@ -97,7 +103,10 @@ describe("architecture fitness · secret & environment boundary", () => {
       if (/\.test\.tsx?$/.test(file)) continue;
       if (/\bprocess\.env\b/.test(read(file))) offenders.push(relative(SRC, file));
     }
-    expect(offenders, `process.env used in client-reachable modules:\n${offenders.join("\n")}`).toEqual([]);
+    expect(
+      offenders,
+      `process.env used in client-reachable modules:\n${offenders.join("\n")}`,
+    ).toEqual([]);
   });
 
   it("presentational components never read env or server secrets", () => {
@@ -111,7 +120,10 @@ describe("architecture fitness · secret & environment boundary", () => {
         offenders.push(relative(SRC, file));
       }
     }
-    expect(offenders, `components must stay presentational (no env/secret access):\n${offenders.join("\n")}`).toEqual([]);
+    expect(
+      offenders,
+      `components must stay presentational (no env/secret access):\n${offenders.join("\n")}`,
+    ).toEqual([]);
   });
 });
 
@@ -134,6 +146,9 @@ describe("architecture fitness · generated & governance invariants", () => {
       const src = read(file);
       if (/\bserver:\s*\{\s*[\s\S]*?handlers\b/.test(src)) offenders.push(relative(SRC, file));
     }
-    expect(offenders, `server route handlers found outside src/routes/api/:\n${offenders.join("\n")}`).toEqual([]);
+    expect(
+      offenders,
+      `server route handlers found outside src/routes/api/:\n${offenders.join("\n")}`,
+    ).toEqual([]);
   });
 });
