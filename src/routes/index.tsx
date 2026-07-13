@@ -503,16 +503,9 @@ function Index() {
                           {
                             id: "neural" as const,
                             title: "Balanced (AI)",
-                            desc: "On-device neural · free · downloads once",
+                            desc: "On-device neural · WebGPU · free · downloads once",
                             icon: "spark" as const,
                             show: neuralAvailable,
-                          },
-                          {
-                            id: "hosted" as const,
-                            title: "Max (Studio AI)",
-                            desc: "Reference-quality restoration · uses AI credits",
-                            icon: "spark" as const,
-                            show: true,
                           },
                         ] as const
                       )
