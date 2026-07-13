@@ -122,12 +122,15 @@ describe("architecture fitness · generated & governance invariants", () => {
     expect(banner).toContain("You should NOT make any changes in this file");
   });
 
-  it("every server route lives under src/routes/api/", () => {
-    // HTTP endpoints (files declaring a `server` handler block) must be isolated
-    // in the api/ bounded context, never mixed into page routes.
+  it("business HTTP endpoints live under src/routes/api/", () => {
+    // API endpoints (files declaring a `server` handler block) must be isolated
+    // in the api/ bounded context, never mixed into page routes. Well-known
+    // web-standard files (sitemap, robots) are served at the root by convention.
+    const ROOT_CONVENTION = new Set(["src/routes/sitemap[.]xml.ts"]);
     const offenders: string[] = [];
     for (const file of ALL_FILES) {
       if (!file.startsWith("src/routes/") || file.startsWith("src/routes/api/")) continue;
+      if (ROOT_CONVENTION.has(file)) continue;
       const src = read(file);
       if (/\bserver:\s*\{\s*[\s\S]*?handlers\b/.test(src)) offenders.push(relative(SRC, file));
     }
