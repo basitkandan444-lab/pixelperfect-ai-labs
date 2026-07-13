@@ -34,12 +34,13 @@ export interface EnhanceOptions {
   /**
    * "classical": instant, zero-download unsharp/Laplacian engine.
    * "neural" (default when supported): lazy-loaded on-device super-resolution
-   * model (real detail synthesis), with automatic fallback to classical.
-   * "hosted": opt-in "Max" path — real generative restoration via the Lovable
-   * AI Gateway (reference-quality face/detail synthesis, uses AI credits). It
-   * does NOT silently fall back so the user sees the real reason on failure.
+   * transformer (real detail reconstruction via WebGPU), with automatic
+   * fallback to classical if the model or GPU is unavailable.
+   *
+   * Both run 100% in the browser — no network request, no hosted model, no API
+   * key, no credits.
    */
-  engine?: "classical" | "neural" | "hosted";
+  engine?: "classical" | "neural";
   signal?: AbortSignal;
   onProgress?: (p: EnhanceProgress) => void;
   /** Injectable for tests; defaults to runtime detection. */
@@ -54,7 +55,7 @@ export interface EnhanceResult {
   height: number;
   scale: Scale;
   capabilities: EnhanceCapabilities;
-  path: "worker" | "main" | "neural" | "hosted";
+  path: "worker" | "main" | "neural";
   durationMs: number;
 }
 
