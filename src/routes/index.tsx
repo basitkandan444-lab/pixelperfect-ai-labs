@@ -113,7 +113,11 @@ function Index() {
     let cancelled = false;
     import("@/lib/enhance/neural")
       .then(({ neuralSupported }) => {
-        if (!cancelled) setNeuralAvailable(neuralSupported());
+        if (cancelled) return;
+        const supported = neuralSupported();
+        setNeuralAvailable(supported);
+        // Neural (on-device AI) is the default when the device can run it.
+        if (supported) setEngine((e) => (e === "classical" ? "neural" : e));
       })
       .catch(() => {});
     return () => {
