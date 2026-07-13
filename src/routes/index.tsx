@@ -212,7 +212,11 @@ function Index() {
     } catch (err) {
       // A user-initiated cancel is not an error — reset() already handled UI.
       if (err instanceof DOMException && err.name === "AbortError") return;
-      if (err instanceof Error && err.name === "UnsupportedBrowserError") {
+      if (err instanceof Error && err.name === "HostedEnhanceError") {
+        // Surface the real reason from the server (e.g. out of credits, rate
+        // limited) so the user isn't left guessing.
+        toast.error(err.message);
+      } else if (err instanceof Error && err.name === "UnsupportedBrowserError") {
         toast.error("Your browser does not support this enhancement mode. Try a modern browser.");
       } else {
         toast.error("Enhancement failed. Please try a different image.");
