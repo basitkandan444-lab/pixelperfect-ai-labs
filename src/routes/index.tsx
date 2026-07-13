@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Sparkles,
   UploadCloud,
@@ -17,14 +17,25 @@ import { CompareSlider } from "@/components/CompareSlider";
 import { SiteFooter } from "@/components/SiteFooter";
 import { HomeContent } from "@/components/HomeContent";
 import { BeforeAfterGallery } from "@/components/BeforeAfterGallery";
+import { AnalysisCard } from "@/components/AnalysisCard";
+import { ProcessingOverlay } from "@/components/ProcessingOverlay";
 import { trackEvent } from "@/lib/analytics";
 import { SITE, FAQS, absoluteUrl } from "@/lib/site";
 import { originLoader } from "@/lib/origin.functions";
 import { detectCapabilities } from "@/lib/enhance/capabilities";
-import { estimateEnhanceMs, formatEta, formatRemaining } from "@/lib/enhance/estimate";
+import { formatEta } from "@/lib/enhance/estimate";
+import {
+  predict,
+  recordOutcome,
+  adjustRemainingMs,
+  confidencePercent,
+  stageForProgress,
+  type ProcessingStage,
+} from "@/lib/enhance/predictor";
 // The browser enhancement engine (+ its worker) is lazy-loaded on first use so
 // it never weighs down the initial page bundle — see the dynamic import in
 // `enhance()` below.
+
 
 
 export const Route = createFileRoute("/")({
