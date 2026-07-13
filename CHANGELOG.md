@@ -6,6 +6,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — Architecture / dependency hygiene
+
+- **Pruned dead UI surface and dependencies.** The template shipped all 46
+  shadcn/ui primitives, but only 4 are used anywhere in the app (`badge`,
+  `button`, `card`, `sonner`). The 42 unused primitives were removed along with
+  the 33 production dependencies that existed solely to support them
+  (25 `@radix-ui/*` packages plus `cmdk`, `embla-carousel-react`, `input-otp`,
+  `react-day-picker`, `react-hook-form`, `react-resizable-panels`, `recharts`,
+  `vaul`). Evidence: `rg -oNI "@/components/ui/*" src -g '!src/components/ui/**'`
+  returns only the four kept primitives; each removed dependency had zero
+  references outside `src/components/ui/`. This cuts the installed dependency /
+  supply-chain surface (fewer `bun audit` advisories and Dependabot PRs to
+  triage), shrinks the typecheck/lint/format footprint, and removes maintenance
+  drift on code no feature imports. shadcn config (`components.json`) is
+  retained, so any future primitive is one `bunx shadcn add <name>` away.
+  Verified with `bun run typecheck`, `bun run lint` (0 errors), `format:check`,
+  `bun run test` (99 passing), `bun run build`, and `bun run bundle:check`.
+
 ### Fixed
 
 - **Cross-engine reliability of the enhance journey (Firefox/WebKit):** the image
