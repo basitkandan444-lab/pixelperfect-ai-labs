@@ -486,46 +486,61 @@ function Index() {
                     </fieldset>
                   )}
 
-                  {stage !== "done" && neuralAvailable && (
+                  {stage !== "done" && (
                     <fieldset
-                      className="grid grid-cols-2 gap-3 border-0 p-0"
+                      className="grid grid-cols-1 gap-3 border-0 p-0 sm:grid-cols-3"
                       disabled={stage === "loading"}
                     >
                       <legend className="sr-only">Choose enhancement engine</legend>
-                      {[
-                        {
-                          id: "classical" as const,
-                          title: "Fast",
-                          desc: "Instant · no download",
-                        },
-                        {
-                          id: "neural" as const,
-                          title: "Max quality (AI)",
-                          desc: "Neural model · downloads once",
-                        },
-                      ].map((e) => (
-                        <button
-                          key={e.id}
-                          type="button"
-                          aria-pressed={engine === e.id}
-                          onClick={() => setEngine(e.id)}
-                          className={`flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${
-                            engine === e.id
-                              ? "border-primary bg-primary/10 shadow-glow"
-                              : "border-border hover:border-primary/50"
-                          }`}
-                        >
-                          <span className="flex items-center gap-2 font-display font-bold">
-                            {e.id === "neural" ? (
-                              <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
-                            ) : (
-                              <Zap className="h-4 w-4 text-primary" aria-hidden="true" />
-                            )}
-                            {e.title}
-                          </span>
-                          <span className="text-xs text-muted-foreground">{e.desc}</span>
-                        </button>
-                      ))}
+                      {(
+                        [
+                          {
+                            id: "classical" as const,
+                            title: "Fast",
+                            desc: "Instant · on-device · free",
+                            icon: "zap" as const,
+                            show: true,
+                          },
+                          {
+                            id: "neural" as const,
+                            title: "Balanced (AI)",
+                            desc: "On-device neural · free · downloads once",
+                            icon: "spark" as const,
+                            show: neuralAvailable,
+                          },
+                          {
+                            id: "hosted" as const,
+                            title: "Max (Studio AI)",
+                            desc: "Reference-quality restoration · uses AI credits",
+                            icon: "spark" as const,
+                            show: true,
+                          },
+                        ] as const
+                      )
+                        .filter((e) => e.show)
+                        .map((e) => (
+                          <button
+                            key={e.id}
+                            type="button"
+                            aria-pressed={engine === e.id}
+                            onClick={() => setEngine(e.id)}
+                            className={`flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${
+                              engine === e.id
+                                ? "border-primary bg-primary/10 shadow-glow"
+                                : "border-border hover:border-primary/50"
+                            }`}
+                          >
+                            <span className="flex items-center gap-2 font-display font-bold">
+                              {e.icon === "spark" ? (
+                                <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
+                              ) : (
+                                <Zap className="h-4 w-4 text-primary" aria-hidden="true" />
+                              )}
+                              {e.title}
+                            </span>
+                            <span className="text-xs text-muted-foreground">{e.desc}</span>
+                          </button>
+                        ))}
                     </fieldset>
                   )}
 
