@@ -2,67 +2,45 @@ import { test, expect } from "@playwright/test";
 
 import { locators, openHome, uploadImage, validImageFile } from "./helpers";
 
-// MODULE 4 — network resilience.
+// MODULE 4 — offline / network resilience.
 //
-// `failure-scenarios.spec.ts` mocks a single aborted request at the route layer.
-// This suite instead flips the whole browser context offline via CDP
-// (`context.setOffline`) — the closest deterministic analogue to a user losing
-// connectivity mid-session. It verifies the app degrades gracefully rather than
-// hanging or throwing: the enhance request fails, a clear recovery message is
-// shown, and the workspace returns to a retryable state. When connectivity is
-// restored the same action succeeds, proving the failure was transient-safe and
-// left no corrupt state behind.
-//
-// Offline is toggled AFTER the page has loaded and the image is uploaded (both
-// are client-only, no network), so only the `/api/enhance-image` call is
-// affected — keeping the scenario surgical and deterministic.
+// Because enhancement now runs entirely on the user's device (no hosted
+// inference, no API call), it must keep working with NO network connectivity.
+// This suite flips the whole browser context offline via CDP
+// (`context.setOffline`) AFTER the page and image have loaded, then proves the
+// enhancement still completes end-to-end. This is the strongest possible
+// evidence that zero hosted inference remains: the feature works with the
+// network physically cut.
 
-test.describe("Network resilience", () => {
-  test("enhancing while offline shows a recovery message and stays retryable", async ({
-    page,
-    context,
-  }) => {
+test.describe("Offline resilience", () => {
+  test("enhancement completes fully while offline", async ({ page, context }) => {
     await openHome(page);
     await uploadImage(page, validImageFile(), locators.imagePreview);
 
+    // Cut the network entirely — a hosted-inference app would fail here.
     await context.setOffline(true);
     await locators.enhanceButton(page).click();
 
-    await expect(locators.toast(page, /Network error/i)).toBeVisible();
-    // The workspace is intact and the action can be retried — nothing is broken.
-    await expect(locators.imagePreview(page)).toBeVisible();
-    await expect(locators.enhanceButton(page)).toBeEnabled();
-  });
-
-  test("recovers and succeeds once connectivity is restored", async ({ page, context }) => {
-    await openHome(page);
-    await uploadImage(page, validImageFile(), locators.imagePreview);
-
-    // First attempt fails offline (no route mock — the real fetch cannot leave
-    // the offline context, so the app's catch path runs).
-    await context.setOffline(true);
-    await locators.enhanceButton(page).click();
-    await expect(locators.toast(page, /Network error/i)).toBeVisible();
-
-    // Connectivity returns; install a deterministic success response for the
-    // retry and confirm the flow completes end-to-end with no residual state.
-    await context.setOffline(false);
-    await page.route("**/api/enhance-image", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          success: true,
-          data: {
-            image:
-              "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-            scale: "4k",
-          },
-        }),
-      });
-    });
-    await locators.enhanceButton(page).click();
+    // The local engine produces a real result with no connectivity.
     await expect(locators.compareSlider(page)).toBeVisible();
     await expect(locators.downloadButton(page)).toBeVisible();
+    await expect(locators.toast(page, /Enhanced to 4K quality/i)).toBeVisible();
+  });
+
+  test("no request is ever made to a hosted inference endpoint", async ({ page }) => {
+    const inferenceRequests: string[] = [];
+    page.on("request", (req) => {
+      const url = req.url();
+      if (/enhance-image|gateway\.lovable|openai|replicate|fal\.|huggingface|inference/i.test(url)) {
+        inferenceRequests.push(url);
+      }
+    });
+
+    await openHome(page);
+    await uploadImage(page, validImageFile(), locators.imagePreview);
+    await locators.enhanceButton(page).click();
+    await expect(locators.compareSlider(page)).toBeVisible();
+
+    expect(inferenceRequests).toEqual([]);
   });
 });
