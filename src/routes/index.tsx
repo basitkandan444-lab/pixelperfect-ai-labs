@@ -291,9 +291,10 @@ function Index() {
       }
       setStage("ready");
     } finally {
+      stopCountdown();
       if (abortRef.current === controller) abortRef.current = null;
     }
-  }, [clearResultUrl, original, scale, engine]);
+  }, [clearResultUrl, original, scale, engine, stopCountdown]);
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
