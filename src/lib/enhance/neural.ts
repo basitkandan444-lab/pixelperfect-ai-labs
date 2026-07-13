@@ -102,10 +102,11 @@ async function getSession(
 ): Promise<{ ort: OrtModule; session: OrtSession }> {
   if (!sessionPromise) {
     sessionPromise = (async () => {
-      // Use the WebGPU build; load its WASM helper from the pinned CDN and run
-      // single-threaded so we don't require cross-origin isolation (COOP/COEP).
+      // Use the WebGPU build and run single-threaded so we don't require
+      // cross-origin isolation (COOP/COEP). The "bundle" build self-locates its
+      // co-located WASM asset, so we leave wasmPaths untouched.
       const ort = (await import("onnxruntime-web/webgpu")) as unknown as OrtModule;
-      ort.env.wasm.wasmPaths = ORT_WASM_BASE;
+      void ORT_VERSION;
       ort.env.wasm.numThreads = 1;
       ort.env.wasm.simd = true;
       ort.env.logLevel = "error";
