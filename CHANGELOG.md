@@ -6,6 +6,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — Enhancement produced visually identical output
+
+- **Detail-recovery pass was perceptually a no-op.** A forensic pixel-level
+  audit (upload → bitmap → worker → canvas → blob → preview) found the
+  "enhanced" output was indistinguishable from a plain bicubic resize:
+  SSIM 1.0000, mean abs diff 0.31/255, only ~0.1% of pixels changed by >2
+  levels, sharpness gain 1.9×. Root cause: the unsharp-mask radius was
+  hardcoded to 1px while a 4×/8× interpolated upscale spreads edges over
+  ~4–8px, so sharpening operated below the interpolation-blur scale.
+- **Fix:** the coarse unsharp radius now scales with the actual upscale factor
+  (`filterFor(caps, target.factor)` in `pipeline.ts`), `filters.ts` applies a
+  two-scale unsharp (coarse at the factor scale + fine radius-1 micro-contrast),
+  and per-tier amounts were raised. Re-audit on the same real photo: sharpness
+  gain **15.0×** and **11.2%** of pixels changed by >2 levels — measurable and
+  visibly sharper edges. Still zero network/inference requests.
+- Added a regression test in `filters.test.ts` asserting a factor-matched
+  radius sharpens a soft 4px edge >2× more than a fixed 1px radius, so the
+  mismatch cannot silently return.
+
+
+
 ### Changed — Browser-first enhancement engine (zero hosted inference, zero credits)
 
 - **Removed all hosted AI inference.** Deleted the server route
