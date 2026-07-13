@@ -6,6 +6,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — live time-to-complete countdown + faster first enhance
+
+- **Live ETA countdown.** When the user presses Enhance, a clock now shows a
+  realistic "Ns remaining" countdown for their device, plus an up-front
+  "Estimated time on your device" hint before they commit. Removes the
+  open-ended-spinner uncertainty that caused drop-off between enhance-start and
+  download.
+- **New pure module `src/lib/enhance/estimate.ts`** (fully unit-tested, no DOM):
+  device-tier throughput model over the real tiled workload (`estimateEnhanceMs`)
+  plus `formatEta` / `formatRemaining` label helpers.
+- **Background neural warm-up (`warmUpNeural` in `neural.ts`).** The one-time
+  model + onnxruntime WASM download/session-create cost is now paid in the
+  background right after upload (while the user picks options), so pressing
+  Enhance goes straight to inference instead of waiting on cold start. Still
+  100% on-device, offline-after-first-load, SSR-safe — no server, no APIs.
+
+
+
 ### Added — Phase 1: production-grade tiled neural inference
 
 - **Removed the fixed 512px neural input cap.** The Real-ESRGAN model now

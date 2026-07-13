@@ -1,6 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Sparkles, UploadCloud, Wand2, Download, RotateCcw, Zap, Gauge } from "lucide-react";
+import {
+  Sparkles,
+  UploadCloud,
+  Wand2,
+  Download,
+  RotateCcw,
+  Zap,
+  Gauge,
+  Clock,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -11,9 +20,12 @@ import { BeforeAfterGallery } from "@/components/BeforeAfterGallery";
 import { trackEvent } from "@/lib/analytics";
 import { SITE, FAQS, absoluteUrl } from "@/lib/site";
 import { originLoader } from "@/lib/origin.functions";
+import { detectCapabilities } from "@/lib/enhance/capabilities";
+import { estimateEnhanceMs, formatEta, formatRemaining } from "@/lib/enhance/estimate";
 // The browser enhancement engine (+ its worker) is lazy-loaded on first use so
 // it never weighs down the initial page bundle — see the dynamic import in
 // `enhance()` below.
+
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -90,16 +102,26 @@ function Index() {
   const [dragOver, setDragOver] = useState(false);
   const [progress, setProgress] = useState(0);
   const [statusMessage, setStatusMessage] = useState("Preparing local AI engine…");
+  const [etaTotalMs, setEtaTotalMs] = useState(0);
+  const [etaRemainingMs, setEtaRemainingMs] = useState(0);
+  const [dims, setDims] = useState<{ w: number; h: number } | null>(null);
+  const [deviceTier, setDeviceTier] = useState<"high" | "medium" | "low">("medium");
   const [hydrated, setHydrated] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const resultUrlRef = useRef<string | null>(null);
+  const dimensionsRef = useRef<{ w: number; h: number } | null>(null);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const neuralWarmRef = useRef(false);
 
   // Signal that React has hydrated and the upload handler is attached. The
   // server-rendered <input> exists before hydration, so a file set in that
   // window is silently dropped; consumers (and E2E specs) can wait for this
   // marker instead of retrying the whole upload.
-  useEffect(() => setHydrated(true), []);
+  useEffect(() => {
+    setHydrated(true);
+    setDeviceTier(detectCapabilities().tier);
+  }, []);
 
   // Detect whether the neural (GPU) engine can run acceptably in this browser.
   // Client-only: navigator.gpu is not present during SSR. When unavailable we
@@ -129,10 +151,18 @@ function Index() {
   useEffect(
     () => () => {
       abortRef.current?.abort();
+      if (countdownRef.current) clearInterval(countdownRef.current);
       if (resultUrlRef.current) URL.revokeObjectURL(resultUrlRef.current);
     },
     [],
   );
+
+  const stopCountdown = useCallback(() => {
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+      countdownRef.current = null;
+    }
+  }, []);
 
   const clearResultUrl = useCallback(() => {
     if (resultUrlRef.current) URL.revokeObjectURL(resultUrlRef.current);
@@ -151,13 +181,37 @@ function Index() {
     const reader = new FileReader();
     reader.onerror = () => toast.error("Could not read that file. Please try another image.");
     reader.onload = () => {
-      setOriginal(reader.result as string);
+      const dataUrl = reader.result as string;
+      setOriginal(dataUrl);
       clearResultUrl();
       setResult(null);
       setResultInfo(null);
       setStage("ready");
       toast.success("Image ready. Choose a quality and enhance it.");
       trackEvent("upload", { format: file.type, size: file.size });
+
+      // Capture natural dimensions so we can estimate the enhancement time as
+      // soon as the user presses Enhance (used by the live countdown clock).
+      const probe = new Image();
+      probe.onload = () => {
+        const d = { w: probe.naturalWidth, h: probe.naturalHeight };
+        dimensionsRef.current = d;
+        setDims(d);
+      };
+      probe.src = dataUrl;
+
+      // Warm the neural engine in the background right after upload: this pays
+      // the one-time model + runtime download/init cost NOW (while the user is
+      // choosing options) instead of during the enhancement wait, so pressing
+      // Enhance goes straight to inference. Purely on-device; failures are safe.
+      if (!import.meta.env.SSR && !neuralWarmRef.current) {
+        import("@/lib/enhance/neural")
+          .then(({ warmUpNeural }) => warmUpNeural())
+          .then((ok) => {
+            neuralWarmRef.current = ok;
+          })
+          .catch(() => {});
+      }
     };
     reader.readAsDataURL(file);
   }, []);
@@ -176,6 +230,31 @@ function Index() {
     setStatusMessage("Preparing local AI engine…");
     setStage("loading");
     trackEvent("enhance_start", { scale, engine });
+
+    // Estimate how long this will take on THIS device and start a live
+    // countdown so the user knows the wait up-front instead of staring at an
+    // open-ended spinner. The estimate uses the real image dimensions, chosen
+    // quality/engine and detected device tier.
+    const dims = dimensionsRef.current;
+    const caps = detectCapabilities();
+    const estimatedMs = dims
+      ? estimateEnhanceMs({
+          srcW: dims.w,
+          srcH: dims.h,
+          scale,
+          engine,
+          tier: caps.tier,
+          warm: engine === "neural" ? neuralWarmRef.current : true,
+        })
+      : 8000;
+    const startedAt = Date.now();
+    setEtaTotalMs(estimatedMs);
+    setEtaRemainingMs(estimatedMs);
+    stopCountdown();
+    countdownRef.current = setInterval(() => {
+      const remaining = estimatedMs - (Date.now() - startedAt);
+      setEtaRemainingMs(remaining > 0 ? remaining : 0);
+    }, 250);
     try {
       // Lazy-load the local engine (and its worker) on first use so it never
       // bloats the initial page load. All inference runs on the user's own
@@ -219,13 +298,15 @@ function Index() {
       }
       setStage("ready");
     } finally {
+      stopCountdown();
       if (abortRef.current === controller) abortRef.current = null;
     }
-  }, [clearResultUrl, original, scale, engine]);
+  }, [clearResultUrl, original, scale, engine, stopCountdown]);
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
+    stopCountdown();
     clearResultUrl();
     setOriginal(null);
     setResult(null);
@@ -233,8 +314,12 @@ function Index() {
     setZoom(false);
     setStage("idle");
     setProgress(0);
+    setEtaTotalMs(0);
+    setEtaRemainingMs(0);
+    dimensionsRef.current = null;
+    setDims(null);
     if (inputRef.current) inputRef.current.value = "";
-  }, [clearResultUrl]);
+  }, [clearResultUrl, stopCountdown]);
 
   const download = useCallback(() => {
     if (!result) return;
@@ -426,6 +511,18 @@ function Index() {
                           <p className="relative font-display font-semibold">
                             Enhancing to {scale.toUpperCase()}…
                           </p>
+                          {etaTotalMs > 0 && (
+                            <div
+                              className="relative flex items-center gap-2 rounded-full border border-border bg-background/60 px-3.5 py-1.5"
+                              aria-live="polite"
+                              data-testid="eta-countdown"
+                            >
+                              <Clock className="h-4 w-4 text-primary" aria-hidden="true" />
+                              <span className="font-display text-sm font-semibold tabular-nums">
+                                {formatRemaining(etaRemainingMs)}
+                              </span>
+                            </div>
+                          )}
                           <div
                             className="relative h-2 w-full max-w-xs overflow-hidden rounded-full bg-muted"
                             role="progressbar"
@@ -535,6 +632,30 @@ function Index() {
                         ))}
                     </fieldset>
                   )}
+
+                  {stage === "ready" && dims && (
+                    <p
+                      className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground"
+                      aria-live="polite"
+                    >
+                      <Clock className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                      Estimated time on your device:{" "}
+                      <span className="font-medium text-foreground">
+                        {formatEta(
+                          estimateEnhanceMs({
+                            srcW: dims.w,
+                            srcH: dims.h,
+                            scale,
+                            engine,
+                            tier: deviceTier,
+                            warm: engine === "neural" ? neuralWarmRef.current : true,
+                          }),
+                        )}
+                      </span>
+                    </p>
+                  )}
+
+
 
                   <div className="flex flex-col gap-3 sm:flex-row">
                     {stage !== "done" ? (
