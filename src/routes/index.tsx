@@ -146,10 +146,18 @@ function Index() {
   useEffect(
     () => () => {
       abortRef.current?.abort();
+      if (countdownRef.current) clearInterval(countdownRef.current);
       if (resultUrlRef.current) URL.revokeObjectURL(resultUrlRef.current);
     },
     [],
   );
+
+  const stopCountdown = useCallback(() => {
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+      countdownRef.current = null;
+    }
+  }, []);
 
   const clearResultUrl = useCallback(() => {
     if (resultUrlRef.current) URL.revokeObjectURL(resultUrlRef.current);
