@@ -27,6 +27,7 @@ export type Database = {
           id: number
           language: string | null
           medium: string | null
+          metrics: Json | null
           name: string
           ok: boolean | null
           os: string | null
@@ -53,6 +54,7 @@ export type Database = {
           id?: number
           language?: string | null
           medium?: string | null
+          metrics?: Json | null
           name: string
           ok?: boolean | null
           os?: string | null
@@ -79,6 +81,7 @@ export type Database = {
           id?: number
           language?: string | null
           medium?: string | null
+          metrics?: Json | null
           name?: string
           ok?: boolean | null
           os?: string | null

@@ -24,6 +24,7 @@ export interface EventInput {
   ok?: boolean;
   error_code?: string;
   feature?: string;
+  metrics?: Record<string, unknown>;
 }
 
 const SESSION_KEY = "ppp_sid";
@@ -188,6 +189,7 @@ export function track(input: EventInput): void {
       ok: input.ok,
       error_code: input.error_code,
       feature: input.feature,
+      metrics: input.metrics,
     });
     if (queue.length >= 10) flush();
     else if (!flushT) flushT = setTimeout(flush, 500);

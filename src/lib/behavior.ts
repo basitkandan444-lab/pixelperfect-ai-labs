@@ -405,7 +405,7 @@ export function snapshot(): BehaviorMetrics {
   let readingMode: BehaviorMetrics["readingMode"] = "unknown";
   const engagedMs = R.activeMs;
   if (R.scrollMax < 15 && engagedMs < 3_000) readingMode = "abandoning";
-  else if (engagedMs > 20_000 && R.scrollPauseCount > 5 && R.scrollMax > 30) readingMode = "reading";
+  else if (engagedMs > 20_000 && R.scrollPauses > 5 && R.scrollMax > 30) readingMode = "reading";
   else if (R.scrollVelocities.length > 10 && sv.mean > 1.5) readingMode = "scanning";
   else if (R.idleMs > engagedMs && R.idleMs > 15_000) readingMode = "idle";
 
