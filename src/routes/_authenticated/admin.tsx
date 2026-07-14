@@ -137,6 +137,16 @@ function CommandCenter() {
     URL.revokeObjectURL(url);
   };
 
+  const downloadReport = async () => {
+    const { report } = await reportFn({ data: { days } });
+    const url = URL.createObjectURL(new Blob([report], { type: "text/markdown" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `traffic-intelligence-${days}d.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="min-h-dvh bg-background text-foreground">
       <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
@@ -166,10 +176,16 @@ function CommandCenter() {
               Export CSV
             </button>
             <button
+              onClick={downloadReport}
+              className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent"
+            >
+              Download report
+            </button>
+            <button
               onClick={() => window.print()}
               className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent"
             >
-              Print report
+              Print
             </button>
             <button
               onClick={signOut}
