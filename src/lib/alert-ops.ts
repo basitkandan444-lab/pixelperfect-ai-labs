@@ -127,8 +127,9 @@ export const NOISY_OCCURRENCE_THRESHOLD = 20;
 const percentile = (xs: number[], p: number): number | null => {
   if (xs.length === 0) return null;
   const s = [...xs].sort((a, b) => a - b);
-  const idx = Math.min(s.length - 1, Math.floor(p * (s.length - 1)));
-  return s[idx];
+  // Nearest-rank method: rank = ceil(p * n), 1-indexed.
+  const rank = Math.max(1, Math.ceil(p * s.length));
+  return s[rank - 1];
 };
 
 const mean = (xs: number[]): number | null =>
