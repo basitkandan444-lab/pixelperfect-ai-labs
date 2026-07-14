@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Investigation Workspace — server functions.
 //
 // All admin-gated. Bookmarks and workspaces persist to Supabase tables
