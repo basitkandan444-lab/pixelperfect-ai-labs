@@ -83,3 +83,49 @@ export const getIntelligenceReport = createServerFn({ method: "POST" })
     const { buildTextReport } = await import("./intelligence.server");
     return { report: buildTextReport(rows, data.days) };
   });
+
+const ReportSchema = RangeSchema.extend({
+  format: z.enum(["markdown", "csv", "html"]).default("markdown"),
+});
+
+export const getExecutive = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { days?: number }) => RangeSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { rows } = await fetchAndBuild(data.days);
+    const { buildExecutive } = await import("./intelligence.server");
+    return buildExecutive(rows, data.days);
+  });
+
+export const getTrends = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { days?: number }) => RangeSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { rows } = await fetchAndBuild(data.days);
+    const { buildTrends } = await import("./intelligence.server");
+    return buildTrends(rows, data.days);
+  });
+
+export const getAlerts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { days?: number }) => RangeSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { rows } = await fetchAndBuild(data.days);
+    const { buildAlerts } = await import("./intelligence.server");
+    return buildAlerts(rows, data.days);
+  });
+
+export const getFullReport = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { days?: number; format?: "markdown" | "csv" | "html" }) =>
+    ReportSchema.parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { rows } = await fetchAndBuild(data.days);
+    const { buildFullReport } = await import("./intelligence.server");
+    return { report: buildFullReport(rows, data.days, data.format), format: data.format };
+  });

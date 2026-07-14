@@ -1,9 +1,13 @@
 import { describe, it, expect } from "vitest";
 
 import {
+  buildAlerts,
+  buildExecutive,
+  buildFullReport,
   buildIntelligence,
   buildRealtimeIntelligence,
   buildSourceIntelligence,
+  buildTrends,
   buildVisitorTimelines,
   classifySession,
   groupSessions,
@@ -112,5 +116,102 @@ describe("intelligence · aggregate builders", () => {
     const r = buildRealtimeIntelligence(rows, 300);
     expect(r.active).toBe(1);
     expect(r.currentlyUploading).toBe(1);
+  });
+});
+
+describe("intelligence · advanced multi-signal detection", () => {
+  it("consumes session_summary metrics: robotic click rhythm lowers human probability", () => {
+    const base = Date.now();
+    const rows: EventRow[] = [
+      ev({ ts: new Date(base).toISOString() }),
+      ev({ ts: new Date(base + 1000).toISOString(), name: "page_view", path: "/a" }),
+      {
+        ...ev({ ts: new Date(base + 2000).toISOString(), name: "session_summary" }),
+        metrics: {
+          webdriver: true,
+          mouseMoves: 0,
+          hasTouch: false,
+          sessionMs: 15000,
+          clickCount: 6,
+          clickIntervalCV: 0.02,
+          readingMode: "scanning",
+          languages: 0,
+          hardwareConcurrency: 0,
+        },
+      },
+    ];
+    const s = groupSessions(rows).get("s1")!;
+    const c = classifySession(s);
+    expect(c.humanProbability).toBeLessThan(0.35);
+    expect(c.evidence.some((e) => e.signal.includes("webdriver"))).toBe(true);
+    expect(c.evidence.some((e) => e.signal.includes("Robotic click"))).toBe(true);
+    expect(c.riskLevel).toBe("high");
+    expect(c.summary?.readingMode).toBe("scanning");
+  });
+
+  it("buildExecutive returns headline, bullets and top source", () => {
+    const base = Date.now();
+    const rows: EventRow[] = [
+      ev({ session_id: "a", source: "organic", ts: new Date(base).toISOString() }),
+      ev({
+        session_id: "a",
+        source: "organic",
+        name: "download_completed",
+        ts: new Date(base + 10_000).toISOString(),
+      }),
+      ev({ session_id: "b", source: "direct", ts: new Date(base + 5_000).toISOString() }),
+    ];
+    const x = buildExecutive(rows, 7);
+    expect(x.headline.length).toBeGreaterThan(0);
+    expect(x.bullets.length).toBeGreaterThan(1);
+    // Top source requires >=3 sessions per source; with light fixtures the
+    // property is nullable — assert it doesn't throw and the shape is right.
+    expect(x).toHaveProperty("topPerformingSource");
+  });
+
+  it("buildTrends buckets by day and computes direction/forecast", () => {
+    const day1 = new Date();
+    day1.setDate(day1.getDate() - 1);
+    const day2 = new Date();
+    const rows: EventRow[] = [
+      ev({ session_id: "d1a", ts: day1.toISOString() }),
+      ev({ session_id: "d2a", ts: day2.toISOString(), name: "enhance_completed" }),
+    ];
+    const t = buildTrends(rows, 7);
+    expect(t.points.length).toBe(2);
+    expect(t.movingAverage.length).toBe(2);
+    expect(["up", "down", "flat"]).toContain(t.direction);
+    expect(t.forecastQualityNextDay).not.toBeNull();
+  });
+
+  it("buildAlerts flags automation spike day-over-day", () => {
+    const day1 = new Date();
+    day1.setDate(day1.getDate() - 1);
+    const day2 = new Date();
+    const rows: EventRow[] = [
+      ev({ session_id: "h1", ts: day1.toISOString(), name: "enhance_completed" }),
+      ev({ session_id: "h2", ts: day1.toISOString(), name: "download_completed" }),
+      // Day 2 is dominated by bot-flagged sessions
+      ...Array.from({ length: 8 }, (_, i) =>
+        ev({
+          session_id: `bot${i}`,
+          ua_kind: "suspicious",
+          ts: new Date(day2.getTime() + i * 20).toISOString(),
+        }),
+      ),
+    ];
+    const alerts = buildAlerts(rows, 7);
+    expect(alerts.length).toBeGreaterThan(0);
+    expect(alerts.some((a) => a.id === "automation-up" || a.id === "traffic-spike")).toBe(true);
+  });
+
+  it("buildFullReport produces markdown, csv and html", () => {
+    const rows: EventRow[] = [ev({ ts: new Date().toISOString() })];
+    const md = buildFullReport(rows, 7, "markdown");
+    const csv = buildFullReport(rows, 7, "csv");
+    const html = buildFullReport(rows, 7, "html");
+    expect(md).toContain("# Pixel Perfect Pro");
+    expect(csv.split("\n")[0]).toBe("section,key,value");
+    expect(html).toContain("<!doctype html>");
   });
 });
