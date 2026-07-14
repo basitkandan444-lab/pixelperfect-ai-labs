@@ -707,3 +707,389 @@ export function buildTextReport(rows: EventRow[], days: number): string {
   lines.push(`Retention: ${intel.retention.note}`);
   return lines.join("\n");
 }
+
+// ---------- Executive intelligence ----------
+
+export interface ExecutiveIntelligence {
+  headline: string;
+  bullets: string[];
+  trafficQuality: number;
+  automationTrend: "up" | "down" | "flat";
+  topPerformingSource: { source: string; conversionRate: number } | null;
+  topCountry: { code: string; sessions: number } | null;
+  topBrowser: { name: string; sessions: number } | null;
+  bestPage: { path: string; sessions: number } | null;
+  worstPage: { path: string; sessions: number; bounceRate: number } | null;
+  mostAbandonedFlow: string | null;
+  mostSuccessfulFlow: string | null;
+  suspiciousPatterns: string[];
+  highIntentSessions: number;
+  activatedSessions: number;
+}
+
+export function buildExecutive(rows: EventRow[], days: number): ExecutiveIntelligence {
+  const intel = buildIntelligence(rows, days);
+  const src = buildSourceIntelligence(rows);
+  const sessions = groupSessions(rows);
+  const pathCount: Record<string, number> = {};
+  const pathBounce: Record<string, number> = {};
+  const country: Record<string, number> = {};
+  const browser: Record<string, number> = {};
+  let highIntent = 0;
+  let activated = 0;
+  const suspiciousPatterns: string[] = [];
+
+  for (const s of sessions.values()) {
+    const c = classifySession(s);
+    if (c.intentScore >= 60) highIntent += 1;
+    if (c.segment === "Activated" || c.segment === "Power User") activated += 1;
+    const firstPath = s.events[0]?.path ?? null;
+    if (firstPath) {
+      pathCount[firstPath] = (pathCount[firstPath] ?? 0) + 1;
+      if (s.paths.size === 1 && s.events.length <= 2)
+        pathBounce[firstPath] = (pathBounce[firstPath] ?? 0) + 1;
+    }
+    if (s.country) country[s.country] = (country[s.country] ?? 0) + 1;
+    if (s.browser) browser[s.browser] = (browser[s.browser] ?? 0) + 1;
+    if (c.riskLevel === "high") {
+      const pattern = `${s.source ?? "unknown"} · ${s.device ?? "?"} · ${s.country ?? "??"}`;
+      if (!suspiciousPatterns.includes(pattern)) suspiciousPatterns.push(pattern);
+    }
+  }
+
+  const topSource =
+    src.filter((s) => s.sessions >= 3).sort((a, b) => b.conversionRate - a.conversionRate)[0] ??
+    null;
+
+  const rank = (o: Record<string, number>) => Object.entries(o).sort((a, b) => b[1] - a[1]);
+  const [topCountryCode, topCountryN] = rank(country)[0] ?? [null, 0];
+  const [topBrowserName, topBrowserN] = rank(browser)[0] ?? [null, 0];
+  const [bestPagePath, bestPageN] = rank(pathCount)[0] ?? [null, 0];
+  const worstEntry = Object.entries(pathCount)
+    .map(([p, n]) => ({ p, n, br: (pathBounce[p] ?? 0) / Math.max(1, n) }))
+    .filter((x) => x.n >= 5)
+    .sort((a, b) => b.br - a.br)[0];
+
+  const flows: Record<string, number> = {};
+  for (const s of sessions.values()) {
+    const key = Array.from(s.names).filter((x) => x !== "session_summary").slice(0, 5).sort().join(" → ") || "empty";
+    flows[key] = (flows[key] ?? 0) + 1;
+  }
+  const flowsSorted = Object.entries(flows).sort((a, b) => b[1] - a[1]);
+  const mostSuccessfulFlow =
+    flowsSorted.find(([k]) => k.includes("download_completed"))?.[0] ??
+    flowsSorted.find(([k]) => k.includes("enhance_completed"))?.[0] ??
+    null;
+  const mostAbandonedFlow =
+    flowsSorted.find(
+      ([k]) => k.includes("upload_started") && !k.includes("enhance_completed"),
+    )?.[0] ?? null;
+
+  const bullets: string[] = [];
+  bullets.push(
+    `Traffic quality is ${intel.overall.classification} (${intel.overall.score}/100) across ${intel.overall.sessions} sessions.`,
+  );
+  bullets.push(
+    `Human likelihood ${(intel.overall.humanPct * 100).toFixed(0)}%, automation likelihood ${(intel.overall.automationPct * 100).toFixed(0)}%.`,
+  );
+  if (topSource)
+    bullets.push(
+      `Top-converting source: ${topSource.source} (${(topSource.conversionRate * 100).toFixed(1)}%).`,
+    );
+  if (mostAbandonedFlow) bullets.push(`Most abandoned flow: ${mostAbandonedFlow}.`);
+  if (mostSuccessfulFlow) bullets.push(`Most successful flow: ${mostSuccessfulFlow}.`);
+  bullets.push(...intel.insights);
+
+  const headline =
+    intel.overall.sessions === 0
+      ? "No traffic in the selected window."
+      : intel.overall.classification === "high"
+        ? "Traffic is strong and looks predominantly human."
+        : intel.overall.classification === "low"
+          ? "Traffic quality is low — automation or shallow visits dominate."
+          : "Traffic quality is mixed — investigate the drop-offs below.";
+
+  return {
+    headline,
+    bullets,
+    trafficQuality: intel.overall.score,
+    automationTrend: "flat", // set by trends builder when historical baseline exists
+    topPerformingSource: topSource
+      ? { source: topSource.source, conversionRate: topSource.conversionRate }
+      : null,
+    topCountry: topCountryCode ? { code: topCountryCode, sessions: topCountryN } : null,
+    topBrowser: topBrowserName ? { name: topBrowserName, sessions: topBrowserN } : null,
+    bestPage: bestPagePath ? { path: bestPagePath, sessions: bestPageN } : null,
+    worstPage: worstEntry
+      ? { path: worstEntry.p, sessions: worstEntry.n, bounceRate: worstEntry.br }
+      : null,
+    mostAbandonedFlow,
+    mostSuccessfulFlow,
+    suspiciousPatterns: suspiciousPatterns.slice(0, 5),
+    highIntentSessions: highIntent,
+    activatedSessions: activated,
+  };
+}
+
+// ---------- Historical trends ----------
+
+export interface TrendPoint {
+  date: string; // YYYY-MM-DD
+  sessions: number;
+  humanPct: number;
+  automationPct: number;
+  quality: number;
+  activations: number;
+  downloads: number;
+  uploads: number;
+  errors: number;
+}
+
+export interface TrendReport {
+  days: number;
+  points: TrendPoint[];
+  movingAverage: number[]; // 3-day MA of quality
+  direction: "up" | "down" | "flat";
+  changePct: number;
+  forecastQualityNextDay: number | null; // simple last-3-day mean
+  forecastNote: string;
+}
+
+export function buildTrends(rows: EventRow[], days: number): TrendReport {
+  const buckets = new Map<string, EventRow[]>();
+  for (const r of rows) {
+    const d = r.ts.slice(0, 10);
+    const arr = buckets.get(d) ?? [];
+    arr.push(r);
+    buckets.set(d, arr);
+  }
+  const points: TrendPoint[] = [];
+  for (const [date, dayRows] of Array.from(buckets.entries()).sort()) {
+    const sessions = groupSessions(dayRows);
+    let sum = 0, human = 0, act = 0, dl = 0, up = 0, err = 0;
+    for (const s of sessions.values()) {
+      const c = classifySession(s);
+      sum += c.qualityScore;
+      if (c.humanProbability >= 0.6) human += 1;
+      if (c.segment === "Activated" || c.segment === "Power User") act += 1;
+      if (s.names.has("download_completed")) dl += 1;
+      if (s.names.has("upload_started")) up += 1;
+      err += s.errors;
+    }
+    const n = sessions.size || 1;
+    points.push({
+      date,
+      sessions: sessions.size,
+      humanPct: human / n,
+      automationPct: 1 - human / n,
+      quality: Math.round(sum / n),
+      activations: act,
+      downloads: dl,
+      uploads: up,
+      errors: err,
+    });
+  }
+
+  // 3-day moving average on quality
+  const ma: number[] = [];
+  for (let i = 0; i < points.length; i++) {
+    const slice = points.slice(Math.max(0, i - 2), i + 1);
+    ma.push(Math.round(slice.reduce((a, b) => a + b.quality, 0) / slice.length));
+  }
+  const first = ma[0] ?? 0;
+  const last = ma[ma.length - 1] ?? 0;
+  const changePct = first > 0 ? ((last - first) / first) * 100 : 0;
+  const direction: "up" | "down" | "flat" =
+    Math.abs(changePct) < 3 ? "flat" : changePct > 0 ? "up" : "down";
+  const forecast =
+    points.length >= 3
+      ? Math.round(
+          points.slice(-3).reduce((a, b) => a + b.quality, 0) / 3,
+        )
+      : points.length > 0
+        ? points[points.length - 1].quality
+        : null;
+
+  return {
+    days,
+    points,
+    movingAverage: ma,
+    direction,
+    changePct: Math.round(changePct * 10) / 10,
+    forecastQualityNextDay: forecast,
+    forecastNote:
+      "Forecast is a 3-day trailing mean of observed quality. Not a prediction of future traffic.",
+  };
+}
+
+// ---------- Alerts ----------
+
+export interface Alert {
+  id: string;
+  severity: "info" | "warning" | "critical";
+  title: string;
+  detail: string;
+}
+
+export function buildAlerts(rows: EventRow[], days: number): Alert[] {
+  const trend = buildTrends(rows, days);
+  const intel = buildIntelligence(rows, days);
+  const alerts: Alert[] = [];
+  const points = trend.points;
+  if (points.length >= 2) {
+    const last = points[points.length - 1];
+    const prev = points[points.length - 2];
+    const sessDelta = prev.sessions > 0 ? (last.sessions - prev.sessions) / prev.sessions : 0;
+    if (sessDelta >= 0.5)
+      alerts.push({
+        id: "traffic-spike",
+        severity: "warning",
+        title: "Traffic spike",
+        detail: `Sessions increased ${(sessDelta * 100).toFixed(0)}% day-over-day. Verify quality below.`,
+      });
+    if (sessDelta <= -0.4)
+      alerts.push({
+        id: "traffic-drop",
+        severity: "warning",
+        title: "Traffic drop",
+        detail: `Sessions fell ${(Math.abs(sessDelta) * 100).toFixed(0)}% day-over-day.`,
+      });
+    if (last.automationPct - prev.automationPct >= 0.15)
+      alerts.push({
+        id: "automation-up",
+        severity: "critical",
+        title: "Automation increased",
+        detail: `Automation likelihood rose ${((last.automationPct - prev.automationPct) * 100).toFixed(0)} pts vs previous day.`,
+      });
+    if (last.errors > prev.errors && last.errors >= 5)
+      alerts.push({
+        id: "error-spike",
+        severity: "warning",
+        title: "Error spike",
+        detail: `${last.errors} error events today (was ${prev.errors}).`,
+      });
+    if (prev.downloads > 0 && last.downloads / Math.max(1, last.sessions) <
+        (prev.downloads / Math.max(1, prev.sessions)) * 0.5)
+      alerts.push({
+        id: "conversion-collapse",
+        severity: "critical",
+        title: "Conversion collapse",
+        detail: "Download rate dropped by >50% versus previous day.",
+      });
+  }
+  if (intel.distribution.low > intel.distribution.high * 2 && intel.overall.sessions >= 20)
+    alerts.push({
+      id: "low-quality-majority",
+      severity: "warning",
+      title: "High bounce / low-quality majority",
+      detail: `${intel.distribution.low} low-quality sessions vs ${intel.distribution.high} high-quality.`,
+    });
+  return alerts;
+}
+
+// ---------- Report generation (multi-format) ----------
+
+export function buildFullReport(
+  rows: EventRow[],
+  days: number,
+  format: "markdown" | "csv" | "html",
+): string {
+  const intel = buildIntelligence(rows, days);
+  const exec = buildExecutive(rows, days);
+  const src = buildSourceIntelligence(rows).slice(0, 10);
+  const trend = buildTrends(rows, days);
+  const alerts = buildAlerts(rows, days);
+
+  if (format === "csv") {
+    const out: string[] = [];
+    out.push("section,key,value");
+    out.push(`overall,sessions,${intel.overall.sessions}`);
+    out.push(`overall,score,${intel.overall.score}`);
+    out.push(`overall,human_pct,${intel.overall.humanPct.toFixed(3)}`);
+    out.push(`overall,automation_pct,${intel.overall.automationPct.toFixed(3)}`);
+    for (const [seg, n] of Object.entries(intel.segments))
+      out.push(`segment,${seg},${n}`);
+    for (const s of src)
+      out.push(`source,${s.source},sessions=${s.sessions};quality=${s.avgQuality};conv=${s.conversionRate.toFixed(3)}`);
+    for (const p of trend.points)
+      out.push(`trend,${p.date},sessions=${p.sessions};quality=${p.quality};human=${p.humanPct.toFixed(2)}`);
+    for (const a of alerts) out.push(`alert,${a.severity},${a.title}: ${a.detail.replace(/,/g, ";")}`);
+    return out.join("\n");
+  }
+
+  if (format === "html") {
+    const li = (xs: string[]) => xs.map((x) => `<li>${escapeHtml(x)}</li>`).join("");
+    return `<!doctype html><meta charset="utf-8"><title>Traffic Intelligence — ${days}d</title>
+<style>body{font:14px/1.6 system-ui;max-width:820px;margin:2rem auto;padding:0 1rem;color:#111}h1,h2{margin-top:2rem}table{width:100%;border-collapse:collapse;margin:1rem 0}th,td{border-bottom:1px solid #ddd;padding:.35rem .5rem;text-align:left}</style>
+<h1>Traffic Intelligence — last ${days}d</h1>
+<p><b>${escapeHtml(exec.headline)}</b></p>
+<h2>Executive summary</h2><ul>${li(exec.bullets)}</ul>
+<h2>Alerts</h2>${alerts.length ? `<ul>${li(alerts.map((a) => `[${a.severity}] ${a.title} — ${a.detail}`))}</ul>` : "<p>No active alerts.</p>"}
+<h2>Sources</h2><table><tr><th>Source</th><th>Sessions</th><th>Human %</th><th>Quality</th><th>Conv.</th></tr>${src
+      .map(
+        (s) =>
+          `<tr><td>${escapeHtml(s.source)}</td><td>${s.sessions}</td><td>${(s.humanPct * 100).toFixed(0)}%</td><td>${s.avgQuality}</td><td>${(s.conversionRate * 100).toFixed(1)}%</td></tr>`,
+      )
+      .join("")}</table>
+<h2>Trend (${trend.direction}, ${trend.changePct}%)</h2><table><tr><th>Date</th><th>Sessions</th><th>Quality</th><th>Human %</th></tr>${trend.points
+      .map(
+        (p) =>
+          `<tr><td>${p.date}</td><td>${p.sessions}</td><td>${p.quality}</td><td>${(p.humanPct * 100).toFixed(0)}%</td></tr>`,
+      )
+      .join("")}</table>
+<h2>Insights</h2><ul>${li(intel.insights)}</ul>`;
+  }
+
+  // markdown
+  const lines: string[] = [];
+  lines.push(`# Pixel Perfect Pro — Traffic Intelligence Report`);
+  lines.push(`_Window: last ${days} day(s) · Generated ${new Date().toISOString()}_`);
+  lines.push("");
+  lines.push(`## Executive Summary`);
+  lines.push(`> ${exec.headline}`);
+  for (const b of exec.bullets) lines.push(`- ${b}`);
+  lines.push("");
+  lines.push(`## Alerts`);
+  if (alerts.length === 0) lines.push("_No active alerts._");
+  for (const a of alerts) lines.push(`- **[${a.severity}] ${a.title}** — ${a.detail}`);
+  lines.push("");
+  lines.push(`## Overall`);
+  lines.push(`- Sessions: ${intel.overall.sessions}`);
+  lines.push(`- Quality score: ${intel.overall.score}/100 (${intel.overall.classification})`);
+  lines.push(`- Human likelihood: ${(intel.overall.humanPct * 100).toFixed(1)}%`);
+  lines.push(`- Automation likelihood: ${(intel.overall.automationPct * 100).toFixed(1)}%`);
+  lines.push("");
+  lines.push(`## Segments`);
+  for (const [seg, n] of Object.entries(intel.segments).sort((a, b) => b[1] - a[1]))
+    lines.push(`- ${seg}: ${n}`);
+  lines.push("");
+  lines.push(`## Traffic Sources`);
+  for (const s of src)
+    lines.push(
+      `- **${s.source}** · ${s.sessions} sessions · human ${(s.humanPct * 100).toFixed(0)}% · quality ${s.avgQuality} · conv ${(s.conversionRate * 100).toFixed(1)}%`,
+    );
+  lines.push("");
+  lines.push(`## Trend (${trend.direction}, ${trend.changePct}%)`);
+  for (const p of trend.points)
+    lines.push(
+      `- ${p.date}: ${p.sessions} sessions · quality ${p.quality} · human ${(p.humanPct * 100).toFixed(0)}%`,
+    );
+  lines.push("");
+  lines.push(`Forecast (next day, trailing mean): ${trend.forecastQualityNextDay ?? "n/a"}`);
+  lines.push(`_${trend.forecastNote}_`);
+  lines.push("");
+  lines.push(`## Automated Insights`);
+  for (const i of intel.insights) lines.push(`- ${i}`);
+  lines.push("");
+  lines.push(`## Detected Risks`);
+  for (const p of exec.suspiciousPatterns) lines.push(`- ${p}`);
+  lines.push("");
+  lines.push(`## Appendix`);
+  lines.push(`Retention: ${intel.retention.note}`);
+  return lines.join("\n");
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+}
+
