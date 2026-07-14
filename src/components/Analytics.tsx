@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useRouterState } from "@tanstack/react-router";
 
 import { ANALYTICS } from "@/lib/analytics";
+import { initBehavior } from "@/lib/behavior";
 import { initTracker, track } from "@/lib/track";
 
 /**
@@ -40,6 +41,7 @@ export function Analytics() {
     }
 
     initTracker();
+    initBehavior();
   }, []);
 
   // Fire a first-party page_view on every route change (SPA nav included).
