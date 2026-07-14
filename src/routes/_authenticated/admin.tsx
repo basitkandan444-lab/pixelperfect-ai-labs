@@ -20,7 +20,10 @@ import {
   getVisitorTimelines,
   getSourceIntelligence,
   getRealtimeIntelligence,
-  getIntelligenceReport,
+  getExecutive,
+  getTrends,
+  getAlerts,
+  getFullReport,
 } from "@/lib/intelligence.functions";
 
 // Admin gate: this route lives under _authenticated so the session is already
