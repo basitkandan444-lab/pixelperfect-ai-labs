@@ -10,7 +10,7 @@
 // classification summary (probability, quality, confidence, risk tier).
 
 import { BUILD_INFO, releaseTag } from "./build-info";
-import type { Classification } from "./intelligence.server";
+import type { SessionClassification } from "./intelligence.server";
 
 export const ENGINE_VERSION = "3.0.0";
 export const INTELLIGENCE_VERSION = "3.0.0";
@@ -113,7 +113,7 @@ export function freezeRecord<T extends object>(r: T): Readonly<T> {
 }
 
 export function createAuditRecord(
-  c: Classification,
+  c: SessionClassification,
   now: string = new Date().toISOString(),
 ): AuditRecord {
   return freezeRecord({
@@ -122,7 +122,7 @@ export function createAuditRecord(
     humanProbability: c.humanProbability,
     qualityScore: c.qualityScore,
     confidence: c.confidence,
-    riskTier: c.riskTier,
+    riskTier: c.riskLevel,
     version: currentEngineVersion(),
   });
 }
