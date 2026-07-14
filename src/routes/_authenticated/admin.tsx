@@ -42,6 +42,20 @@ import {
   type AlertStatus,
   type AlertSeverity,
 } from "@/lib/alerts";
+import {
+  simulateRules,
+  getSandboxHistory,
+} from "@/lib/sandbox.functions";
+import {
+  DEFAULT_RULES,
+  WEIGHT_META,
+  THRESHOLD_META,
+  diffRuleSets,
+  validateRuleSet,
+  type RuleSet,
+  type WeightKey,
+  type ThresholdKey,
+} from "@/lib/sandbox/rules";
 
 // Admin gate: this route lives under _authenticated so the session is already
 // checked. The role check happens client-side (redirect on fail) AND server-side
@@ -335,6 +349,14 @@ function CommandCenter() {
         >
           <AuditVerificationPanel data={auditOps.data} />
         </Section>
+
+        <Section
+          title="Rule Sandbox"
+          subtitle="Simulate rule changes safely against historical sessions — production scoring never changes"
+        >
+          <RuleSandboxPanel days={days} />
+        </Section>
+
 
 
         <Section
@@ -2154,6 +2176,377 @@ function AuditVerificationPanel({
           </ol>
         )}
       </div>
+    </div>
+  );
+}
+
+// ---------- Loop 2 · Rule Sandbox ----------
+
+type SimulationResponse = Awaited<ReturnType<typeof simulateRules>>;
+type HistoryResponse = Awaited<ReturnType<typeof getSandboxHistory>>;
+
+function RuleSandboxPanel({ days }: { days: number }) {
+  const simulateFn = useServerFn(simulateRules);
+  const historyFn = useServerFn(getSandboxHistory);
+  const [proposed, setProposed] = useState<RuleSet>(() => JSON.parse(JSON.stringify(DEFAULT_RULES)));
+  const [result, setResult] = useState<SimulationResponse | null>(null);
+  const [running, setRunning] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const history = useQuery({
+    queryKey: ["sandbox-history"],
+    queryFn: () => historyFn({ data: { days: 30 } }) as Promise<HistoryResponse>,
+  });
+
+  const rows = diffRuleSets(DEFAULT_RULES, proposed);
+  const validation = validateRuleSet(proposed);
+
+  const updateWeight = (k: WeightKey, v: number) =>
+    setProposed((p) => ({ ...p, weights: { ...p.weights, [k]: v } }));
+  const updateThreshold = (k: ThresholdKey, v: number) =>
+    setProposed((p) => ({ ...p, thresholds: { ...p.thresholds, [k]: v } }));
+
+  const run = async () => {
+    if (!validation.ok) return;
+    setRunning(true);
+    setError(null);
+    try {
+      const r = (await simulateFn({ data: { days, rules: proposed, limit: 1000 } })) as SimulationResponse;
+      setResult(r);
+      await history.refetch();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  const reset = () => {
+    setProposed(JSON.parse(JSON.stringify(DEFAULT_RULES)));
+    setResult(null);
+  };
+
+  return (
+    <div className="space-y-4 text-sm">
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="rounded-md border border-border p-3">
+          <div className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
+            Weights (multipliers)
+          </div>
+          <ul className="space-y-1 text-xs">
+            {(Object.keys(WEIGHT_META) as WeightKey[]).map((k) => (
+              <RuleRow
+                key={k}
+                label={WEIGHT_META[k].label}
+                current={DEFAULT_RULES.weights[k]}
+                value={proposed.weights[k]}
+                min={WEIGHT_META[k].min}
+                max={WEIGHT_META[k].max}
+                step={0.05}
+                onChange={(v) => updateWeight(k, v)}
+              />
+            ))}
+          </ul>
+        </div>
+        <div className="rounded-md border border-border p-3">
+          <div className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
+            Thresholds
+          </div>
+          <ul className="space-y-1 text-xs">
+            {(Object.keys(THRESHOLD_META) as ThresholdKey[]).map((k) => (
+              <RuleRow
+                key={k}
+                label={THRESHOLD_META[k].label}
+                current={DEFAULT_RULES.thresholds[k]}
+                value={proposed.thresholds[k]}
+                min={THRESHOLD_META[k].min}
+                max={THRESHOLD_META[k].max}
+                step={THRESHOLD_META[k].max <= 1 ? 0.05 : 1}
+                onChange={(v) => updateThreshold(k, v)}
+              />
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <button
+          onClick={() => void run()}
+          disabled={!validation.ok || running}
+          className="rounded-md bg-primary px-3 py-1 text-primary-foreground disabled:opacity-50"
+        >
+          {running ? "Simulating…" : "Run simulation"}
+        </button>
+        <button
+          onClick={reset}
+          className="rounded-md border border-input px-3 py-1 hover:bg-accent"
+        >
+          Reset to defaults
+        </button>
+        <span className="text-muted-foreground">
+          Sample size: last {days} day(s), up to 1000 sessions.
+        </span>
+        {rows.filter((r) => r.delta !== 0).length > 0 && (
+          <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-primary">
+            {rows.filter((r) => r.delta !== 0).length} parameter change(s)
+          </span>
+        )}
+      </div>
+
+      {!validation.ok && (
+        <div className="rounded-md border border-red-500/40 bg-red-500/5 p-2 text-xs">
+          <div className="mb-1 font-semibold text-red-400">Validation blocked</div>
+          <ul className="space-y-1 font-mono">
+            {validation.issues.map((i, idx) => (
+              <li key={idx}>
+                [{i.code}] {i.field} — {i.message}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {error && (
+        <div className="rounded-md border border-red-500/40 bg-red-500/5 p-2 text-xs text-red-400">
+          {error}
+        </div>
+      )}
+
+      {result?.ok && result.result && <SimulationView result={result.result} />}
+
+      <SandboxHistory data={history.data} />
+    </div>
+  );
+}
+
+function RuleRow({
+  label,
+  current,
+  value,
+  min,
+  max,
+  step,
+  onChange,
+}: {
+  label: string;
+  current: number;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  onChange: (v: number) => void;
+}) {
+  const delta = value - current;
+  const inRange = Number.isFinite(value) && value >= min && value <= max;
+  return (
+    <li className="flex flex-wrap items-center gap-2">
+      <span className="min-w-[180px] flex-1 truncate">{label}</span>
+      <input
+        type="number"
+        value={value}
+        min={min}
+        max={max}
+        step={step}
+        onChange={(e) => onChange(parseFloat(e.target.value))}
+        className={`w-20 rounded border px-1 py-0.5 text-right font-mono text-[11px] ${
+          inRange ? "border-input bg-background" : "border-red-500 bg-red-500/10"
+        }`}
+      />
+      <span className="w-14 text-right font-mono text-[10px] text-muted-foreground">
+        cur {current}
+      </span>
+      <span
+        className={`w-14 text-right font-mono text-[10px] ${
+          delta === 0
+            ? "text-muted-foreground"
+            : delta > 0
+              ? "text-emerald-400"
+              : "text-amber-400"
+        }`}
+      >
+        {delta === 0 ? "±0" : delta > 0 ? `+${delta.toFixed(2)}` : delta.toFixed(2)}
+      </span>
+    </li>
+  );
+}
+
+function SimulationView({
+  result,
+}: {
+  result: NonNullable<Extract<SimulationResponse, { ok: true }>["result"]>;
+}) {
+  const verdictCls =
+    result.recommendation.verdict === "safe-to-deploy"
+      ? "bg-emerald-500/20 text-emerald-400"
+      : result.recommendation.verdict === "deploy-with-caution"
+        ? "bg-amber-500/20 text-amber-400"
+        : result.recommendation.verdict === "reject"
+          ? "bg-red-500/20 text-red-400"
+          : "bg-muted text-muted-foreground";
+  return (
+    <div className="space-y-3 rounded-md border border-border p-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase ${verdictCls}`}>
+          {result.recommendation.verdict}
+        </span>
+        <span className="text-xs text-muted-foreground">
+          {result.sampleSize} sessions · {result.durationMs}ms · sim {result.simulationId}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 text-xs">
+        <ComparisonKPI label="Human %" a={result.before.humanPct} b={result.after.humanPct} format="pct" />
+        <ComparisonKPI label="Bot %" a={result.before.botPct} b={result.after.botPct} format="pct" />
+        <ComparisonKPI label="Avg quality" a={result.before.avgQuality} b={result.after.avgQuality} format="num" />
+        <ComparisonKPI label="Avg human prob" a={result.before.avgHuman} b={result.after.avgHuman} format="pct" />
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2 text-xs">
+        <div className="rounded border border-border/60 p-2">
+          <div className="mb-1 font-semibold uppercase text-muted-foreground">
+            Confidence distribution
+          </div>
+          <DistTable a={result.before.confidence} b={result.after.confidence} />
+        </div>
+        <div className="rounded border border-border/60 p-2">
+          <div className="mb-1 font-semibold uppercase text-muted-foreground">
+            Risk distribution
+          </div>
+          <DistTable a={result.before.risk} b={result.after.risk} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 text-xs md:grid-cols-4">
+        <Impact label="Humans affected" v={result.impact.humansAffected} />
+        <Impact label="Bots affected" v={result.impact.botsAffected} />
+        <Impact label="High-risk changed" v={result.impact.highRiskChanged} />
+        <Impact label="Low-risk changed" v={result.impact.lowRiskChanged} />
+        <Impact label="Confidence ↑" v={result.impact.confidenceImprovements} />
+        <Impact label="Confidence ↓" v={result.impact.confidenceDegradations} />
+        <Impact label="FP candidates" v={result.impact.falsePositiveCandidates} />
+        <Impact label="FN candidates" v={result.impact.falseNegativeCandidates} />
+      </div>
+
+      <div className="rounded border border-border/60 p-2 text-xs">
+        <div className="mb-1 font-semibold uppercase text-muted-foreground">
+          Recommendation reasoning
+        </div>
+        <ul className="space-y-1">
+          {result.recommendation.reasons.map((r, i) => (
+            <li key={i}>
+              <span className="font-mono text-muted-foreground">[{r.code}]</span> {r.message}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function ComparisonKPI({
+  label,
+  a,
+  b,
+  format,
+}: {
+  label: string;
+  a: number;
+  b: number;
+  format: "pct" | "num";
+}) {
+  const fmt = (v: number) => (format === "pct" ? `${(v * 100).toFixed(1)}%` : v.toFixed(1));
+  const delta = b - a;
+  return (
+    <div className="rounded border border-border/60 p-2">
+      <div className="text-[10px] uppercase text-muted-foreground">{label}</div>
+      <div className="mt-1 flex items-baseline gap-2 font-mono">
+        <span className="text-muted-foreground">{fmt(a)}</span>
+        <span>→</span>
+        <span className="font-semibold">{fmt(b)}</span>
+      </div>
+      <div
+        className={`text-[10px] ${
+          delta === 0
+            ? "text-muted-foreground"
+            : delta > 0
+              ? "text-emerald-400"
+              : "text-amber-400"
+        }`}
+      >
+        {delta === 0 ? "±0" : delta > 0 ? `+${fmt(Math.abs(delta))}` : `-${fmt(Math.abs(delta))}`}
+      </div>
+    </div>
+  );
+}
+
+function DistTable({ a, b }: { a: Record<string, number>; b: Record<string, number> }) {
+  const keys = Array.from(new Set([...Object.keys(a), ...Object.keys(b)]));
+  return (
+    <table className="w-full">
+      <thead className="text-left text-muted-foreground">
+        <tr>
+          <th className="pb-1">Bucket</th>
+          <th className="pb-1">Before</th>
+          <th className="pb-1">After</th>
+          <th className="pb-1">Δ</th>
+        </tr>
+      </thead>
+      <tbody>
+        {keys.map((k) => {
+          const av = a[k] ?? 0;
+          const bv = b[k] ?? 0;
+          return (
+            <tr key={k} className="border-t border-border/50">
+              <td className="py-1 font-mono">{k}</td>
+              <td className="tabular-nums">{av}</td>
+              <td className="tabular-nums">{bv}</td>
+              <td className="tabular-nums">{bv - av >= 0 ? `+${bv - av}` : bv - av}</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  );
+}
+
+function Impact({ label, v }: { label: string; v: number }) {
+  return (
+    <div className="rounded border border-border/60 px-2 py-1">
+      <div className="text-[10px] uppercase text-muted-foreground">{label}</div>
+      <div className="font-mono text-sm">{v}</div>
+    </div>
+  );
+}
+
+function SandboxHistory({ data }: { data?: HistoryResponse }) {
+  if (!data || data.entries.length === 0) return null;
+  return (
+    <div className="rounded-md border border-border p-3 text-xs">
+      <div className="mb-2 font-semibold uppercase text-muted-foreground">
+        Sandbox audit ({data.entries.length} run{data.entries.length === 1 ? "" : "s"})
+      </div>
+      <ul className="max-h-64 space-y-1 overflow-y-auto">
+        {data.entries.map((e: Record<string, unknown>, i: number) => {
+          const rec = String(e.recommendation ?? "");
+          const cls = rec === "safe-to-deploy"
+            ? "text-emerald-400"
+            : rec === "reject"
+              ? "text-red-400"
+              : "text-amber-400";
+          return (
+            <li key={i} className="flex flex-wrap gap-2">
+              <span className="font-mono text-muted-foreground">{String(e.ts)}</span>
+              <span className={`font-mono ${cls}`}>{rec}</span>
+              <span className="font-mono text-muted-foreground">
+                sample {String(e.sampleSize ?? "?")} · {String(e.durationMs ?? 0)}ms
+              </span>
+              <span className="font-mono text-muted-foreground">
+                sim {String(e.simulationId ?? "")}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
