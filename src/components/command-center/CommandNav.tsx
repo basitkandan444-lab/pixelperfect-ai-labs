@@ -28,8 +28,7 @@ export function CommandNav() {
     >
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-1 px-4 py-1.5">
         {ITEMS.map((item) => {
-          const [path] = item.to.split("?");
-          const active = pathname === path;
+          const active = pathname === item.to;
           return (
             <Link
               key={item.to}
