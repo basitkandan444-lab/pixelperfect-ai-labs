@@ -27,9 +27,11 @@ export default defineTool({
     const intel = buildIntelligence(rows, days);
     return jsonResult({
       windowDays: days,
-      totals: intel.totals,
-      quality: intel.quality,
-      topSources: intel.topSources?.slice(0, 10),
+      overall: intel.overall,
+      distribution: intel.distribution,
+      segments: intel.segments,
+      topReasons: intel.topReasons.slice(0, 10),
+      insights: intel.insights,
     });
   },
 });
