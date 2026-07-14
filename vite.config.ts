@@ -7,6 +7,7 @@
 import { readFileSync } from "node:fs";
 
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
 
 // Release intelligence: bake immutable build metadata into the bundle so any
 // deployment can report exactly which version/commit/build-time is live
@@ -28,6 +29,7 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
+    plugins: [mcpPlugin()],
     define: {
       __APP_VERSION__: JSON.stringify(pkg.version ?? "0.0.0"),
       __APP_COMMIT__: JSON.stringify(commit.slice(0, 12)),

@@ -1,0 +1,119 @@
+{
+  "version": 1,
+  "sdk_version": "0.21.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://pyxfszretybpjvwttvcg.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "pixel-perfect-pro-mcp",
+      "version": "1.0.0",
+      "title": "Pixel Perfect Pro — Visitor Intelligence"
+    },
+    "tools": [
+      {
+        "name": "traffic_overview",
+        "title": "Traffic overview",
+        "description": "Summarise visitor intelligence for the last N days: totals, quality mix, top sources, and headline KPIs.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 90,
+              "default": 7,
+              "description": "Look-back window in days (1-90)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "top_sources",
+        "title": "Top traffic sources",
+        "description": "Rank traffic sources by session volume and quality for the last N days.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 90,
+              "default": 7
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "realtime_visitors",
+        "title": "Realtime visitors",
+        "description": "Live snapshot of active sessions and recent activity within a rolling time window.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "windowSeconds": {
+              "type": "integer",
+              "minimum": 30,
+              "maximum": 3600,
+              "default": 300,
+              "description": "Rolling window in seconds (30-3600)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_alerts",
+        "title": "List intelligence alerts",
+        "description": "Return active/recent intelligence alerts (traffic anomalies, risk spikes, source quality drops) for the last N days.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30,
+              "default": 7
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
