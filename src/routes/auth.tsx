@@ -5,17 +5,28 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 
+function safeNext(v: unknown): string {
+  if (typeof v !== "string") return "/admin";
+  if (!v.startsWith("/") || v.startsWith("//")) return "/admin";
+  return v;
+}
+
 export const Route = createFileRoute("/auth")({
   ssr: false,
-  beforeLoad: async () => {
+  validateSearch: (s: Record<string, unknown>) => ({
+    next: typeof s.next === "string" ? s.next : undefined,
+  }),
+  beforeLoad: async ({ search }) => {
     const { data } = await supabase.auth.getSession();
-    if (data.session) throw redirect({ to: "/admin" });
+    if (data.session) throw redirect({ href: safeNext(search.next) });
   },
   component: AuthPage,
 });
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
+  const target = safeNext(next);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,10 +34,13 @@ function AuthPage() {
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session) navigate({ to: "/admin" });
+      if (session) {
+        if (target.startsWith("/")) window.location.href = target;
+        else navigate({ to: "/admin" });
+      }
     });
     return () => sub.subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, target]);
 
   const emailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +50,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/admin` },
+          options: { emailRedirectTo: `${window.location.origin}${target}` },
         });
         if (error) throw error;
         toast.success("Account created. Check your email to confirm.");
@@ -54,7 +68,7 @@ function AuthPage() {
   const google = async () => {
     setBusy(true);
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: `${window.location.origin}${target}`,
     });
     if (result.error) {
       toast.error(result.error.message);

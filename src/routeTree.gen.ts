@@ -16,6 +16,7 @@ import { Route as RestoreOldPhotoRouteImport } from './routes/restore-old-photo'
 import { Route as RemoveImageNoiseRouteImport } from './routes/remove-image-noise'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as OpsRouteImport } from './routes/ops'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as IncreaseImageResolutionRouteImport } from './routes/increase-image-resolution'
 import { Route as ImageUpscalerRouteImport } from './routes/image-upscaler'
 import { Route as FixBlurryPhotoRouteImport } from './routes/fix-blurry-photo'
@@ -28,11 +29,15 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as ApiPublicVitalsRouteImport } from './routes/api/public/vitals'
 import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
 import { Route as ApiPublicMetricsRouteImport } from './routes/api/public/metrics'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicEventsRouteImport } from './routes/api/public/events'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -67,6 +72,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const OpsRoute = OpsRouteImport.update({
   id: '/ops',
   path: '/ops',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IncreaseImageResolutionRoute = IncreaseImageResolutionRouteImport.update({
@@ -128,6 +138,18 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicVitalsRoute = ApiPublicVitalsRouteImport.update({
   id: '/api/public/vitals',
   path: '/api/public/vitals',
@@ -153,6 +175,17 @@ const ApiPublicEventsRoute = ApiPublicEventsRouteImport.update({
   path: '/api/public/events',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -165,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/fix-blurry-photo': typeof FixBlurryPhotoRoute
   '/image-upscaler': typeof ImageUpscalerRoute
   '/increase-image-resolution': typeof IncreaseImageResolutionRoute
+  '/mcp': typeof McpRoute
   '/ops': typeof OpsRoute
   '/privacy': typeof PrivacyRoute
   '/remove-image-noise': typeof RemoveImageNoiseRoute
@@ -172,7 +206,11 @@ export interface FileRoutesByFullPath {
   '/sharpen-image': typeof SharpenImageRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/events': typeof ApiPublicEventsRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
@@ -190,6 +228,7 @@ export interface FileRoutesByTo {
   '/fix-blurry-photo': typeof FixBlurryPhotoRoute
   '/image-upscaler': typeof ImageUpscalerRoute
   '/increase-image-resolution': typeof IncreaseImageResolutionRoute
+  '/mcp': typeof McpRoute
   '/ops': typeof OpsRoute
   '/privacy': typeof PrivacyRoute
   '/remove-image-noise': typeof RemoveImageNoiseRoute
@@ -197,7 +236,11 @@ export interface FileRoutesByTo {
   '/sharpen-image': typeof SharpenImageRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/events': typeof ApiPublicEventsRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
@@ -217,6 +260,7 @@ export interface FileRoutesById {
   '/fix-blurry-photo': typeof FixBlurryPhotoRoute
   '/image-upscaler': typeof ImageUpscalerRoute
   '/increase-image-resolution': typeof IncreaseImageResolutionRoute
+  '/mcp': typeof McpRoute
   '/ops': typeof OpsRoute
   '/privacy': typeof PrivacyRoute
   '/remove-image-noise': typeof RemoveImageNoiseRoute
@@ -224,7 +268,11 @@ export interface FileRoutesById {
   '/sharpen-image': typeof SharpenImageRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/events': typeof ApiPublicEventsRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
@@ -244,6 +292,7 @@ export interface FileRouteTypes {
     | '/fix-blurry-photo'
     | '/image-upscaler'
     | '/increase-image-resolution'
+    | '/mcp'
     | '/ops'
     | '/privacy'
     | '/remove-image-noise'
@@ -251,7 +300,11 @@ export interface FileRouteTypes {
     | '/sharpen-image'
     | '/sitemap.xml'
     | '/terms'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/admin'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/api/public/events'
     | '/api/public/health'
     | '/api/public/metrics'
@@ -269,6 +322,7 @@ export interface FileRouteTypes {
     | '/fix-blurry-photo'
     | '/image-upscaler'
     | '/increase-image-resolution'
+    | '/mcp'
     | '/ops'
     | '/privacy'
     | '/remove-image-noise'
@@ -276,7 +330,11 @@ export interface FileRouteTypes {
     | '/sharpen-image'
     | '/sitemap.xml'
     | '/terms'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/admin'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/api/public/events'
     | '/api/public/health'
     | '/api/public/metrics'
@@ -295,6 +353,7 @@ export interface FileRouteTypes {
     | '/fix-blurry-photo'
     | '/image-upscaler'
     | '/increase-image-resolution'
+    | '/mcp'
     | '/ops'
     | '/privacy'
     | '/remove-image-noise'
@@ -302,7 +361,11 @@ export interface FileRouteTypes {
     | '/sharpen-image'
     | '/sitemap.xml'
     | '/terms'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/_authenticated/admin'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/api/public/events'
     | '/api/public/health'
     | '/api/public/metrics'
@@ -322,6 +385,7 @@ export interface RootRouteChildren {
   FixBlurryPhotoRoute: typeof FixBlurryPhotoRoute
   ImageUpscalerRoute: typeof ImageUpscalerRoute
   IncreaseImageResolutionRoute: typeof IncreaseImageResolutionRoute
+  McpRoute: typeof McpRoute
   OpsRoute: typeof OpsRoute
   PrivacyRoute: typeof PrivacyRoute
   RemoveImageNoiseRoute: typeof RemoveImageNoiseRoute
@@ -329,6 +393,10 @@ export interface RootRouteChildren {
   SharpenImageRoute: typeof SharpenImageRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicEventsRoute: typeof ApiPublicEventsRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicMetricsRoute: typeof ApiPublicMetricsRoute
@@ -385,6 +453,13 @@ declare module '@tanstack/react-router' {
       path: '/ops'
       fullPath: '/ops'
       preLoaderRoute: typeof OpsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/increase-image-resolution': {
@@ -471,6 +546,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/vitals': {
       id: '/api/public/vitals'
       path: '/api/public/vitals'
@@ -506,6 +595,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -532,6 +635,7 @@ const rootRouteChildren: RootRouteChildren = {
   FixBlurryPhotoRoute: FixBlurryPhotoRoute,
   ImageUpscalerRoute: ImageUpscalerRoute,
   IncreaseImageResolutionRoute: IncreaseImageResolutionRoute,
+  McpRoute: McpRoute,
   OpsRoute: OpsRoute,
   PrivacyRoute: PrivacyRoute,
   RemoveImageNoiseRoute: RemoveImageNoiseRoute,
@@ -539,6 +643,11 @@ const rootRouteChildren: RootRouteChildren = {
   SharpenImageRoute: SharpenImageRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicEventsRoute: ApiPublicEventsRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicMetricsRoute: ApiPublicMetricsRoute,
