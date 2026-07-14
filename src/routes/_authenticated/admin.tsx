@@ -208,10 +208,22 @@ function CommandCenter() {
               Export CSV
             </button>
             <button
-              onClick={downloadReport}
+              onClick={() => downloadReport("markdown")}
               className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent"
             >
-              Download report
+              Report (MD)
+            </button>
+            <button
+              onClick={() => downloadReport("html")}
+              className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent"
+            >
+              Report (HTML)
+            </button>
+            <button
+              onClick={() => downloadReport("csv")}
+              className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent"
+            >
+              Report (CSV)
             </button>
             <button
               onClick={() => window.print()}
