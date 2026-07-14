@@ -11,13 +11,7 @@
 
 import type { SessionClassification } from "../intelligence.server";
 
-import type {
-  FilterClause,
-  FilterGroup,
-  Operator,
-  SearchField,
-  Sort,
-} from "./schema";
+import type { FilterClause, FilterGroup, Operator, SearchField, Sort } from "./schema";
 
 /** Enriched record — flattens summary fields into top-level accessors so
  *  every SearchField resolves without walking nested `summary`. */
@@ -212,9 +206,13 @@ function applyOp(
       return a >= lo && a <= hi;
     }
     case "in":
-      return Array.isArray(values) && values.some((v) => raw === v || asString(raw) === asString(v));
+      return (
+        Array.isArray(values) && values.some((v) => raw === v || asString(raw) === asString(v))
+      );
     case "notIn":
-      return !(Array.isArray(values) && values.some((v) => raw === v || asString(raw) === asString(v)));
+      return !(
+        Array.isArray(values) && values.some((v) => raw === v || asString(raw) === asString(v))
+      );
     default: {
       const _n: never = op;
       void _n;
@@ -285,10 +283,7 @@ export interface SearchOptions {
   pageSize?: number;
 }
 
-export function runSearch(
-  records: InvestigationRecord[],
-  opts: SearchOptions = {},
-): SearchResult {
+export function runSearch(records: InvestigationRecord[], opts: SearchOptions = {}): SearchResult {
   const page = Math.max(1, opts.page ?? 1);
   const pageSize = Math.max(1, Math.min(200, opts.pageSize ?? 50));
 

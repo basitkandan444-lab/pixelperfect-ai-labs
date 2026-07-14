@@ -68,12 +68,8 @@ function mkRec(o: Partial<InvestigationRecord> = {}): InvestigationRecord {
 
 describe("investigation schema", () => {
   it("BookmarkInputSchema rejects empty title and oversized fields", () => {
-    expect(() =>
-      BookmarkInputSchema.parse({ sessionId: "s", title: "" }),
-    ).toThrow();
-    expect(() =>
-      BookmarkInputSchema.parse({ sessionId: "s", title: "x".repeat(500) }),
-    ).toThrow();
+    expect(() => BookmarkInputSchema.parse({ sessionId: "s", title: "" })).toThrow();
+    expect(() => BookmarkInputSchema.parse({ sessionId: "s", title: "x".repeat(500) })).toThrow();
   });
 
   it("BookmarkInputSchema accepts minimal input and applies defaults", () => {
@@ -111,7 +107,13 @@ describe("investigation schema", () => {
     const w = WorkspaceInputSchema.parse({
       name: "My view",
       shared: false,
-      config: { visibleColumns: ["a"], charts: [], comparisonSessionIds: [], bookmarkIds: [], pinnedMetrics: [] },
+      config: {
+        visibleColumns: ["a"],
+        charts: [],
+        comparisonSessionIds: [],
+        bookmarkIds: [],
+        pinnedMetrics: [],
+      },
     });
     expect(w.name).toBe("My view");
   });
@@ -121,10 +123,36 @@ describe("investigation schema", () => {
 
 describe("search engine", () => {
   const records: InvestigationRecord[] = [
-    mkRec({ session_id: "a", segment: "Suspicious", qualityScore: 20, country: "US", riskLevel: "high", behaviorTags: ["rage-click"] }),
-    mkRec({ session_id: "b", segment: "Interested", qualityScore: 60, country: "DE", riskLevel: "medium" }),
-    mkRec({ session_id: "c", segment: "Activated", qualityScore: 88, country: "US", riskLevel: "low", landingPage: "/pricing" }),
-    mkRec({ session_id: "d", segment: "Explorer", qualityScore: 40, country: "FR", riskLevel: "low" }),
+    mkRec({
+      session_id: "a",
+      segment: "Suspicious",
+      qualityScore: 20,
+      country: "US",
+      riskLevel: "high",
+      behaviorTags: ["rage-click"],
+    }),
+    mkRec({
+      session_id: "b",
+      segment: "Interested",
+      qualityScore: 60,
+      country: "DE",
+      riskLevel: "medium",
+    }),
+    mkRec({
+      session_id: "c",
+      segment: "Activated",
+      qualityScore: 88,
+      country: "US",
+      riskLevel: "low",
+      landingPage: "/pricing",
+    }),
+    mkRec({
+      session_id: "d",
+      segment: "Explorer",
+      qualityScore: 40,
+      country: "FR",
+      riskLevel: "low",
+    }),
   ];
 
   it("eq matches exact segment", () => {
@@ -272,9 +300,21 @@ describe("search engine", () => {
     const bulk: InvestigationRecord[] = Array.from({ length: 25 }, (_, i) =>
       mkRec({ session_id: `s${i}`, qualityScore: 100 - i }),
     );
-    const p1 = runSearch(bulk, { sort: [{ field: "qualityScore", direction: "desc" }], page: 1, pageSize: 10 });
-    const p2 = runSearch(bulk, { sort: [{ field: "qualityScore", direction: "desc" }], page: 2, pageSize: 10 });
-    const p3 = runSearch(bulk, { sort: [{ field: "qualityScore", direction: "desc" }], page: 3, pageSize: 10 });
+    const p1 = runSearch(bulk, {
+      sort: [{ field: "qualityScore", direction: "desc" }],
+      page: 1,
+      pageSize: 10,
+    });
+    const p2 = runSearch(bulk, {
+      sort: [{ field: "qualityScore", direction: "desc" }],
+      page: 2,
+      pageSize: 10,
+    });
+    const p3 = runSearch(bulk, {
+      sort: [{ field: "qualityScore", direction: "desc" }],
+      page: 3,
+      pageSize: 10,
+    });
     expect(p1.rows).toHaveLength(10);
     expect(p2.rows).toHaveLength(10);
     expect(p3.rows).toHaveLength(5);
@@ -291,7 +331,11 @@ describe("search engine", () => {
 
   it("performance: 5k records filtered under 100ms", () => {
     const large: InvestigationRecord[] = Array.from({ length: 5000 }, (_, i) =>
-      mkRec({ session_id: `bulk-${i}`, qualityScore: (i % 100) + 1, segment: i % 2 ? "Interested" : "Suspicious" }),
+      mkRec({
+        session_id: `bulk-${i}`,
+        qualityScore: (i % 100) + 1,
+        segment: i % 2 ? "Interested" : "Suspicious",
+      }),
     );
     const t0 = performance.now();
     const r = runSearch(large, {
@@ -414,7 +458,9 @@ describe("explain engine", () => {
   });
 
   it("headline reflects probability", () => {
-    const humanEx = explainInvestigation(mkClass({ humanProbability: 0.95, automationProbability: 0.05 }));
+    const humanEx = explainInvestigation(
+      mkClass({ humanProbability: 0.95, automationProbability: 0.05 }),
+    );
     expect(humanEx.headline).toMatch(/human/i);
     const botEx = explainInvestigation(
       mkClass({ humanProbability: 0.1, automationProbability: 0.9, riskLevel: "high" }),
@@ -437,26 +483,39 @@ describe("bookmark analytics", () => {
   const now = new Date("2026-07-14T12:00:00Z").getTime();
   const rows: BookmarkRow[] = [
     {
-      id: "1", session_id: "a", status: "open", priority: "high",
+      id: "1",
+      session_id: "a",
+      status: "open",
+      priority: "high",
       tags: ["suspicious", "needs-review"],
       created_at: new Date(now - 1 * 86_400_000).toISOString(),
       updated_at: new Date(now - 1 * 86_400_000).toISOString(),
-      pinned: true, favorite: true,
+      pinned: true,
+      favorite: true,
     },
     {
-      id: "2", session_id: "a", status: "resolved", priority: "normal",
+      id: "2",
+      session_id: "a",
+      status: "resolved",
+      priority: "normal",
       tags: ["human"],
       created_at: new Date(now - 5 * 86_400_000).toISOString(),
       updated_at: new Date(now - 3 * 86_400_000).toISOString(),
     },
     {
-      id: "3", session_id: "b", status: "false_positive", priority: "low",
+      id: "3",
+      session_id: "b",
+      status: "false_positive",
+      priority: "low",
       tags: ["human", "false-positive"],
       created_at: new Date(now - 10 * 86_400_000).toISOString(),
       updated_at: new Date(now - 8 * 86_400_000).toISOString(),
     },
     {
-      id: "4", session_id: "c", status: "archived", priority: "critical",
+      id: "4",
+      session_id: "c",
+      status: "archived",
+      priority: "critical",
       tags: [],
       created_at: new Date(now - 40 * 86_400_000).toISOString(),
       updated_at: new Date(now - 40 * 86_400_000).toISOString(),
@@ -508,7 +567,15 @@ describe("privacy invariants", () => {
     const r = runSearch([mkRec()]);
     const keys = new Set(Object.keys(r.rows[0]));
     // Should not include ip, email, name, phone, cookie, etc.
-    for (const forbidden of ["ip", "ip_address", "email", "phone", "name", "cookie", "user_email"]) {
+    for (const forbidden of [
+      "ip",
+      "ip_address",
+      "email",
+      "phone",
+      "name",
+      "cookie",
+      "user_email",
+    ]) {
       expect(keys.has(forbidden)).toBe(false);
     }
   });

@@ -78,8 +78,10 @@ export function bucketByDay(events: TimelineEvent[]): { day: string; events: Tim
     if (bucket) bucket.push(e);
     else map.set(day, [e]);
   }
-  return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([day, es]) => ({
-    day,
-    events: es,
-  }));
+  return [...map.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([day, es]) => ({
+      day,
+      events: es,
+    }));
 }

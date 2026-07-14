@@ -62,8 +62,10 @@ export function explainInvestigation(c: SessionClassification): InvestigationExp
   const pos = positive.reduce((a, b) => a + b.weight, 0);
   const neg = negative.reduce((a, b) => a + b.weight, 0);
   const qualityDrivers: string[] = [];
-  if (pos > 0) qualityDrivers.push(`+${pos.toFixed(0)} points from ${positive.length} positive signal(s)`);
-  if (neg > 0) qualityDrivers.push(`-${neg.toFixed(0)} points from ${negative.length} negative signal(s)`);
+  if (pos > 0)
+    qualityDrivers.push(`+${pos.toFixed(0)} points from ${positive.length} positive signal(s)`);
+  if (neg > 0)
+    qualityDrivers.push(`-${neg.toFixed(0)} points from ${negative.length} negative signal(s)`);
   if (positive[0]) qualityDrivers.push(`Strongest positive: ${positive[0].signal}`);
   if (negative[0]) qualityDrivers.push(`Strongest negative: ${negative[0].signal}`);
 
@@ -91,8 +93,18 @@ export function explainInvestigation(c: SessionClassification): InvestigationExp
 
   const narrative = [
     `${headline}. Classified as "${c.segment}" with ${c.confidence} confidence and ${c.riskLevel} risk.`,
-    positive.length > 0 ? `Positive evidence includes: ${positive.slice(0, 3).map((e) => e.signal).join("; ")}.` : "",
-    negative.length > 0 ? `Negative evidence includes: ${negative.slice(0, 3).map((e) => e.signal).join("; ")}.` : "",
+    positive.length > 0
+      ? `Positive evidence includes: ${positive
+          .slice(0, 3)
+          .map((e) => e.signal)
+          .join("; ")}.`
+      : "",
+    negative.length > 0
+      ? `Negative evidence includes: ${negative
+          .slice(0, 3)
+          .map((e) => e.signal)
+          .join("; ")}.`
+      : "",
     conflicting.length > 0 ? `${conflicting.length} conflicting signal pair(s) detected.` : "",
   ]
     .filter(Boolean)

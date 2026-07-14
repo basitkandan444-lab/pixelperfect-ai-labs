@@ -112,9 +112,11 @@ export function analyzeBookmarks(rows: BookmarkRow[], now: number = Date.now()):
     priorityBreakdown: Object.fromEntries(priorityTally),
     growth7d,
     growth30d,
-    trend: [...trendMap.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([day, created]) => ({
-      day,
-      created,
-    })),
+    trend: [...trendMap.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([day, created]) => ({
+        day,
+        created,
+      })),
   };
 }

@@ -109,7 +109,13 @@ export type SearchRequest = z.infer<typeof SearchRequestSchema>;
 
 // ---------- Bookmarks ----------
 
-export const BOOKMARK_STATUSES = ["open", "in_review", "resolved", "false_positive", "archived"] as const;
+export const BOOKMARK_STATUSES = [
+  "open",
+  "in_review",
+  "resolved",
+  "false_positive",
+  "archived",
+] as const;
 export const BOOKMARK_PRIORITIES = ["low", "normal", "high", "critical"] as const;
 
 const trimmed = (max: number) => z.string().trim().min(1).max(max);

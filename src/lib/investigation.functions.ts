@@ -84,28 +84,44 @@ async function admin() {
   return supabaseAdmin as unknown as {
     from: (t: string) => {
       select: (c?: string) => {
-        eq: (col: string, v: unknown) => {
-          order?: (col: string, opts: { ascending: boolean }) => Promise<{ data: unknown; error: unknown }>;
+        eq: (
+          col: string,
+          v: unknown,
+        ) => {
+          order?: (
+            col: string,
+            opts: { ascending: boolean },
+          ) => Promise<{ data: unknown; error: unknown }>;
           limit?: (n: number) => Promise<{ data: unknown; error: unknown }>;
           maybeSingle: () => Promise<{ data: unknown; error: unknown }>;
         };
-        order?: (col: string, opts: { ascending: boolean }) => Promise<{ data: unknown; error: unknown }>;
+        order?: (
+          col: string,
+          opts: { ascending: boolean },
+        ) => Promise<{ data: unknown; error: unknown }>;
         limit?: (n: number) => Promise<{ data: unknown; error: unknown }>;
       };
-      insert: (
-        v: unknown,
-      ) => {
+      insert: (v: unknown) => {
         select: (c?: string) => { single: () => Promise<{ data: unknown; error: unknown }> };
       };
       update: (v: unknown) => {
-        eq: (col: string, v: unknown) => {
-          eq: (col: string, v: unknown) => {
+        eq: (
+          col: string,
+          v: unknown,
+        ) => {
+          eq: (
+            col: string,
+            v: unknown,
+          ) => {
             select: (c?: string) => { single: () => Promise<{ data: unknown; error: unknown }> };
           };
         };
       };
       delete: () => {
-        eq: (col: string, v: unknown) => {
+        eq: (
+          col: string,
+          v: unknown,
+        ) => {
           eq: (col: string, v: unknown) => Promise<{ error: unknown }>;
         };
       };
@@ -253,11 +269,13 @@ export const archiveBookmark = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const sb = await admin();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (sb.from("investigation_bookmarks").update({
-      status: "archived",
-      archived_at: new Date().toISOString(),
-    }) as any)
+
+    await (
+      sb.from("investigation_bookmarks").update({
+        status: "archived",
+        archived_at: new Date().toISOString(),
+      }) as any
+    )
       .eq("id", data.id)
       .eq("user_id", context.userId)
       .select(BookmarkRowSelect)
@@ -272,11 +290,13 @@ export const restoreBookmark = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const sb = await admin();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (sb.from("investigation_bookmarks").update({
-      status: "open",
-      archived_at: null,
-    }) as any)
+
+    await (
+      sb.from("investigation_bookmarks").update({
+        status: "open",
+        archived_at: null,
+      }) as any
+    )
       .eq("id", data.id)
       .eq("user_id", context.userId)
       .select(BookmarkRowSelect)
@@ -346,7 +366,7 @@ export const importBookmarks = createServerFn({ method: "POST" })
       BookmarkRowSelect,
     );
     await audit(sb, context.userId, "imported", { count: rows.length });
-    return { imported: rows.length, bookmarks: ((res as { data?: BookmarkRowDTO[] }).data ?? []) };
+    return { imported: rows.length, bookmarks: (res as { data?: BookmarkRowDTO[] }).data ?? [] };
   });
 
 // ---------- Workspaces CRUD ----------
@@ -447,7 +467,10 @@ export const compareInvestigations = createServerFn({ method: "POST" })
     await audit(supabaseAdmin, context.userId, "comparison_created", {
       sessions: data.sessionIds.length,
     });
-    return { report: compareSessions(classifications), missing: data.sessionIds.length - classifications.length };
+    return {
+      report: compareSessions(classifications),
+      missing: data.sessionIds.length - classifications.length,
+    };
   });
 
 const TimelineSchema = z.object({
@@ -506,12 +529,14 @@ export const bookmarkAnalytics = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
     const sb = await admin();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res = await (sb
-      .from("investigation_bookmarks")
-      .select(
-        "id,session_id,status,priority,tags,reason,created_at,updated_at,archived_at,pinned,favorite",
-      ) as any).order("created_at", { ascending: false });
+
+    const res = await (
+      sb
+        .from("investigation_bookmarks")
+        .select(
+          "id,session_id,status,priority,tags,reason,created_at,updated_at,archived_at,pinned,favorite",
+        ) as any
+    ).order("created_at", { ascending: false });
     const { analyzeBookmarks } = await import("./investigation/analytics");
     return { analytics: analyzeBookmarks((res.data ?? []) as never) };
   });
