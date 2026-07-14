@@ -443,15 +443,12 @@ function BookmarksPanel({ days, onOpen }: { days: number; onOpen: (id: string) =
     <div className="space-y-4">
       {analytics.data && (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <StatTile label="Total" value={String(analytics.data.analytics.total ?? 0)} />
-          <StatTile label="Open" value={String(analytics.data.analytics.byStatus?.open ?? 0)} />
-          <StatTile
-            label="Resolved"
-            value={String(analytics.data.analytics.byStatus?.resolved ?? 0)}
-          />
+          <StatTile label="Total" value={String(analytics.data.analytics.total)} />
+          <StatTile label="Open" value={String(analytics.data.analytics.open)} />
+          <StatTile label="Resolved" value={String(analytics.data.analytics.resolved)} />
           <StatTile
             label="False positive"
-            value={String(analytics.data.analytics.byStatus?.false_positive ?? 0)}
+            value={String(analytics.data.analytics.falsePositive)}
           />
         </div>
       )}
