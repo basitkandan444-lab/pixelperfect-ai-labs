@@ -13,7 +13,10 @@ const RangeSchema = z.object({
 
 async function assertAdmin(supabase: ReturnType<typeof Object>, userId: string) {
   const supa = supabase as unknown as {
-    rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: boolean | null; error: unknown }>;
+    rpc: (
+      fn: string,
+      args: Record<string, unknown>,
+    ) => Promise<{ data: boolean | null; error: unknown }>;
   };
   const { data, error } = await supa.rpc("has_role", { _user_id: userId, _role: "admin" });
   if (error || !data) throw new Error("Forbidden");
@@ -52,7 +55,9 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
     }
     const durations = Object.values(perSess).map((s) => s.last - s.first);
     const avgDur = durations.length ? durations.reduce((a, b) => a + b, 0) / durations.length : 0;
-    const engaged = Object.values(perSess).filter((s) => s.hits >= 2 || s.last - s.first > 10_000).length;
+    const engaged = Object.values(perSess).filter(
+      (s) => s.hits >= 2 || s.last - s.first > 10_000,
+    ).length;
     return {
       users: sessions.size,
       sessions: sessions.size,
@@ -79,7 +84,10 @@ export const getTrafficSources = createServerFn({ method: "POST" })
       .select("session_id,source,device_type,name")
       .gte("ts", since);
     const r = rows ?? [];
-    const buckets: Record<string, { sessions: Set<string>; enhanced: number; devices: Record<string, number> }> = {};
+    const buckets: Record<
+      string,
+      { sessions: Set<string>; enhanced: number; devices: Record<string, number> }
+    > = {};
     for (const x of r) {
       const s = x.source ?? "unknown";
       const b = buckets[s] ?? (buckets[s] = { sessions: new Set(), enhanced: 0, devices: {} });
@@ -126,8 +134,12 @@ export const getGeoBreakdown = createServerFn({ method: "POST" })
         .map(([code, s]) => ({ code, users: s.size }))
         .sort((a, b) => b.users - a.users)
         .slice(0, 50),
-      timezones: Object.entries(byTz).sort((a, b) => b[1] - a[1]).slice(0, 20),
-      languages: Object.entries(byLang).sort((a, b) => b[1] - a[1]).slice(0, 20),
+      timezones: Object.entries(byTz)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 20),
+      languages: Object.entries(byLang)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 20),
     };
   });
 
@@ -150,7 +162,9 @@ export const getDeviceBreakdown = createServerFn({ method: "POST" })
         const v = (x[k] as string) ?? "unknown";
         (map[v] ?? (map[v] = new Set())).add(x.session_id);
       }
-      return Object.entries(map).map(([k, s]) => ({ label: k, users: s.size })).sort((a, b) => b.users - a.users);
+      return Object.entries(map)
+        .map(([k, s]) => ({ label: k, users: s.size }))
+        .sort((a, b) => b.users - a.users);
     };
     return { device_type: count("device_type"), os: count("os"), browser: count("browser") };
   });
@@ -181,13 +195,17 @@ export const getQualityAndFunnel = createServerFn({ method: "POST" })
       s.first = Math.min(s.first, t);
       s.last = Math.max(s.last, t);
     }
-    let human = 0, review = 0, suspicious = 0;
+    let human = 0,
+      review = 0,
+      suspicious = 0;
     for (const sid of Object.keys(sessionEvents)) {
       const kind = sessionKind[sid];
       const evs = sessionEvents[sid];
       const dur = sessionSpan[sid].last - sessionSpan[sid].first;
       const engaged = evs.length >= 2 && dur > 5_000;
-      const meaningful = evs.some((n) => n === "upload_started" || n === "enhance_completed" || n === "download_completed");
+      const meaningful = evs.some(
+        (n) => n === "upload_started" || n === "enhance_completed" || n === "download_completed",
+      );
       const veryFast = evs.length > 5 && dur < 1_000;
       if (kind === "suspicious" || veryFast) suspicious++;
       else if (kind === "needs_review" || (!engaged && !meaningful)) review++;
@@ -240,7 +258,9 @@ export const getRealtime = createServerFn({ method: "GET" })
     return {
       active: active.size,
       recent: r.slice(0, 20),
-      topPaths: Object.entries(byPath).sort((a, b) => b[1] - a[1]).slice(0, 10),
+      topPaths: Object.entries(byPath)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10),
     };
   });
 
@@ -288,7 +308,9 @@ export const exportEventsCsv = createServerFn({ method: "POST" })
     const since = new Date(Date.now() - data.days * 86_400_000).toISOString();
     const { data: rows } = await sb
       .from("events")
-      .select("ts,name,path,source,country,device_type,os,browser,ua_kind,duration_ms,ok,error_code")
+      .select(
+        "ts,name,path,source,country,device_type,os,browser,ua_kind,duration_ms,ok,error_code",
+      )
       .gte("ts", since)
       .limit(50000);
     const header =
@@ -300,9 +322,21 @@ export const exportEventsCsv = createServerFn({ method: "POST" })
     const body = (rows ?? [])
       .map((r) =>
         [
-          r.ts, r.name, r.path, r.source, r.country, r.device_type, r.os, r.browser, r.ua_kind,
-          r.duration_ms, r.ok, r.error_code,
-        ].map(esc).join(","),
+          r.ts,
+          r.name,
+          r.path,
+          r.source,
+          r.country,
+          r.device_type,
+          r.os,
+          r.browser,
+          r.ua_kind,
+          r.duration_ms,
+          r.ok,
+          r.error_code,
+        ]
+          .map(esc)
+          .join(","),
       )
       .join("\n");
     return { csv: `${header}\n${body}` };

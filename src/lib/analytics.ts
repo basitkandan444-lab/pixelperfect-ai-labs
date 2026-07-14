@@ -60,4 +60,3 @@ export function trackEvent(name: string, params: EventParams = {}) {
     // Analytics must never break the app.
   }
 }
-

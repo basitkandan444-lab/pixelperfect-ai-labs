@@ -74,9 +74,7 @@ export const Route = createFileRoute("/api/public/events")({
         // Country derived from Cloudflare edge header (workerd sets CF-IPCountry).
         // No IP is ever read or stored.
         const country =
-          request.headers.get("cf-ipcountry") ??
-          request.headers.get("x-vercel-ip-country") ??
-          null;
+          request.headers.get("cf-ipcountry") ?? request.headers.get("x-vercel-ip-country") ?? null;
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const rows = samples.map((s) => ({

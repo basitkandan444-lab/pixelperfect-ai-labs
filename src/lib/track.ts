@@ -42,7 +42,12 @@ function sid(): string {
   return v;
 }
 
-function classifySource(): { source: string; medium?: string; campaign?: string; refHost?: string } {
+function classifySource(): {
+  source: string;
+  medium?: string;
+  campaign?: string;
+  refHost?: string;
+} {
   if (typeof window === "undefined") return { source: "unknown" };
   const p = new URLSearchParams(window.location.search);
   const medium = p.get("utm_medium") ?? undefined;
@@ -67,15 +72,26 @@ function classifySource(): { source: string; medium?: string; campaign?: string;
   const h = refHost.toLowerCase();
   if (/google|bing|duckduckgo|yahoo|yandex|baidu|ecosia|brave/.test(h))
     return { source: "organic", refHost, medium, campaign };
-  if (/facebook|instagram|twitter|x\.com|linkedin|reddit|pinterest|tiktok|youtube|threads|bsky/.test(h))
+  if (
+    /facebook|instagram|twitter|x\.com|linkedin|reddit|pinterest|tiktok|youtube|threads|bsky/.test(
+      h,
+    )
+  )
     return { source: "social", refHost, medium, campaign };
   return { source: "referral", refHost, medium, campaign };
 }
 
-function device(): { device_type: string; os: string; browser: string; screen_w: number; screen_h: number } {
+function device(): {
+  device_type: string;
+  os: string;
+  browser: string;
+  screen_w: number;
+  screen_h: number;
+} {
   const ua = navigator.userAgent;
   const mobile = /Mobi|Android|iPhone/i.test(ua);
-  const tablet = /iPad|Tablet/i.test(ua) || (mobile && Math.min(screen.width, screen.height) >= 600);
+  const tablet =
+    /iPad|Tablet/i.test(ua) || (mobile && Math.min(screen.width, screen.height) >= 600);
   let os = "other";
   if (/Windows/.test(ua)) os = "Windows";
   else if (/Mac OS/.test(ua)) os = "macOS";

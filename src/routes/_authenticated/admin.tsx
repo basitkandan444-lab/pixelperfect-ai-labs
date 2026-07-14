@@ -57,18 +57,28 @@ function CommandCenter() {
   const gscPerfFn = useServerFn(getGscPerformance);
   const csvFn = useServerFn(exportEventsCsv);
 
-  const overview = useQuery({ queryKey: ["ov", days], queryFn: () => overviewFn({ data: { days } }) });
-  const sources = useQuery({ queryKey: ["src", days], queryFn: () => sourcesFn({ data: { days } }) });
+  const overview = useQuery({
+    queryKey: ["ov", days],
+    queryFn: () => overviewFn({ data: { days } }),
+  });
+  const sources = useQuery({
+    queryKey: ["src", days],
+    queryFn: () => sourcesFn({ data: { days } }),
+  });
   const geo = useQuery({ queryKey: ["geo", days], queryFn: () => geoFn({ data: { days } }) });
   const dev = useQuery({ queryKey: ["dev", days], queryFn: () => deviceFn({ data: { days } }) });
   const qf = useQuery({ queryKey: ["qf", days], queryFn: () => qfFn({ data: { days } }) });
   const rt = useQuery({ queryKey: ["rt"], queryFn: () => rtFn(), refetchInterval: 5000 });
-  const journeys = useQuery({ queryKey: ["j", days], queryFn: () => journeysFn({ data: { days } }) });
+  const journeys = useQuery({
+    queryKey: ["j", days],
+    queryFn: () => journeysFn({ data: { days } }),
+  });
   const gscSites = useQuery({ queryKey: ["gscSites"], queryFn: () => gscSitesFn() });
   const firstSite = gscSites.data?.sites?.[0]?.siteUrl;
   const gscPerf = useQuery({
     queryKey: ["gscPerf", firstSite, days],
-    queryFn: () => (firstSite ? gscPerfFn({ data: { siteUrl: firstSite, days } }) : Promise.resolve(null)),
+    queryFn: () =>
+      firstSite ? gscPerfFn({ data: { siteUrl: firstSite, days } }) : Promise.resolve(null),
     enabled: !!firstSite,
   });
 
@@ -115,16 +125,27 @@ function CommandCenter() {
               className="rounded-md border border-input bg-background px-2 py-1 text-sm"
             >
               {[1, 7, 14, 28, 90].map((d) => (
-                <option key={d} value={d}>{d === 1 ? "Last 24h" : `Last ${d}d`}</option>
+                <option key={d} value={d}>
+                  {d === 1 ? "Last 24h" : `Last ${d}d`}
+                </option>
               ))}
             </select>
-            <button onClick={exportCsv} className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent">
+            <button
+              onClick={exportCsv}
+              className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent"
+            >
               Export CSV
             </button>
-            <button onClick={() => window.print()} className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent">
+            <button
+              onClick={() => window.print()}
+              className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent"
+            >
               Print report
             </button>
-            <button onClick={signOut} className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent">
+            <button
+              onClick={signOut}
+              className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent"
+            >
               Sign out
             </button>
           </div>
@@ -185,14 +206,20 @@ function CommandCenter() {
 }
 
 function Section({
-  title, subtitle, children,
+  title,
+  subtitle,
+  children,
 }: {
-  title: string; subtitle?: string; children: React.ReactNode;
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
 }) {
   return (
     <section className="rounded-2xl border border-border bg-card p-5">
       <div className="mb-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{title}</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          {title}
+        </h2>
         {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
       </div>
       {children}
@@ -251,7 +278,17 @@ function Realtime({ data }: { data?: Awaited<ReturnType<typeof getRealtime>> }) 
   );
 }
 
-function Funnel({ funnel }: { funnel?: { visited: number; uploaded: number; enhanceStarted: number; enhanceCompleted: number; downloaded: number } }) {
+function Funnel({
+  funnel,
+}: {
+  funnel?: {
+    visited: number;
+    uploaded: number;
+    enhanceStarted: number;
+    enhanceCompleted: number;
+    downloaded: number;
+  };
+}) {
   if (!funnel) return <Skeleton />;
   const steps = [
     ["Visited", funnel.visited],
@@ -272,7 +309,10 @@ function Funnel({ funnel }: { funnel?: { visited: number; uploaded: number; enha
             <div className="mb-1 flex justify-between text-sm">
               <span>{label}</span>
               <span className="tabular-nums text-muted-foreground">
-                {n} {i > 0 && dropRate > 0 && <em className="text-orange-500">-{(dropRate * 100).toFixed(0)}%</em>}
+                {n}{" "}
+                {i > 0 && dropRate > 0 && (
+                  <em className="text-orange-500">-{(dropRate * 100).toFixed(0)}%</em>
+                )}
               </span>
             </div>
             <div className="h-2 overflow-hidden rounded bg-muted">
@@ -291,7 +331,12 @@ function TrafficSources({ rows }: { rows?: Awaited<ReturnType<typeof getTrafficS
   return (
     <table className="w-full text-sm">
       <thead className="text-left text-xs text-muted-foreground">
-        <tr><th className="pb-2">Source</th><th>Users</th><th>Enhanced</th><th>Conv.</th></tr>
+        <tr>
+          <th className="pb-2">Source</th>
+          <th>Users</th>
+          <th>Enhanced</th>
+          <th>Conv.</th>
+        </tr>
       </thead>
       <tbody>
         {rows.map((r) => (
@@ -307,7 +352,11 @@ function TrafficSources({ rows }: { rows?: Awaited<ReturnType<typeof getTrafficS
   );
 }
 
-function Quality({ q }: { q?: { human: number; review: number; suspicious: number; total: number } }) {
+function Quality({
+  q,
+}: {
+  q?: { human: number; review: number; suspicious: number; total: number };
+}) {
   if (!q) return <Skeleton />;
   if (q.total === 0) return <Empty msg="No sessions yet." />;
   const seg = (n: number, cls: string) => (
@@ -321,13 +370,19 @@ function Quality({ q }: { q?: { human: number; review: number; suspicious: numbe
         {seg(q.suspicious, "bg-red-500")}
       </div>
       <ul className="mt-3 grid grid-cols-3 gap-2 text-sm">
-        <li><span className="text-emerald-500">●</span> Likely human · <b>{q.human}</b></li>
-        <li><span className="text-amber-500">●</span> Needs review · <b>{q.review}</b></li>
-        <li><span className="text-red-500">●</span> Suspicious · <b>{q.suspicious}</b></li>
+        <li>
+          <span className="text-emerald-500">●</span> Likely human · <b>{q.human}</b>
+        </li>
+        <li>
+          <span className="text-amber-500">●</span> Needs review · <b>{q.review}</b>
+        </li>
+        <li>
+          <span className="text-red-500">●</span> Suspicious · <b>{q.suspicious}</b>
+        </li>
       </ul>
       <p className="mt-3 text-xs text-muted-foreground">
-        Heuristic score from UA signals, session depth, and meaningful interactions. Not a
-        certainty judgment — no user is uniquely identified.
+        Heuristic score from UA signals, session depth, and meaningful interactions. Not a certainty
+        judgment — no user is uniquely identified.
       </p>
     </div>
   );
@@ -357,7 +412,10 @@ function Geography({ data }: { data?: Awaited<ReturnType<typeof getGeoBreakdown>
         <h3 className="mb-2 text-xs font-medium text-muted-foreground">Languages</h3>
         <ul className="space-y-1 text-sm">
           {data.languages.slice(0, 8).map(([l, n]) => (
-            <li key={l} className="flex justify-between"><span>{l}</span><span className="tabular-nums">{n}</span></li>
+            <li key={l} className="flex justify-between">
+              <span>{l}</span>
+              <span className="tabular-nums">{n}</span>
+            </li>
           ))}
         </ul>
       </div>
@@ -372,7 +430,10 @@ function DeviceBreakdown({ data }: { data?: Awaited<ReturnType<typeof getDeviceB
       <h3 className="mb-2 text-xs font-medium text-muted-foreground">{title}</h3>
       <ul className="space-y-1 text-sm">
         {rows.slice(0, 6).map((r) => (
-          <li key={r.label} className="flex justify-between"><span>{r.label}</span><span className="tabular-nums">{r.users}</span></li>
+          <li key={r.label} className="flex justify-between">
+            <span>{r.label}</span>
+            <span className="tabular-nums">{r.users}</span>
+          </li>
         ))}
       </ul>
     </div>
@@ -392,7 +453,10 @@ function Journeys({ rows }: { rows?: Awaited<ReturnType<typeof getJourneys>> }) 
   return (
     <ul className="space-y-2 text-sm">
       {rows.map((r) => (
-        <li key={r.signature} className="flex items-center justify-between border-b border-border pb-2 last:border-b-0">
+        <li
+          key={r.signature}
+          className="flex items-center justify-between border-b border-border pb-2 last:border-b-0"
+        >
           <span className="font-mono text-xs">{r.signature}</span>
           <span className="tabular-nums text-muted-foreground">{r.sessions}</span>
         </li>
@@ -418,14 +482,35 @@ function Vitals({ data }: { data?: { metrics?: Record<string, VitalMetric> } }) 
         const rating =
           m.poor > m.good ? "poor" : m.needsImprovement > m.good ? "needs-improvement" : "good";
         const cls =
-          rating === "good" ? "text-emerald-500" : rating === "poor" ? "text-red-500" : "text-amber-500";
-        return <KPI key={n} label={n} value={<span className={cls}>{n === "CLS" ? m.p75.toFixed(2) : `${Math.round(m.p75)}ms`}</span>} />;
+          rating === "good"
+            ? "text-emerald-500"
+            : rating === "poor"
+              ? "text-red-500"
+              : "text-amber-500";
+        return (
+          <KPI
+            key={n}
+            label={n}
+            value={
+              <span className={cls}>
+                {n === "CLS" ? m.p75.toFixed(2) : `${Math.round(m.p75)}ms`}
+              </span>
+            }
+          />
+        );
       })}
     </div>
   );
 }
 
-interface Reliability { requests: number; success: number; failure: number; successRate: number; p95DurationMs: number; errors: Record<string, number> }
+interface Reliability {
+  requests: number;
+  success: number;
+  failure: number;
+  successRate: number;
+  p95DurationMs: number;
+  errors: Record<string, number>;
+}
 function Reliability({ data }: { data?: { reliability?: Reliability } }) {
   if (!data?.reliability) return <Skeleton />;
   const r = data.reliability;
@@ -440,7 +525,10 @@ function Reliability({ data }: { data?: { reliability?: Reliability } }) {
       {Object.keys(r.errors).length > 0 && (
         <ul className="mt-3 space-y-1 text-sm">
           {Object.entries(r.errors).map(([code, n]) => (
-            <li key={code} className="flex justify-between"><span className="font-mono text-xs">{code}</span><span className="tabular-nums text-red-500">{n}</span></li>
+            <li key={code} className="flex justify-between">
+              <span className="font-mono text-xs">{code}</span>
+              <span className="tabular-nums text-red-500">{n}</span>
+            </li>
           ))}
         </ul>
       )}
@@ -448,18 +536,36 @@ function Reliability({ data }: { data?: { reliability?: Reliability } }) {
   );
 }
 
-interface GscSites { connected: boolean; sites: { siteUrl: string }[] }
-interface GscPerf { totals: { clicks?: number; impressions?: number; ctr?: number; position?: number } | null; byQuery: { keys?: string[]; clicks?: number; impressions?: number; ctr?: number; position?: number }[]; byPage: { keys?: string[]; clicks?: number; impressions?: number }[] }
+interface GscSites {
+  connected: boolean;
+  sites: { siteUrl: string }[];
+}
+interface GscPerf {
+  totals: { clicks?: number; impressions?: number; ctr?: number; position?: number } | null;
+  byQuery: {
+    keys?: string[];
+    clicks?: number;
+    impressions?: number;
+    ctr?: number;
+    position?: number;
+  }[];
+  byPage: { keys?: string[]; clicks?: number; impressions?: number }[];
+}
 function SEO({ sites, perf }: { sites?: GscSites; perf?: GscPerf | null }) {
   const connected = sites?.connected;
   const site = sites?.sites?.[0]?.siteUrl;
-  if (!connected) return <Empty msg="Search Console is linked but no verified property was found. Verify your domain in Search Console." />;
+  if (!connected)
+    return (
+      <Empty msg="Search Console is linked but no verified property was found. Verify your domain in Search Console." />
+    );
   if (!site) return <Empty msg="No verified properties." />;
   if (!perf) return <Skeleton />;
   const t = perf.totals ?? { clicks: 0, impressions: 0, ctr: 0, position: 0 };
   return (
     <div>
-      <div className="mb-3 text-xs text-muted-foreground">Property: <span className="font-mono">{site}</span></div>
+      <div className="mb-3 text-xs text-muted-foreground">
+        Property: <span className="font-mono">{site}</span>
+      </div>
       <div className="grid grid-cols-4 gap-3">
         <KPI label="Clicks" value={t.clicks ?? 0} />
         <KPI label="Impressions" value={t.impressions ?? 0} />
@@ -473,7 +579,9 @@ function SEO({ sites, perf }: { sites?: GscSites; perf?: GscPerf | null }) {
             {(perf.byQuery ?? []).slice(0, 10).map((row, i) => (
               <li key={i} className="flex justify-between gap-2">
                 <span className="truncate">{row.keys?.[0]}</span>
-                <span className="tabular-nums text-muted-foreground">{row.clicks} / {row.impressions}</span>
+                <span className="tabular-nums text-muted-foreground">
+                  {row.clicks} / {row.impressions}
+                </span>
               </li>
             ))}
           </ul>
@@ -484,7 +592,9 @@ function SEO({ sites, perf }: { sites?: GscSites; perf?: GscPerf | null }) {
             {(perf.byPage ?? []).slice(0, 10).map((row, i) => (
               <li key={i} className="flex justify-between gap-2">
                 <span className="truncate font-mono text-xs">{row.keys?.[0]}</span>
-                <span className="tabular-nums text-muted-foreground">{row.clicks} / {row.impressions}</span>
+                <span className="tabular-nums text-muted-foreground">
+                  {row.clicks} / {row.impressions}
+                </span>
               </li>
             ))}
           </ul>
