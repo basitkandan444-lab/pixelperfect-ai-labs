@@ -258,6 +258,14 @@ function CommandCenter() {
           <Alerts data={alerts.data} />
         </Section>
 
+        <Section
+          title="Intelligence Validation"
+          subtitle="Self-audit: averages, confidence & risk distributions, false-flag candidates"
+        >
+          <Validation data={validation.data} />
+        </Section>
+
+
         <Section title="Traffic Overview">
           <KPIRow data={overview.data} />
         </Section>
