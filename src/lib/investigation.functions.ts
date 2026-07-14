@@ -16,6 +16,41 @@ import {
   WorkspaceInputSchema,
 } from "./investigation/schema";
 
+// Concrete serializable row types (Cloudflare Worker RPC can't serialize `unknown`).
+export interface BookmarkRowDTO {
+  id: string;
+  user_id: string;
+  session_id: string;
+  title: string;
+  description: string | null;
+  priority: string;
+  status: string;
+  reason: string | null;
+  risk: string | null;
+  category: string | null;
+  folder: string | null;
+  tags: string[];
+  linked_alerts: string[];
+  linked_incidents: string[];
+  pinned: boolean;
+  favorite: boolean;
+  archived_at: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkspaceRowDTO {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  shared: boolean;
+  config: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
+}
+
 const IdSchema = z.object({ id: z.string().uuid() });
 const RangeSchema = z.object({ days: z.number().int().min(1).max(90).default(7) });
 
