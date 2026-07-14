@@ -171,7 +171,7 @@ export const listBookmarks = createServerFn({ method: "POST" })
       "created_at",
       { ascending: false },
     );
-    return { rows: (res.data ?? []) as unknown[] };
+    return { rows: (res.data ?? []) as BookmarkRowDTO[] };
   });
 
 export const createBookmark = createServerFn({ method: "POST" })
@@ -345,7 +345,7 @@ export const importBookmarks = createServerFn({ method: "POST" })
       BookmarkRowSelect,
     );
     await audit(sb, context.userId, "imported", { count: rows.length });
-    return { imported: rows.length, bookmarks: (res as { data?: unknown[] }).data ?? [] };
+    return { imported: rows.length, bookmarks: ((res as { data?: BookmarkRowDTO[] }).data ?? []) };
   });
 
 // ---------- Workspaces CRUD ----------
@@ -363,7 +363,7 @@ export const listWorkspaces = createServerFn({ method: "POST" })
       "updated_at",
       { ascending: false },
     );
-    return { rows: (res.data ?? []) as unknown[] };
+    return { rows: (res.data ?? []) as WorkspaceRowDTO[] };
   });
 
 export const saveWorkspace = createServerFn({ method: "POST" })
