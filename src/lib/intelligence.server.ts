@@ -145,8 +145,9 @@ export interface SessionClassification {
   segment: Segment;
   intentScore: number; // 0..100
   engagementScore: number; // 0..100
+  riskLevel: "low" | "medium" | "high";
   evidence: { signal: string; direction: "positive" | "negative"; weight: number }[];
-  reasons: string[]; // human-readable summary
+  reasons: string[];
   device: string | null;
   source: string | null;
   country: string | null;
@@ -154,6 +155,20 @@ export interface SessionClassification {
   events: number;
   first: string;
   last: string;
+  summary: Record<string, unknown> | null;
+  rageClicks: number;
+  deadClicks: number;
+}
+
+// Bounded-add helper. Every signal contributes a capped weight so a single
+// noisy signal cannot dominate the multi-signal score.
+function addEv(
+  ev: SessionClassification["evidence"],
+  signal: string,
+  direction: "positive" | "negative",
+  weight: number,
+) {
+  ev.push({ signal, direction, weight: Math.min(weight, 25) });
 }
 
 export function classifySession(s: SessionAgg): SessionClassification {
@@ -161,6 +176,10 @@ export function classifySession(s: SessionAgg): SessionClassification {
   const n = s.events.length;
   const ev: SessionClassification["evidence"] = [];
   let score = 50;
+  const push = (sig: string, dir: "positive" | "negative", w: number) => {
+    addEv(ev, sig, dir, w);
+    score += dir === "positive" ? Math.min(w, 25) : -Math.min(w, 25);
+  };
 
   // UA signal
   if (s.ua_kind === "likely_human") {
