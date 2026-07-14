@@ -63,6 +63,10 @@ function CommandCenter() {
   const gscSitesFn = useServerFn(listGscSites);
   const gscPerfFn = useServerFn(getGscPerformance);
   const intelFn = useServerFn(getIntelligence);
+  const visitorsFn = useServerFn(getVisitorTimelines);
+  const sourceIntelFn = useServerFn(getSourceIntelligence);
+  const rtIntelFn = useServerFn(getRealtimeIntelligence);
+  const reportFn = useServerFn(getIntelligenceReport);
   const csvFn = useServerFn(exportEventsCsv);
 
   const overview = useQuery({
