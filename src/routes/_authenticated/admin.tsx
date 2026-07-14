@@ -15,7 +15,13 @@ import {
   exportEventsCsv,
 } from "@/lib/admin.functions";
 import { listGscSites, getGscPerformance } from "@/lib/gsc.functions";
-import { getIntelligence } from "@/lib/intelligence.functions";
+import {
+  getIntelligence,
+  getVisitorTimelines,
+  getSourceIntelligence,
+  getRealtimeIntelligence,
+  getIntelligenceReport,
+} from "@/lib/intelligence.functions";
 
 // Admin gate: this route lives under _authenticated so the session is already
 // checked. The role check happens client-side (redirect on fail) AND server-side
@@ -57,6 +63,10 @@ function CommandCenter() {
   const gscSitesFn = useServerFn(listGscSites);
   const gscPerfFn = useServerFn(getGscPerformance);
   const intelFn = useServerFn(getIntelligence);
+  const visitorsFn = useServerFn(getVisitorTimelines);
+  const sourceIntelFn = useServerFn(getSourceIntelligence);
+  const rtIntelFn = useServerFn(getRealtimeIntelligence);
+  const reportFn = useServerFn(getIntelligenceReport);
   const csvFn = useServerFn(exportEventsCsv);
 
   const overview = useQuery({
@@ -87,6 +97,19 @@ function CommandCenter() {
     queryKey: ["intel", days],
     queryFn: () => intelFn({ data: { days } }),
   });
+  const visitors = useQuery({
+    queryKey: ["visitors", days],
+    queryFn: () => visitorsFn({ data: { days, limit: 25 } }),
+  });
+  const sourceIntel = useQuery({
+    queryKey: ["srcIntel", days],
+    queryFn: () => sourceIntelFn({ data: { days } }),
+  });
+  const rtIntel = useQuery({
+    queryKey: ["rtIntel"],
+    queryFn: () => rtIntelFn({ data: { windowSeconds: 300 } }),
+    refetchInterval: 5000,
+  });
 
   const vitals = useQuery({
     queryKey: ["vitals"],
@@ -110,6 +133,16 @@ function CommandCenter() {
     const a = document.createElement("a");
     a.href = url;
     a.download = `visitors-${days}d.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadReport = async () => {
+    const { report } = await reportFn({ data: { days } });
+    const url = URL.createObjectURL(new Blob([report], { type: "text/markdown" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `traffic-intelligence-${days}d.md`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -143,10 +176,16 @@ function CommandCenter() {
               Export CSV
             </button>
             <button
+              onClick={downloadReport}
+              className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent"
+            >
+              Download report
+            </button>
+            <button
               onClick={() => window.print()}
               className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent"
             >
-              Print report
+              Print
             </button>
             <button
               onClick={signOut}
@@ -167,14 +206,26 @@ function CommandCenter() {
           <Intelligence data={intel.data} />
         </Section>
 
+        <Section title="Real-Time Command Room" subtitle="Live visitors · classified in real time">
+          <RealtimeCommandRoom data={rtIntel.data} />
+        </Section>
+
         <div className="grid gap-6 lg:grid-cols-2">
-          <Section title="Real-Time Monitor" subtitle="Last 5 minutes">
+          <Section title="Recent Activity" subtitle="Last 5 minutes">
             <Realtime data={rt.data} />
           </Section>
           <Section title="Product Activation Funnel">
             <Funnel funnel={qf.data?.funnel} />
           </Section>
         </div>
+
+        <Section title="Source Intelligence" subtitle="Quality, conversion & human likelihood by channel">
+          <SourceIntel rows={sourceIntel.data} />
+        </Section>
+
+        <Section title="Visitor Timelines" subtitle="Per-session classification with probability, confidence & evidence">
+          <VisitorList rows={visitors.data} />
+        </Section>
 
         <div className="grid gap-6 lg:grid-cols-2">
           <Section title="Traffic Sources">
@@ -737,3 +788,170 @@ function Intelligence({ data }: { data?: Awaited<ReturnType<typeof getIntelligen
   );
 }
 
+
+function RealtimeCommandRoom({ data }: { data?: Awaited<ReturnType<typeof getRealtimeIntelligence>> }) {
+  if (!data) return <Skeleton />;
+  if (data.active === 0) return <Empty msg="No live visitors right now." />;
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <KPI label="Active now" value={data.active} sub={`${data.windowSeconds}s window`} />
+        <KPI label="Human likely" value={<span className="text-emerald-500">{data.humanLikely}</span>} />
+        <KPI label="Unknown" value={<span className="text-amber-500">{data.unknown}</span>} />
+        <KPI label="Suspicious" value={<span className="text-red-500">{data.suspicious}</span>} />
+      </div>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <KPI label="Uploading" value={data.currentlyUploading} />
+        <KPI label="Enhancing" value={data.currentlyEnhancing} />
+        <KPI label="Downloading" value={data.currentlyDownloading} />
+        <KPI label="Exploring" value={data.currentlyExploring} />
+      </div>
+      <div className="grid gap-4 md:grid-cols-3 text-sm">
+        <MiniList title="By country" rows={data.byCountry.map((c) => [c.code, c.n] as const)} />
+        <MiniList title="By device" rows={data.byDevice.map((c) => [c.device, c.n] as const)} />
+        <MiniList title="By source" rows={data.bySource.map((c) => [c.source, c.n] as const)} />
+      </div>
+    </div>
+  );
+}
+
+function MiniList({ title, rows }: { title: string; rows: (readonly [string, number])[] }) {
+  return (
+    <div>
+      <h3 className="mb-2 text-xs font-medium text-muted-foreground">{title}</h3>
+      <ul className="space-y-1">
+        {rows.length === 0 && <li className="text-muted-foreground">—</li>}
+        {rows.map(([k, n]) => (
+          <li key={k} className="flex justify-between">
+            <span className="truncate">{k}</span>
+            <span className="tabular-nums text-muted-foreground">{n}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function SourceIntel({ rows }: { rows?: Awaited<ReturnType<typeof getSourceIntelligence>> }) {
+  if (!rows) return <Skeleton />;
+  if (rows.length === 0) return <Empty msg="No source data yet." />;
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead className="text-left text-xs text-muted-foreground">
+          <tr>
+            <th className="pb-2">Source</th>
+            <th>Sessions</th>
+            <th>Human</th>
+            <th>Automation</th>
+            <th>Quality</th>
+            <th>Intent</th>
+            <th>Activation</th>
+            <th>Conv.</th>
+            <th>Top segment</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.source} className="border-t border-border">
+              <td className="py-2 capitalize">{r.source}</td>
+              <td className="tabular-nums">{r.sessions}</td>
+              <td className="tabular-nums text-emerald-500">{(r.humanPct * 100).toFixed(0)}%</td>
+              <td className="tabular-nums text-red-500">{(r.automationPct * 100).toFixed(0)}%</td>
+              <td className="tabular-nums">{r.avgQuality}</td>
+              <td className="tabular-nums">{r.avgIntent}</td>
+              <td className="tabular-nums">{(r.activationRate * 100).toFixed(1)}%</td>
+              <td className="tabular-nums">{(r.conversionRate * 100).toFixed(1)}%</td>
+              <td className="text-xs text-muted-foreground">
+                {r.topSegments.map((s) => `${s.segment} (${s.n})`).join(", ")}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function VisitorList({ rows }: { rows?: Awaited<ReturnType<typeof getVisitorTimelines>> }) {
+  if (!rows) return <Skeleton />;
+  if (rows.length === 0) return <Empty msg="No visitor sessions yet." />;
+  return (
+    <ul className="space-y-3">
+      {rows.map((v) => (
+        <VisitorRow key={v.classification.session_id} v={v} />
+      ))}
+    </ul>
+  );
+}
+
+function VisitorRow({ v }: { v: Awaited<ReturnType<typeof getVisitorTimelines>>[number] }) {
+  const [open, setOpen] = useState(false);
+  const c = v.classification;
+  const confCls =
+    c.confidence === "high" ? "text-emerald-500" : c.confidence === "low" ? "text-red-500" : "text-amber-500";
+  const humanCls =
+    c.humanProbability >= 0.7
+      ? "text-emerald-500"
+      : c.humanProbability <= 0.3
+        ? "text-red-500"
+        : "text-amber-500";
+  const shortId = c.session_id.slice(0, 8);
+  const dur = Math.round(c.duration_ms / 1000);
+  return (
+    <li className="rounded-lg border border-border">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full flex-wrap items-center gap-3 px-3 py-2 text-left text-sm hover:bg-accent/50"
+      >
+        <span className="font-mono text-xs text-muted-foreground">#{shortId}</span>
+        <span className="font-medium">{c.segment}</span>
+        <span className={`tabular-nums ${humanCls}`}>
+          Human {(c.humanProbability * 100).toFixed(0)}%
+        </span>
+        <span className={`text-xs ${confCls}`}>({c.confidence} conf.)</span>
+        <span className="tabular-nums text-muted-foreground">Q {c.qualityScore}</span>
+        <span className="tabular-nums text-muted-foreground">Intent {c.intentScore}</span>
+        <span className="ml-auto text-xs text-muted-foreground">
+          {c.device ?? "?"} · {c.country ?? "??"} · {c.source ?? "?"} · {c.events} events · {dur}s
+        </span>
+      </button>
+      {open && (
+        <div className="grid gap-4 border-t border-border p-3 md:grid-cols-2">
+          <div>
+            <h4 className="mb-2 text-xs font-medium text-muted-foreground">Evidence</h4>
+            <ul className="space-y-1 text-xs">
+              {c.evidence.map((e, i) => (
+                <li key={i} className="flex justify-between gap-2">
+                  <span className={e.direction === "positive" ? "text-emerald-500" : "text-red-500"}>
+                    {e.direction === "positive" ? "✓" : "✗"} {e.signal}
+                  </span>
+                  <span className="tabular-nums text-muted-foreground">±{e.weight}</span>
+                </li>
+              ))}
+              {c.evidence.length === 0 && (
+                <li className="text-muted-foreground">No evidence beyond baseline.</li>
+              )}
+            </ul>
+          </div>
+          <div>
+            <h4 className="mb-2 text-xs font-medium text-muted-foreground">Timeline</h4>
+            <ol className="space-y-1 text-xs">
+              {v.timeline.map((t, i) => (
+                <li key={i} className="grid grid-cols-[4rem_1fr] gap-2">
+                  <span className="font-mono tabular-nums text-muted-foreground">
+                    {Math.round(t.offset_ms / 1000)}s
+                  </span>
+                  <span>
+                    <b>{t.name}</b>
+                    {t.path && <span className="text-muted-foreground"> · {t.path}</span>}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      )}
+    </li>
+  );
+}
