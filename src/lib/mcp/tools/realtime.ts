@@ -22,9 +22,11 @@ export default defineTool({
     const auth = await requireAdmin(ctx);
     if (!auth.ok) return errorResult(auth.message);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { fetchWindow, buildRealtime } = await import("../../intelligence.server");
+    const { fetchWindow, buildRealtimeIntelligence } = await import(
+      "../../intelligence.server"
+    );
     const rows = await fetchWindow(supabaseAdmin, 1);
-    const realtime = buildRealtime(rows, windowSeconds);
+    const realtime = buildRealtimeIntelligence(rows, windowSeconds);
     return jsonResult(realtime);
   },
 });
