@@ -74,6 +74,7 @@ function CommandCenter() {
   const trendsFn = useServerFn(getTrends);
   const alertsFn = useServerFn(getAlerts);
   const fullReportFn = useServerFn(getFullReport);
+  const validationFn = useServerFn(getValidation);
   const csvFn = useServerFn(exportEventsCsv);
 
   // Client-side filters
