@@ -165,6 +165,16 @@ function CommandCenter() {
     queryFn: () => validationFn({ data: { days } }),
   });
 
+  const lifecycles = useQuery({
+    queryKey: ["alert-lifecycles", days],
+    queryFn: () => alertLifecycleFn({ data: { days } }),
+    refetchInterval: 60_000,
+  });
+  const audit = useQuery({
+    queryKey: ["audit", days],
+    queryFn: () => auditFn({ data: { days } }),
+  });
+
 
   const vitals = useQuery({
     queryKey: ["vitals"],
