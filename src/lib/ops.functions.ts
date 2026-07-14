@@ -255,3 +255,152 @@ export const recordAudit = createServerFn({ method: "POST" })
     });
     return { ok: true, record: rec };
   });
+
+// ---------- Loop 1.1: alert ops metrics + timelines + incidents ----------
+
+const TimelineSchema = z.object({
+  alertId: z.string().min(1).max(64),
+  days: z.number().int().min(1).max(90).default(7),
+});
+
+async function fetchDetectionsAndActions(sb: Awaited<ReturnType<typeof admin>>, days: number) {
+  const since = new Date(Date.now() - days * 86_400_000).toISOString();
+  const { data: rows } = await sb
+    .from("events")
+    .select("name,ts,metrics")
+    .in("name", ["alert_action", "alert_detection"])
+    .gte("ts", since)
+    .order("ts", { ascending: true })
+    .limit(10000);
+  const actions: import("./alerts").AlertAction[] = [];
+  const detections: import("./alerts").AlertDetection[] = [];
+  for (const r of rows ?? []) {
+    const m = (r.metrics ?? {}) as Record<string, unknown>;
+    if (r.name === "alert_action") {
+      actions.push({
+        id: String(m.id ?? `${r.ts}-${m.type}`),
+        alertId: String(m.alertId ?? ""),
+        type: m.type as import("./alerts").AlertActionType,
+        at: String(m.at ?? r.ts),
+        actor: String(m.actor ?? "unknown"),
+        note: m.note ? String(m.note) : undefined,
+        tag: m.tag ? String(m.tag) : undefined,
+        mutedUntil: m.mutedUntil ? String(m.mutedUntil) : undefined,
+      });
+    } else if (r.name === "alert_detection") {
+      detections.push({
+        id: String(m.id ?? ""),
+        severity: (m.severity as "info" | "warning" | "critical") ?? "info",
+        title: String(m.title ?? ""),
+        detail: String(m.detail ?? ""),
+        detectedAt: String(m.detectedAt ?? r.ts),
+      });
+    }
+  }
+  return { detections, actions };
+}
+
+export const getAlertOps = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { days?: number }) => RangeSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const sb = await admin();
+    const raw = await fetchRawAlerts(data.days);
+    const nowIso = new Date().toISOString();
+    const { detectionsFromAlerts, buildAlertLifecycles } = await import("./alerts");
+    const { detections, actions } = await fetchDetectionsAndActions(sb, data.days);
+    const currentDets = detectionsFromAlerts(raw, nowIso);
+    const lifecycles = buildAlertLifecycles({
+      detections: [...detections, ...currentDets],
+      actions,
+    });
+    const { computeAlertOpsMetrics, correlateIncidents } = await import("./alert-ops");
+    return {
+      generatedAt: nowIso,
+      metrics: computeAlertOpsMetrics(lifecycles),
+      incidents: correlateIncidents(lifecycles),
+      alertCount: lifecycles.length,
+    };
+  });
+
+export const getAlertTimeline = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => TimelineSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const sb = await admin();
+    const raw = await fetchRawAlerts(data.days);
+    const nowIso = new Date().toISOString();
+    const { detectionsFromAlerts } = await import("./alerts");
+    const { detections, actions } = await fetchDetectionsAndActions(sb, data.days);
+    const allDetections = [...detections, ...detectionsFromAlerts(raw, nowIso)];
+    const { buildAlertTimeline } = await import("./alert-ops");
+    return {
+      alertId: data.alertId,
+      timeline: buildAlertTimeline(data.alertId, allDetections, actions),
+      generatedAt: nowIso,
+    };
+  });
+
+// ---------- Loop 1.1: audit verification + version timeline + diff ----------
+
+export const getAuditOps = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { days?: number }) => RangeSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const sb = await admin();
+    const since = new Date(Date.now() - data.days * 86_400_000).toISOString();
+    const { data: rows } = await sb
+      .from("events")
+      .select("metrics,ts")
+      .eq("name", "audit_record")
+      .gte("ts", since)
+      .order("ts", { ascending: true })
+      .limit(20000);
+    const records = (rows ?? [])
+      .map((r) => r.metrics as unknown as import("./audit").AuditRecord)
+      .filter((r) => r && r.version && r.sessionId);
+    const { verifyAuditLog, versionHistoryTimeline } = await import("./audit-ops");
+    const { currentEngineVersion } = await import("./audit");
+    return {
+      verification: verifyAuditLog(records),
+      timeline: versionHistoryTimeline(records),
+      current: currentEngineVersion(),
+      generatedAt: new Date().toISOString(),
+    };
+  });
+
+const DiffSchema = z.object({
+  hashA: z.string().min(1),
+  hashB: z.string().min(1),
+  days: z.number().int().min(1).max(90).default(30),
+});
+
+export const diffAuditVersions = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => DiffSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const sb = await admin();
+    const since = new Date(Date.now() - data.days * 86_400_000).toISOString();
+    const { data: rows } = await sb
+      .from("events")
+      .select("metrics,ts")
+      .eq("name", "audit_record")
+      .gte("ts", since)
+      .order("ts", { ascending: true })
+      .limit(20000);
+    const records = (rows ?? [])
+      .map((r) => r.metrics as unknown as import("./audit").AuditRecord)
+      .filter((r) => r && r.version && r.sessionId);
+    const findVersion = (hash: string) =>
+      records.find((r) => r.version.modelConfigHash === hash)?.version ?? null;
+    const a = findVersion(data.hashA);
+    const b = findVersion(data.hashB);
+    if (!a || !b) return { found: false as const };
+    const { diffEngineVersions } = await import("./audit-ops");
+    return { found: true as const, a, b, diff: diffEngineVersions(a, b) };
+  });
+
