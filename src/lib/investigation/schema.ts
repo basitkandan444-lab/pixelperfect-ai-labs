@@ -73,18 +73,24 @@ export const FilterClauseSchema = z.object({
 });
 export type FilterClause = z.infer<typeof FilterClauseSchema>;
 
-export const FilterGroupSchema: z.ZodType<FilterGroup> = z.lazy(() =>
-  z.object({
-    combinator: z.enum(["and", "or"]).default("and"),
-    clauses: z.array(FilterClauseSchema).default([]),
-    groups: z.array(FilterGroupSchema).default([]),
-  }),
-);
 export interface FilterGroup {
   combinator: "and" | "or";
   clauses: FilterClause[];
   groups: FilterGroup[];
 }
+export interface FilterGroupInput {
+  combinator?: "and" | "or";
+  clauses?: FilterClause[];
+  groups?: FilterGroupInput[];
+}
+export const FilterGroupSchema: z.ZodType<FilterGroup, z.ZodTypeDef, FilterGroupInput> = z.lazy(
+  () =>
+    z.object({
+      combinator: z.enum(["and", "or"]).default("and"),
+      clauses: z.array(FilterClauseSchema).default([]),
+      groups: z.array(FilterGroupSchema).default([]),
+    }),
+);
 
 export const SortSchema = z.object({
   field: z.enum(SEARCH_FIELDS),
