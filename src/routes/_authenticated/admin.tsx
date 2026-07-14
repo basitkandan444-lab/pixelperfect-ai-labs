@@ -303,6 +303,8 @@ function CommandCenter() {
         </div>
       </header>
 
+      <CommandNav />
+
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-6">
         <Section title="Executive Summary" subtitle="One-glance intelligence briefing">
           <Executive data={exec.data} />
