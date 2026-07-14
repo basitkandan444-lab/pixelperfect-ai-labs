@@ -184,7 +184,7 @@ export const listBookmarks = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
     const sb = await admin();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const res = await (sb.from("investigation_bookmarks").select(BookmarkRowSelect) as any).order(
       "created_at",
       { ascending: false },
@@ -216,7 +216,7 @@ export const createBookmark = createServerFn({ method: "POST" })
       favorite: data.favorite,
       notes: data.notes ?? null,
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const res = await (sb.from("investigation_bookmarks").insert(row) as any)
       .select(BookmarkRowSelect)
       .single();
@@ -253,7 +253,7 @@ export const updateBookmark = createServerFn({ method: "POST" })
     if (data.pinned !== undefined) patch.pinned = data.pinned;
     if (data.favorite !== undefined) patch.favorite = data.favorite;
     if (data.notes !== undefined) patch.notes = data.notes ?? null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const res = await (sb.from("investigation_bookmarks").update(patch) as any)
       .eq("id", data.id)
       .eq("user_id", context.userId)
@@ -275,7 +275,17 @@ export const archiveBookmark = createServerFn({ method: "POST" })
       sb.from("investigation_bookmarks").update({
         status: "archived",
         archived_at: new Date().toISOString(),
-      }) as unknown as { eq: (c:string,v:unknown)=>{ eq:(c:string,v:unknown)=>{ select:(s?:string)=>{single:()=>Promise<unknown>}}}}
+      }) as unknown as {
+        eq: (
+          c: string,
+          v: unknown,
+        ) => {
+          eq: (
+            c: string,
+            v: unknown,
+          ) => { select: (s?: string) => { single: () => Promise<unknown> } };
+        };
+      }
     )
       .eq("id", data.id)
       .eq("user_id", context.userId)
@@ -296,7 +306,17 @@ export const restoreBookmark = createServerFn({ method: "POST" })
       sb.from("investigation_bookmarks").update({
         status: "open",
         archived_at: null,
-      }) as unknown as { eq: (c:string,v:unknown)=>{ eq:(c:string,v:unknown)=>{ select:(s?:string)=>{single:()=>Promise<unknown>}}}}
+      }) as unknown as {
+        eq: (
+          c: string,
+          v: unknown,
+        ) => {
+          eq: (
+            c: string,
+            v: unknown,
+          ) => { select: (s?: string) => { single: () => Promise<unknown> } };
+        };
+      }
     )
       .eq("id", data.id)
       .eq("user_id", context.userId)
@@ -312,7 +332,7 @@ export const deleteBookmark = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const sb = await admin();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     await (sb.from("investigation_bookmarks").delete() as any)
       .eq("id", data.id)
       .eq("user_id", context.userId);
@@ -325,7 +345,7 @@ export const exportBookmarks = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
     const sb = await admin();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const res = await (sb.from("investigation_bookmarks").select(BookmarkRowSelect) as any).order(
       "created_at",
       { ascending: false },
@@ -362,7 +382,7 @@ export const importBookmarks = createServerFn({ method: "POST" })
       favorite: b.favorite,
       notes: b.notes ?? null,
     }));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const res = await ((sb.from("investigation_bookmarks") as any).insert(rows) as any).select(
       BookmarkRowSelect,
     );
@@ -380,7 +400,7 @@ export const listWorkspaces = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
     const sb = await admin();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const res = await (sb.from("investigation_workspaces").select(WorkspaceRowSelect) as any).order(
       "updated_at",
       { ascending: false },
@@ -401,7 +421,7 @@ export const saveWorkspace = createServerFn({ method: "POST" })
       shared: data.shared,
       config: data.config as unknown as Record<string, unknown>,
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const res = await (sb.from("investigation_workspaces").insert(row) as any)
       .select(WorkspaceRowSelect)
       .single();
@@ -420,7 +440,7 @@ export const updateWorkspace = createServerFn({ method: "POST" })
     if (data.description !== undefined) patch.description = data.description ?? null;
     if (data.shared !== undefined) patch.shared = data.shared;
     if (data.config !== undefined) patch.config = data.config as unknown as Record<string, unknown>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const res = await (sb.from("investigation_workspaces").update(patch) as any)
       .eq("id", data.id)
       .eq("user_id", context.userId)
@@ -436,7 +456,7 @@ export const deleteWorkspace = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const sb = await admin();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     await (sb.from("investigation_workspaces").delete() as any)
       .eq("id", data.id)
       .eq("user_id", context.userId);
