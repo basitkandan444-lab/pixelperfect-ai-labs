@@ -1227,12 +1227,17 @@ function VisitorRow({ v }: { v: Awaited<ReturnType<typeof getVisitorTimelines>>[
         <span className={`text-xs ${confCls}`}>({c.confidence} conf.)</span>
         <span className="tabular-nums text-muted-foreground">Q {c.qualityScore}</span>
         <span className="tabular-nums text-muted-foreground">Intent {c.intentScore}</span>
+        <span
+          className={`text-[10px] uppercase ${c.riskLevel === "high" ? "text-red-500" : c.riskLevel === "medium" ? "text-amber-500" : "text-muted-foreground"}`}
+        >
+          risk: {c.riskLevel}
+        </span>
         <span className="ml-auto text-xs text-muted-foreground">
           {c.device ?? "?"} · {c.country ?? "??"} · {c.source ?? "?"} · {c.events} events · {dur}s
         </span>
       </button>
       {open && (
-        <div className="grid gap-4 border-t border-border p-3 md:grid-cols-2">
+        <div className="grid gap-4 border-t border-border p-3 md:grid-cols-2 lg:grid-cols-3">
           <div>
             <h4 className="mb-2 text-xs font-medium text-muted-foreground">Evidence</h4>
             <ul className="space-y-1 text-xs">
@@ -1248,6 +1253,21 @@ function VisitorRow({ v }: { v: Awaited<ReturnType<typeof getVisitorTimelines>>[
                 <li className="text-muted-foreground">No evidence beyond baseline.</li>
               )}
             </ul>
+            {(c.rageClicks > 0 || c.deadClicks > 0) && (
+              <p className="mt-2 text-xs text-red-500">
+                Rage clicks: {c.rageClicks} · Dead clicks: {c.deadClicks}
+              </p>
+            )}
+          </div>
+          <div>
+            <h4 className="mb-2 text-xs font-medium text-muted-foreground">Behavior summary</h4>
+            {c.summary ? (
+              <SummaryPanel s={c.summary} />
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                No behavior summary captured (visitor didn&apos;t reach page-hide).
+              </p>
+            )}
           </div>
           <div>
             <h4 className="mb-2 text-xs font-medium text-muted-foreground">Timeline</h4>
@@ -1268,5 +1288,54 @@ function VisitorRow({ v }: { v: Awaited<ReturnType<typeof getVisitorTimelines>>[
         </div>
       )}
     </li>
+  );
+}
+
+function SummaryPanel({
+  s,
+}: {
+  s: Record<string, number | string | boolean | null>;
+}) {
+  const rows: [string, string | number][] = [];
+  const add = (label: string, val: string | number | boolean | null | undefined) => {
+    if (val === null || val === undefined || val === "") return;
+    rows.push([label, typeof val === "boolean" ? (val ? "yes" : "no") : val]);
+  };
+  add("Reading mode", s.readingMode as string);
+  add("Scroll max", s.scrollMaxPct != null ? `${s.scrollMaxPct}%` : null);
+  add("Scroll avg", s.scrollAvgPct != null ? `${s.scrollAvgPct}%` : null);
+  add("Mouse moves", s.mouseMoves as number);
+  add("Mouse speed CV", s.mouseSpeedStd as number);
+  add("Clicks", s.clickCount as number);
+  add("Click CV", s.clickIntervalCV as number);
+  add("Bursts", s.burstClicks as number);
+  add("Hover count", s.hoverCount as number);
+  add("Hover abandon", s.hoverAbandonRate as number);
+  add("Idle ms", s.idleMs as number);
+  add("Active ms", s.activeMs as number);
+  add("Longest active", s.longestActiveStreakMs as number);
+  add("Network", s.effectiveType as string);
+  add("RTT", s.rtt as number);
+  add("Downlink", s.downlink as number);
+  add("Offline transitions", s.offlineTransitions as number);
+  add("LCP", s.lcpMs as number);
+  add("INP", s.inpMs as number);
+  add("CLS", s.cls as number);
+  add("Long tasks", s.longTasks as number);
+  add("Memory MB", s.memoryUsedMb as number);
+  add("Webdriver", s.webdriver as boolean);
+  add("Touch", s.hasTouch as boolean);
+  add("Languages", s.languages as number);
+  add("HW concurrency", s.hardwareConcurrency as number);
+  return (
+    <ul className="space-y-1 text-xs">
+      {rows.map(([k, v]) => (
+        <li key={k} className="flex justify-between gap-2">
+          <span className="text-muted-foreground">{k}</span>
+          <span className="tabular-nums">{v}</span>
+        </li>
+      ))}
+      {rows.length === 0 && <li className="text-muted-foreground">Empty.</li>}
+    </ul>
   );
 }
