@@ -19,6 +19,7 @@ export interface EventRow {
   ts: string;
   duration_ms: number | null;
   ok: boolean | null;
+  metrics?: Record<string, unknown> | null;
 }
 
 export async function fetchWindow(sb: SupabaseClient, days: number): Promise<EventRow[]> {
@@ -26,7 +27,7 @@ export async function fetchWindow(sb: SupabaseClient, days: number): Promise<Eve
   const { data } = await sb
     .from("events")
     .select(
-      "session_id,name,path,source,medium,device_type,os,browser,ua_kind,country,ts,duration_ms,ok",
+      "session_id,name,path,source,medium,device_type,os,browser,ua_kind,country,ts,duration_ms,ok,metrics",
     )
     .gte("ts", since)
     .order("ts", { ascending: true })
