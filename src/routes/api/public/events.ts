@@ -106,7 +106,11 @@ export const Route = createFileRoute("/api/public/events")({
           metrics: s.metrics ?? null,
         }));
 
-        const { error } = await supabaseAdmin.from("events").insert(rows);
+        const { error } = await supabaseAdmin
+          .from("events")
+          // Cast: `metrics jsonb` was added in a later migration; generated
+          // types may not yet reflect it. Runtime shape is validated by Zod.
+          .insert(rows as unknown as never);
         if (error) {
           return jsonFail("internal_error", "Ingestion failed.", { status: 500, requestId });
         }
