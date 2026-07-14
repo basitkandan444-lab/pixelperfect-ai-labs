@@ -97,6 +97,19 @@ function CommandCenter() {
     queryKey: ["intel", days],
     queryFn: () => intelFn({ data: { days } }),
   });
+  const visitors = useQuery({
+    queryKey: ["visitors", days],
+    queryFn: () => visitorsFn({ data: { days, limit: 25 } }),
+  });
+  const sourceIntel = useQuery({
+    queryKey: ["srcIntel", days],
+    queryFn: () => sourceIntelFn({ data: { days } }),
+  });
+  const rtIntel = useQuery({
+    queryKey: ["rtIntel"],
+    queryFn: () => rtIntelFn({ data: { windowSeconds: 300 } }),
+    refetchInterval: 5000,
+  });
 
   const vitals = useQuery({
     queryKey: ["vitals"],
