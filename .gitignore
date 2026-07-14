@@ -17,9 +17,10 @@ dist-ssr
 *.local
 
 # Environment files (never commit secrets — .env.example is the template)
-.env
-.env.*
-!.env.example
+# .env tracked for VITE_ vars
+.env.local
+.env.*.local
+
 
 # Wrangler / Cloudflare
 .wrangler/
