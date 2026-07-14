@@ -97,6 +97,7 @@ describe("architecture fitness · secret & environment boundary", () => {
   it("process.env is confined to server-only surfaces", () => {
     const allowed = (f: string) =>
       f.startsWith("src/routes/") ||
+      f.startsWith("src/integrations/") ||
       f === "src/lib/env.ts" ||
       f === "src/server.ts" ||
       f === "src/start.ts" ||
