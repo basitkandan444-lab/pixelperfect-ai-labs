@@ -15,7 +15,13 @@ import {
   exportEventsCsv,
 } from "@/lib/admin.functions";
 import { listGscSites, getGscPerformance } from "@/lib/gsc.functions";
-import { getIntelligence } from "@/lib/intelligence.functions";
+import {
+  getIntelligence,
+  getVisitorTimelines,
+  getSourceIntelligence,
+  getRealtimeIntelligence,
+  getIntelligenceReport,
+} from "@/lib/intelligence.functions";
 
 // Admin gate: this route lives under _authenticated so the session is already
 // checked. The role check happens client-side (redirect on fail) AND server-side
