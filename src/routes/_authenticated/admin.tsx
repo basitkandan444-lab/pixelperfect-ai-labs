@@ -287,6 +287,31 @@ function CommandCenter() {
         </Section>
 
         <Section
+          title="Enterprise Operations · Alert Center"
+          subtitle="Full incident lifecycle: acknowledge, resolve, mute, tag, note"
+        >
+          <AlertCenter
+            data={lifecycles.data?.lifecycles}
+            onAction={async (payload) => {
+              await alertActionFn({ data: payload });
+              await lifecycles.refetch();
+            }}
+            onSnapshot={async () => {
+              await alertSnapshotFn({ data: { days } });
+              await lifecycles.refetch();
+            }}
+          />
+        </Section>
+
+        <Section
+          title="Enterprise Operations · Intelligence Audit"
+          subtitle="Every classification is stamped with engine, rules, weights & config hash"
+        >
+          <AuditPanel data={audit.data} />
+        </Section>
+
+
+        <Section
           title="Intelligence Validation"
           subtitle="Self-audit: averages, confidence & risk distributions, false-flag candidates"
         >
