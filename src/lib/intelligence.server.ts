@@ -52,7 +52,10 @@ export interface SessionAgg {
   browser: string | null;
   country: string | null;
   errors: number;
-  intervals: number[]; // ms between consecutive events
+  intervals: number[];
+  summary: Record<string, unknown> | null; // last session_summary metrics
+  rageClicks: number;
+  deadClicks: number;
 }
 
 export function groupSessions(rows: EventRow[]): Map<string, SessionAgg> {
@@ -77,6 +80,9 @@ export function groupSessions(rows: EventRow[]): Map<string, SessionAgg> {
         country: r.country,
         errors: 0,
         intervals: [],
+        summary: null,
+        rageClicks: 0,
+        deadClicks: 0,
       };
       m.set(r.session_id, s);
     }
@@ -90,6 +96,15 @@ export function groupSessions(rows: EventRow[]): Map<string, SessionAgg> {
     if (r.path) s.paths.add(r.path);
     s.names.add(r.name);
     if (r.name === "error" || r.ok === false) s.errors += 1;
+    if (r.name === "session_summary" && r.metrics && typeof r.metrics === "object")
+      s.summary = r.metrics;
+    if (r.name === "feature_interaction" && r.metrics) {
+      const feat = (r.metrics as { feature?: string }).feature;
+      // The feature name is also placed on the row via track(); but fall through
+      // by inspecting metrics.element / feature stored downstream.
+      if (feat === "rage_click") s.rageClicks += 1;
+      if (feat === "dead_click") s.deadClicks += 1;
+    }
     if (!s.ua_kind && r.ua_kind) s.ua_kind = r.ua_kind;
     if (!s.source && r.source) s.source = r.source;
     if (!s.device && r.device_type) s.device = r.device_type;
