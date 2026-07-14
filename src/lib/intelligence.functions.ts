@@ -129,3 +129,60 @@ export const getFullReport = createServerFn({ method: "POST" })
     const { buildFullReport } = await import("./intelligence.server");
     return { report: buildFullReport(rows, data.days, data.format), format: data.format };
   });
+
+const SessionPairSchema = z.object({
+  days: z.number().int().min(1).max(90).default(7),
+  sessionIdA: z.string().min(1),
+  sessionIdB: z.string().min(1),
+});
+const SessionSchema = z.object({
+  days: z.number().int().min(1).max(90).default(7),
+  sessionId: z.string().min(1),
+});
+
+export const getValidation = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { days?: number }) => RangeSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { rows } = await fetchAndBuild(data.days);
+    const { buildValidation } = await import("./intelligence.server");
+    return buildValidation(rows, data.days);
+  });
+
+export const getComparison = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { days?: number; sessionIdA: string; sessionIdB: string }) =>
+    SessionPairSchema.parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { rows } = await fetchAndBuild(data.days);
+    const { buildComparison } = await import("./intelligence.server");
+    return buildComparison(rows, data.sessionIdA, data.sessionIdB);
+  });
+
+export const getNarrative = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { days?: number; sessionId: string }) => SessionSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { rows } = await fetchAndBuild(data.days);
+    const { buildNarrative } = await import("./intelligence.server");
+    return { steps: buildNarrative(rows, data.sessionId) };
+  });
+
+export const explainSession = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { days?: number; sessionId: string }) => SessionSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { rows } = await fetchAndBuild(data.days);
+    const { groupSessions, classifySession, explainClassification } = await import(
+      "./intelligence.server"
+    );
+    const s = groupSessions(rows).get(data.sessionId);
+    if (!s) return null;
+    const c = classifySession(s);
+    return { classification: c, explanation: explainClassification(c) };
+  });

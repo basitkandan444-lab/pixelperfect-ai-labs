@@ -2,14 +2,18 @@ import { describe, it, expect } from "vitest";
 
 import {
   buildAlerts,
+  buildComparison,
   buildExecutive,
   buildFullReport,
   buildIntelligence,
+  buildNarrative,
   buildRealtimeIntelligence,
   buildSourceIntelligence,
   buildTrends,
+  buildValidation,
   buildVisitorTimelines,
   classifySession,
+  explainClassification,
   groupSessions,
   type EventRow,
 } from "./intelligence.server";
@@ -213,5 +217,78 @@ describe("intelligence · advanced multi-signal detection", () => {
     expect(md).toContain("# Pixel Perfect Pro");
     expect(csv.split("\n")[0]).toBe("section,key,value");
     expect(html).toContain("<!doctype html>");
+  });
+});
+
+describe("intelligence v3 · explainability + validation + comparison + narrative", () => {
+  it("explainClassification returns positive/negative breakdown + decision summary", () => {
+    const base = Date.now();
+    const rows: EventRow[] = [
+      ev({ ts: new Date(base).toISOString() }),
+      ev({ ts: new Date(base + 5_000).toISOString(), name: "upload_started" }),
+      ev({ ts: new Date(base + 15_000).toISOString(), name: "enhance_completed" }),
+      ev({ ts: new Date(base + 22_000).toISOString(), name: "download_completed" }),
+    ];
+    const s = groupSessions(rows).get("s1")!;
+    const c = classifySession(s);
+    const x = explainClassification(c);
+    expect(x.positiveCount).toBeGreaterThan(0);
+    expect(x.evidenceCount).toBe(c.evidence.length);
+    expect(x.evidenceAgreement).toBeGreaterThanOrEqual(0);
+    expect(x.decisionSummary.length).toBeGreaterThan(20);
+    expect(x.humanIndicators.length).toBeGreaterThan(0);
+  });
+
+  it("buildNarrative produces a readable step chain including pauses", () => {
+    const base = Date.now();
+    const rows: EventRow[] = [
+      ev({ ts: new Date(base).toISOString(), path: "/" }),
+      ev({ ts: new Date(base + 6_000).toISOString(), name: "page_view", path: "/enhance" }),
+      ev({ ts: new Date(base + 12_000).toISOString(), name: "upload_started" }),
+      ev({ ts: new Date(base + 30_000).toISOString(), name: "download_completed" }),
+    ];
+    const steps = buildNarrative(rows, "s1");
+    expect(steps.length).toBeGreaterThan(3);
+    expect(steps.some((x) => x.kind === "landing")).toBe(true);
+    expect(steps.some((x) => x.kind === "outcome")).toBe(true);
+    expect(steps.at(-1)!.kind).toBe("exit");
+  });
+
+  it("buildValidation returns averages + distributions", () => {
+    const base = Date.now();
+    const rows: EventRow[] = [
+      ev({ session_id: "a", ts: new Date(base).toISOString() }),
+      ev({
+        session_id: "a",
+        name: "enhance_completed",
+        ts: new Date(base + 10_000).toISOString(),
+      }),
+      ev({ session_id: "b", ts: new Date(base).toISOString(), ua_kind: "suspicious" }),
+    ];
+    const v = buildValidation(rows, 7);
+    expect(v.sessions).toBe(2);
+    expect(v.averages.qualityScore).toBeGreaterThanOrEqual(0);
+    expect(
+      v.confidenceDistribution.high +
+        v.confidenceDistribution.medium +
+        v.confidenceDistribution.low,
+    ).toBe(2);
+  });
+
+  it("buildComparison returns both sides + diffs, null when session missing", () => {
+    const base = Date.now();
+    const rows: EventRow[] = [
+      ev({ session_id: "a", ts: new Date(base).toISOString(), source: "organic" }),
+      ev({
+        session_id: "a",
+        name: "enhance_completed",
+        ts: new Date(base + 8_000).toISOString(),
+      }),
+      ev({ session_id: "b", ts: new Date(base).toISOString(), source: "direct" }),
+    ];
+    const cmp = buildComparison(rows, "a", "b");
+    expect(cmp).not.toBeNull();
+    expect(cmp!.differences.length).toBeGreaterThan(0);
+    expect(buildComparison(rows, "a", "missing")).toBeNull();
   });
 });

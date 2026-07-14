@@ -1093,3 +1093,303 @@ function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 }
 
+
+// ============================================================================
+// v3.0 · Explainability, Validation, Comparison, Narrative
+// ----------------------------------------------------------------------------
+// Additive: existing shapes preserved. Every new export is pure and reads only
+// the first-party event store (privacy-safe, browser-first).
+// ============================================================================
+
+export interface ClassificationExplanation {
+  positiveCount: number;
+  negativeCount: number;
+  neutralCount: number;
+  conflictingCount: number;
+  evidenceCount: number;
+  evidenceStrength: number; // 0..100 total weight, clamped
+  evidenceAgreement: number; // 0..1 (dominant side / total weight)
+  positiveSignals: { signal: string; weight: number }[];
+  negativeSignals: { signal: string; weight: number }[];
+  humanIndicators: string[];
+  botIndicators: string[];
+  confidenceDrivers: string[];
+  qualityDrivers: string[];
+  riskDrivers: string[];
+  decisionSummary: string;
+}
+
+export function explainClassification(c: SessionClassification): ClassificationExplanation {
+  const pos = c.evidence.filter((e) => e.direction === "positive");
+  const neg = c.evidence.filter((e) => e.direction === "negative");
+  const posW = pos.reduce((a, b) => a + b.weight, 0);
+  const negW = neg.reduce((a, b) => a + b.weight, 0);
+  const total = posW + negW;
+  const dominant = Math.max(posW, negW);
+  const agreement = total > 0 ? dominant / total : 0;
+  const conflictingCount = total > 0 && Math.min(posW, negW) / Math.max(1, dominant) > 0.35 ? Math.min(pos.length, neg.length) : 0;
+
+  const positiveSignals = pos.map((e) => ({ signal: e.signal, weight: e.weight }));
+  const negativeSignals = neg.map((e) => ({ signal: e.signal, weight: e.weight }));
+
+  const humanIndicators = pos.map((e) => e.signal).slice(0, 6);
+  const botIndicators = neg.map((e) => e.signal).slice(0, 6);
+
+  const confidenceDrivers: string[] = [];
+  if (c.evidence.length >= 6) confidenceDrivers.push("Multiple independent signals");
+  if (c.events >= 6) confidenceDrivers.push("Rich event stream");
+  if (c.duration_ms >= 10_000) confidenceDrivers.push("Sustained session duration");
+  if (agreement >= 0.7) confidenceDrivers.push("Signals largely agree");
+  if (agreement < 0.6) confidenceDrivers.push("Signals partially disagree (lower confidence)");
+
+  const qualityDrivers = [...positiveSignals.slice(0, 4).map((s) => `+${s.weight} ${s.signal}`),
+    ...negativeSignals.slice(0, 3).map((s) => `-${s.weight} ${s.signal}`)];
+
+  const riskDrivers = neg
+    .filter((e) => e.weight >= 10)
+    .slice(0, 5)
+    .map((e) => e.signal);
+
+  const humanPct = Math.round(c.humanProbability * 100);
+  const decisionSummary =
+    c.humanProbability >= 0.75
+      ? `Classification favors a human visitor (${humanPct}%): multiple independent behavioral signals agree, contradictory evidence is minimal.`
+      : c.humanProbability <= 0.25
+        ? `Classification favors automated traffic (${100 - humanPct}%): behavioral evidence conflicts with typical human patterns.`
+        : `Classification is uncertain (${humanPct}% human). Signals are mixed — treat with caution and prefer more evidence before acting.`;
+
+  return {
+    positiveCount: pos.length,
+    negativeCount: neg.length,
+    neutralCount: 0,
+    conflictingCount,
+    evidenceCount: c.evidence.length,
+    evidenceStrength: Math.min(100, Math.round(total)),
+    evidenceAgreement: Math.round(agreement * 100) / 100,
+    positiveSignals,
+    negativeSignals,
+    humanIndicators,
+    botIndicators,
+    confidenceDrivers,
+    qualityDrivers,
+    riskDrivers,
+    decisionSummary,
+  };
+}
+
+// ---------- Behavioral narrative (privacy-safe replay alternative) ----------
+
+export interface NarrativeStep {
+  ts: string;
+  offset_ms: number;
+  label: string; // human-readable
+  kind: "landing" | "navigation" | "workflow" | "engagement" | "outcome" | "signal" | "exit";
+}
+
+export function buildNarrative(rows: EventRow[], sessionId: string): NarrativeStep[] {
+  const sessions = groupSessions(rows);
+  const s = sessions.get(sessionId);
+  if (!s) return [];
+  const steps: NarrativeStep[] = [];
+  let lastPath: string | null = null;
+  for (let i = 0; i < s.events.length; i++) {
+    const e = s.events[i];
+    const t = new Date(e.ts).getTime();
+    const off = t - s.first;
+    const push = (label: string, kind: NarrativeStep["kind"]) =>
+      steps.push({ ts: e.ts, offset_ms: off, label, kind });
+
+    if (e.name === "page_view") {
+      if (i === 0) push(`Landed on ${e.path ?? "site"}`, "landing");
+      else if (e.path && e.path !== lastPath) push(`Navigated to ${e.path}`, "navigation");
+      else push("Refreshed page", "navigation");
+      if (e.path) lastPath = e.path;
+    } else if (e.name === "upload_started") push("Uploaded an image", "workflow");
+    else if (e.name === "upload_completed") push("Upload completed", "workflow");
+    else if (e.name === "enhance_started") push("Started enhancement", "workflow");
+    else if (e.name === "enhance_completed") push("Completed enhancement", "outcome");
+    else if (e.name === "download_completed") push("Downloaded result", "outcome");
+    else if (e.name === "feature_interaction") {
+      const feat = (e.metrics as { feature?: string } | null)?.feature ?? "interaction";
+      if (feat === "rage_click") push("Rage-clicked (frustration signal)", "signal");
+      else if (feat === "dead_click") push("Clicked a non-interactive area", "signal");
+      else push(`Interacted with ${feat}`, "engagement");
+    } else if (e.name === "session_summary") push("Session summary captured", "signal");
+    else if (e.name === "error") push("Encountered an error", "signal");
+    // Idle detection between consecutive events
+    if (i > 0) {
+      const prev = new Date(s.events[i - 1].ts).getTime();
+      const gap = t - prev;
+      if (gap >= 4_000 && gap < 60_000)
+        steps.splice(steps.length - 1, 0, {
+          ts: new Date(prev + gap / 2).toISOString(),
+          offset_ms: prev + gap / 2 - s.first,
+          label: `Paused ${(gap / 1000).toFixed(1)}s`,
+          kind: "engagement",
+        });
+    }
+  }
+  steps.push({
+    ts: new Date(s.last).toISOString(),
+    offset_ms: s.last - s.first,
+    label: "Session ended",
+    kind: "exit",
+  });
+  return steps;
+}
+
+// ---------- Intelligence Validation Dashboard ----------
+
+export interface ValidationReport {
+  window_days: number;
+  sessions: number;
+  averages: {
+    humanProbability: number;
+    automationProbability: number;
+    confidence: number; // mapped high=1, medium=.6, low=.3
+    evidenceCount: number;
+    evidenceStrength: number;
+    qualityScore: number;
+  };
+  confidenceDistribution: { high: number; medium: number; low: number };
+  riskDistribution: { high: number; medium: number; low: number };
+  segmentDistribution: Record<string, number>;
+  falsePositiveCandidates: { session_id: string; reason: string }[]; // flagged bot but strong human signals
+  falseNegativeCandidates: { session_id: string; reason: string }[]; // flagged human but weak evidence
+  lowConfidenceSessions: number;
+  notes: string[];
+}
+
+const CONF_WEIGHT: Record<Confidence, number> = { high: 1, medium: 0.6, low: 0.3 };
+
+export function buildValidation(rows: EventRow[], days: number): ValidationReport {
+  const sessions = groupSessions(rows);
+  const classes: SessionClassification[] = [];
+  for (const s of sessions.values()) classes.push(classifySession(s));
+  const n = classes.length || 1;
+
+  const sum = (f: (c: SessionClassification) => number) =>
+    classes.reduce((a, b) => a + f(b), 0) / n;
+
+  const confDist = { high: 0, medium: 0, low: 0 };
+  const riskDist = { high: 0, medium: 0, low: 0 };
+  const segDist: Record<string, number> = {};
+  const fp: ValidationReport["falsePositiveCandidates"] = [];
+  const fn: ValidationReport["falseNegativeCandidates"] = [];
+  let lowConf = 0;
+
+  for (const c of classes) {
+    confDist[c.confidence] += 1;
+    riskDist[c.riskLevel] += 1;
+    segDist[c.segment] = (segDist[c.segment] ?? 0) + 1;
+    if (c.confidence === "low") lowConf += 1;
+    const exp = explainClassification(c);
+    // FP: labeled Suspicious/high-risk but strong positive evidence too
+    if (
+      (c.segment === "Suspicious" || c.riskLevel === "high") &&
+      exp.positiveCount >= 3 &&
+      exp.evidenceAgreement < 0.7
+    )
+      fp.push({ session_id: c.session_id, reason: "Bot-flagged with strong human signals present" });
+    // FN: labeled human but very thin evidence
+    if (c.humanProbability >= 0.6 && exp.evidenceCount <= 2 && c.duration_ms < 3_000)
+      fn.push({ session_id: c.session_id, reason: "Human-labeled with sparse evidence" });
+  }
+
+  const notes: string[] = [];
+  if (classes.length === 0) notes.push("No sessions in window — validation metrics are placeholders.");
+  if (lowConf / n > 0.3) notes.push(`${((lowConf / n) * 100).toFixed(0)}% of sessions are low-confidence.`);
+  if (fp.length > 0) notes.push(`${fp.length} sessions may be false-positive bot flags — review.`);
+  if (fn.length > 0) notes.push(`${fn.length} sessions may be over-trusted — sparse evidence.`);
+
+  return {
+    window_days: days,
+    sessions: classes.length,
+    averages: {
+      humanProbability: Math.round(sum((c) => c.humanProbability) * 1000) / 1000,
+      automationProbability: Math.round(sum((c) => c.automationProbability) * 1000) / 1000,
+      confidence: Math.round(sum((c) => CONF_WEIGHT[c.confidence]) * 1000) / 1000,
+      evidenceCount: Math.round(sum((c) => c.evidence.length) * 10) / 10,
+      evidenceStrength: Math.round(sum((c) => explainClassification(c).evidenceStrength)),
+      qualityScore: Math.round(sum((c) => c.qualityScore)),
+    },
+    confidenceDistribution: confDist,
+    riskDistribution: riskDist,
+    segmentDistribution: segDist,
+    falsePositiveCandidates: fp.slice(0, 10),
+    falseNegativeCandidates: fn.slice(0, 10),
+    lowConfidenceSessions: lowConf,
+    notes,
+  };
+}
+
+// ---------- Session Comparison Console ----------
+
+export interface SessionComparison {
+  a: SessionClassification;
+  b: SessionClassification;
+  explainA: ClassificationExplanation;
+  explainB: ClassificationExplanation;
+  timelineA: VisitorTimelineEntry[];
+  timelineB: VisitorTimelineEntry[];
+  narrativeA: NarrativeStep[];
+  narrativeB: NarrativeStep[];
+  differences: string[];
+}
+
+function timelineOf(s: SessionAgg): VisitorTimelineEntry[] {
+  return s.events.map((e) => ({
+    ts: e.ts,
+    offset_ms: new Date(e.ts).getTime() - s.first,
+    name: e.name,
+    path: e.path,
+  }));
+}
+
+export function buildComparison(
+  rows: EventRow[],
+  idA: string,
+  idB: string,
+): SessionComparison | null {
+  const sessions = groupSessions(rows);
+  const sa = sessions.get(idA);
+  const sb = sessions.get(idB);
+  if (!sa || !sb) return null;
+  const ca = classifySession(sa);
+  const cb = classifySession(sb);
+  const ea = explainClassification(ca);
+  const eb = explainClassification(cb);
+
+  const diffs: string[] = [];
+  const pushDiff = (label: string, av: unknown, bv: unknown) => {
+    if (av !== bv) diffs.push(`${label}: A=${String(av)} · B=${String(bv)}`);
+  };
+  pushDiff("Segment", ca.segment, cb.segment);
+  pushDiff("Confidence", ca.confidence, cb.confidence);
+  pushDiff("Risk", ca.riskLevel, cb.riskLevel);
+  pushDiff("Device", ca.device, cb.device);
+  pushDiff("Source", ca.source, cb.source);
+  pushDiff("Country", ca.country, cb.country);
+  const dq = ca.qualityScore - cb.qualityScore;
+  if (Math.abs(dq) >= 5) diffs.push(`Quality Δ ${dq > 0 ? "+" : ""}${dq}`);
+  const dh = Math.round((ca.humanProbability - cb.humanProbability) * 100);
+  if (Math.abs(dh) >= 5) diffs.push(`Human probability Δ ${dh > 0 ? "+" : ""}${dh}%`);
+  const setA = new Set(ca.evidence.map((e) => e.signal));
+  const setB = new Set(cb.evidence.map((e) => e.signal));
+  const uniqA = [...setA].filter((x) => !setB.has(x)).slice(0, 5);
+  const uniqB = [...setB].filter((x) => !setA.has(x)).slice(0, 5);
+  if (uniqA.length) diffs.push(`Only in A: ${uniqA.join("; ")}`);
+  if (uniqB.length) diffs.push(`Only in B: ${uniqB.join("; ")}`);
+
+  return {
+    a: ca,
+    b: cb,
+    explainA: ea,
+    explainB: eb,
+    timelineA: timelineOf(sa),
+    timelineB: timelineOf(sb),
+    narrativeA: buildNarrative(rows, idA),
+    narrativeB: buildNarrative(rows, idB),
+    differences: diffs,
+  };
+}

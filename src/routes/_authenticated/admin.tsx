@@ -24,6 +24,7 @@ import {
   getTrends,
   getAlerts,
   getFullReport,
+  getValidation,
 } from "@/lib/intelligence.functions";
 
 // Admin gate: this route lives under _authenticated so the session is already
@@ -73,6 +74,7 @@ function CommandCenter() {
   const trendsFn = useServerFn(getTrends);
   const alertsFn = useServerFn(getAlerts);
   const fullReportFn = useServerFn(getFullReport);
+  const validationFn = useServerFn(getValidation);
   const csvFn = useServerFn(exportEventsCsv);
 
   // Client-side filters
@@ -139,6 +141,12 @@ function CommandCenter() {
     queryFn: () => alertsFn({ data: { days } }),
     refetchInterval: 60_000,
   });
+
+  const validation = useQuery({
+    queryKey: ["validation", days],
+    queryFn: () => validationFn({ data: { days } }),
+  });
+
 
   const vitals = useQuery({
     queryKey: ["vitals"],
@@ -249,6 +257,14 @@ function CommandCenter() {
         <Section title="Alerts" subtitle="Privacy-safe anomaly detection">
           <Alerts data={alerts.data} />
         </Section>
+
+        <Section
+          title="Intelligence Validation"
+          subtitle="Self-audit: averages, confidence & risk distributions, false-flag candidates"
+        >
+          <Validation data={validation.data} />
+        </Section>
+
 
         <Section title="Traffic Overview">
           <KPIRow data={overview.data} />
@@ -1337,5 +1353,86 @@ function SummaryPanel({
       ))}
       {rows.length === 0 && <li className="text-muted-foreground">Empty.</li>}
     </ul>
+  );
+}
+
+function Validation({ data }: { data?: Awaited<ReturnType<typeof getValidation>> }) {
+  if (!data) return <p className="text-sm text-muted-foreground">Loading validation…</p>;
+  if (data.sessions === 0)
+    return <p className="text-sm text-muted-foreground">No sessions yet — validation unlocks with traffic.</p>;
+  const a = data.averages;
+  const pct = (n: number) => `${Math.round(n * 100)}%`;
+  const cd = data.confidenceDistribution;
+  const rd = data.riskDistribution;
+  const Cell = ({ label, value }: { label: string; value: string | number }) => (
+    <div className="rounded-md border border-border bg-card p-3">
+      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className="mt-1 text-lg font-semibold">{value}</div>
+    </div>
+  );
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <Cell label="Sessions" value={data.sessions} />
+        <Cell label="Avg quality" value={`${a.qualityScore}/100`} />
+        <Cell label="Avg human" value={pct(a.humanProbability)} />
+        <Cell label="Avg automation" value={pct(a.automationProbability)} />
+        <Cell label="Avg confidence" value={pct(a.confidence)} />
+        <Cell label="Evidence strength" value={a.evidenceStrength} />
+      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-md border border-border bg-card p-3">
+          <div className="mb-2 text-sm font-semibold">Confidence distribution</div>
+          <ul className="space-y-1 text-sm">
+            <li>High: {cd.high}</li>
+            <li>Medium: {cd.medium}</li>
+            <li>Low: {cd.low}</li>
+          </ul>
+        </div>
+        <div className="rounded-md border border-border bg-card p-3">
+          <div className="mb-2 text-sm font-semibold">Risk distribution</div>
+          <ul className="space-y-1 text-sm">
+            <li>High: {rd.high}</li>
+            <li>Medium: {rd.medium}</li>
+            <li>Low: {rd.low}</li>
+          </ul>
+        </div>
+      </div>
+      {(data.falsePositiveCandidates.length > 0 || data.falseNegativeCandidates.length > 0) && (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {data.falsePositiveCandidates.length > 0 && (
+            <div className="rounded-md border border-border bg-card p-3">
+              <div className="mb-2 text-sm font-semibold">Possible false-positive bot flags</div>
+              <ul className="space-y-1 text-xs">
+                {data.falsePositiveCandidates.map((c) => (
+                  <li key={c.session_id} className="text-muted-foreground">
+                    <span className="font-mono text-foreground">{c.session_id.slice(0, 10)}</span> — {c.reason}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {data.falseNegativeCandidates.length > 0 && (
+            <div className="rounded-md border border-border bg-card p-3">
+              <div className="mb-2 text-sm font-semibold">Possibly over-trusted sessions</div>
+              <ul className="space-y-1 text-xs">
+                {data.falseNegativeCandidates.map((c) => (
+                  <li key={c.session_id} className="text-muted-foreground">
+                    <span className="font-mono text-foreground">{c.session_id.slice(0, 10)}</span> — {c.reason}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+      {data.notes.length > 0 && (
+        <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+          {data.notes.map((n, i) => (
+            <li key={i}>{n}</li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
