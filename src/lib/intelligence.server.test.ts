@@ -1,9 +1,13 @@
 import { describe, it, expect } from "vitest";
 
 import {
+  buildAlerts,
+  buildExecutive,
+  buildFullReport,
   buildIntelligence,
   buildRealtimeIntelligence,
   buildSourceIntelligence,
+  buildTrends,
   buildVisitorTimelines,
   classifySession,
   groupSessions,
