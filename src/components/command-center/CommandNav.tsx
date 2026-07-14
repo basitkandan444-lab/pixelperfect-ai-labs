@@ -1,14 +1,19 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Activity, BarChart3, Search } from "lucide-react";
+import { Activity, BarChart3, GitBranch, Search } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
-type NavItem = { to: "/admin" | "/admin/investigations" | "/ops"; label: string; icon: ReactNode };
+type NavItem = {
+  to: "/admin" | "/admin/investigations" | "/admin/version-intel" | "/ops";
+  label: string;
+  icon: ReactNode;
+};
 
 const ITEMS: NavItem[] = [
   { to: "/admin", label: "Overview", icon: <BarChart3 className="h-4 w-4" /> },
   { to: "/admin/investigations", label: "Investigations", icon: <Search className="h-4 w-4" /> },
+  { to: "/admin/version-intel", label: "Version Intelligence", icon: <GitBranch className="h-4 w-4" /> },
   { to: "/ops", label: "Live Ops", icon: <Activity className="h-4 w-4" /> },
 ];
 
