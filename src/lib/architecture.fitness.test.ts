@@ -146,7 +146,16 @@ describe("architecture fitness · generated & governance invariants", () => {
     // API endpoints (files declaring a `server` handler block) must be isolated
     // in the api/ bounded context, never mixed into page routes. Well-known
     // web-standard files (sitemap, robots) are served at the root by convention.
-    const ROOT_CONVENTION = new Set(["src/routes/sitemap[.]xml.ts"]);
+    // MCP endpoints and OAuth resource discovery are protocol-standard paths
+    // that MUST live at the documented URLs (/mcp, /.mcp/*, /.well-known/*),
+    // so they are exempt from the api/ bounded-context rule.
+    const ROOT_CONVENTION = new Set([
+      "src/routes/sitemap[.]xml.ts",
+      "src/routes/mcp.ts",
+      "src/routes/[.mcp]/list-tools.ts",
+      "src/routes/[.mcp]/invoke-tool/$tool.ts",
+      "src/routes/[.well-known]/oauth-protected-resource.ts",
+    ]);
     const offenders: string[] = [];
     for (const file of ALL_FILES) {
       if (!file.startsWith("src/routes/") || file.startsWith("src/routes/api/")) continue;

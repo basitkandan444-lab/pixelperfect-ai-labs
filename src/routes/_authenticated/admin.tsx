@@ -64,7 +64,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   ssr: false,
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
-    if (!data.user) throw redirect({ to: "/auth" });
+    if (!data.user) throw redirect({ to: "/auth", search: { next: undefined } });
     const { data: roles } = await supabase
       .from("user_roles")
       .select("role")
@@ -216,7 +216,7 @@ function CommandCenter() {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    navigate({ to: "/auth", search: { next: undefined }, replace: true });
   };
 
   const exportCsv = async () => {
