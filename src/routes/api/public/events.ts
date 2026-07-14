@@ -19,6 +19,7 @@ const EVENT_NAMES = [
   "download_completed",
   "error",
   "feature_interaction",
+  "session_summary",
 ] as const;
 
 const EventSchema = z.object({
@@ -42,6 +43,8 @@ const EventSchema = z.object({
   error_code: z.string().max(64).optional(),
   ua_kind: z.enum(["likely_human", "needs_review", "suspicious"]).optional(),
   feature: z.string().max(64).optional(),
+  // Anonymous behavioral / performance / network summaries. No PII.
+  metrics: z.record(z.string(), z.unknown()).optional(),
 });
 
 const Payload = z.union([EventSchema, z.array(EventSchema).min(1).max(20)]);
@@ -51,9 +54,9 @@ export const Route = createFileRoute("/api/public/events")({
     handlers: {
       POST: async ({ request }) => {
         const requestId = newRequestId();
-        // Cap body size: 10 KB is more than enough for 20 events × ~500 bytes.
+        // Cap body size: 24 KB accommodates 20 events × ~1 KB (with metrics blobs).
         const text = await request.text();
-        if (text.length > 10_240) {
+        if (text.length > 24_576) {
           return jsonFail("invalid_request", "Payload too large.", { status: 413, requestId });
         }
         let raw: unknown;
@@ -100,6 +103,7 @@ export const Route = createFileRoute("/api/public/events")({
           ok: s.ok ?? null,
           error_code: s.error_code ?? null,
           ua_kind: s.ua_kind ?? null,
+          metrics: s.metrics ?? null,
         }));
 
         const { error } = await supabaseAdmin.from("events").insert(rows);
