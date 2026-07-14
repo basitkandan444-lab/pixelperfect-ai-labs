@@ -31,6 +31,8 @@ import {
   recordAlertAction,
   snapshotAlertDetections,
   getAuditSummary,
+  getAlertOps,
+  getAuditOps,
 } from "@/lib/ops.functions";
 import {
   filterAlerts,
@@ -94,6 +96,8 @@ function CommandCenter() {
   const alertActionFn = useServerFn(recordAlertAction);
   const alertSnapshotFn = useServerFn(snapshotAlertDetections);
   const auditFn = useServerFn(getAuditSummary);
+  const alertOpsFn = useServerFn(getAlertOps);
+  const auditOpsFn = useServerFn(getAuditOps);
 
   // Client-side filters
   const [filters, setFilters] = useState<{
@@ -174,6 +178,16 @@ function CommandCenter() {
     queryKey: ["audit", days],
     queryFn: () => auditFn({ data: { days } }),
   });
+  const alertOps = useQuery({
+    queryKey: ["alert-ops", days],
+    queryFn: () => alertOpsFn({ data: { days } }),
+    refetchInterval: 60_000,
+  });
+  const auditOps = useQuery({
+    queryKey: ["audit-ops", days],
+    queryFn: () => auditOpsFn({ data: { days } }),
+  });
+
 
   const vitals = useQuery({
     queryKey: ["vitals"],
