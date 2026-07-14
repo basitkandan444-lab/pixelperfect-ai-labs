@@ -1,12 +1,80 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+interface ResponsiveImage {
+  /** Fallback URL (JPEG/PNG) also used as the <img src>. */
+  src: string;
+  /** Optional base path without extension, e.g. "/gallery/landscape-before". */
+  base?: string;
+  /** Widths available at `${base}-${w}.avif` / `.webp`. */
+  widths?: number[];
+  /** Intrinsic width/height, e.g. 900x675. Set both to zero-out CLS. */
+  width?: number;
+  height?: number;
+}
+
 interface CompareSliderProps {
-  before: string;
-  after: string;
+  /** Backwards-compatible string src or a full responsive descriptor. */
+  before: string | ResponsiveImage;
+  after: string | ResponsiveImage;
   afterAlt?: string;
   beforeAlt?: string;
   className?: string;
   loading?: "lazy" | "eager";
+  /** <picture> sizes attribute, defaults to a two-column responsive layout. */
+  sizes?: string;
+  /** Preload hint for the very first slider on the page. */
+  fetchPriority?: "high" | "low" | "auto";
+}
+
+function toImg(v: string | ResponsiveImage): ResponsiveImage {
+  return typeof v === "string" ? { src: v } : v;
+}
+
+function Picture({
+  img,
+  alt,
+  className,
+  style,
+  draggable,
+  loading,
+  fetchPriority,
+  sizes,
+}: {
+  img: ResponsiveImage;
+  alt: string;
+  className?: string;
+  style?: React.CSSProperties;
+  draggable?: boolean;
+  loading?: "lazy" | "eager";
+  fetchPriority?: "high" | "low" | "auto";
+  sizes?: string;
+}) {
+  const widths = img.widths ?? [];
+  const base = img.base;
+  const buildSrcSet = (ext: string) =>
+    widths.map((w) => `${base}-${w}.${ext} ${w}w`).join(", ");
+  return (
+    <picture>
+      {base && widths.length > 0 && (
+        <>
+          <source type="image/avif" srcSet={buildSrcSet("avif")} sizes={sizes} />
+          <source type="image/webp" srcSet={buildSrcSet("webp")} sizes={sizes} />
+        </>
+      )}
+      <img
+        src={img.src}
+        alt={alt}
+        width={img.width}
+        height={img.height}
+        className={className}
+        style={style}
+        draggable={draggable}
+        loading={loading}
+        decoding="async"
+        {...(fetchPriority ? { fetchpriority: fetchPriority } : {})}
+      />
+    </picture>
+  );
 }
 
 export function CompareSlider({
@@ -16,7 +84,12 @@ export function CompareSlider({
   beforeAlt,
   className,
   loading = "eager",
+  sizes = "(min-width: 1024px) 45vw, (min-width: 640px) 90vw, 100vw",
+  fetchPriority,
 }: CompareSliderProps) {
+  const beforeImg = toImg(before);
+  const afterImg = toImg(after);
+
   const [pos, setPos] = useState(50);
   const [width, setWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -65,23 +138,25 @@ export function CompareSlider({
       onMouseLeave={() => (dragging.current = false)}
       onTouchMove={(e) => updateFromClientX(e.touches[0].clientX)}
     >
-      <img
-        src={after}
+      <Picture
+        img={afterImg}
         alt={afterAlt ?? "Enhanced high-resolution result"}
-        className="block w-full"
+        className="block h-auto w-full"
         draggable={false}
         loading={loading}
-        decoding="async"
+        fetchPriority={fetchPriority}
+        sizes={sizes}
       />
       <div className="absolute inset-0 overflow-hidden" style={{ width: `${pos}%` }}>
-        <img
-          src={before}
+        <Picture
+          img={beforeImg}
           alt={beforeAlt ?? "Original low-quality image"}
           className="absolute inset-0 h-full max-w-none object-cover"
           style={{ width: width || "100%" }}
           draggable={false}
           loading={loading}
-          decoding="async"
+          fetchPriority={fetchPriority}
+          sizes={sizes}
         />
       </div>
 

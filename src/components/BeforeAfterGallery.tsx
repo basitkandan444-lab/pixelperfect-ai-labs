@@ -91,11 +91,24 @@ export function BeforeAfterGallery() {
             </div>
 
             <CompareSlider
-              before={`/gallery/${item.slug}-before.jpg`}
-              after={`/gallery/${item.slug}-after.jpg`}
+              before={{
+                src: `/gallery/${item.slug}-before.jpg`,
+                base: `/gallery/${item.slug}-before`,
+                widths: [300, 600, 900],
+                width: 900,
+                height: 675,
+              }}
+              after={{
+                src: `/gallery/${item.slug}-after.jpg`,
+                base: `/gallery/${item.slug}-after`,
+                widths: [300, 600, 900],
+                width: 900,
+                height: 675,
+              }}
               beforeAlt={`${item.title} — original low-quality version`}
               afterAlt={`${item.title} — AI enhanced high-resolution version`}
               loading={i === 0 ? "eager" : "lazy"}
+              fetchPriority={i === 0 ? "high" : undefined}
             />
 
             <dl className="mt-4 space-y-2 text-sm">
