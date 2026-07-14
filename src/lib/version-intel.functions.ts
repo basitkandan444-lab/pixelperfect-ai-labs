@@ -69,7 +69,7 @@ export const getVersionDiff = createServerFn({ method: "POST" })
     const snaps = versionSnapshots(entries);
     const baseline = snaps.find((s) => s.engineVersion === data.baseline);
     const candidate = snaps.find((s) => s.engineVersion === data.candidate);
-    if (!baseline || !candidate) return { diff: null as const };
+    if (!baseline || !candidate) return { diff: null };
     return { diff: compareVersions(baseline, candidate) };
   });
 
@@ -176,6 +176,6 @@ export const getSimulationDetail = createServerFn({ method: "POST" })
       ...(r.metrics as Record<string, unknown>),
     })) as unknown as import("./version-intel/compute").SimulationEntry[];
     const entry = entries.find((e) => e.simulationId === data.simulationId);
-    if (!entry) return { entry: null as const };
+    if (!entry) return { entry: null };
     return { entry, assessment: assessPromotion(entry) };
   });
