@@ -69,8 +69,20 @@ function CommandCenter() {
   const visitorsFn = useServerFn(getVisitorTimelines);
   const sourceIntelFn = useServerFn(getSourceIntelligence);
   const rtIntelFn = useServerFn(getRealtimeIntelligence);
-  const reportFn = useServerFn(getIntelligenceReport);
+  const execFn = useServerFn(getExecutive);
+  const trendsFn = useServerFn(getTrends);
+  const alertsFn = useServerFn(getAlerts);
+  const fullReportFn = useServerFn(getFullReport);
   const csvFn = useServerFn(exportEventsCsv);
+
+  // Client-side filters
+  const [filters, setFilters] = useState<{
+    source: string;
+    device: string;
+    country: string;
+    segment: string;
+    quality: string;
+  }>({ source: "", device: "", country: "", segment: "", quality: "" });
 
   const overview = useQuery({
     queryKey: ["ov", days],
@@ -114,6 +126,20 @@ function CommandCenter() {
     refetchInterval: 5000,
   });
 
+  const exec = useQuery({
+    queryKey: ["exec", days],
+    queryFn: () => execFn({ data: { days } }),
+  });
+  const trends = useQuery({
+    queryKey: ["trends", days],
+    queryFn: () => trendsFn({ data: { days } }),
+  });
+  const alerts = useQuery({
+    queryKey: ["alerts", days],
+    queryFn: () => alertsFn({ data: { days } }),
+    refetchInterval: 60_000,
+  });
+
   const vitals = useQuery({
     queryKey: ["vitals"],
     queryFn: () => fetch("/api/public/vitals").then((r) => r.json()),
@@ -140,12 +166,15 @@ function CommandCenter() {
     URL.revokeObjectURL(url);
   };
 
-  const downloadReport = async () => {
-    const { report } = await reportFn({ data: { days } });
-    const url = URL.createObjectURL(new Blob([report], { type: "text/markdown" }));
+  const downloadReport = async (format: "markdown" | "csv" | "html") => {
+    const { report } = await fullReportFn({ data: { days, format } });
+    const mime =
+      format === "csv" ? "text/csv" : format === "html" ? "text/html" : "text/markdown";
+    const ext = format === "markdown" ? "md" : format;
+    const url = URL.createObjectURL(new Blob([report], { type: mime }));
     const a = document.createElement("a");
     a.href = url;
-    a.download = `traffic-intelligence-${days}d.md`;
+    a.download = `traffic-intelligence-${days}d.${ext}`;
     a.click();
     URL.revokeObjectURL(url);
   };
