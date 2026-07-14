@@ -221,7 +221,7 @@ export const getSessionAuditHistory = createServerFn({ method: "POST" })
       .eq("session_id", `ops:audit-${data.sessionId}`)
       .gte("ts", since)
       .order("ts", { ascending: true });
-    const records = (rows ?? []).map((r) => r.metrics as import("./audit").AuditRecord);
+    const records = (rows ?? []).map((r) => r.metrics as unknown as import("./audit").AuditRecord);
     const { attributionLine } = await import("./audit");
     return {
       sessionId: data.sessionId,
@@ -246,7 +246,7 @@ export const recordAudit = createServerFn({ method: "POST" })
     await sb.from("events").insert({
       session_id: `ops:audit-${data.sessionId}`,
       name: "audit_record",
-      metrics: rec as unknown as Record<string, unknown>,
+      metrics: JSON.parse(JSON.stringify(rec)),
     });
     return { ok: true, record: rec };
   });
