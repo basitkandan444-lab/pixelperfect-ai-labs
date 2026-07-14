@@ -15,6 +15,7 @@ import {
   exportEventsCsv,
 } from "@/lib/admin.functions";
 import { listGscSites, getGscPerformance } from "@/lib/gsc.functions";
+import { getIntelligence } from "@/lib/intelligence.functions";
 
 // Admin gate: this route lives under _authenticated so the session is already
 // checked. The role check happens client-side (redirect on fail) AND server-side
@@ -55,6 +56,7 @@ function CommandCenter() {
   const journeysFn = useServerFn(getJourneys);
   const gscSitesFn = useServerFn(listGscSites);
   const gscPerfFn = useServerFn(getGscPerformance);
+  const intelFn = useServerFn(getIntelligence);
   const csvFn = useServerFn(exportEventsCsv);
 
   const overview = useQuery({
@@ -80,6 +82,10 @@ function CommandCenter() {
     queryFn: () =>
       firstSite ? gscPerfFn({ data: { siteUrl: firstSite, days } }) : Promise.resolve(null),
     enabled: !!firstSite,
+  });
+  const intel = useQuery({
+    queryKey: ["intel", days],
+    queryFn: () => intelFn({ data: { days } }),
   });
 
   const vitals = useQuery({
@@ -155,6 +161,10 @@ function CommandCenter() {
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-6">
         <Section title="Traffic Overview">
           <KPIRow data={overview.data} />
+        </Section>
+
+        <Section title="Intelligence Analyst" subtitle="Auto-generated insights, quality score & segments">
+          <Intelligence data={intel.data} />
         </Section>
 
         <div className="grid gap-6 lg:grid-cols-2">
@@ -610,3 +620,120 @@ function Skeleton() {
 function Empty({ msg }: { msg: string }) {
   return <p className="text-sm text-muted-foreground">{msg}</p>;
 }
+
+function Intelligence({ data }: { data?: Awaited<ReturnType<typeof getIntelligence>> }) {
+  if (!data) return <Skeleton />;
+  const o = data.overall;
+  if (o.sessions === 0) return <Empty msg="No sessions in this window yet." />;
+  const cls =
+    o.classification === "high"
+      ? "text-emerald-500"
+      : o.classification === "low"
+        ? "text-red-500"
+        : "text-amber-500";
+  const label =
+    o.classification === "high"
+      ? "High confidence human traffic"
+      : o.classification === "low"
+        ? "Low quality — investigate"
+        : "Mixed quality";
+  const segEntries = Object.entries(data.segments).sort((a, b) => b[1] - a[1]);
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-xl border border-border p-4">
+          <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+            Traffic Quality Score
+          </div>
+          <div className={`mt-1 text-4xl font-bold tabular-nums ${cls}`}>{o.score}/100</div>
+          <div className={`text-sm ${cls}`}>{label}</div>
+        </div>
+        <div className="rounded-xl border border-border p-4">
+          <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+            Human likelihood
+          </div>
+          <div className="mt-1 text-4xl font-bold tabular-nums text-emerald-500">
+            {(o.humanPct * 100).toFixed(0)}%
+          </div>
+          <div className="text-xs text-muted-foreground">
+            Automation likelihood {(o.automationPct * 100).toFixed(0)}%
+          </div>
+        </div>
+        <div className="rounded-xl border border-border p-4">
+          <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+            Quality distribution
+          </div>
+          <div className="mt-2 flex overflow-hidden rounded-md">
+            <div
+              className="h-6 bg-emerald-500"
+              style={{ width: `${(data.distribution.high / o.sessions) * 100}%` }}
+            />
+            <div
+              className="h-6 bg-amber-500"
+              style={{ width: `${(data.distribution.medium / o.sessions) * 100}%` }}
+            />
+            <div
+              className="h-6 bg-red-500"
+              style={{ width: `${(data.distribution.low / o.sessions) * 100}%` }}
+            />
+          </div>
+          <div className="mt-2 flex justify-between text-xs text-muted-foreground">
+            <span>High {data.distribution.high}</span>
+            <span>Med {data.distribution.medium}</span>
+            <span>Low {data.distribution.low}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <div>
+          <h3 className="mb-2 text-xs font-medium text-muted-foreground">User segments</h3>
+          <ul className="space-y-1 text-sm">
+            {segEntries.map(([name, n]) => (
+              <li key={name} className="flex justify-between">
+                <span>{name}</span>
+                <span className="tabular-nums text-muted-foreground">{n}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h3 className="mb-2 text-xs font-medium text-muted-foreground">Top quality signals</h3>
+          <ul className="space-y-1 text-sm">
+            {data.topReasons.length === 0 && (
+              <li className="text-muted-foreground">No signals aggregated yet.</li>
+            )}
+            {data.topReasons.map((r) => (
+              <li key={r.reason} className="flex justify-between">
+                <span>{r.reason}</span>
+                <span className="tabular-nums text-muted-foreground">{r.count}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      {data.insights.length > 0 && (
+        <div>
+          <h3 className="mb-2 text-xs font-medium text-muted-foreground">Automated insights</h3>
+          <ul className="space-y-2 text-sm">
+            {data.insights.map((line, i) => (
+              <li
+                key={i}
+                className="rounded-md border border-border bg-muted/30 px-3 py-2 leading-relaxed"
+              >
+                {line}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <p className="text-xs text-muted-foreground">
+        Retention cohorts (D1/D7/D30):{" "}
+        <span className="text-foreground">Not computed.</span> {data.retention.note}
+      </p>
+    </div>
+  );
+}
+
