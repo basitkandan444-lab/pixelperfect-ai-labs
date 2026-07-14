@@ -26,6 +26,20 @@ import {
   getFullReport,
   getValidation,
 } from "@/lib/intelligence.functions";
+import {
+  getAlertLifecycles,
+  recordAlertAction,
+  snapshotAlertDetections,
+  getAuditSummary,
+} from "@/lib/ops.functions";
+import {
+  filterAlerts,
+  sortAlerts,
+  type AlertLifecycle,
+  type AlertSort,
+  type AlertStatus,
+  type AlertSeverity,
+} from "@/lib/alerts";
 
 // Admin gate: this route lives under _authenticated so the session is already
 // checked. The role check happens client-side (redirect on fail) AND server-side
@@ -76,6 +90,10 @@ function CommandCenter() {
   const fullReportFn = useServerFn(getFullReport);
   const validationFn = useServerFn(getValidation);
   const csvFn = useServerFn(exportEventsCsv);
+  const alertLifecycleFn = useServerFn(getAlertLifecycles);
+  const alertActionFn = useServerFn(recordAlertAction);
+  const alertSnapshotFn = useServerFn(snapshotAlertDetections);
+  const auditFn = useServerFn(getAuditSummary);
 
   // Client-side filters
   const [filters, setFilters] = useState<{
@@ -147,6 +165,15 @@ function CommandCenter() {
     queryFn: () => validationFn({ data: { days } }),
   });
 
+  const lifecycles = useQuery({
+    queryKey: ["alert-lifecycles", days],
+    queryFn: () => alertLifecycleFn({ data: { days } }),
+    refetchInterval: 60_000,
+  });
+  const audit = useQuery({
+    queryKey: ["audit", days],
+    queryFn: () => auditFn({ data: { days } }),
+  });
 
   const vitals = useQuery({
     queryKey: ["vitals"],
@@ -176,8 +203,7 @@ function CommandCenter() {
 
   const downloadReport = async (format: "markdown" | "csv" | "html") => {
     const { report } = await fullReportFn({ data: { days, format } });
-    const mime =
-      format === "csv" ? "text/csv" : format === "html" ? "text/html" : "text/markdown";
+    const mime = format === "csv" ? "text/csv" : format === "html" ? "text/html" : "text/markdown";
     const ext = format === "markdown" ? "md" : format;
     const url = URL.createObjectURL(new Blob([report], { type: mime }));
     const a = document.createElement("a");
@@ -259,22 +285,51 @@ function CommandCenter() {
         </Section>
 
         <Section
+          title="Enterprise Operations · Alert Center"
+          subtitle="Full incident lifecycle: acknowledge, resolve, mute, tag, note"
+        >
+          <AlertCenter
+            data={lifecycles.data?.lifecycles}
+            onAction={async (payload) => {
+              await alertActionFn({ data: payload });
+              await lifecycles.refetch();
+            }}
+            onSnapshot={async () => {
+              await alertSnapshotFn({ data: { days } });
+              await lifecycles.refetch();
+            }}
+          />
+        </Section>
+
+        <Section
+          title="Enterprise Operations · Intelligence Audit"
+          subtitle="Every classification is stamped with engine, rules, weights & config hash"
+        >
+          <AuditPanel data={audit.data} />
+        </Section>
+
+        <Section
           title="Intelligence Validation"
           subtitle="Self-audit: averages, confidence & risk distributions, false-flag candidates"
         >
           <Validation data={validation.data} />
         </Section>
 
-
         <Section title="Traffic Overview">
           <KPIRow data={overview.data} />
         </Section>
 
-        <Section title="Intelligence Analyst" subtitle="Auto-generated insights, quality score & segments">
+        <Section
+          title="Intelligence Analyst"
+          subtitle="Auto-generated insights, quality score & segments"
+        >
           <Intelligence data={intel.data} />
         </Section>
 
-        <Section title="Historical Trends" subtitle="Daily quality, human likelihood, conversions & errors">
+        <Section
+          title="Historical Trends"
+          subtitle="Daily quality, human likelihood, conversions & errors"
+        >
           <Trends data={trends.data} />
         </Section>
 
@@ -291,7 +346,10 @@ function CommandCenter() {
           </Section>
         </div>
 
-        <Section title="Source Intelligence" subtitle="Quality, conversion & human likelihood by channel">
+        <Section
+          title="Source Intelligence"
+          subtitle="Quality, conversion & human likelihood by channel"
+        >
           <SourceIntel rows={sourceIntel.data} />
         </Section>
 
@@ -299,14 +357,9 @@ function CommandCenter() {
           title="Visitor Investigation Console"
           subtitle="Filter, inspect and export per-session intelligence"
         >
-          <Filters
-            data={visitors.data}
-            filters={filters}
-            setFilters={setFilters}
-          />
+          <Filters data={visitors.data} filters={filters} setFilters={setFilters} />
           <VisitorList rows={visitors.data} filters={filters} />
         </Section>
-
 
         <div className="grid gap-6 lg:grid-cols-2">
           <Section title="Traffic Sources">
@@ -862,22 +915,28 @@ function Intelligence({ data }: { data?: Awaited<ReturnType<typeof getIntelligen
       )}
 
       <p className="text-xs text-muted-foreground">
-        Retention cohorts (D1/D7/D30):{" "}
-        <span className="text-foreground">Not computed.</span> {data.retention.note}
+        Retention cohorts (D1/D7/D30): <span className="text-foreground">Not computed.</span>{" "}
+        {data.retention.note}
       </p>
     </div>
   );
 }
 
-
-function RealtimeCommandRoom({ data }: { data?: Awaited<ReturnType<typeof getRealtimeIntelligence>> }) {
+function RealtimeCommandRoom({
+  data,
+}: {
+  data?: Awaited<ReturnType<typeof getRealtimeIntelligence>>;
+}) {
   if (!data) return <Skeleton />;
   if (data.active === 0) return <Empty msg="No live visitors right now." />;
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <KPI label="Active now" value={data.active} sub={`${data.windowSeconds}s window`} />
-        <KPI label="Human likely" value={<span className="text-emerald-500">{data.humanLikely}</span>} />
+        <KPI
+          label="Human likely"
+          value={<span className="text-emerald-500">{data.humanLikely}</span>}
+        />
         <KPI label="Unknown" value={<span className="text-amber-500">{data.unknown}</span>} />
         <KPI label="Suspicious" value={<span className="text-red-500">{data.suspicious}</span>} />
       </div>
@@ -962,10 +1021,7 @@ type FilterState = {
   quality: string;
 };
 
-function applyFilters(
-  rows: Awaited<ReturnType<typeof getVisitorTimelines>>,
-  f: FilterState,
-) {
+function applyFilters(rows: Awaited<ReturnType<typeof getVisitorTimelines>>, f: FilterState) {
   return rows.filter((v) => {
     const c = v.classification;
     if (f.source && (c.source ?? "unknown") !== f.source) return false;
@@ -989,7 +1045,9 @@ function Filters({
   filters: FilterState;
   setFilters: (f: FilterState) => void;
 }) {
-  const uniq = (fn: (v: Awaited<ReturnType<typeof getVisitorTimelines>>[number]) => string | null) => {
+  const uniq = (
+    fn: (v: Awaited<ReturnType<typeof getVisitorTimelines>>[number]) => string | null,
+  ) => {
     const s = new Set<string>();
     (data ?? []).forEach((v) => {
       const val = fn(v);
@@ -1002,15 +1060,7 @@ function Filters({
   const countries = uniq((v) => v.classification.country);
   const segments = uniq((v) => v.classification.segment);
   const set = (k: keyof FilterState, val: string) => setFilters({ ...filters, [k]: val });
-  const Sel = ({
-    k,
-    opts,
-    label,
-  }: {
-    k: keyof FilterState;
-    opts: string[];
-    label: string;
-  }) => (
+  const Sel = ({ k, opts, label }: { k: keyof FilterState; opts: string[]; label: string }) => (
     <label className="flex items-center gap-1 text-xs">
       <span className="text-muted-foreground">{label}</span>
       <select
@@ -1035,7 +1085,9 @@ function Filters({
       <Sel k="segment" opts={segments} label="Segment" />
       <Sel k="quality" opts={["high", "medium", "low", "suspicious"]} label="Quality" />
       <button
-        onClick={() => setFilters({ source: "", device: "", country: "", segment: "", quality: "" })}
+        onClick={() =>
+          setFilters({ source: "", device: "", country: "", segment: "", quality: "" })
+        }
         className="rounded-md border border-input px-2 py-1 text-xs hover:bg-accent"
       >
         Reset
@@ -1215,12 +1267,15 @@ function Trends({ data }: { data?: Awaited<ReturnType<typeof getTrends>> }) {
   );
 }
 
-
 function VisitorRow({ v }: { v: Awaited<ReturnType<typeof getVisitorTimelines>>[number] }) {
   const [open, setOpen] = useState(false);
   const c = v.classification;
   const confCls =
-    c.confidence === "high" ? "text-emerald-500" : c.confidence === "low" ? "text-red-500" : "text-amber-500";
+    c.confidence === "high"
+      ? "text-emerald-500"
+      : c.confidence === "low"
+        ? "text-red-500"
+        : "text-amber-500";
   const humanCls =
     c.humanProbability >= 0.7
       ? "text-emerald-500"
@@ -1259,7 +1314,9 @@ function VisitorRow({ v }: { v: Awaited<ReturnType<typeof getVisitorTimelines>>[
             <ul className="space-y-1 text-xs">
               {c.evidence.map((e, i) => (
                 <li key={i} className="flex justify-between gap-2">
-                  <span className={e.direction === "positive" ? "text-emerald-500" : "text-red-500"}>
+                  <span
+                    className={e.direction === "positive" ? "text-emerald-500" : "text-red-500"}
+                  >
                     {e.direction === "positive" ? "✓" : "✗"} {e.signal}
                   </span>
                   <span className="tabular-nums text-muted-foreground">±{e.weight}</span>
@@ -1307,11 +1364,7 @@ function VisitorRow({ v }: { v: Awaited<ReturnType<typeof getVisitorTimelines>>[
   );
 }
 
-function SummaryPanel({
-  s,
-}: {
-  s: Record<string, number | string | boolean | null>;
-}) {
+function SummaryPanel({ s }: { s: Record<string, number | string | boolean | null> }) {
   const rows: [string, string | number][] = [];
   const add = (label: string, val: string | number | boolean | null | undefined) => {
     if (val === null || val === undefined || val === "") return;
@@ -1359,7 +1412,11 @@ function SummaryPanel({
 function Validation({ data }: { data?: Awaited<ReturnType<typeof getValidation>> }) {
   if (!data) return <p className="text-sm text-muted-foreground">Loading validation…</p>;
   if (data.sessions === 0)
-    return <p className="text-sm text-muted-foreground">No sessions yet — validation unlocks with traffic.</p>;
+    return (
+      <p className="text-sm text-muted-foreground">
+        No sessions yet — validation unlocks with traffic.
+      </p>
+    );
   const a = data.averages;
   const pct = (n: number) => `${Math.round(n * 100)}%`;
   const cd = data.confidenceDistribution;
@@ -1406,7 +1463,8 @@ function Validation({ data }: { data?: Awaited<ReturnType<typeof getValidation>>
               <ul className="space-y-1 text-xs">
                 {data.falsePositiveCandidates.map((c) => (
                   <li key={c.session_id} className="text-muted-foreground">
-                    <span className="font-mono text-foreground">{c.session_id.slice(0, 10)}</span> — {c.reason}
+                    <span className="font-mono text-foreground">{c.session_id.slice(0, 10)}</span> —{" "}
+                    {c.reason}
                   </li>
                 ))}
               </ul>
@@ -1418,7 +1476,8 @@ function Validation({ data }: { data?: Awaited<ReturnType<typeof getValidation>>
               <ul className="space-y-1 text-xs">
                 {data.falseNegativeCandidates.map((c) => (
                   <li key={c.session_id} className="text-muted-foreground">
-                    <span className="font-mono text-foreground">{c.session_id.slice(0, 10)}</span> — {c.reason}
+                    <span className="font-mono text-foreground">{c.session_id.slice(0, 10)}</span> —{" "}
+                    {c.reason}
                   </li>
                 ))}
               </ul>
@@ -1433,6 +1492,460 @@ function Validation({ data }: { data?: Awaited<ReturnType<typeof getValidation>>
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+// ---------- Enterprise Operations · Alert Center ----------
+
+type AlertActionPayload = {
+  alertId: string;
+  type: "acknowledge" | "resolve" | "mute" | "unmute" | "note" | "tag" | "untag";
+  note?: string;
+  tag?: string;
+  mutedUntil?: string;
+};
+
+function AlertCenter({
+  data,
+  onAction,
+  onSnapshot,
+}: {
+  data?: AlertLifecycle[];
+  onAction: (p: AlertActionPayload) => Promise<void>;
+  onSnapshot: () => Promise<void>;
+}) {
+  const [statusFilter, setStatusFilter] = useState<AlertStatus | "all">("all");
+  const [severityFilter, setSeverityFilter] = useState<AlertSeverity | "all">("all");
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<AlertSort>("severity");
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  if (!data) return <Skeleton />;
+
+  const filtered = sortAlerts(
+    filterAlerts(data, { status: statusFilter, severity: severityFilter, search }),
+    sort,
+  );
+  const active = data.filter((a) => a.status === "active").length;
+  const acked = data.filter((a) => a.status === "acknowledged").length;
+  const resolved = data.filter((a) => a.status === "resolved").length;
+  const muted = data.filter((a) => a.status === "muted").length;
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <KPI label="Active" value={active} />
+        <KPI label="Acknowledged" value={acked} />
+        <KPI label="Resolved" value={resolved} />
+        <KPI label="Muted" value={muted} />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <input
+          placeholder="Search title, detail, tag…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="min-w-[200px] flex-1 rounded-md border border-input bg-background px-2 py-1"
+        />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as AlertStatus | "all")}
+          className="rounded-md border border-input bg-background px-2 py-1"
+        >
+          <option value="all">All statuses</option>
+          <option value="active">Active</option>
+          <option value="acknowledged">Acknowledged</option>
+          <option value="resolved">Resolved</option>
+          <option value="muted">Muted</option>
+        </select>
+        <select
+          value={severityFilter}
+          onChange={(e) => setSeverityFilter(e.target.value as AlertSeverity | "all")}
+          className="rounded-md border border-input bg-background px-2 py-1"
+        >
+          <option value="all">All severities</option>
+          <option value="critical">Critical</option>
+          <option value="warning">Warning</option>
+          <option value="info">Info</option>
+        </select>
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value as AlertSort)}
+          className="rounded-md border border-input bg-background px-2 py-1"
+        >
+          <option value="severity">Sort: severity</option>
+          <option value="lastDetected">Sort: last detected</option>
+          <option value="firstDetected">Sort: first detected</option>
+          <option value="occurrences">Sort: occurrences</option>
+          <option value="recurrence">Sort: recurrence</option>
+        </select>
+        <button
+          onClick={() => void onSnapshot()}
+          className="rounded-md border border-input px-3 py-1 hover:bg-accent"
+        >
+          Snapshot now
+        </button>
+      </div>
+
+      {filtered.length === 0 ? (
+        <Empty msg="No alerts match the current filters." />
+      ) : (
+        <ul className="space-y-2">
+          {filtered.map((a) => (
+            <AlertRow
+              key={a.id}
+              alert={a}
+              expanded={expanded === a.id}
+              onToggle={() => setExpanded(expanded === a.id ? null : a.id)}
+              onAction={onAction}
+            />
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function AlertRow({
+  alert,
+  expanded,
+  onToggle,
+  onAction,
+}: {
+  alert: AlertLifecycle;
+  expanded: boolean;
+  onToggle: () => void;
+  onAction: (p: AlertActionPayload) => Promise<void>;
+}) {
+  const cls =
+    alert.severity === "critical"
+      ? "border-red-500/50 bg-red-500/5"
+      : alert.severity === "warning"
+        ? "border-amber-500/50 bg-amber-500/5"
+        : "border-border";
+  const statusCls =
+    alert.status === "active"
+      ? "bg-red-500/20 text-red-400"
+      : alert.status === "acknowledged"
+        ? "bg-amber-500/20 text-amber-400"
+        : alert.status === "resolved"
+          ? "bg-emerald-500/20 text-emerald-400"
+          : "bg-muted text-muted-foreground";
+  const duration = Math.round(alert.durationMs / 60_000);
+
+  return (
+    <li className={`rounded-md border px-3 py-2 text-sm ${cls}`}>
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-start justify-between text-left"
+      >
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">
+              {alert.severity}
+            </span>
+            <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase ${statusCls}`}>
+              {alert.status}
+            </span>
+            {alert.recurring && (
+              <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] uppercase text-purple-300">
+                recurring ×{alert.recurrenceCount}
+              </span>
+            )}
+            <span className="font-mono text-[10px] text-muted-foreground">{alert.id}</span>
+            {alert.tags.map((t) => (
+              <span
+                key={t}
+                className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary"
+              >
+                #{t}
+              </span>
+            ))}
+          </div>
+          <div className="mt-1 font-medium">{alert.title}</div>
+          <div className="text-xs text-muted-foreground">{alert.detail}</div>
+          <div className="mt-1 text-[10px] text-muted-foreground">
+            {alert.totalOccurrences} occurrence(s) · {duration}m span · first{" "}
+            {new Date(alert.firstDetected).toLocaleString()}
+          </div>
+        </div>
+        <span className="ml-3 text-xs text-muted-foreground">{expanded ? "▲" : "▼"}</span>
+      </button>
+
+      {expanded && (
+        <div className="mt-3 border-t border-border pt-3">
+          <div className="mb-3 flex flex-wrap gap-2">
+            {!alert.acknowledged && (
+              <button
+                className="rounded-md border border-input px-2 py-1 text-xs hover:bg-accent"
+                onClick={() => void onAction({ alertId: alert.id, type: "acknowledge" })}
+              >
+                Acknowledge
+              </button>
+            )}
+            {!alert.resolved && (
+              <button
+                className="rounded-md border border-input px-2 py-1 text-xs hover:bg-accent"
+                onClick={() => void onAction({ alertId: alert.id, type: "resolve" })}
+              >
+                Resolve
+              </button>
+            )}
+            {alert.muted ? (
+              <button
+                className="rounded-md border border-input px-2 py-1 text-xs hover:bg-accent"
+                onClick={() => void onAction({ alertId: alert.id, type: "unmute" })}
+              >
+                Unmute
+              </button>
+            ) : (
+              <button
+                className="rounded-md border border-input px-2 py-1 text-xs hover:bg-accent"
+                onClick={() =>
+                  void onAction({
+                    alertId: alert.id,
+                    type: "mute",
+                    mutedUntil: new Date(Date.now() + 24 * 3600_000).toISOString(),
+                  })
+                }
+              >
+                Mute 24h
+              </button>
+            )}
+            <button
+              className="rounded-md border border-input px-2 py-1 text-xs hover:bg-accent"
+              onClick={() => {
+                const note = window.prompt("Add note");
+                if (note) void onAction({ alertId: alert.id, type: "note", note });
+              }}
+            >
+              Add note
+            </button>
+            <button
+              className="rounded-md border border-input px-2 py-1 text-xs hover:bg-accent"
+              onClick={() => {
+                const tag = window.prompt("Add tag");
+                if (tag) void onAction({ alertId: alert.id, type: "tag", tag });
+              }}
+            >
+              Add tag
+            </button>
+          </div>
+
+          <div className="grid gap-3 text-xs md:grid-cols-2">
+            <div>
+              <div className="mb-1 font-semibold text-muted-foreground">Lifecycle timeline</div>
+              <ul className="space-y-1">
+                <li>
+                  First detected: <span className="font-mono">{alert.firstDetected}</span>
+                </li>
+                <li>
+                  Last detected: <span className="font-mono">{alert.lastDetected}</span>
+                </li>
+                {alert.acknowledged && (
+                  <li>
+                    Acknowledged by{" "}
+                    <span className="font-mono">{alert.acknowledgedBy?.slice(0, 8)}</span> at{" "}
+                    <span className="font-mono">{alert.acknowledgedAt}</span>
+                  </li>
+                )}
+                {alert.resolved && (
+                  <li>
+                    Resolved by <span className="font-mono">{alert.resolvedBy?.slice(0, 8)}</span>{" "}
+                    at <span className="font-mono">{alert.resolvedAt}</span>
+                  </li>
+                )}
+                {alert.muted && alert.mutedUntil && (
+                  <li>
+                    Muted until <span className="font-mono">{alert.mutedUntil}</span>
+                  </li>
+                )}
+                <li>
+                  Related group: <span className="font-mono">{alert.relatedGroup}</span>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <div className="mb-1 font-semibold text-muted-foreground">Severity history</div>
+              <ul className="space-y-1">
+                {alert.severityHistory.map((s, i) => (
+                  <li key={i}>
+                    <span className="font-mono">{s.at}</span> — {s.severity}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {alert.notes.length > 0 && (
+            <div className="mt-3 text-xs">
+              <div className="mb-1 font-semibold text-muted-foreground">Notes</div>
+              <ul className="space-y-1">
+                {alert.notes.map((n, i) => (
+                  <li key={i}>
+                    <span className="font-mono">{n.at}</span>{" "}
+                    <span className="text-muted-foreground">({n.actor.slice(0, 8)})</span> —{" "}
+                    {n.text}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </li>
+  );
+}
+
+// ---------- Enterprise Operations · Intelligence Audit ----------
+
+function AuditPanel({ data }: { data?: Awaited<ReturnType<typeof getAuditSummary>> }) {
+  if (!data) return <Skeleton />;
+  const { summary, current, sampleAttribution } = data;
+  return (
+    <div className="space-y-4 text-sm">
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="rounded-md border border-border p-3">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Current engine
+          </div>
+          <ul className="space-y-1 text-xs">
+            <li>
+              Engine: <span className="font-mono">{current.engineVersion}</span>
+            </li>
+            <li>
+              Intelligence: <span className="font-mono">{current.intelligenceVersion}</span>
+            </li>
+            <li>
+              Classification: <span className="font-mono">{current.classificationVersion}</span>
+            </li>
+            <li>
+              Rules: <span className="font-mono">{current.ruleVersion}</span>
+            </li>
+            <li>
+              Weights: <span className="font-mono">{current.weightVersion}</span>
+            </li>
+            <li>
+              Scoring: <span className="font-mono">{current.scoringVersion}</span>
+            </li>
+            <li>
+              Deployment: <span className="font-mono">{current.deploymentVersion}</span>
+            </li>
+            <li>
+              Build: <span className="font-mono">{current.buildVersion}</span> ·{" "}
+              <span className="font-mono">{current.buildCommit}</span>
+            </li>
+            <li>
+              Model config hash: <span className="font-mono">{current.modelConfigHash}</span>
+            </li>
+            <li>
+              Feature flags:{" "}
+              {current.featureFlags.map((f) => (
+                <span
+                  key={f}
+                  className="mr-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary"
+                >
+                  {f}
+                </span>
+              ))}
+            </li>
+          </ul>
+        </div>
+        <div className="rounded-md border border-border p-3">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Audit inventory
+          </div>
+          <ul className="space-y-1 text-xs">
+            <li>Total records: {summary.totalRecords}</li>
+            <li>Historical (persisted): {data.totalHistorical}</li>
+            <li>Live (this window): {data.totalLive}</li>
+          </ul>
+          {sampleAttribution && (
+            <div className="mt-3 rounded-md bg-muted/40 p-2 font-mono text-[11px]">
+              {sampleAttribution}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <AuditGroup
+        title="Engine versions"
+        rows={summary.engineVersions.map((r) => ({
+          key: r.engineVersion,
+          count: r.count,
+          earliest: r.earliest,
+          latest: r.latest,
+        }))}
+      />
+      <AuditGroup
+        title="Rule versions"
+        rows={summary.ruleVersions.map((r) => ({
+          key: r.ruleVersion,
+          count: r.count,
+        }))}
+      />
+      <AuditGroup
+        title="Weight versions"
+        rows={summary.weightVersions.map((r) => ({
+          key: r.weightVersion,
+          count: r.count,
+        }))}
+      />
+      <AuditGroup
+        title="Model config hashes"
+        rows={summary.modelConfigHashes.map((r) => ({
+          key: r.hash,
+          count: r.count,
+        }))}
+      />
+      <AuditGroup
+        title="Deployment timeline"
+        rows={summary.deploymentTimeline.map((r) => ({
+          key: r.deploymentVersion,
+          count: r.count,
+          earliest: r.earliest,
+          latest: r.latest,
+        }))}
+      />
+    </div>
+  );
+}
+
+function AuditGroup({
+  title,
+  rows,
+}: {
+  title: string;
+  rows: { key: string; count: number; earliest?: string; latest?: string }[];
+}) {
+  if (rows.length === 0) return null;
+  return (
+    <div className="rounded-md border border-border p-3">
+      <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {title}
+      </div>
+      <table className="w-full text-xs">
+        <thead className="text-left text-muted-foreground">
+          <tr>
+            <th className="pb-1">Version</th>
+            <th>Count</th>
+            {rows[0].earliest && <th>Earliest</th>}
+            {rows[0].latest && <th>Latest</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.key} className="border-t border-border/50">
+              <td className="py-1 font-mono">{r.key}</td>
+              <td className="tabular-nums">{r.count}</td>
+              {r.earliest && <td className="font-mono">{r.earliest}</td>}
+              {r.latest && <td className="font-mono">{r.latest}</td>}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
