@@ -24,6 +24,7 @@ import {
   getTrends,
   getAlerts,
   getFullReport,
+  getValidation,
 } from "@/lib/intelligence.functions";
 
 // Admin gate: this route lives under _authenticated so the session is already
