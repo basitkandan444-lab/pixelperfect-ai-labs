@@ -16,7 +16,7 @@ const iso = (ms: number) => new Date(ms).toISOString();
 const T0 = Date.parse("2026-07-14T10:00:00Z");
 
 function lc(overrides: Partial<AlertLifecycle> & { id: string }): AlertLifecycle {
-  return {
+  const base: AlertLifecycle = {
     id: overrides.id,
     type: overrides.id,
     severity: "warning",
@@ -36,8 +36,8 @@ function lc(overrides: Partial<AlertLifecycle> & { id: string }): AlertLifecycle
     relatedGroup: "traffic",
     notes: [],
     tags: [],
-    ...overrides,
   };
+  return { ...base, ...overrides };
 }
 
 describe("buildAlertTimeline", () => {
