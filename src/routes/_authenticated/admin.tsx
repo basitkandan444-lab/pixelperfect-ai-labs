@@ -68,7 +68,7 @@ function CommandCenter() {
   const firstSite = gscSites.data?.sites?.[0]?.siteUrl;
   const gscPerf = useQuery({
     queryKey: ["gscPerf", firstSite, days],
-    queryFn: () => (firstSite ? gscPerfFn({ data: { siteUrl: firstSite, days } }) : null),
+    queryFn: () => (firstSite ? gscPerfFn({ data: { siteUrl: firstSite, days } }) : Promise.resolve(null)),
     enabled: !!firstSite,
   });
 

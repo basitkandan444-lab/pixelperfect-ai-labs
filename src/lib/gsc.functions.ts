@@ -22,14 +22,24 @@ function headers() {
   };
 }
 
+export type GscSite = { siteUrl: string; permissionLevel?: string };
+export type GscRow = {
+  keys?: string[];
+  clicks?: number;
+  impressions?: number;
+  ctr?: number;
+  position?: number;
+};
+export type GscTotals = { clicks?: number; impressions?: number; ctr?: number; position?: number };
+
 export const listGscSites = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .handler(async ({ context }): Promise<{ sites: GscSite[]; connected: boolean; error?: string }> => {
     await assertAdmin(context.supabase, context.userId);
     if (!process.env.GOOGLE_SEARCH_CONSOLE_API_KEY) return { sites: [], connected: false };
     const res = await fetch(`${GATEWAY}/webmasters/v3/sites`, { headers: headers() });
     if (!res.ok) return { sites: [], connected: false, error: `${res.status}` };
-    const j = (await res.json()) as { siteEntry?: Array<{ siteUrl: string; permissionLevel?: string }> };
+    const j = (await res.json()) as { siteEntry?: GscSite[] };
     return { sites: j.siteEntry ?? [], connected: true };
   });
 
@@ -39,14 +49,14 @@ export const getGscPerformance = createServerFn({ method: "POST" })
     siteUrl: String(d.siteUrl),
     days: Math.min(90, Math.max(1, Number(d.days ?? 28))),
   }))
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<{ totals: GscTotals | null; byQuery: GscRow[]; byPage: GscRow[] } | null> => {
     await assertAdmin(context.supabase, context.userId);
     if (!process.env.GOOGLE_SEARCH_CONSOLE_API_KEY) return null;
     const end = new Date();
     const start = new Date(end.getTime() - data.days * 86_400_000);
     const iso = (d: Date) => d.toISOString().slice(0, 10);
     const path = `/webmasters/v3/sites/${encodeURIComponent(data.siteUrl)}/searchAnalytics/query`;
-    const call = async (dim: string[]) => {
+    const call = async (dim: string[]): Promise<{ rows: GscRow[] }> => {
       const res = await fetch(`${GATEWAY}${path}`, {
         method: "POST",
         headers: headers(),
@@ -57,9 +67,10 @@ export const getGscPerformance = createServerFn({ method: "POST" })
           rowLimit: 50,
         }),
       });
-      if (!res.ok) return { rows: [] as unknown[] };
-      return (await res.json()) as { rows?: unknown[] };
+      if (!res.ok) return { rows: [] };
+      const j = (await res.json()) as { rows?: GscRow[] };
+      return { rows: j.rows ?? [] };
     };
     const [totals, byQuery, byPage] = await Promise.all([call([]), call(["query"]), call(["page"])]);
-    return { totals: totals.rows?.[0] ?? null, byQuery: byQuery.rows ?? [], byPage: byPage.rows ?? [] };
+    return { totals: (totals.rows[0] as GscTotals | undefined) ?? null, byQuery: byQuery.rows, byPage: byPage.rows };
   });
