@@ -361,6 +361,28 @@ export function classifySession(s: SessionAgg): SessionClassification {
   // Segmentation
   const seg = segmentOf(s, qualityScore);
 
+  // Risk level: high risk when automation probability is elevated *and* we
+  // have strong evidence backing it. Otherwise degrade gracefully so we
+  // never over-flag genuine but low-signal sessions.
+  const evidencePointsFinal = ev.reduce((a, b) => a + b.weight, 0);
+  const riskLevel: "low" | "medium" | "high" =
+    automationProbability > 0.7 && evidencePointsFinal >= 30
+      ? "high"
+      : automationProbability > 0.4
+        ? "medium"
+        : "low";
+
+  // Serialization-safe summary shape (numbers/strings/booleans/null only).
+  let safeSummary: Record<string, number | string | boolean | null> | null = null;
+  if (s.summary) {
+    safeSummary = {};
+    for (const [k, v] of Object.entries(s.summary)) {
+      if (v === null) safeSummary[k] = null;
+      else if (typeof v === "number" || typeof v === "string" || typeof v === "boolean")
+        safeSummary[k] = v;
+    }
+  }
+
   return {
     session_id: s.session_id,
     humanProbability,
@@ -370,6 +392,7 @@ export function classifySession(s: SessionAgg): SessionClassification {
     segment: seg,
     intentScore: intent,
     engagementScore: engagement,
+    riskLevel,
     evidence: ev.sort((a, b) => b.weight - a.weight),
     reasons: ev.map((e) => (e.direction === "positive" ? "✓ " : "✗ ") + e.signal),
     device: s.device,
@@ -379,6 +402,9 @@ export function classifySession(s: SessionAgg): SessionClassification {
     events: n,
     first: new Date(s.first).toISOString(),
     last: new Date(s.last).toISOString(),
+    summary: safeSummary,
+    rageClicks: s.rageClicks,
+    deadClicks: s.deadClicks,
   };
 }
 
