@@ -144,8 +144,9 @@ function CommandCenter() {
 
   const validation = useQuery({
     queryKey: ["validation", days],
-    queryFn: () => useServerFn(getValidation)({ data: { days } }),
+    queryFn: () => validationFn({ data: { days } }),
   });
+
 
   const vitals = useQuery({
     queryKey: ["vitals"],
