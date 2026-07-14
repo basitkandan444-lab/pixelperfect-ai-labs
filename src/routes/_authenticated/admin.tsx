@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
+import { CommandNav } from "@/components/command-center/CommandNav";
 import { supabase } from "@/integrations/supabase/client";
 import {
   getTrafficOverview,
@@ -302,6 +303,8 @@ function CommandCenter() {
           </div>
         </div>
       </header>
+
+      <CommandNav />
 
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-6">
         <Section title="Executive Summary" subtitle="One-glance intelligence briefing">
