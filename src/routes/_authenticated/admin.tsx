@@ -1978,3 +1978,182 @@ function AuditGroup({
     </div>
   );
 }
+
+// ---------- Loop 1.1 · Alert Ops Metrics ----------
+
+function fmtDur(ms: number | null): string {
+  if (ms === null || !isFinite(ms)) return "—";
+  if (ms < 60_000) return `${Math.round(ms / 1000)}s`;
+  if (ms < 3600_000) return `${Math.round(ms / 60_000)}m`;
+  if (ms < 86_400_000) return `${(ms / 3600_000).toFixed(1)}h`;
+  return `${(ms / 86_400_000).toFixed(1)}d`;
+}
+
+function AlertOpsPanel({ data }: { data?: Awaited<ReturnType<typeof getAlertOps>> }) {
+  if (!data) return <Skeleton />;
+  const { metrics, incidents } = data;
+  if (metrics.totalAlerts === 0) return <Empty msg="No alerts in this window." />;
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <KPI label="MTTA (mean)" value={fmtDur(metrics.mttaMs)} sub={`median ${fmtDur(metrics.medianMttaMs)}`} />
+        <KPI label="MTTR (mean)" value={fmtDur(metrics.mttrMs)} sub={`p95 ${fmtDur(metrics.p95MttrMs)}`} />
+        <KPI label="Ack rate" value={`${Math.round(metrics.ackRate * 100)}%`} sub={`${metrics.acknowledgedAlerts}/${metrics.totalAlerts}`} />
+        <KPI label="Resolve rate" value={`${Math.round(metrics.resolveRate * 100)}%`} sub={`${metrics.resolvedAlerts}/${metrics.totalAlerts}`} />
+      </div>
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="rounded-md border border-border p-3 text-xs">
+          <div className="mb-2 font-semibold uppercase tracking-wide text-muted-foreground">
+            Top recurring
+          </div>
+          {metrics.topRecurring.length === 0 ? (
+            <p className="text-muted-foreground">No recurring alerts.</p>
+          ) : (
+            <ul className="space-y-1">
+              {metrics.topRecurring.map((r) => (
+                <li key={r.id} className="flex justify-between">
+                  <span className="truncate">{r.title}</span>
+                  <span className="ml-2 font-mono">×{r.recurrenceCount}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div className="rounded-md border border-border p-3 text-xs">
+          <div className="mb-2 font-semibold uppercase tracking-wide text-muted-foreground">
+            Noisy alerts (≥20 occurrences)
+          </div>
+          {metrics.noisyAlerts.length === 0 ? (
+            <p className="text-muted-foreground">No noisy alerts.</p>
+          ) : (
+            <ul className="space-y-1">
+              {metrics.noisyAlerts.map((r) => (
+                <li key={r.id} className="flex justify-between">
+                  <span className="truncate">{r.title}</span>
+                  <span className="ml-2 font-mono">{r.occurrences}×</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+      <div className="rounded-md border border-border p-3 text-xs">
+        <div className="mb-2 font-semibold uppercase tracking-wide text-muted-foreground">
+          Correlated incidents ({incidents.length})
+        </div>
+        {incidents.length === 0 ? (
+          <p className="text-muted-foreground">
+            No correlated incidents — related alerts did not cluster in time.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {incidents.map((inc) => (
+              <li key={inc.id} className="rounded border border-border/60 p-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] uppercase text-primary">
+                    {inc.group}
+                  </span>
+                  <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                    {inc.severity}
+                  </span>
+                  {inc.active && (
+                    <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] uppercase text-red-400">
+                      active
+                    </span>
+                  )}
+                  <span className="text-muted-foreground">
+                    {inc.alertCount} alerts · {fmtDur(Date.parse(inc.endedAt) - Date.parse(inc.startedAt))}
+                  </span>
+                </div>
+                <div className="mt-1 font-medium">{inc.title}</div>
+                <div className="text-muted-foreground">{inc.summary}</div>
+                <div className="mt-1 font-mono text-[10px] text-muted-foreground">
+                  {inc.startedAt} → {inc.endedAt}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------- Loop 1.1 · Audit Verification & Version History ----------
+
+function AuditVerificationPanel({
+  data,
+}: {
+  data?: Awaited<ReturnType<typeof getAuditOps>>;
+}) {
+  if (!data) return <Skeleton />;
+  const { verification, timeline } = data;
+  const badgeCls = verification.ok
+    ? "bg-emerald-500/20 text-emerald-400"
+    : "bg-red-500/20 text-red-400";
+  return (
+    <div className="space-y-4 text-sm">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+        <div className="rounded-md border border-border p-3">
+          <div className="text-xs uppercase text-muted-foreground">Integrity</div>
+          <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] uppercase ${badgeCls}`}>
+            {verification.ok ? "append-only ok" : "issues detected"}
+          </span>
+        </div>
+        <KPI label="Records" value={verification.totalRecords} />
+        <KPI label="Out of order" value={verification.outOfOrder} />
+        <KPI label="Duplicates" value={verification.duplicateRecords} />
+        <KPI label="Invalid" value={verification.invalidRecords} />
+      </div>
+
+      {verification.issues.length > 0 && (
+        <div className="rounded-md border border-red-500/40 bg-red-500/5 p-3 text-xs">
+          <div className="mb-2 font-semibold text-red-400">
+            First {verification.issues.length} issue(s)
+          </div>
+          <ul className="space-y-1 font-mono">
+            {verification.issues.slice(0, 10).map((i, idx) => (
+              <li key={idx}>
+                [{i.code}] {i.message}
+                {i.sessionId ? ` · session ${i.sessionId.slice(0, 8)}` : ""}
+                {i.at ? ` @ ${i.at}` : ""}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="rounded-md border border-border p-3">
+        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Version history timeline ({timeline.length} window{timeline.length === 1 ? "" : "s"})
+        </div>
+        {timeline.length === 0 ? (
+          <p className="text-xs text-muted-foreground">No audit records in this window.</p>
+        ) : (
+          <ol className="space-y-2 text-xs">
+            {timeline.map((w, i) => (
+              <li key={i} className="rounded border border-border/60 p-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary">
+                    engine v{w.version.engineVersion}
+                  </span>
+                  <span className="font-mono text-[10px] text-muted-foreground">
+                    hash {w.version.modelConfigHash}
+                  </span>
+                  <span className="text-muted-foreground">rules {w.version.ruleVersion}</span>
+                  <span className="text-muted-foreground">weights {w.version.weightVersion}</span>
+                  <span className="ml-auto tabular-nums text-muted-foreground">
+                    {w.records} record{w.records === 1 ? "" : "s"}
+                  </span>
+                </div>
+                <div className="mt-1 font-mono text-[10px] text-muted-foreground">
+                  {w.from} → {w.to}
+                </div>
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
+    </div>
+  );
+}
