@@ -323,6 +323,21 @@ function CommandCenter() {
         </Section>
 
         <Section
+          title="Alert Ops Metrics"
+          subtitle="MTTA / MTTR, noisy alerts, recurring incidents, correlated incidents"
+        >
+          <AlertOpsPanel data={alertOps.data} />
+        </Section>
+
+        <Section
+          title="Audit Verification & Version History"
+          subtitle="Append-only integrity checks + chronological engine timeline"
+        >
+          <AuditVerificationPanel data={auditOps.data} />
+        </Section>
+
+
+        <Section
           title="Intelligence Validation"
           subtitle="Self-audit: averages, confidence & risk distributions, false-flag candidates"
         >
