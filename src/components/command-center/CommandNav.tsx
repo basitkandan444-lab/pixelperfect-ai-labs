@@ -9,9 +9,9 @@ type NavItem = { to: string; label: string; icon: ReactNode };
 const ITEMS: NavItem[] = [
   { to: "/admin", label: "Overview", icon: <BarChart3 className="h-4 w-4" /> },
   { to: "/admin/investigations", label: "Investigations", icon: <Search className="h-4 w-4" /> },
-  { to: "/admin/investigations?tab=bookmarks", label: "Bookmarks", icon: <Bookmark className="h-4 w-4" /> },
+  { to: "/admin/investigations", label: "Bookmarks", icon: <Bookmark className="h-4 w-4" /> },
   { to: "/ops", label: "Live Ops", icon: <Activity className="h-4 w-4" /> },
-  { to: "/admin?tab=sandbox", label: "Sandbox", icon: <FlaskConical className="h-4 w-4" /> },
+  { to: "/admin", label: "Sandbox", icon: <FlaskConical className="h-4 w-4" /> },
 ];
 
 /**
