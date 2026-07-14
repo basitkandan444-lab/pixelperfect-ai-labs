@@ -175,7 +175,6 @@ function CommandCenter() {
     queryFn: () => auditFn({ data: { days } }),
   });
 
-
   const vitals = useQuery({
     queryKey: ["vitals"],
     queryFn: () => fetch("/api/public/vitals").then((r) => r.json()),
@@ -204,8 +203,7 @@ function CommandCenter() {
 
   const downloadReport = async (format: "markdown" | "csv" | "html") => {
     const { report } = await fullReportFn({ data: { days, format } });
-    const mime =
-      format === "csv" ? "text/csv" : format === "html" ? "text/html" : "text/markdown";
+    const mime = format === "csv" ? "text/csv" : format === "html" ? "text/html" : "text/markdown";
     const ext = format === "markdown" ? "md" : format;
     const url = URL.createObjectURL(new Blob([report], { type: mime }));
     const a = document.createElement("a");
@@ -310,7 +308,6 @@ function CommandCenter() {
           <AuditPanel data={audit.data} />
         </Section>
 
-
         <Section
           title="Intelligence Validation"
           subtitle="Self-audit: averages, confidence & risk distributions, false-flag candidates"
@@ -318,16 +315,21 @@ function CommandCenter() {
           <Validation data={validation.data} />
         </Section>
 
-
         <Section title="Traffic Overview">
           <KPIRow data={overview.data} />
         </Section>
 
-        <Section title="Intelligence Analyst" subtitle="Auto-generated insights, quality score & segments">
+        <Section
+          title="Intelligence Analyst"
+          subtitle="Auto-generated insights, quality score & segments"
+        >
           <Intelligence data={intel.data} />
         </Section>
 
-        <Section title="Historical Trends" subtitle="Daily quality, human likelihood, conversions & errors">
+        <Section
+          title="Historical Trends"
+          subtitle="Daily quality, human likelihood, conversions & errors"
+        >
           <Trends data={trends.data} />
         </Section>
 
@@ -344,7 +346,10 @@ function CommandCenter() {
           </Section>
         </div>
 
-        <Section title="Source Intelligence" subtitle="Quality, conversion & human likelihood by channel">
+        <Section
+          title="Source Intelligence"
+          subtitle="Quality, conversion & human likelihood by channel"
+        >
           <SourceIntel rows={sourceIntel.data} />
         </Section>
 
@@ -352,14 +357,9 @@ function CommandCenter() {
           title="Visitor Investigation Console"
           subtitle="Filter, inspect and export per-session intelligence"
         >
-          <Filters
-            data={visitors.data}
-            filters={filters}
-            setFilters={setFilters}
-          />
+          <Filters data={visitors.data} filters={filters} setFilters={setFilters} />
           <VisitorList rows={visitors.data} filters={filters} />
         </Section>
-
 
         <div className="grid gap-6 lg:grid-cols-2">
           <Section title="Traffic Sources">
@@ -915,22 +915,28 @@ function Intelligence({ data }: { data?: Awaited<ReturnType<typeof getIntelligen
       )}
 
       <p className="text-xs text-muted-foreground">
-        Retention cohorts (D1/D7/D30):{" "}
-        <span className="text-foreground">Not computed.</span> {data.retention.note}
+        Retention cohorts (D1/D7/D30): <span className="text-foreground">Not computed.</span>{" "}
+        {data.retention.note}
       </p>
     </div>
   );
 }
 
-
-function RealtimeCommandRoom({ data }: { data?: Awaited<ReturnType<typeof getRealtimeIntelligence>> }) {
+function RealtimeCommandRoom({
+  data,
+}: {
+  data?: Awaited<ReturnType<typeof getRealtimeIntelligence>>;
+}) {
   if (!data) return <Skeleton />;
   if (data.active === 0) return <Empty msg="No live visitors right now." />;
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <KPI label="Active now" value={data.active} sub={`${data.windowSeconds}s window`} />
-        <KPI label="Human likely" value={<span className="text-emerald-500">{data.humanLikely}</span>} />
+        <KPI
+          label="Human likely"
+          value={<span className="text-emerald-500">{data.humanLikely}</span>}
+        />
         <KPI label="Unknown" value={<span className="text-amber-500">{data.unknown}</span>} />
         <KPI label="Suspicious" value={<span className="text-red-500">{data.suspicious}</span>} />
       </div>
@@ -1015,10 +1021,7 @@ type FilterState = {
   quality: string;
 };
 
-function applyFilters(
-  rows: Awaited<ReturnType<typeof getVisitorTimelines>>,
-  f: FilterState,
-) {
+function applyFilters(rows: Awaited<ReturnType<typeof getVisitorTimelines>>, f: FilterState) {
   return rows.filter((v) => {
     const c = v.classification;
     if (f.source && (c.source ?? "unknown") !== f.source) return false;
@@ -1042,7 +1045,9 @@ function Filters({
   filters: FilterState;
   setFilters: (f: FilterState) => void;
 }) {
-  const uniq = (fn: (v: Awaited<ReturnType<typeof getVisitorTimelines>>[number]) => string | null) => {
+  const uniq = (
+    fn: (v: Awaited<ReturnType<typeof getVisitorTimelines>>[number]) => string | null,
+  ) => {
     const s = new Set<string>();
     (data ?? []).forEach((v) => {
       const val = fn(v);
@@ -1055,15 +1060,7 @@ function Filters({
   const countries = uniq((v) => v.classification.country);
   const segments = uniq((v) => v.classification.segment);
   const set = (k: keyof FilterState, val: string) => setFilters({ ...filters, [k]: val });
-  const Sel = ({
-    k,
-    opts,
-    label,
-  }: {
-    k: keyof FilterState;
-    opts: string[];
-    label: string;
-  }) => (
+  const Sel = ({ k, opts, label }: { k: keyof FilterState; opts: string[]; label: string }) => (
     <label className="flex items-center gap-1 text-xs">
       <span className="text-muted-foreground">{label}</span>
       <select
@@ -1088,7 +1085,9 @@ function Filters({
       <Sel k="segment" opts={segments} label="Segment" />
       <Sel k="quality" opts={["high", "medium", "low", "suspicious"]} label="Quality" />
       <button
-        onClick={() => setFilters({ source: "", device: "", country: "", segment: "", quality: "" })}
+        onClick={() =>
+          setFilters({ source: "", device: "", country: "", segment: "", quality: "" })
+        }
         className="rounded-md border border-input px-2 py-1 text-xs hover:bg-accent"
       >
         Reset
@@ -1268,12 +1267,15 @@ function Trends({ data }: { data?: Awaited<ReturnType<typeof getTrends>> }) {
   );
 }
 
-
 function VisitorRow({ v }: { v: Awaited<ReturnType<typeof getVisitorTimelines>>[number] }) {
   const [open, setOpen] = useState(false);
   const c = v.classification;
   const confCls =
-    c.confidence === "high" ? "text-emerald-500" : c.confidence === "low" ? "text-red-500" : "text-amber-500";
+    c.confidence === "high"
+      ? "text-emerald-500"
+      : c.confidence === "low"
+        ? "text-red-500"
+        : "text-amber-500";
   const humanCls =
     c.humanProbability >= 0.7
       ? "text-emerald-500"
@@ -1312,7 +1314,9 @@ function VisitorRow({ v }: { v: Awaited<ReturnType<typeof getVisitorTimelines>>[
             <ul className="space-y-1 text-xs">
               {c.evidence.map((e, i) => (
                 <li key={i} className="flex justify-between gap-2">
-                  <span className={e.direction === "positive" ? "text-emerald-500" : "text-red-500"}>
+                  <span
+                    className={e.direction === "positive" ? "text-emerald-500" : "text-red-500"}
+                  >
                     {e.direction === "positive" ? "✓" : "✗"} {e.signal}
                   </span>
                   <span className="tabular-nums text-muted-foreground">±{e.weight}</span>
@@ -1360,11 +1364,7 @@ function VisitorRow({ v }: { v: Awaited<ReturnType<typeof getVisitorTimelines>>[
   );
 }
 
-function SummaryPanel({
-  s,
-}: {
-  s: Record<string, number | string | boolean | null>;
-}) {
+function SummaryPanel({ s }: { s: Record<string, number | string | boolean | null> }) {
   const rows: [string, string | number][] = [];
   const add = (label: string, val: string | number | boolean | null | undefined) => {
     if (val === null || val === undefined || val === "") return;
@@ -1412,7 +1412,11 @@ function SummaryPanel({
 function Validation({ data }: { data?: Awaited<ReturnType<typeof getValidation>> }) {
   if (!data) return <p className="text-sm text-muted-foreground">Loading validation…</p>;
   if (data.sessions === 0)
-    return <p className="text-sm text-muted-foreground">No sessions yet — validation unlocks with traffic.</p>;
+    return (
+      <p className="text-sm text-muted-foreground">
+        No sessions yet — validation unlocks with traffic.
+      </p>
+    );
   const a = data.averages;
   const pct = (n: number) => `${Math.round(n * 100)}%`;
   const cd = data.confidenceDistribution;
@@ -1459,7 +1463,8 @@ function Validation({ data }: { data?: Awaited<ReturnType<typeof getValidation>>
               <ul className="space-y-1 text-xs">
                 {data.falsePositiveCandidates.map((c) => (
                   <li key={c.session_id} className="text-muted-foreground">
-                    <span className="font-mono text-foreground">{c.session_id.slice(0, 10)}</span> — {c.reason}
+                    <span className="font-mono text-foreground">{c.session_id.slice(0, 10)}</span> —{" "}
+                    {c.reason}
                   </li>
                 ))}
               </ul>
@@ -1471,7 +1476,8 @@ function Validation({ data }: { data?: Awaited<ReturnType<typeof getValidation>>
               <ul className="space-y-1 text-xs">
                 {data.falseNegativeCandidates.map((c) => (
                   <li key={c.session_id} className="text-muted-foreground">
-                    <span className="font-mono text-foreground">{c.session_id.slice(0, 10)}</span> — {c.reason}
+                    <span className="font-mono text-foreground">{c.session_id.slice(0, 10)}</span> —{" "}
+                    {c.reason}
                   </li>
                 ))}
               </ul>
@@ -1733,8 +1739,7 @@ function AlertRow({
               <div className="mb-1 font-semibold text-muted-foreground">Lifecycle timeline</div>
               <ul className="space-y-1">
                 <li>
-                  First detected:{" "}
-                  <span className="font-mono">{alert.firstDetected}</span>
+                  First detected: <span className="font-mono">{alert.firstDetected}</span>
                 </li>
                 <li>
                   Last detected: <span className="font-mono">{alert.lastDetected}</span>
@@ -1748,9 +1753,8 @@ function AlertRow({
                 )}
                 {alert.resolved && (
                   <li>
-                    Resolved by{" "}
-                    <span className="font-mono">{alert.resolvedBy?.slice(0, 8)}</span> at{" "}
-                    <span className="font-mono">{alert.resolvedAt}</span>
+                    Resolved by <span className="font-mono">{alert.resolvedBy?.slice(0, 8)}</span>{" "}
+                    at <span className="font-mono">{alert.resolvedAt}</span>
                   </li>
                 )}
                 {alert.muted && alert.mutedUntil && (
@@ -1797,11 +1801,7 @@ function AlertRow({
 
 // ---------- Enterprise Operations · Intelligence Audit ----------
 
-function AuditPanel({
-  data,
-}: {
-  data?: Awaited<ReturnType<typeof getAuditSummary>>;
-}) {
+function AuditPanel({ data }: { data?: Awaited<ReturnType<typeof getAuditSummary>> }) {
   if (!data) return <Skeleton />;
   const { summary, current, sampleAttribution } = data;
   return (
@@ -1870,30 +1870,45 @@ function AuditPanel({
         </div>
       </div>
 
-      <AuditGroup title="Engine versions" rows={summary.engineVersions.map((r) => ({
-        key: r.engineVersion,
-        count: r.count,
-        earliest: r.earliest,
-        latest: r.latest,
-      }))} />
-      <AuditGroup title="Rule versions" rows={summary.ruleVersions.map((r) => ({
-        key: r.ruleVersion,
-        count: r.count,
-      }))} />
-      <AuditGroup title="Weight versions" rows={summary.weightVersions.map((r) => ({
-        key: r.weightVersion,
-        count: r.count,
-      }))} />
-      <AuditGroup title="Model config hashes" rows={summary.modelConfigHashes.map((r) => ({
-        key: r.hash,
-        count: r.count,
-      }))} />
-      <AuditGroup title="Deployment timeline" rows={summary.deploymentTimeline.map((r) => ({
-        key: r.deploymentVersion,
-        count: r.count,
-        earliest: r.earliest,
-        latest: r.latest,
-      }))} />
+      <AuditGroup
+        title="Engine versions"
+        rows={summary.engineVersions.map((r) => ({
+          key: r.engineVersion,
+          count: r.count,
+          earliest: r.earliest,
+          latest: r.latest,
+        }))}
+      />
+      <AuditGroup
+        title="Rule versions"
+        rows={summary.ruleVersions.map((r) => ({
+          key: r.ruleVersion,
+          count: r.count,
+        }))}
+      />
+      <AuditGroup
+        title="Weight versions"
+        rows={summary.weightVersions.map((r) => ({
+          key: r.weightVersion,
+          count: r.count,
+        }))}
+      />
+      <AuditGroup
+        title="Model config hashes"
+        rows={summary.modelConfigHashes.map((r) => ({
+          key: r.hash,
+          count: r.count,
+        }))}
+      />
+      <AuditGroup
+        title="Deployment timeline"
+        rows={summary.deploymentTimeline.map((r) => ({
+          key: r.deploymentVersion,
+          count: r.count,
+          earliest: r.earliest,
+          latest: r.latest,
+        }))}
+      />
     </div>
   );
 }

@@ -59,9 +59,7 @@ export function canonicalJson(value: unknown): string {
   if (Array.isArray(value)) return "[" + value.map(canonicalJson).join(",") + "]";
   const obj = value as Record<string, unknown>;
   const keys = Object.keys(obj).sort();
-  return (
-    "{" + keys.map((k) => JSON.stringify(k) + ":" + canonicalJson(obj[k])).join(",") + "}"
-  );
+  return "{" + keys.map((k) => JSON.stringify(k) + ":" + canonicalJson(obj[k])).join(",") + "}";
 }
 
 const MODEL_CONFIG = {
@@ -133,7 +131,12 @@ export interface AuditLogSummary {
   ruleVersions: { ruleVersion: string; count: number }[];
   weightVersions: { weightVersion: string; count: number }[];
   modelConfigHashes: { hash: string; count: number }[];
-  deploymentTimeline: { deploymentVersion: string; earliest: string; latest: string; count: number }[];
+  deploymentTimeline: {
+    deploymentVersion: string;
+    earliest: string;
+    latest: string;
+    count: number;
+  }[];
   current: EngineVersion;
 }
 

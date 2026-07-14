@@ -18,13 +18,7 @@ import type { Alert } from "./intelligence.server";
 export type AlertSeverity = "info" | "warning" | "critical";
 export type AlertStatus = "active" | "acknowledged" | "resolved" | "muted";
 export type AlertActionType =
-  | "acknowledge"
-  | "resolve"
-  | "mute"
-  | "unmute"
-  | "note"
-  | "tag"
-  | "untag";
+  "acknowledge" | "resolve" | "mute" | "unmute" | "note" | "tag" | "untag";
 
 /** A single detection snapshot at a point in time (from `buildAlerts`). */
 export interface AlertDetection {
@@ -108,7 +102,11 @@ interface BuildInput {
  * chronological order and NEVER overwrite prior lifecycle state — every
  * acknowledge/resolve is preserved in `severityHistory`, `notes`, etc.
  */
-export function buildAlertLifecycles({ detections, actions, now = Date.now() }: BuildInput): AlertLifecycle[] {
+export function buildAlertLifecycles({
+  detections,
+  actions,
+  now = Date.now(),
+}: BuildInput): AlertLifecycle[] {
   // Group detections by id, preserving chronological order.
   const byId = new Map<string, AlertDetection[]>();
   const sortedDet = [...detections].sort((a, b) => a.detectedAt.localeCompare(b.detectedAt));
@@ -266,11 +264,7 @@ export function filterAlerts(list: AlertLifecycle[], f: AlertFilter): AlertLifec
 }
 
 export type AlertSort =
-  | "severity"
-  | "lastDetected"
-  | "firstDetected"
-  | "recurrence"
-  | "occurrences";
+  "severity" | "lastDetected" | "firstDetected" | "recurrence" | "occurrences";
 
 const SEVERITY_RANK: Record<AlertSeverity, number> = { critical: 3, warning: 2, info: 1 };
 

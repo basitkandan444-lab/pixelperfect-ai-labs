@@ -147,7 +147,13 @@ export const snapshotAlertDetections = createServerFn({ method: "POST" })
         raw.map((a) => ({
           session_id: "ops:alerts",
           name: "alert_detection",
-          metrics: { id: a.id, severity: a.severity, title: a.title, detail: a.detail, detectedAt: at },
+          metrics: {
+            id: a.id,
+            severity: a.severity,
+            title: a.title,
+            detail: a.detail,
+            detectedAt: at,
+          },
         })),
       );
     }
@@ -173,9 +179,8 @@ export const getAuditSummary = createServerFn({ method: "POST" })
 
     // Historical records read as-is (immutable) plus live classifications from
     // the current engine so a fresh install still shows current-version data.
-    const { fetchWindow, buildIntelligence, groupSessions, classifySession } = await import(
-      "./intelligence.server"
-    );
+    const { fetchWindow, buildIntelligence, groupSessions, classifySession } =
+      await import("./intelligence.server");
     const { createAuditRecord, summarizeAuditLog, currentEngineVersion, attributionLine } =
       await import("./audit");
     const historical = (rows ?? [])

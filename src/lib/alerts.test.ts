@@ -10,7 +10,11 @@ import {
   type AlertDetection,
 } from "./alerts";
 
-const D = (id: string, at: string, severity: "info" | "warning" | "critical" = "warning"): AlertDetection => ({
+const D = (
+  id: string,
+  at: string,
+  severity: "info" | "warning" | "critical" = "warning",
+): AlertDetection => ({
   id,
   severity,
   title: id,
@@ -23,7 +27,14 @@ const A = (
   type: AlertAction["type"],
   at: string,
   extra: Partial<AlertAction> = {},
-): AlertAction => ({ id: `${alertId}-${type}-${at}`, alertId, type, at, actor: "user-1", ...extra });
+): AlertAction => ({
+  id: `${alertId}-${type}-${at}`,
+  alertId,
+  type,
+  at,
+  actor: "user-1",
+  ...extra,
+});
 
 describe("alerts lifecycle", () => {
   it("builds a fresh active alert from a single detection", () => {
@@ -82,9 +93,7 @@ describe("alerts lifecycle", () => {
         D("error-spike", "2026-01-01T00:00:00Z"),
         D("error-spike", "2026-01-02T00:00:00Z"),
       ],
-      actions: [
-        A("error-spike", "resolve", "2026-01-01T00:30:00Z", { note: "fixed" }),
-      ],
+      actions: [A("error-spike", "resolve", "2026-01-01T00:30:00Z", { note: "fixed" })],
     });
     expect(lc.status).toBe("active");
     expect(lc.resolved).toBe(false);
