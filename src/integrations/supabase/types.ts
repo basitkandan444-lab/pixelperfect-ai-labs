@@ -98,6 +98,108 @@ export type Database = {
         }
         Relationships: []
       }
+      investigation_bookmarks: {
+        Row: {
+          archived_at: string | null
+          category: string | null
+          created_at: string
+          description: string | null
+          favorite: boolean
+          folder: string | null
+          id: string
+          linked_alerts: string[]
+          linked_incidents: string[]
+          notes: string | null
+          pinned: boolean
+          priority: string
+          reason: string | null
+          risk: string | null
+          session_id: string
+          status: string
+          tags: string[]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          favorite?: boolean
+          folder?: string | null
+          id?: string
+          linked_alerts?: string[]
+          linked_incidents?: string[]
+          notes?: string | null
+          pinned?: boolean
+          priority?: string
+          reason?: string | null
+          risk?: string | null
+          session_id: string
+          status?: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          favorite?: boolean
+          folder?: string | null
+          id?: string
+          linked_alerts?: string[]
+          linked_incidents?: string[]
+          notes?: string | null
+          pinned?: boolean
+          priority?: string
+          reason?: string | null
+          risk?: string | null
+          session_id?: string
+          status?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      investigation_workspaces: {
+        Row: {
+          config: Json
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          shared: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          shared?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          shared?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
