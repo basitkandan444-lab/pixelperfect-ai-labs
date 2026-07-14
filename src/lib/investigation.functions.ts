@@ -40,13 +40,14 @@ export interface BookmarkRowDTO {
   updated_at: string;
 }
 
+type JsonValue = string | number | boolean | null | JsonValue[] | { [k: string]: JsonValue };
 export interface WorkspaceRowDTO {
   id: string;
   user_id: string;
   name: string;
   description: string | null;
   shared: boolean;
-  config: Record<string, unknown> | null;
+  config: JsonValue;
   created_at: string;
   updated_at: string;
 }
