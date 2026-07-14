@@ -15,6 +15,7 @@ import {
   exportEventsCsv,
 } from "@/lib/admin.functions";
 import { listGscSites, getGscPerformance } from "@/lib/gsc.functions";
+import { getIntelligence } from "@/lib/intelligence.functions";
 
 // Admin gate: this route lives under _authenticated so the session is already
 // checked. The role check happens client-side (redirect on fail) AND server-side
@@ -55,6 +56,7 @@ function CommandCenter() {
   const journeysFn = useServerFn(getJourneys);
   const gscSitesFn = useServerFn(listGscSites);
   const gscPerfFn = useServerFn(getGscPerformance);
+  const intelFn = useServerFn(getIntelligence);
   const csvFn = useServerFn(exportEventsCsv);
 
   const overview = useQuery({
@@ -80,6 +82,10 @@ function CommandCenter() {
     queryFn: () =>
       firstSite ? gscPerfFn({ data: { siteUrl: firstSite, days } }) : Promise.resolve(null),
     enabled: !!firstSite,
+  });
+  const intel = useQuery({
+    queryKey: ["intel", days],
+    queryFn: () => intelFn({ data: { days } }),
   });
 
   const vitals = useQuery({
@@ -155,6 +161,10 @@ function CommandCenter() {
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-6">
         <Section title="Traffic Overview">
           <KPIRow data={overview.data} />
+        </Section>
+
+        <Section title="Intelligence Analyst" subtitle="Auto-generated insights, quality score & segments">
+          <Intelligence data={intel.data} />
         </Section>
 
         <div className="grid gap-6 lg:grid-cols-2">
