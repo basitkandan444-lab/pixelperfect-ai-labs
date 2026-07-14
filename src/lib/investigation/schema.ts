@@ -83,14 +83,13 @@ export interface FilterGroupInput {
   clauses?: FilterClause[];
   groups?: FilterGroupInput[];
 }
-export const FilterGroupSchema: z.ZodType<FilterGroup, z.ZodTypeDef, FilterGroupInput> = z.lazy(
-  () =>
-    z.object({
-      combinator: z.enum(["and", "or"]).default("and"),
-      clauses: z.array(FilterClauseSchema).default([]),
-      groups: z.array(FilterGroupSchema).default([]),
-    }),
-);
+export const FilterGroupSchema: z.ZodType<FilterGroup, z.ZodTypeDef, unknown> = z.lazy(() =>
+  z.object({
+    combinator: z.enum(["and", "or"]).default("and"),
+    clauses: z.array(FilterClauseSchema).default([]),
+    groups: z.array(FilterGroupSchema).default([]),
+  }),
+) as z.ZodType<FilterGroup, z.ZodTypeDef, unknown>;
 
 export const SortSchema = z.object({
   field: z.enum(SEARCH_FIELDS),
