@@ -44,7 +44,7 @@ describe("intelligence · classifySession", () => {
     const c = classifySession(s);
     expect(c.qualityScore).toBeGreaterThan(75);
     expect(c.humanProbability).toBeGreaterThan(0.8);
-    expect(c.segment).toBe("Power User");
+    expect(c.segment).toBe("Activated");
     expect(c.confidence).not.toBe("low");
   });
 
