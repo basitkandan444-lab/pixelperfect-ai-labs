@@ -2,14 +2,18 @@ import { describe, it, expect } from "vitest";
 
 import {
   buildAlerts,
+  buildComparison,
   buildExecutive,
   buildFullReport,
   buildIntelligence,
+  buildNarrative,
   buildRealtimeIntelligence,
   buildSourceIntelligence,
   buildTrends,
+  buildValidation,
   buildVisitorTimelines,
   classifySession,
+  explainClassification,
   groupSessions,
   type EventRow,
 } from "./intelligence.server";
