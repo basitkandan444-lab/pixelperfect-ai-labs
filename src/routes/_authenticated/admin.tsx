@@ -141,6 +141,11 @@ function CommandCenter() {
     refetchInterval: 60_000,
   });
 
+  const validation = useQuery({
+    queryKey: ["validation", days],
+    queryFn: () => useServerFn(getValidation)({ data: { days } }),
+  });
+
   const vitals = useQuery({
     queryKey: ["vitals"],
     queryFn: () => fetch("/api/public/vitals").then((r) => r.json()),
