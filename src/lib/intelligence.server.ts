@@ -155,7 +155,7 @@ export interface SessionClassification {
   events: number;
   first: string;
   last: string;
-  summary: Record<string, unknown> | null;
+  summary: Record<string, number | string | boolean | null> | null;
   rageClicks: number;
   deadClicks: number;
 }
@@ -256,6 +256,82 @@ export function classifySession(s: SessionAgg): SessionClassification {
     score -= 5;
     ev.push({ signal: "Single-event bounce", direction: "negative", weight: 5 });
   }
+
+  // ---------- Advanced behavioral signals (from session_summary metrics) ----------
+  const sum = s.summary ?? null;
+  const num = (k: string): number | null => {
+    if (!sum) return null;
+    const v = sum[k];
+    return typeof v === "number" && Number.isFinite(v) ? v : null;
+  };
+  const bool = (k: string): boolean => sum?.[k] === true;
+  const str = (k: string): string | null => (typeof sum?.[k] === "string" ? (sum![k] as string) : null);
+
+  if (sum) {
+    // Bot indicators
+    if (bool("webdriver")) push("navigator.webdriver present", "negative", 25);
+    const langs = num("languages");
+    if (langs !== null && langs === 0) push("No browser languages", "negative", 12);
+    else if (langs !== null && langs >= 1) push("Language preferences present", "positive", 3);
+    const hc = num("hardwareConcurrency");
+    if (hc !== null && hc === 0) push("No hardware concurrency", "negative", 8);
+
+    // Reading / engagement
+    const readingMode = str("readingMode");
+    if (readingMode === "reading") push("Sustained reading behavior", "positive", 12);
+    else if (readingMode === "scanning") push("Scanning behavior", "positive", 4);
+    else if (readingMode === "abandoning") push("Abandoned quickly", "negative", 10);
+
+    // Scroll
+    const scrollMax = num("scrollMaxPct");
+    if (scrollMax !== null) {
+      if (scrollMax >= 75) push("Deep scroll (>75%)", "positive", 6);
+      else if (scrollMax < 5 && (num("sessionMs") ?? 0) > 8_000) push("No scroll in long session", "negative", 10);
+    }
+
+    // Mouse — no coords, only summary statistics
+    const mouseMoves = num("mouseMoves");
+    const mouseSpeedStd = num("mouseSpeedStd");
+    if (mouseMoves !== null) {
+      if (mouseMoves === 0 && (num("sessionMs") ?? 0) > 6_000 && !bool("hasTouch"))
+        push("Zero mouse movement on non-touch device", "negative", 15);
+      else if (mouseMoves > 30 && mouseSpeedStd !== null && mouseSpeedStd > 0.05)
+        push("Natural mouse movement variance", "positive", 8);
+      else if (mouseMoves > 20 && mouseSpeedStd !== null && mouseSpeedStd < 0.005)
+        push("Uniform mouse speed (script-like)", "negative", 15);
+    }
+
+    // Click rhythm
+    const clickCV = num("clickIntervalCV");
+    const clickCount = num("clickCount");
+    if (clickCount !== null && clickCount >= 4 && clickCV !== null) {
+      if (clickCV < 0.1) push("Robotic click rhythm", "negative", 18);
+      else if (clickCV > 0.4) push("Natural click rhythm", "positive", 6);
+    }
+    const bursts = num("burstClicks");
+    if (bursts !== null && bursts >= 3) push("Burst clicking", "negative", 6);
+
+    // Timezone / locale consistency
+    const tzOff = num("timezoneOffset");
+    if (tzOff !== null && tzOff !== new Date().getTimezoneOffset() && !s.country) {
+      // Consistency check is soft — country may be missing on non-Cloudflare
+      // edges. Do not add strong evidence.
+    }
+
+    // Network
+    const rtt = num("rtt");
+    if (rtt !== null && rtt > 800) push("Very high RTT", "negative", 4);
+
+    // Performance / responsiveness
+    const inp = num("inpMs");
+    if (inp !== null && inp > 500) push("Poor input responsiveness", "negative", 4);
+    if (num("longTasks") !== null && (num("longTasks") as number) > 8)
+      push("Many long tasks (slow render path)", "negative", 3);
+  }
+
+  // Rage / dead clicks
+  if (s.rageClicks > 0) push(`Rage-clicked ${s.rageClicks}×`, "negative", 6);
+  if (s.deadClicks > 0) push(`Dead click on ${s.deadClicks} target(s)`, "negative", 5);
 
   const qualityScore = Math.max(0, Math.min(100, score));
 
