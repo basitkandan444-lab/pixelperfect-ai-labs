@@ -26,6 +26,20 @@ import {
   getFullReport,
   getValidation,
 } from "@/lib/intelligence.functions";
+import {
+  getAlertLifecycles,
+  recordAlertAction,
+  snapshotAlertDetections,
+  getAuditSummary,
+} from "@/lib/ops.functions";
+import {
+  filterAlerts,
+  sortAlerts,
+  type AlertLifecycle,
+  type AlertSort,
+  type AlertStatus,
+  type AlertSeverity,
+} from "@/lib/alerts";
 
 // Admin gate: this route lives under _authenticated so the session is already
 // checked. The role check happens client-side (redirect on fail) AND server-side
@@ -76,6 +90,10 @@ function CommandCenter() {
   const fullReportFn = useServerFn(getFullReport);
   const validationFn = useServerFn(getValidation);
   const csvFn = useServerFn(exportEventsCsv);
+  const alertLifecycleFn = useServerFn(getAlertLifecycles);
+  const alertActionFn = useServerFn(recordAlertAction);
+  const alertSnapshotFn = useServerFn(snapshotAlertDetections);
+  const auditFn = useServerFn(getAuditSummary);
 
   // Client-side filters
   const [filters, setFilters] = useState<{
