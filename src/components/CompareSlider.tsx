@@ -71,7 +71,7 @@ function Picture({
         draggable={draggable}
         loading={loading}
         decoding="async"
-        {...(fetchPriority ? { fetchpriority: fetchPriority } : {})}
+        fetchPriority={fetchPriority}
       />
     </picture>
   );
