@@ -938,17 +938,267 @@ function SourceIntel({ rows }: { rows?: Awaited<ReturnType<typeof getSourceIntel
   );
 }
 
-function VisitorList({ rows }: { rows?: Awaited<ReturnType<typeof getVisitorTimelines>> }) {
+type FilterState = {
+  source: string;
+  device: string;
+  country: string;
+  segment: string;
+  quality: string;
+};
+
+function applyFilters(
+  rows: Awaited<ReturnType<typeof getVisitorTimelines>>,
+  f: FilterState,
+) {
+  return rows.filter((v) => {
+    const c = v.classification;
+    if (f.source && (c.source ?? "unknown") !== f.source) return false;
+    if (f.device && (c.device ?? "unknown") !== f.device) return false;
+    if (f.country && (c.country ?? "??") !== f.country) return false;
+    if (f.segment && c.segment !== f.segment) return false;
+    if (f.quality === "high" && c.qualityScore < 70) return false;
+    if (f.quality === "medium" && (c.qualityScore < 40 || c.qualityScore >= 70)) return false;
+    if (f.quality === "low" && c.qualityScore >= 40) return false;
+    if (f.quality === "suspicious" && c.humanProbability > 0.4) return false;
+    return true;
+  });
+}
+
+function Filters({
+  data,
+  filters,
+  setFilters,
+}: {
+  data?: Awaited<ReturnType<typeof getVisitorTimelines>>;
+  filters: FilterState;
+  setFilters: (f: FilterState) => void;
+}) {
+  const uniq = (fn: (v: Awaited<ReturnType<typeof getVisitorTimelines>>[number]) => string | null) => {
+    const s = new Set<string>();
+    (data ?? []).forEach((v) => {
+      const val = fn(v);
+      if (val) s.add(val);
+    });
+    return Array.from(s).sort();
+  };
+  const sources = uniq((v) => v.classification.source);
+  const devices = uniq((v) => v.classification.device);
+  const countries = uniq((v) => v.classification.country);
+  const segments = uniq((v) => v.classification.segment);
+  const set = (k: keyof FilterState, val: string) => setFilters({ ...filters, [k]: val });
+  const Sel = ({
+    k,
+    opts,
+    label,
+  }: {
+    k: keyof FilterState;
+    opts: string[];
+    label: string;
+  }) => (
+    <label className="flex items-center gap-1 text-xs">
+      <span className="text-muted-foreground">{label}</span>
+      <select
+        value={filters[k]}
+        onChange={(e) => set(k, e.target.value)}
+        className="rounded-md border border-input bg-background px-2 py-1 text-xs"
+      >
+        <option value="">All</option>
+        {opts.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+  return (
+    <div className="mb-3 flex flex-wrap items-center gap-2">
+      <Sel k="source" opts={sources} label="Source" />
+      <Sel k="device" opts={devices} label="Device" />
+      <Sel k="country" opts={countries} label="Country" />
+      <Sel k="segment" opts={segments} label="Segment" />
+      <Sel k="quality" opts={["high", "medium", "low", "suspicious"]} label="Quality" />
+      <button
+        onClick={() => setFilters({ source: "", device: "", country: "", segment: "", quality: "" })}
+        className="rounded-md border border-input px-2 py-1 text-xs hover:bg-accent"
+      >
+        Reset
+      </button>
+      <span className="ml-auto text-xs text-muted-foreground">
+        Showing {data ? applyFilters(data, filters).length : 0} / {data?.length ?? 0}
+      </span>
+    </div>
+  );
+}
+
+function VisitorList({
+  rows,
+  filters,
+}: {
+  rows?: Awaited<ReturnType<typeof getVisitorTimelines>>;
+  filters?: FilterState;
+}) {
   if (!rows) return <Skeleton />;
-  if (rows.length === 0) return <Empty msg="No visitor sessions yet." />;
+  const shown = filters ? applyFilters(rows, filters) : rows;
+  if (shown.length === 0) return <Empty msg="No visitor sessions match the current filters." />;
   return (
     <ul className="space-y-3">
-      {rows.map((v) => (
+      {shown.map((v) => (
         <VisitorRow key={v.classification.session_id} v={v} />
       ))}
     </ul>
   );
 }
+
+function Executive({ data }: { data?: Awaited<ReturnType<typeof getExecutive>> }) {
+  if (!data) return <Skeleton />;
+  return (
+    <div className="space-y-3">
+      <p className="text-lg font-semibold">{data.headline}</p>
+      <ul className="space-y-1 text-sm">
+        {data.bullets.map((b, i) => (
+          <li key={i} className="rounded-md border border-border bg-muted/30 px-3 py-2">
+            {b}
+          </li>
+        ))}
+      </ul>
+      <div className="grid gap-3 text-sm md:grid-cols-2 lg:grid-cols-4">
+        <KPI
+          label="Top source (conv.)"
+          value={data.topPerformingSource?.source ?? "—"}
+          sub={
+            data.topPerformingSource
+              ? `${(data.topPerformingSource.conversionRate * 100).toFixed(1)}%`
+              : undefined
+          }
+        />
+        <KPI
+          label="Top country"
+          value={data.topCountry?.code ?? "—"}
+          sub={data.topCountry ? `${data.topCountry.sessions} sessions` : undefined}
+        />
+        <KPI
+          label="Top browser"
+          value={data.topBrowser?.name ?? "—"}
+          sub={data.topBrowser ? `${data.topBrowser.sessions} sessions` : undefined}
+        />
+        <KPI
+          label="Best landing"
+          value={<span className="font-mono text-sm">{data.bestPage?.path ?? "—"}</span>}
+          sub={data.bestPage ? `${data.bestPage.sessions} sessions` : undefined}
+        />
+      </div>
+      {data.suspiciousPatterns.length > 0 && (
+        <div>
+          <h3 className="mb-1 text-xs font-medium text-muted-foreground">Suspicious patterns</h3>
+          <ul className="space-y-1 text-sm">
+            {data.suspiciousPatterns.map((p, i) => (
+              <li key={i} className="text-red-500">
+                • {p}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Alerts({ data }: { data?: Awaited<ReturnType<typeof getAlerts>> }) {
+  if (!data) return <Skeleton />;
+  if (data.length === 0)
+    return <Empty msg="No active alerts. System is within normal operating ranges." />;
+  return (
+    <ul className="space-y-2 text-sm">
+      {data.map((a) => {
+        const cls =
+          a.severity === "critical"
+            ? "border-red-500/50 bg-red-500/10 text-red-400"
+            : a.severity === "warning"
+              ? "border-amber-500/50 bg-amber-500/10 text-amber-400"
+              : "border-border bg-muted/30";
+        return (
+          <li key={a.id} className={`rounded-md border px-3 py-2 ${cls}`}>
+            <div className="text-xs uppercase tracking-wide">{a.severity}</div>
+            <div className="font-medium">{a.title}</div>
+            <div className="text-xs opacity-90">{a.detail}</div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function Trends({ data }: { data?: Awaited<ReturnType<typeof getTrends>> }) {
+  if (!data) return <Skeleton />;
+  if (data.points.length === 0) return <Empty msg="No trend data yet." />;
+  const maxQ = Math.max(1, ...data.points.map((p) => p.quality));
+  const maxS = Math.max(1, ...data.points.map((p) => p.sessions));
+  const dirCls =
+    data.direction === "up"
+      ? "text-emerald-500"
+      : data.direction === "down"
+        ? "text-red-500"
+        : "text-muted-foreground";
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-3 text-sm">
+        <span>Direction:</span>
+        <span className={`font-medium ${dirCls}`}>
+          {data.direction} ({data.changePct}%)
+        </span>
+        <span className="ml-auto text-xs text-muted-foreground">
+          Forecast (next day, trailing mean): {data.forecastQualityNextDay ?? "—"}
+        </span>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead className="text-left text-muted-foreground">
+            <tr>
+              <th className="pb-1">Date</th>
+              <th>Sessions</th>
+              <th>Quality</th>
+              <th>MA(3)</th>
+              <th>Human</th>
+              <th>Uploads</th>
+              <th>Downloads</th>
+              <th>Errors</th>
+              <th className="w-40">Quality bar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.points.map((p, i) => (
+              <tr key={p.date} className="border-t border-border">
+                <td className="py-1 font-mono">{p.date}</td>
+                <td className="tabular-nums">{p.sessions}</td>
+                <td className="tabular-nums">{p.quality}</td>
+                <td className="tabular-nums">{data.movingAverage[i]}</td>
+                <td className="tabular-nums">{(p.humanPct * 100).toFixed(0)}%</td>
+                <td className="tabular-nums">{p.uploads}</td>
+                <td className="tabular-nums">{p.downloads}</td>
+                <td className="tabular-nums">{p.errors}</td>
+                <td>
+                  <div className="flex h-2 gap-[1px]">
+                    <div
+                      className="bg-primary"
+                      style={{ width: `${(p.quality / maxQ) * 60}px`, height: 8 }}
+                    />
+                    <div
+                      className="bg-muted-foreground/50"
+                      style={{ width: `${(p.sessions / maxS) * 60}px`, height: 8 }}
+                    />
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="text-xs text-muted-foreground">{data.forecastNote}</p>
+    </div>
+  );
+}
+
 
 function VisitorRow({ v }: { v: Awaited<ReturnType<typeof getVisitorTimelines>>[number] }) {
   const [open, setOpen] = useState(false);
