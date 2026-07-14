@@ -24,7 +24,6 @@ export interface TimelineEvent {
   title: string;
   detail?: string;
   severity?: "info" | "low" | "medium" | "high" | "critical";
-  data?: Record<string, unknown>;
 }
 
 const KIND_ORDER: Record<TimelineKind, number> = {
