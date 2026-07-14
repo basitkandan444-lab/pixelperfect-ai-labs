@@ -242,12 +242,24 @@ function CommandCenter() {
       </header>
 
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-6">
+        <Section title="Executive Summary" subtitle="One-glance intelligence briefing">
+          <Executive data={exec.data} />
+        </Section>
+
+        <Section title="Alerts" subtitle="Privacy-safe anomaly detection">
+          <Alerts data={alerts.data} />
+        </Section>
+
         <Section title="Traffic Overview">
           <KPIRow data={overview.data} />
         </Section>
 
         <Section title="Intelligence Analyst" subtitle="Auto-generated insights, quality score & segments">
           <Intelligence data={intel.data} />
+        </Section>
+
+        <Section title="Historical Trends" subtitle="Daily quality, human likelihood, conversions & errors">
+          <Trends data={trends.data} />
         </Section>
 
         <Section title="Real-Time Command Room" subtitle="Live visitors · classified in real time">
@@ -267,9 +279,18 @@ function CommandCenter() {
           <SourceIntel rows={sourceIntel.data} />
         </Section>
 
-        <Section title="Visitor Timelines" subtitle="Per-session classification with probability, confidence & evidence">
-          <VisitorList rows={visitors.data} />
+        <Section
+          title="Visitor Investigation Console"
+          subtitle="Filter, inspect and export per-session intelligence"
+        >
+          <Filters
+            data={visitors.data}
+            filters={filters}
+            setFilters={setFilters}
+          />
+          <VisitorList rows={visitors.data} filters={filters} />
         </Section>
+
 
         <div className="grid gap-6 lg:grid-cols-2">
           <Section title="Traffic Sources">
