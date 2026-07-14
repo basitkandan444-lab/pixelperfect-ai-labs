@@ -1,0 +1,502 @@
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+
+import { supabase } from "@/integrations/supabase/client";
+import {
+  getTrafficOverview,
+  getTrafficSources,
+  getGeoBreakdown,
+  getDeviceBreakdown,
+  getQualityAndFunnel,
+  getRealtime,
+  getJourneys,
+  exportEventsCsv,
+} from "@/lib/admin.functions";
+import { listGscSites, getGscPerformance } from "@/lib/gsc.functions";
+
+// Admin gate: this route lives under _authenticated so the session is already
+// checked. The role check happens client-side (redirect on fail) AND server-side
+// in every data function (defense in depth).
+export const Route = createFileRoute("/_authenticated/admin")({
+  ssr: false,
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) throw redirect({ to: "/auth" });
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", data.user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!roles) throw redirect({ to: "/" });
+    return { userId: data.user.id };
+  },
+  head: () => ({
+    meta: [
+      { title: "Visitor Intelligence — Command Center" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+  component: CommandCenter,
+});
+
+function CommandCenter() {
+  const [days, setDays] = useState(7);
+  const navigate = useNavigate();
+
+  const overviewFn = useServerFn(getTrafficOverview);
+  const sourcesFn = useServerFn(getTrafficSources);
+  const geoFn = useServerFn(getGeoBreakdown);
+  const deviceFn = useServerFn(getDeviceBreakdown);
+  const qfFn = useServerFn(getQualityAndFunnel);
+  const rtFn = useServerFn(getRealtime);
+  const journeysFn = useServerFn(getJourneys);
+  const gscSitesFn = useServerFn(listGscSites);
+  const gscPerfFn = useServerFn(getGscPerformance);
+  const csvFn = useServerFn(exportEventsCsv);
+
+  const overview = useQuery({ queryKey: ["ov", days], queryFn: () => overviewFn({ data: { days } }) });
+  const sources = useQuery({ queryKey: ["src", days], queryFn: () => sourcesFn({ data: { days } }) });
+  const geo = useQuery({ queryKey: ["geo", days], queryFn: () => geoFn({ data: { days } }) });
+  const dev = useQuery({ queryKey: ["dev", days], queryFn: () => deviceFn({ data: { days } }) });
+  const qf = useQuery({ queryKey: ["qf", days], queryFn: () => qfFn({ data: { days } }) });
+  const rt = useQuery({ queryKey: ["rt"], queryFn: () => rtFn(), refetchInterval: 5000 });
+  const journeys = useQuery({ queryKey: ["j", days], queryFn: () => journeysFn({ data: { days } }) });
+  const gscSites = useQuery({ queryKey: ["gscSites"], queryFn: () => gscSitesFn() });
+  const firstSite = gscSites.data?.sites?.[0]?.siteUrl;
+  const gscPerf = useQuery({
+    queryKey: ["gscPerf", firstSite, days],
+    queryFn: () => (firstSite ? gscPerfFn({ data: { siteUrl: firstSite, days } }) : null),
+    enabled: !!firstSite,
+  });
+
+  const vitals = useQuery({
+    queryKey: ["vitals"],
+    queryFn: () => fetch("/api/public/vitals").then((r) => r.json()),
+    refetchInterval: 15000,
+  });
+  const metrics = useQuery({
+    queryKey: ["metrics"],
+    queryFn: () => fetch("/api/public/metrics").then((r) => r.json()),
+    refetchInterval: 15000,
+  });
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  };
+
+  const exportCsv = async () => {
+    const { csv } = await csvFn({ data: { days } });
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `visitors-${days}d.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="min-h-dvh bg-background text-foreground">
+      <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+          <div>
+            <h1 className="text-xl font-bold">Visitor Intelligence</h1>
+            <p className="text-xs text-muted-foreground">
+              Real-time · privacy-preserving · first-party
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <select
+              value={days}
+              onChange={(e) => setDays(Number(e.target.value))}
+              className="rounded-md border border-input bg-background px-2 py-1 text-sm"
+            >
+              {[1, 7, 14, 28, 90].map((d) => (
+                <option key={d} value={d}>{d === 1 ? "Last 24h" : `Last ${d}d`}</option>
+              ))}
+            </select>
+            <button onClick={exportCsv} className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent">
+              Export CSV
+            </button>
+            <button onClick={() => window.print()} className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent">
+              Print report
+            </button>
+            <button onClick={signOut} className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent">
+              Sign out
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-7xl space-y-6 px-4 py-6">
+        <Section title="Traffic Overview">
+          <KPIRow data={overview.data} />
+        </Section>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Section title="Real-Time Monitor" subtitle="Last 5 minutes">
+            <Realtime data={rt.data} />
+          </Section>
+          <Section title="Product Activation Funnel">
+            <Funnel funnel={qf.data?.funnel} />
+          </Section>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Section title="Traffic Sources">
+            <TrafficSources rows={sources.data} />
+          </Section>
+          <Section title="Traffic Quality">
+            <Quality q={qf.data?.quality} />
+          </Section>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Section title="Geography">
+            <Geography data={geo.data} />
+          </Section>
+          <Section title="Device Intelligence">
+            <DeviceBreakdown data={dev.data} />
+          </Section>
+        </div>
+
+        <Section title="Visitor Journeys" subtitle="Top event sequences">
+          <Journeys rows={journeys.data} />
+        </Section>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Section title="Performance (Core Web Vitals)">
+            <Vitals data={vitals.data?.data} />
+          </Section>
+          <Section title="Reliability">
+            <Reliability data={metrics.data?.data} />
+          </Section>
+        </div>
+
+        <Section title="SEO Intelligence" subtitle="Google Search Console">
+          <SEO sites={gscSites.data} perf={gscPerf.data} />
+        </Section>
+      </main>
+    </div>
+  );
+}
+
+function Section({
+  title, subtitle, children,
+}: {
+  title: string; subtitle?: string; children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-2xl border border-border bg-card p-5">
+      <div className="mb-4">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{title}</h2>
+        {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function KPI({ label, value, sub }: { label: string; value: React.ReactNode; sub?: string }) {
+  return (
+    <div className="rounded-xl border border-border p-3">
+      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className="mt-1 text-2xl font-bold tabular-nums">{value}</div>
+      {sub && <div className="text-xs text-muted-foreground">{sub}</div>}
+    </div>
+  );
+}
+
+function KPIRow({ data }: { data?: Awaited<ReturnType<typeof getTrafficOverview>> }) {
+  if (!data) return <Skeleton />;
+  const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
+  return (
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
+      <KPI label="Sessions" value={data.sessions} />
+      <KPI label="Pageviews" value={data.pageviews} />
+      <KPI label="Events" value={data.events} />
+      <KPI label="Enhancements" value={data.enhancements} />
+      <KPI label="Downloads" value={data.downloads} />
+      <KPI label="Conv. rate" value={pct(data.conversionRate)} sub="download / session" />
+      <KPI label="Engagement" value={pct(data.engagementRate)} />
+      <KPI label="Avg. session" value={`${Math.round(data.avgSessionMs / 1000)}s`} />
+    </div>
+  );
+}
+
+function Realtime({ data }: { data?: Awaited<ReturnType<typeof getRealtime>> }) {
+  if (!data) return <Skeleton />;
+  return (
+    <div>
+      <div className="flex items-center gap-3">
+        <div className="text-4xl font-bold tabular-nums">{data.active}</div>
+        <div className="text-sm text-muted-foreground">active visitors</div>
+        <span className="ml-auto inline-flex h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+      </div>
+      <div className="mt-4">
+        <h3 className="text-xs font-medium text-muted-foreground">Top current pages</h3>
+        <ul className="mt-2 space-y-1 text-sm">
+          {data.topPaths.map(([p, n]) => (
+            <li key={p} className="flex justify-between">
+              <span className="truncate">{p}</span>
+              <span className="tabular-nums text-muted-foreground">{n}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function Funnel({ funnel }: { funnel?: { visited: number; uploaded: number; enhanceStarted: number; enhanceCompleted: number; downloaded: number } }) {
+  if (!funnel) return <Skeleton />;
+  const steps = [
+    ["Visited", funnel.visited],
+    ["Uploaded", funnel.uploaded],
+    ["Enhance started", funnel.enhanceStarted],
+    ["Enhance completed", funnel.enhanceCompleted],
+    ["Downloaded", funnel.downloaded],
+  ] as const;
+  const max = Math.max(1, funnel.visited);
+  return (
+    <ul className="space-y-2">
+      {steps.map(([label, n], i) => {
+        const pct = (n / max) * 100;
+        const prev = i > 0 ? Number(steps[i - 1][1]) : n;
+        const dropRate = prev ? 1 - n / prev : 0;
+        return (
+          <li key={label}>
+            <div className="mb-1 flex justify-between text-sm">
+              <span>{label}</span>
+              <span className="tabular-nums text-muted-foreground">
+                {n} {i > 0 && dropRate > 0 && <em className="text-orange-500">-{(dropRate * 100).toFixed(0)}%</em>}
+              </span>
+            </div>
+            <div className="h-2 overflow-hidden rounded bg-muted">
+              <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function TrafficSources({ rows }: { rows?: Awaited<ReturnType<typeof getTrafficSources>> }) {
+  if (!rows) return <Skeleton />;
+  if (rows.length === 0) return <Empty msg="No traffic yet. Events appear as visitors arrive." />;
+  return (
+    <table className="w-full text-sm">
+      <thead className="text-left text-xs text-muted-foreground">
+        <tr><th className="pb-2">Source</th><th>Users</th><th>Enhanced</th><th>Conv.</th></tr>
+      </thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr key={r.source} className="border-t border-border">
+            <td className="py-2 capitalize">{r.source}</td>
+            <td className="tabular-nums">{r.users}</td>
+            <td className="tabular-nums">{r.enhanced}</td>
+            <td className="tabular-nums">{(r.conversionRate * 100).toFixed(1)}%</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+function Quality({ q }: { q?: { human: number; review: number; suspicious: number; total: number } }) {
+  if (!q) return <Skeleton />;
+  if (q.total === 0) return <Empty msg="No sessions yet." />;
+  const seg = (n: number, cls: string) => (
+    <div className={`h-8 ${cls}`} style={{ width: `${(n / q.total) * 100}%` }} />
+  );
+  return (
+    <div>
+      <div className="flex overflow-hidden rounded-md">
+        {seg(q.human, "bg-emerald-500")}
+        {seg(q.review, "bg-amber-500")}
+        {seg(q.suspicious, "bg-red-500")}
+      </div>
+      <ul className="mt-3 grid grid-cols-3 gap-2 text-sm">
+        <li><span className="text-emerald-500">●</span> Likely human · <b>{q.human}</b></li>
+        <li><span className="text-amber-500">●</span> Needs review · <b>{q.review}</b></li>
+        <li><span className="text-red-500">●</span> Suspicious · <b>{q.suspicious}</b></li>
+      </ul>
+      <p className="mt-3 text-xs text-muted-foreground">
+        Heuristic score from UA signals, session depth, and meaningful interactions. Not a
+        certainty judgment — no user is uniquely identified.
+      </p>
+    </div>
+  );
+}
+
+function Geography({ data }: { data?: Awaited<ReturnType<typeof getGeoBreakdown>> }) {
+  if (!data) return <Skeleton />;
+  if (data.countries.length === 0) return <Empty msg="No geographic data yet." />;
+  const max = Math.max(1, ...data.countries.map((c) => c.users));
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <div>
+        <h3 className="mb-2 text-xs font-medium text-muted-foreground">Top countries</h3>
+        <ul className="space-y-1 text-sm">
+          {data.countries.slice(0, 10).map((c) => (
+            <li key={c.code} className="grid grid-cols-[3rem_1fr_2rem] items-center gap-2">
+              <span className="font-mono text-xs">{c.code}</span>
+              <div className="h-2 overflow-hidden rounded bg-muted">
+                <div className="h-full bg-primary" style={{ width: `${(c.users / max) * 100}%` }} />
+              </div>
+              <span className="text-right tabular-nums">{c.users}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <h3 className="mb-2 text-xs font-medium text-muted-foreground">Languages</h3>
+        <ul className="space-y-1 text-sm">
+          {data.languages.slice(0, 8).map(([l, n]) => (
+            <li key={l} className="flex justify-between"><span>{l}</span><span className="tabular-nums">{n}</span></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function DeviceBreakdown({ data }: { data?: Awaited<ReturnType<typeof getDeviceBreakdown>> }) {
+  if (!data) return <Skeleton />;
+  const Row = ({ title, rows }: { title: string; rows: { label: string; users: number }[] }) => (
+    <div>
+      <h3 className="mb-2 text-xs font-medium text-muted-foreground">{title}</h3>
+      <ul className="space-y-1 text-sm">
+        {rows.slice(0, 6).map((r) => (
+          <li key={r.label} className="flex justify-between"><span>{r.label}</span><span className="tabular-nums">{r.users}</span></li>
+        ))}
+      </ul>
+    </div>
+  );
+  return (
+    <div className="grid gap-4 md:grid-cols-3">
+      <Row title="Device" rows={data.device_type} />
+      <Row title="OS" rows={data.os} />
+      <Row title="Browser" rows={data.browser} />
+    </div>
+  );
+}
+
+function Journeys({ rows }: { rows?: Awaited<ReturnType<typeof getJourneys>> }) {
+  if (!rows) return <Skeleton />;
+  if (rows.length === 0) return <Empty msg="No journeys yet." />;
+  return (
+    <ul className="space-y-2 text-sm">
+      {rows.map((r) => (
+        <li key={r.signature} className="flex items-center justify-between border-b border-border pb-2 last:border-b-0">
+          <span className="font-mono text-xs">{r.signature}</span>
+          <span className="tabular-nums text-muted-foreground">{r.sessions}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+interface VitalMetric {
+  p75: number;
+  good: number;
+  needsImprovement: number;
+  poor: number;
+}
+function Vitals({ data }: { data?: { metrics?: Record<string, VitalMetric> } }) {
+  if (!data?.metrics) return <Skeleton />;
+  const names = ["LCP", "CLS", "INP", "FCP", "TTFB"] as const;
+  return (
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+      {names.map((n) => {
+        const m = data.metrics?.[n];
+        if (!m) return null;
+        const rating =
+          m.poor > m.good ? "poor" : m.needsImprovement > m.good ? "needs-improvement" : "good";
+        const cls =
+          rating === "good" ? "text-emerald-500" : rating === "poor" ? "text-red-500" : "text-amber-500";
+        return <KPI key={n} label={n} value={<span className={cls}>{n === "CLS" ? m.p75.toFixed(2) : `${Math.round(m.p75)}ms`}</span>} />;
+      })}
+    </div>
+  );
+}
+
+interface Reliability { requests: number; success: number; failure: number; successRate: number; p95DurationMs: number; errors: Record<string, number> }
+function Reliability({ data }: { data?: { reliability?: Reliability } }) {
+  if (!data?.reliability) return <Skeleton />;
+  const r = data.reliability;
+  return (
+    <div>
+      <div className="grid grid-cols-4 gap-3">
+        <KPI label="Requests" value={r.requests} />
+        <KPI label="Success" value={`${(r.successRate * 100).toFixed(1)}%`} />
+        <KPI label="Failures" value={r.failure} />
+        <KPI label="p95" value={`${r.p95DurationMs}ms`} />
+      </div>
+      {Object.keys(r.errors).length > 0 && (
+        <ul className="mt-3 space-y-1 text-sm">
+          {Object.entries(r.errors).map(([code, n]) => (
+            <li key={code} className="flex justify-between"><span className="font-mono text-xs">{code}</span><span className="tabular-nums text-red-500">{n}</span></li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+interface GscSites { connected: boolean; sites: { siteUrl: string }[] }
+interface GscPerf { totals: { clicks?: number; impressions?: number; ctr?: number; position?: number } | null; byQuery: { keys: string[]; clicks: number; impressions: number; ctr: number; position: number }[]; byPage: { keys: string[]; clicks: number; impressions: number }[] }
+function SEO({ sites, perf }: { sites?: GscSites; perf?: GscPerf | null }) {
+  const connected = sites?.connected;
+  const site = sites?.sites?.[0]?.siteUrl;
+  if (!connected) return <Empty msg="Search Console is linked but no verified property was found. Verify your domain in Search Console." />;
+  if (!site) return <Empty msg="No verified properties." />;
+  if (!perf) return <Skeleton />;
+  const t = perf.totals ?? { clicks: 0, impressions: 0, ctr: 0, position: 0 };
+  return (
+    <div>
+      <div className="mb-3 text-xs text-muted-foreground">Property: <span className="font-mono">{site}</span></div>
+      <div className="grid grid-cols-4 gap-3">
+        <KPI label="Clicks" value={t.clicks ?? 0} />
+        <KPI label="Impressions" value={t.impressions ?? 0} />
+        <KPI label="CTR" value={`${((t.ctr ?? 0) * 100).toFixed(2)}%`} />
+        <KPI label="Position" value={(t.position ?? 0).toFixed(1)} />
+      </div>
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <div>
+          <h3 className="mb-2 text-xs font-medium text-muted-foreground">Top queries</h3>
+          <ul className="space-y-1 text-sm">
+            {(perf.byQuery ?? []).slice(0, 10).map((row, i) => (
+              <li key={i} className="flex justify-between gap-2">
+                <span className="truncate">{row.keys?.[0]}</span>
+                <span className="tabular-nums text-muted-foreground">{row.clicks} / {row.impressions}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h3 className="mb-2 text-xs font-medium text-muted-foreground">Top pages</h3>
+          <ul className="space-y-1 text-sm">
+            {(perf.byPage ?? []).slice(0, 10).map((row, i) => (
+              <li key={i} className="flex justify-between gap-2">
+                <span className="truncate font-mono text-xs">{row.keys?.[0]}</span>
+                <span className="tabular-nums text-muted-foreground">{row.clicks} / {row.impressions}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Skeleton() {
+  return <div className="h-24 animate-pulse rounded-md bg-muted/50" />;
+}
+function Empty({ msg }: { msg: string }) {
+  return <p className="text-sm text-muted-foreground">{msg}</p>;
+}
