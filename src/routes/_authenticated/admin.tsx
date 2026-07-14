@@ -449,7 +449,7 @@ function Reliability({ data }: { data?: { reliability?: Reliability } }) {
 }
 
 interface GscSites { connected: boolean; sites: { siteUrl: string }[] }
-interface GscPerf { totals: { clicks?: number; impressions?: number; ctr?: number; position?: number } | null; byQuery: { keys: string[]; clicks: number; impressions: number; ctr: number; position: number }[]; byPage: { keys: string[]; clicks: number; impressions: number }[] }
+interface GscPerf { totals: { clicks?: number; impressions?: number; ctr?: number; position?: number } | null; byQuery: { keys?: string[]; clicks?: number; impressions?: number; ctr?: number; position?: number }[]; byPage: { keys?: string[]; clicks?: number; impressions?: number }[] }
 function SEO({ sites, perf }: { sites?: GscSites; perf?: GscPerf | null }) {
   const connected = sites?.connected;
   const site = sites?.sites?.[0]?.siteUrl;
