@@ -262,7 +262,7 @@ function initBehaviorInternal() {
       track({
         name: "feature_interaction",
         feature: "rage_click",
-        metrics: { element: key, count: rc.t.length, path: location.pathname },
+        metrics: { feature: "rage_click", element: key, count: rc.t.length, path: location.pathname },
       });
       rc.t = [];
     }
@@ -286,7 +286,7 @@ function initBehaviorInternal() {
         track({
           name: "feature_interaction",
           feature: "dead_click",
-          metrics: { element: key, path: location.pathname },
+          metrics: { feature: "dead_click", element: key, path: location.pathname },
         });
       }
     }, 400);
