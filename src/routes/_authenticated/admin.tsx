@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
+import { CommandNav } from "@/components/command-center/CommandNav";
 import { supabase } from "@/integrations/supabase/client";
 import {
   getTrafficOverview,
