@@ -274,7 +274,7 @@ export const archiveBookmark = createServerFn({ method: "POST" })
       sb.from("investigation_bookmarks").update({
         status: "archived",
         archived_at: new Date().toISOString(),
-      }) as any
+      }) as unknown as { eq: (c:string,v:unknown)=>{ eq:(c:string,v:unknown)=>{ select:(s?:string)=>{single:()=>Promise<unknown>}}}}
     )
       .eq("id", data.id)
       .eq("user_id", context.userId)
@@ -295,7 +295,7 @@ export const restoreBookmark = createServerFn({ method: "POST" })
       sb.from("investigation_bookmarks").update({
         status: "open",
         archived_at: null,
-      }) as any
+      }) as unknown as { eq: (c:string,v:unknown)=>{ eq:(c:string,v:unknown)=>{ select:(s?:string)=>{single:()=>Promise<unknown>}}}}
     )
       .eq("id", data.id)
       .eq("user_id", context.userId)
