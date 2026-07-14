@@ -206,14 +206,26 @@ function CommandCenter() {
           <Intelligence data={intel.data} />
         </Section>
 
+        <Section title="Real-Time Command Room" subtitle="Live visitors · classified in real time">
+          <RealtimeCommandRoom data={rtIntel.data} />
+        </Section>
+
         <div className="grid gap-6 lg:grid-cols-2">
-          <Section title="Real-Time Monitor" subtitle="Last 5 minutes">
+          <Section title="Recent Activity" subtitle="Last 5 minutes">
             <Realtime data={rt.data} />
           </Section>
           <Section title="Product Activation Funnel">
             <Funnel funnel={qf.data?.funnel} />
           </Section>
         </div>
+
+        <Section title="Source Intelligence" subtitle="Quality, conversion & human likelihood by channel">
+          <SourceIntel rows={sourceIntel.data} />
+        </Section>
+
+        <Section title="Visitor Timelines" subtitle="Per-session classification with probability, confidence & evidence">
+          <VisitorList rows={visitors.data} />
+        </Section>
 
         <div className="grid gap-6 lg:grid-cols-2">
           <Section title="Traffic Sources">
