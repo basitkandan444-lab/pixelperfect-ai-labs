@@ -105,9 +105,8 @@ function Consent() {
           Connect {clientName} to Pixel Perfect Pro
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          This lets {clientName} use this app's visitor-intelligence tools while
-          you are signed in. It does not bypass this app's permissions or
-          backend policies.
+          This lets {clientName} act on your behalf while you are signed in.
+          It does not bypass this app's permissions or backend policies.
         </p>
 
         {scopeList.length > 0 && (
