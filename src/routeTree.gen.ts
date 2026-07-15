@@ -34,6 +34,7 @@ import { Route as ApiPublicVersionRouteImport } from './routes/api/public/versio
 import { Route as ApiPublicReliabilityRouteImport } from './routes/api/public/reliability'
 import { Route as ApiPublicMetricsRouteImport } from './routes/api/public/metrics'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
+import { Route as ApiPublicFunnelRouteImport } from './routes/api/public/funnel'
 import { Route as ApiPublicEventsRouteImport } from './routes/api/public/events'
 import { Route as ApiPublicAlertsRouteImport } from './routes/api/public/alerts'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -168,6 +169,11 @@ const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
   path: '/api/public/health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicFunnelRoute = ApiPublicFunnelRouteImport.update({
+  id: '/api/public/funnel',
+  path: '/api/public/funnel',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicEventsRoute = ApiPublicEventsRouteImport.update({
   id: '/api/public/events',
   path: '/api/public/events',
@@ -227,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/alerts': typeof ApiPublicAlertsRoute
   '/api/public/events': typeof ApiPublicEventsRoute
+  '/api/public/funnel': typeof ApiPublicFunnelRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
   '/api/public/reliability': typeof ApiPublicReliabilityRoute
@@ -260,6 +267,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/alerts': typeof ApiPublicAlertsRoute
   '/api/public/events': typeof ApiPublicEventsRoute
+  '/api/public/funnel': typeof ApiPublicFunnelRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
   '/api/public/reliability': typeof ApiPublicReliabilityRoute
@@ -294,6 +302,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/alerts': typeof ApiPublicAlertsRoute
   '/api/public/events': typeof ApiPublicEventsRoute
+  '/api/public/funnel': typeof ApiPublicFunnelRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
   '/api/public/reliability': typeof ApiPublicReliabilityRoute
@@ -329,6 +338,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/alerts'
     | '/api/public/events'
+    | '/api/public/funnel'
     | '/api/public/health'
     | '/api/public/metrics'
     | '/api/public/reliability'
@@ -362,6 +372,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/alerts'
     | '/api/public/events'
+    | '/api/public/funnel'
     | '/api/public/health'
     | '/api/public/metrics'
     | '/api/public/reliability'
@@ -395,6 +406,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/alerts'
     | '/api/public/events'
+    | '/api/public/funnel'
     | '/api/public/health'
     | '/api/public/metrics'
     | '/api/public/reliability'
@@ -429,6 +441,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicAlertsRoute: typeof ApiPublicAlertsRoute
   ApiPublicEventsRoute: typeof ApiPublicEventsRoute
+  ApiPublicFunnelRoute: typeof ApiPublicFunnelRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicMetricsRoute: typeof ApiPublicMetricsRoute
   ApiPublicReliabilityRoute: typeof ApiPublicReliabilityRoute
@@ -615,6 +628,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/funnel': {
+      id: '/api/public/funnel'
+      path: '/api/public/funnel'
+      fullPath: '/api/public/funnel'
+      preLoaderRoute: typeof ApiPublicFunnelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/events': {
       id: '/api/public/events'
       path: '/api/public/events'
@@ -686,6 +706,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicAlertsRoute: ApiPublicAlertsRoute,
   ApiPublicEventsRoute: ApiPublicEventsRoute,
+  ApiPublicFunnelRoute: ApiPublicFunnelRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicMetricsRoute: ApiPublicMetricsRoute,
   ApiPublicReliabilityRoute: ApiPublicReliabilityRoute,
