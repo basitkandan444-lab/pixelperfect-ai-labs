@@ -35,9 +35,11 @@ import { Route as ApiPublicReliabilityRouteImport } from './routes/api/public/re
 import { Route as ApiPublicMetricsRouteImport } from './routes/api/public/metrics'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicEventsRouteImport } from './routes/api/public/events'
+import { Route as ApiPublicAlertsRouteImport } from './routes/api/public/alerts'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicHooksTelemetrySnapshotRouteImport } from './routes/api/public/hooks/telemetry-snapshot'
+import { Route as ApiPublicHooksReliabilityScanRouteImport } from './routes/api/public/hooks/reliability-scan'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -171,6 +173,11 @@ const ApiPublicEventsRoute = ApiPublicEventsRouteImport.update({
   path: '/api/public/events',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAlertsRoute = ApiPublicAlertsRouteImport.update({
+  id: '/api/public/alerts',
+  path: '/api/public/alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -186,6 +193,12 @@ const ApiPublicHooksTelemetrySnapshotRoute =
   ApiPublicHooksTelemetrySnapshotRouteImport.update({
     id: '/api/public/hooks/telemetry-snapshot',
     path: '/api/public/hooks/telemetry-snapshot',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksReliabilityScanRoute =
+  ApiPublicHooksReliabilityScanRouteImport.update({
+    id: '/api/public/hooks/reliability-scan',
+    path: '/api/public/hooks/reliability-scan',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -212,12 +225,14 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/alerts': typeof ApiPublicAlertsRoute
   '/api/public/events': typeof ApiPublicEventsRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
   '/api/public/reliability': typeof ApiPublicReliabilityRoute
   '/api/public/version': typeof ApiPublicVersionRoute
   '/api/public/vitals': typeof ApiPublicVitalsRoute
+  '/api/public/hooks/reliability-scan': typeof ApiPublicHooksReliabilityScanRoute
   '/api/public/hooks/telemetry-snapshot': typeof ApiPublicHooksTelemetrySnapshotRoute
 }
 export interface FileRoutesByTo {
@@ -243,12 +258,14 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/alerts': typeof ApiPublicAlertsRoute
   '/api/public/events': typeof ApiPublicEventsRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
   '/api/public/reliability': typeof ApiPublicReliabilityRoute
   '/api/public/version': typeof ApiPublicVersionRoute
   '/api/public/vitals': typeof ApiPublicVitalsRoute
+  '/api/public/hooks/reliability-scan': typeof ApiPublicHooksReliabilityScanRoute
   '/api/public/hooks/telemetry-snapshot': typeof ApiPublicHooksTelemetrySnapshotRoute
 }
 export interface FileRoutesById {
@@ -275,12 +292,14 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/alerts': typeof ApiPublicAlertsRoute
   '/api/public/events': typeof ApiPublicEventsRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
   '/api/public/reliability': typeof ApiPublicReliabilityRoute
   '/api/public/version': typeof ApiPublicVersionRoute
   '/api/public/vitals': typeof ApiPublicVitalsRoute
+  '/api/public/hooks/reliability-scan': typeof ApiPublicHooksReliabilityScanRoute
   '/api/public/hooks/telemetry-snapshot': typeof ApiPublicHooksTelemetrySnapshotRoute
 }
 export interface FileRouteTypes {
@@ -308,12 +327,14 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/alerts'
     | '/api/public/events'
     | '/api/public/health'
     | '/api/public/metrics'
     | '/api/public/reliability'
     | '/api/public/version'
     | '/api/public/vitals'
+    | '/api/public/hooks/reliability-scan'
     | '/api/public/hooks/telemetry-snapshot'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -339,12 +360,14 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/alerts'
     | '/api/public/events'
     | '/api/public/health'
     | '/api/public/metrics'
     | '/api/public/reliability'
     | '/api/public/version'
     | '/api/public/vitals'
+    | '/api/public/hooks/reliability-scan'
     | '/api/public/hooks/telemetry-snapshot'
   id:
     | '__root__'
@@ -370,12 +393,14 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/alerts'
     | '/api/public/events'
     | '/api/public/health'
     | '/api/public/metrics'
     | '/api/public/reliability'
     | '/api/public/version'
     | '/api/public/vitals'
+    | '/api/public/hooks/reliability-scan'
     | '/api/public/hooks/telemetry-snapshot'
   fileRoutesById: FileRoutesById
 }
@@ -402,12 +427,14 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicAlertsRoute: typeof ApiPublicAlertsRoute
   ApiPublicEventsRoute: typeof ApiPublicEventsRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicMetricsRoute: typeof ApiPublicMetricsRoute
   ApiPublicReliabilityRoute: typeof ApiPublicReliabilityRoute
   ApiPublicVersionRoute: typeof ApiPublicVersionRoute
   ApiPublicVitalsRoute: typeof ApiPublicVitalsRoute
+  ApiPublicHooksReliabilityScanRoute: typeof ApiPublicHooksReliabilityScanRoute
   ApiPublicHooksTelemetrySnapshotRoute: typeof ApiPublicHooksTelemetrySnapshotRoute
 }
 
@@ -595,6 +622,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/alerts': {
+      id: '/api/public/alerts'
+      path: '/api/public/alerts'
+      fullPath: '/api/public/alerts'
+      preLoaderRoute: typeof ApiPublicAlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
       path: '/.mcp/invoke-tool/$tool'
@@ -614,6 +648,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/telemetry-snapshot'
       fullPath: '/api/public/hooks/telemetry-snapshot'
       preLoaderRoute: typeof ApiPublicHooksTelemetrySnapshotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/reliability-scan': {
+      id: '/api/public/hooks/reliability-scan'
+      path: '/api/public/hooks/reliability-scan'
+      fullPath: '/api/public/hooks/reliability-scan'
+      preLoaderRoute: typeof ApiPublicHooksReliabilityScanRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -643,12 +684,14 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicAlertsRoute: ApiPublicAlertsRoute,
   ApiPublicEventsRoute: ApiPublicEventsRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicMetricsRoute: ApiPublicMetricsRoute,
   ApiPublicReliabilityRoute: ApiPublicReliabilityRoute,
   ApiPublicVersionRoute: ApiPublicVersionRoute,
   ApiPublicVitalsRoute: ApiPublicVitalsRoute,
+  ApiPublicHooksReliabilityScanRoute: ApiPublicHooksReliabilityScanRoute,
   ApiPublicHooksTelemetrySnapshotRoute: ApiPublicHooksTelemetrySnapshotRoute,
 }
 export const routeTree = rootRouteImport
