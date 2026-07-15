@@ -81,6 +81,7 @@ export function summarizeExperiments(events: ExperimentEventRow[]): ExperimentSu
   const byExp = new Map<string, Map<string, Bucket>>();
 
   for (const e of events) {
+    if (e.name !== "experiment_exposure" && e.name !== "experiment_conversion") continue;
     const exp = e.metrics?.experiment_id;
     const variant = e.metrics?.variant;
     if (!exp || !variant) continue;
