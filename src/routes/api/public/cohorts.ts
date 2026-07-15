@@ -34,7 +34,7 @@ export const Route = createFileRoute("/api/public/cohorts")({
           }));
           const result = computeCohorts(rows, days);
           return jsonOk(
-            { window_days: days, since, rows_scanned: rows.length, ...result },
+            { since, rows_scanned: rows.length, ...result },
             { status: 200, requestId },
           );
         } catch {
