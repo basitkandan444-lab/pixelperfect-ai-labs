@@ -94,4 +94,22 @@ historical trends we persist a periodic snapshot to `public.telemetry_snapshots`
   - **risk** — 0..1 composite score for at-a-glance dashboards.
 
 Detection logic lives in `src/lib/reliability.ts` (pure, unit-tested) and is
-reused by dashboards, MCP tooling, and future notifiers.
+reused by dashboards, MCP tooling, and notifiers.
+
+## Alert delivery (Level 5)
+
+- `POST /api/public/hooks/reliability-scan` — auth via `apikey` header. Runs
+  every 5 minutes (`pg_cron` job `reliability-alert-scan-5m`). Fetches the last
+  24h of telemetry snapshots, runs `buildReport`, and persists each new alert
+  into `public.reliability_alerts`, deduplicated by
+  `(kind, dedup_key, hour_bucket)` — the same ongoing incident writes exactly
+  one row per hour.
+- If the `RELIABILITY_ALERT_WEBHOOK_URL` secret is configured, every newly-inserted
+  alert is POSTed there with a flat, Slack/Discord/HTTP-compatible payload
+  (`title`, `severity`, `detail`, `recommendation`, `evidence`, `text`). Delivery
+  status (`delivered` / `failed` + `delivery_error`) is written back to the row.
+- `GET /api/public/alerts?windowHours=24` returns the recent alerts (PII-free)
+  for dashboards and external monitors.
+- Dedup logic lives in `src/lib/alerts.ts` (`dedupKey`, `toDeliverable`,
+  `webhookPayload`) — pure functions, unit-tested in `src/lib/alerts.test.ts`.
+
