@@ -33,9 +33,14 @@ import { Route as ApiPublicVitalsRouteImport } from './routes/api/public/vitals'
 import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
 import { Route as ApiPublicReliabilityRouteImport } from './routes/api/public/reliability'
 import { Route as ApiPublicMetricsRouteImport } from './routes/api/public/metrics'
+import { Route as ApiPublicJourneysRouteImport } from './routes/api/public/journeys'
+import { Route as ApiPublicIntelligenceRouteImport } from './routes/api/public/intelligence'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicFunnelRouteImport } from './routes/api/public/funnel'
+import { Route as ApiPublicExperimentsRouteImport } from './routes/api/public/experiments'
 import { Route as ApiPublicEventsRouteImport } from './routes/api/public/events'
+import { Route as ApiPublicCohortsRouteImport } from './routes/api/public/cohorts'
+import { Route as ApiPublicAnomaliesRouteImport } from './routes/api/public/anomalies'
 import { Route as ApiPublicAlertsRouteImport } from './routes/api/public/alerts'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -164,6 +169,16 @@ const ApiPublicMetricsRoute = ApiPublicMetricsRouteImport.update({
   path: '/api/public/metrics',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicJourneysRoute = ApiPublicJourneysRouteImport.update({
+  id: '/api/public/journeys',
+  path: '/api/public/journeys',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicIntelligenceRoute = ApiPublicIntelligenceRouteImport.update({
+  id: '/api/public/intelligence',
+  path: '/api/public/intelligence',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
   id: '/api/public/health',
   path: '/api/public/health',
@@ -174,9 +189,24 @@ const ApiPublicFunnelRoute = ApiPublicFunnelRouteImport.update({
   path: '/api/public/funnel',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicExperimentsRoute = ApiPublicExperimentsRouteImport.update({
+  id: '/api/public/experiments',
+  path: '/api/public/experiments',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicEventsRoute = ApiPublicEventsRouteImport.update({
   id: '/api/public/events',
   path: '/api/public/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicCohortsRoute = ApiPublicCohortsRouteImport.update({
+  id: '/api/public/cohorts',
+  path: '/api/public/cohorts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicAnomaliesRoute = ApiPublicAnomaliesRouteImport.update({
+  id: '/api/public/anomalies',
+  path: '/api/public/anomalies',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicAlertsRoute = ApiPublicAlertsRouteImport.update({
@@ -232,9 +262,14 @@ export interface FileRoutesByFullPath {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/alerts': typeof ApiPublicAlertsRoute
+  '/api/public/anomalies': typeof ApiPublicAnomaliesRoute
+  '/api/public/cohorts': typeof ApiPublicCohortsRoute
   '/api/public/events': typeof ApiPublicEventsRoute
+  '/api/public/experiments': typeof ApiPublicExperimentsRoute
   '/api/public/funnel': typeof ApiPublicFunnelRoute
   '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/intelligence': typeof ApiPublicIntelligenceRoute
+  '/api/public/journeys': typeof ApiPublicJourneysRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
   '/api/public/reliability': typeof ApiPublicReliabilityRoute
   '/api/public/version': typeof ApiPublicVersionRoute
@@ -266,9 +301,14 @@ export interface FileRoutesByTo {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/alerts': typeof ApiPublicAlertsRoute
+  '/api/public/anomalies': typeof ApiPublicAnomaliesRoute
+  '/api/public/cohorts': typeof ApiPublicCohortsRoute
   '/api/public/events': typeof ApiPublicEventsRoute
+  '/api/public/experiments': typeof ApiPublicExperimentsRoute
   '/api/public/funnel': typeof ApiPublicFunnelRoute
   '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/intelligence': typeof ApiPublicIntelligenceRoute
+  '/api/public/journeys': typeof ApiPublicJourneysRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
   '/api/public/reliability': typeof ApiPublicReliabilityRoute
   '/api/public/version': typeof ApiPublicVersionRoute
@@ -301,9 +341,14 @@ export interface FileRoutesById {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/alerts': typeof ApiPublicAlertsRoute
+  '/api/public/anomalies': typeof ApiPublicAnomaliesRoute
+  '/api/public/cohorts': typeof ApiPublicCohortsRoute
   '/api/public/events': typeof ApiPublicEventsRoute
+  '/api/public/experiments': typeof ApiPublicExperimentsRoute
   '/api/public/funnel': typeof ApiPublicFunnelRoute
   '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/intelligence': typeof ApiPublicIntelligenceRoute
+  '/api/public/journeys': typeof ApiPublicJourneysRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
   '/api/public/reliability': typeof ApiPublicReliabilityRoute
   '/api/public/version': typeof ApiPublicVersionRoute
@@ -337,9 +382,14 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/alerts'
+    | '/api/public/anomalies'
+    | '/api/public/cohorts'
     | '/api/public/events'
+    | '/api/public/experiments'
     | '/api/public/funnel'
     | '/api/public/health'
+    | '/api/public/intelligence'
+    | '/api/public/journeys'
     | '/api/public/metrics'
     | '/api/public/reliability'
     | '/api/public/version'
@@ -371,9 +421,14 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/alerts'
+    | '/api/public/anomalies'
+    | '/api/public/cohorts'
     | '/api/public/events'
+    | '/api/public/experiments'
     | '/api/public/funnel'
     | '/api/public/health'
+    | '/api/public/intelligence'
+    | '/api/public/journeys'
     | '/api/public/metrics'
     | '/api/public/reliability'
     | '/api/public/version'
@@ -405,9 +460,14 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/alerts'
+    | '/api/public/anomalies'
+    | '/api/public/cohorts'
     | '/api/public/events'
+    | '/api/public/experiments'
     | '/api/public/funnel'
     | '/api/public/health'
+    | '/api/public/intelligence'
+    | '/api/public/journeys'
     | '/api/public/metrics'
     | '/api/public/reliability'
     | '/api/public/version'
@@ -440,9 +500,14 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicAlertsRoute: typeof ApiPublicAlertsRoute
+  ApiPublicAnomaliesRoute: typeof ApiPublicAnomaliesRoute
+  ApiPublicCohortsRoute: typeof ApiPublicCohortsRoute
   ApiPublicEventsRoute: typeof ApiPublicEventsRoute
+  ApiPublicExperimentsRoute: typeof ApiPublicExperimentsRoute
   ApiPublicFunnelRoute: typeof ApiPublicFunnelRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
+  ApiPublicIntelligenceRoute: typeof ApiPublicIntelligenceRoute
+  ApiPublicJourneysRoute: typeof ApiPublicJourneysRoute
   ApiPublicMetricsRoute: typeof ApiPublicMetricsRoute
   ApiPublicReliabilityRoute: typeof ApiPublicReliabilityRoute
   ApiPublicVersionRoute: typeof ApiPublicVersionRoute
@@ -621,6 +686,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMetricsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/journeys': {
+      id: '/api/public/journeys'
+      path: '/api/public/journeys'
+      fullPath: '/api/public/journeys'
+      preLoaderRoute: typeof ApiPublicJourneysRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/intelligence': {
+      id: '/api/public/intelligence'
+      path: '/api/public/intelligence'
+      fullPath: '/api/public/intelligence'
+      preLoaderRoute: typeof ApiPublicIntelligenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/health': {
       id: '/api/public/health'
       path: '/api/public/health'
@@ -635,11 +714,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicFunnelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/experiments': {
+      id: '/api/public/experiments'
+      path: '/api/public/experiments'
+      fullPath: '/api/public/experiments'
+      preLoaderRoute: typeof ApiPublicExperimentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/events': {
       id: '/api/public/events'
       path: '/api/public/events'
       fullPath: '/api/public/events'
       preLoaderRoute: typeof ApiPublicEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/cohorts': {
+      id: '/api/public/cohorts'
+      path: '/api/public/cohorts'
+      fullPath: '/api/public/cohorts'
+      preLoaderRoute: typeof ApiPublicCohortsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/anomalies': {
+      id: '/api/public/anomalies'
+      path: '/api/public/anomalies'
+      fullPath: '/api/public/anomalies'
+      preLoaderRoute: typeof ApiPublicAnomaliesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/alerts': {
@@ -705,9 +805,14 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicAlertsRoute: ApiPublicAlertsRoute,
+  ApiPublicAnomaliesRoute: ApiPublicAnomaliesRoute,
+  ApiPublicCohortsRoute: ApiPublicCohortsRoute,
   ApiPublicEventsRoute: ApiPublicEventsRoute,
+  ApiPublicExperimentsRoute: ApiPublicExperimentsRoute,
   ApiPublicFunnelRoute: ApiPublicFunnelRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
+  ApiPublicIntelligenceRoute: ApiPublicIntelligenceRoute,
+  ApiPublicJourneysRoute: ApiPublicJourneysRoute,
   ApiPublicMetricsRoute: ApiPublicMetricsRoute,
   ApiPublicReliabilityRoute: ApiPublicReliabilityRoute,
   ApiPublicVersionRoute: ApiPublicVersionRoute,
