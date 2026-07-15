@@ -327,7 +327,7 @@ export function forecastTrends(rows: SnapshotRow[]): TrendForecast[] {
     const projected1h = last + slopePerHour;
     const projected24h = last + slopePerHour * 24;
     let direction: TrendForecast["direction"] = "steady";
-    const noise = Math.abs(mean(ys)) * 0.02 + 1e-6;
+    const noise = Math.abs(mean(ys)) * 0.005 + 1e-6;
     if (Math.abs(slopePerHour) > noise) {
       const worse =
         metric === "success_rate" ? slopePerHour < 0 : slopePerHour > 0;
