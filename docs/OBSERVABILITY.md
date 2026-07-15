@@ -74,3 +74,24 @@ curl -fsS $BASE/api/public/metrics  | jq .data       # reliability + vitals
 
 Then open `/ops` and confirm status is **Operational** and no error codes are
 accumulating.
+
+## Persistent time-series (Level 5)
+
+Per-isolate counters in `metrics.ts` / `vitals-store.ts` are volatile. To keep
+historical trends we persist a periodic snapshot to `public.telemetry_snapshots`:
+
+- `POST /api/public/hooks/telemetry-snapshot` — cron sink (auth: `apikey` header
+  must match `SUPABASE_PUBLISHABLE_KEY`). Writes one row containing deployment
+  status, reliability counters, error-code breakdown, and Core Web Vitals p75s.
+- `pg_cron` job `telemetry-snapshot-5m` runs every 5 minutes.
+- `GET /api/public/reliability?windowHours=24` returns the recent series plus:
+  - **alerts** — rule-based detections (`error_spike`, `success_rate_drop`,
+    `latency_regression`, `lcp_regression`, `inp_regression`, `traffic_drop`,
+    `new_error_code`) with severity, evidence and a recommended action.
+  - **trends** — linear-regression forecast (`slopePerHour`, `projected1h`,
+    `projected24h`) for success rate, p95 latency and LCP p75, tagged
+    `improving` / `steady` / `degrading`.
+  - **risk** — 0..1 composite score for at-a-glance dashboards.
+
+Detection logic lives in `src/lib/reliability.ts` (pure, unit-tested) and is
+reused by dashboards, MCP tooling, and future notifiers.
