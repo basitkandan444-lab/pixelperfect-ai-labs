@@ -27,6 +27,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AiImageEnhancerRouteImport } from './routes/ai-image-enhancer'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OpsExperimentsRouteImport } from './routes/ops.experiments'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as ApiPublicVitalsRouteImport } from './routes/api/public/vitals'
@@ -136,6 +137,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const OpsExperimentsRoute = OpsExperimentsRouteImport.update({
+  id: '/experiments',
+  path: '/experiments',
+  getParentRoute: () => OpsRoute,
 } as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
   Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
@@ -250,7 +256,7 @@ export interface FileRoutesByFullPath {
   '/image-upscaler': typeof ImageUpscalerRoute
   '/increase-image-resolution': typeof IncreaseImageResolutionRoute
   '/mcp': typeof McpRoute
-  '/ops': typeof OpsRoute
+  '/ops': typeof OpsRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/remove-image-noise': typeof RemoveImageNoiseRoute
   '/restore-old-photo': typeof RestoreOldPhotoRoute
@@ -259,6 +265,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/ops/experiments': typeof OpsExperimentsRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/alerts': typeof ApiPublicAlertsRoute
@@ -289,7 +296,7 @@ export interface FileRoutesByTo {
   '/image-upscaler': typeof ImageUpscalerRoute
   '/increase-image-resolution': typeof IncreaseImageResolutionRoute
   '/mcp': typeof McpRoute
-  '/ops': typeof OpsRoute
+  '/ops': typeof OpsRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/remove-image-noise': typeof RemoveImageNoiseRoute
   '/restore-old-photo': typeof RestoreOldPhotoRoute
@@ -298,6 +305,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/ops/experiments': typeof OpsExperimentsRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/alerts': typeof ApiPublicAlertsRoute
@@ -329,7 +337,7 @@ export interface FileRoutesById {
   '/image-upscaler': typeof ImageUpscalerRoute
   '/increase-image-resolution': typeof IncreaseImageResolutionRoute
   '/mcp': typeof McpRoute
-  '/ops': typeof OpsRoute
+  '/ops': typeof OpsRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/remove-image-noise': typeof RemoveImageNoiseRoute
   '/restore-old-photo': typeof RestoreOldPhotoRoute
@@ -338,6 +346,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/ops/experiments': typeof OpsExperimentsRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/alerts': typeof ApiPublicAlertsRoute
@@ -379,6 +388,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/ops/experiments'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/alerts'
@@ -418,6 +428,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/ops/experiments'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/alerts'
@@ -457,6 +468,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/ops/experiments'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/alerts'
@@ -488,7 +500,7 @@ export interface RootRouteChildren {
   ImageUpscalerRoute: typeof ImageUpscalerRoute
   IncreaseImageResolutionRoute: typeof IncreaseImageResolutionRoute
   McpRoute: typeof McpRoute
-  OpsRoute: typeof OpsRoute
+  OpsRoute: typeof OpsRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   RemoveImageNoiseRoute: typeof RemoveImageNoiseRoute
   RestoreOldPhotoRoute: typeof RestoreOldPhotoRoute
@@ -644,6 +656,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ops/experiments': {
+      id: '/ops/experiments'
+      path: '/experiments'
+      fullPath: '/ops/experiments'
+      preLoaderRoute: typeof OpsExperimentsRouteImport
+      parentRoute: typeof OpsRoute
+    }
     '/.well-known/oauth-protected-resource': {
       id: '/.well-known/oauth-protected-resource'
       path: '/.well-known/oauth-protected-resource'
@@ -780,6 +799,16 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface OpsRouteChildren {
+  OpsExperimentsRoute: typeof OpsExperimentsRoute
+}
+
+const OpsRouteChildren: OpsRouteChildren = {
+  OpsExperimentsRoute: OpsExperimentsRoute,
+}
+
+const OpsRouteWithChildren = OpsRoute._addFileChildren(OpsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -792,7 +821,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImageUpscalerRoute: ImageUpscalerRoute,
   IncreaseImageResolutionRoute: IncreaseImageResolutionRoute,
   McpRoute: McpRoute,
-  OpsRoute: OpsRoute,
+  OpsRoute: OpsRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   RemoveImageNoiseRoute: RemoveImageNoiseRoute,
   RestoreOldPhotoRoute: RestoreOldPhotoRoute,
@@ -823,13 +852,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
