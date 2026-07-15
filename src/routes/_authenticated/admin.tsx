@@ -3,7 +3,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
-import { CommandNav } from "@/components/command-center/CommandNav";
 import { supabase } from "@/integrations/supabase/client";
 import {
   getTrafficOverview,
@@ -16,51 +15,14 @@ import {
   exportEventsCsv,
 } from "@/lib/admin.functions";
 import { listGscSites, getGscPerformance } from "@/lib/gsc.functions";
-import {
-  getIntelligence,
-  getVisitorTimelines,
-  getSourceIntelligence,
-  getRealtimeIntelligence,
-  getExecutive,
-  getTrends,
-  getAlerts,
-  getFullReport,
-  getValidation,
-} from "@/lib/intelligence.functions";
-import {
-  getAlertLifecycles,
-  recordAlertAction,
-  snapshotAlertDetections,
-  getAuditSummary,
-  getAlertOps,
-  getAuditOps,
-} from "@/lib/ops.functions";
-import {
-  filterAlerts,
-  sortAlerts,
-  type AlertLifecycle,
-  type AlertSort,
-  type AlertStatus,
-  type AlertSeverity,
-} from "@/lib/alerts";
-import {
-  simulateRules,
-  getSandboxHistory,
-} from "@/lib/sandbox.functions";
-import {
-  DEFAULT_RULES,
-  WEIGHT_META,
-  THRESHOLD_META,
-  diffRuleSets,
-  validateRuleSet,
-  type RuleSet,
-  type WeightKey,
-  type ThresholdKey,
-} from "@/lib/sandbox/rules";
 
-// Admin gate: this route lives under _authenticated so the session is already
-// checked. The role check happens client-side (redirect on fail) AND server-side
-// in every data function (defense in depth).
+// Admin analytics dashboard — trusted baseline only.
+//
+// The former "Visitor Intelligence" system (per-session classification,
+// human/automation probability, quality score, evidence timelines, segments,
+// alerts, audit log, rule sandbox, version intel) was removed because its
+// data quality was unreliable. This route now shows only the pre-existing
+// first-party analytics (GA4-equivalent counts) and Search Console data.
 export const Route = createFileRoute("/_authenticated/admin")({
   ssr: false,
   beforeLoad: async () => {
@@ -77,7 +39,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   },
   head: () => ({
     meta: [
-      { title: "Visitor Intelligence — Command Center" },
+      { title: "Analytics — Command Center" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -97,31 +59,7 @@ function CommandCenter() {
   const journeysFn = useServerFn(getJourneys);
   const gscSitesFn = useServerFn(listGscSites);
   const gscPerfFn = useServerFn(getGscPerformance);
-  const intelFn = useServerFn(getIntelligence);
-  const visitorsFn = useServerFn(getVisitorTimelines);
-  const sourceIntelFn = useServerFn(getSourceIntelligence);
-  const rtIntelFn = useServerFn(getRealtimeIntelligence);
-  const execFn = useServerFn(getExecutive);
-  const trendsFn = useServerFn(getTrends);
-  const alertsFn = useServerFn(getAlerts);
-  const fullReportFn = useServerFn(getFullReport);
-  const validationFn = useServerFn(getValidation);
   const csvFn = useServerFn(exportEventsCsv);
-  const alertLifecycleFn = useServerFn(getAlertLifecycles);
-  const alertActionFn = useServerFn(recordAlertAction);
-  const alertSnapshotFn = useServerFn(snapshotAlertDetections);
-  const auditFn = useServerFn(getAuditSummary);
-  const alertOpsFn = useServerFn(getAlertOps);
-  const auditOpsFn = useServerFn(getAuditOps);
-
-  // Client-side filters
-  const [filters, setFilters] = useState<{
-    source: string;
-    device: string;
-    country: string;
-    segment: string;
-    quality: string;
-  }>({ source: "", device: "", country: "", segment: "", quality: "" });
 
   const overview = useQuery({
     queryKey: ["ov", days],
@@ -147,62 +85,6 @@ function CommandCenter() {
       firstSite ? gscPerfFn({ data: { siteUrl: firstSite, days } }) : Promise.resolve(null),
     enabled: !!firstSite,
   });
-  const intel = useQuery({
-    queryKey: ["intel", days],
-    queryFn: () => intelFn({ data: { days } }),
-  });
-  const visitors = useQuery({
-    queryKey: ["visitors", days],
-    queryFn: () => visitorsFn({ data: { days, limit: 25 } }),
-  });
-  const sourceIntel = useQuery({
-    queryKey: ["srcIntel", days],
-    queryFn: () => sourceIntelFn({ data: { days } }),
-  });
-  const rtIntel = useQuery({
-    queryKey: ["rtIntel"],
-    queryFn: () => rtIntelFn({ data: { windowSeconds: 300 } }),
-    refetchInterval: 5000,
-  });
-
-  const exec = useQuery({
-    queryKey: ["exec", days],
-    queryFn: () => execFn({ data: { days } }),
-  });
-  const trends = useQuery({
-    queryKey: ["trends", days],
-    queryFn: () => trendsFn({ data: { days } }),
-  });
-  const alerts = useQuery({
-    queryKey: ["alerts", days],
-    queryFn: () => alertsFn({ data: { days } }),
-    refetchInterval: 60_000,
-  });
-
-  const validation = useQuery({
-    queryKey: ["validation", days],
-    queryFn: () => validationFn({ data: { days } }),
-  });
-
-  const lifecycles = useQuery({
-    queryKey: ["alert-lifecycles", days],
-    queryFn: () => alertLifecycleFn({ data: { days } }),
-    refetchInterval: 60_000,
-  });
-  const audit = useQuery({
-    queryKey: ["audit", days],
-    queryFn: () => auditFn({ data: { days } }),
-  });
-  const alertOps = useQuery({
-    queryKey: ["alert-ops", days],
-    queryFn: () => alertOpsFn({ data: { days } }),
-    refetchInterval: 60_000,
-  });
-  const auditOps = useQuery({
-    queryKey: ["audit-ops", days],
-    queryFn: () => auditOpsFn({ data: { days } }),
-  });
-
 
   const vitals = useQuery({
     queryKey: ["vitals"],
@@ -225,19 +107,7 @@ function CommandCenter() {
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
     const a = document.createElement("a");
     a.href = url;
-    a.download = `visitors-${days}d.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const downloadReport = async (format: "markdown" | "csv" | "html") => {
-    const { report } = await fullReportFn({ data: { days, format } });
-    const mime = format === "csv" ? "text/csv" : format === "html" ? "text/html" : "text/markdown";
-    const ext = format === "markdown" ? "md" : format;
-    const url = URL.createObjectURL(new Blob([report], { type: mime }));
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `traffic-intelligence-${days}d.${ext}`;
+    a.download = `events-${days}d.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -247,9 +117,9 @@ function CommandCenter() {
       <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <div>
-            <h1 className="text-xl font-bold">Visitor Intelligence</h1>
+            <h1 className="text-xl font-bold">Analytics</h1>
             <p className="text-xs text-muted-foreground">
-              Real-time · privacy-preserving · first-party
+              First-party events · privacy-preserving
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -257,6 +127,7 @@ function CommandCenter() {
               value={days}
               onChange={(e) => setDays(Number(e.target.value))}
               className="rounded-md border border-input bg-background px-2 py-1 text-sm"
+              aria-label="Time range"
             >
               {[1, 7, 14, 28, 90].map((d) => (
                 <option key={d} value={d}>
@@ -271,30 +142,6 @@ function CommandCenter() {
               Export CSV
             </button>
             <button
-              onClick={() => downloadReport("markdown")}
-              className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent"
-            >
-              Report (MD)
-            </button>
-            <button
-              onClick={() => downloadReport("html")}
-              className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent"
-            >
-              Report (HTML)
-            </button>
-            <button
-              onClick={() => downloadReport("csv")}
-              className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent"
-            >
-              Report (CSV)
-            </button>
-            <button
-              onClick={() => window.print()}
-              className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent"
-            >
-              Print
-            </button>
-            <button
               onClick={signOut}
               className="rounded-md border border-input px-3 py-1 text-sm hover:bg-accent"
             >
@@ -304,91 +151,9 @@ function CommandCenter() {
         </div>
       </header>
 
-      <CommandNav />
-
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-6">
-        <Section title="Executive Summary" subtitle="One-glance intelligence briefing">
-          <Executive data={exec.data} />
-        </Section>
-
-        <Section title="Alerts" subtitle="Privacy-safe anomaly detection">
-          <Alerts data={alerts.data} />
-        </Section>
-
-        <Section
-          title="Enterprise Operations · Alert Center"
-          subtitle="Full incident lifecycle: acknowledge, resolve, mute, tag, note"
-        >
-          <AlertCenter
-            data={lifecycles.data?.lifecycles}
-            onAction={async (payload) => {
-              await alertActionFn({ data: payload });
-              await lifecycles.refetch();
-            }}
-            onSnapshot={async () => {
-              await alertSnapshotFn({ data: { days } });
-              await lifecycles.refetch();
-            }}
-          />
-        </Section>
-
-        <Section
-          title="Enterprise Operations · Intelligence Audit"
-          subtitle="Every classification is stamped with engine, rules, weights & config hash"
-        >
-          <AuditPanel data={audit.data} />
-        </Section>
-
-        <Section
-          title="Alert Ops Metrics"
-          subtitle="MTTA / MTTR, noisy alerts, recurring incidents, correlated incidents"
-        >
-          <AlertOpsPanel data={alertOps.data} />
-        </Section>
-
-        <Section
-          title="Audit Verification & Version History"
-          subtitle="Append-only integrity checks + chronological engine timeline"
-        >
-          <AuditVerificationPanel data={auditOps.data} />
-        </Section>
-
-        <Section
-          title="Rule Sandbox"
-          subtitle="Simulate rule changes safely against historical sessions — production scoring never changes"
-        >
-          <RuleSandboxPanel days={days} />
-        </Section>
-
-
-
-        <Section
-          title="Intelligence Validation"
-          subtitle="Self-audit: averages, confidence & risk distributions, false-flag candidates"
-        >
-          <Validation data={validation.data} />
-        </Section>
-
         <Section title="Traffic Overview">
           <KPIRow data={overview.data} />
-        </Section>
-
-        <Section
-          title="Intelligence Analyst"
-          subtitle="Auto-generated insights, quality score & segments"
-        >
-          <Intelligence data={intel.data} />
-        </Section>
-
-        <Section
-          title="Historical Trends"
-          subtitle="Daily quality, human likelihood, conversions & errors"
-        >
-          <Trends data={trends.data} />
-        </Section>
-
-        <Section title="Real-Time Command Room" subtitle="Live visitors · classified in real time">
-          <RealtimeCommandRoom data={rtIntel.data} />
         </Section>
 
         <div className="grid gap-6 lg:grid-cols-2">
@@ -400,26 +165,11 @@ function CommandCenter() {
           </Section>
         </div>
 
-        <Section
-          title="Source Intelligence"
-          subtitle="Quality, conversion & human likelihood by channel"
-        >
-          <SourceIntel rows={sourceIntel.data} />
-        </Section>
-
-        <Section
-          title="Visitor Investigation Console"
-          subtitle="Filter, inspect and export per-session intelligence"
-        >
-          <Filters data={visitors.data} filters={filters} setFilters={setFilters} />
-          <VisitorList rows={visitors.data} filters={filters} />
-        </Section>
-
         <div className="grid gap-6 lg:grid-cols-2">
           <Section title="Traffic Sources">
             <TrafficSources rows={sources.data} />
           </Section>
-          <Section title="Traffic Quality">
+          <Section title="Traffic Quality" subtitle="Heuristic classification of session engagement">
             <Quality q={qf.data?.quality} />
           </Section>
         </div>
@@ -428,7 +178,7 @@ function CommandCenter() {
           <Section title="Geography">
             <Geography data={geo.data} />
           </Section>
-          <Section title="Device Intelligence">
+          <Section title="Devices">
             <DeviceBreakdown data={dev.data} />
           </Section>
         </div>
@@ -446,7 +196,7 @@ function CommandCenter() {
           </Section>
         </div>
 
-        <Section title="SEO Intelligence" subtitle="Google Search Console">
+        <Section title="SEO" subtitle="Google Search Console">
           <SEO sites={gscSites.data} perf={gscPerf.data} />
         </Section>
       </main>
@@ -486,6 +236,10 @@ function KPI({ label, value, sub }: { label: string; value: React.ReactNode; sub
   );
 }
 
+function Skeleton() {
+  return <div className="h-24 animate-pulse rounded-md bg-muted" />;
+}
+
 function KPIRow({ data }: { data?: Awaited<ReturnType<typeof getTrafficOverview>> }) {
   if (!data) return <Skeleton />;
   const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
@@ -498,7 +252,10 @@ function KPIRow({ data }: { data?: Awaited<ReturnType<typeof getTrafficOverview>
       <KPI label="Downloads" value={data.downloads} />
       <KPI label="Conv. rate" value={pct(data.conversionRate)} sub="download / session" />
       <KPI label="Engagement" value={pct(data.engagementRate)} />
-      <KPI label="Avg. session" value={`${Math.round(data.avgSessionMs / 1000)}s`} />
+      <KPI
+        label="Avg session"
+        value={`${Math.round((data.avgSessionMs ?? 0) / 1000)}s`}
+      />
     </div>
   );
 }
@@ -506,23 +263,19 @@ function KPIRow({ data }: { data?: Awaited<ReturnType<typeof getTrafficOverview>
 function Realtime({ data }: { data?: Awaited<ReturnType<typeof getRealtime>> }) {
   if (!data) return <Skeleton />;
   return (
-    <div>
-      <div className="flex items-center gap-3">
-        <div className="text-4xl font-bold tabular-nums">{data.active}</div>
-        <div className="text-sm text-muted-foreground">active visitors</div>
-        <span className="ml-auto inline-flex h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+    <div className="space-y-2">
+      <div className="text-sm">
+        <strong className="tabular-nums">{data.active}</strong> active sessions
       </div>
-      <div className="mt-4">
-        <h3 className="text-xs font-medium text-muted-foreground">Top current pages</h3>
-        <ul className="mt-2 space-y-1 text-sm">
-          {data.topPaths.map(([p, n]) => (
-            <li key={p} className="flex justify-between">
-              <span className="truncate">{p}</span>
-              <span className="tabular-nums text-muted-foreground">{n}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <ul className="max-h-64 space-y-1 overflow-auto text-xs">
+        {data.recent.map((r, i) => (
+          <li key={i} className="flex justify-between gap-2 border-b border-border/50 py-1">
+            <span className="truncate">{r.name}</span>
+            <span className="truncate text-muted-foreground">{r.path ?? "-"}</span>
+            <span className="text-muted-foreground">{r.country ?? "??"}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -530,67 +283,51 @@ function Realtime({ data }: { data?: Awaited<ReturnType<typeof getRealtime>> }) 
 function Funnel({
   funnel,
 }: {
-  funnel?: {
-    visited: number;
-    uploaded: number;
-    enhanceStarted: number;
-    enhanceCompleted: number;
-    downloaded: number;
-  };
+  funnel?: Awaited<ReturnType<typeof getQualityAndFunnel>>["funnel"];
 }) {
   if (!funnel) return <Skeleton />;
-  const steps = [
+  const rows: [string, number][] = [
     ["Visited", funnel.visited],
     ["Uploaded", funnel.uploaded],
     ["Enhance started", funnel.enhanceStarted],
     ["Enhance completed", funnel.enhanceCompleted],
     ["Downloaded", funnel.downloaded],
-  ] as const;
-  const max = Math.max(1, funnel.visited);
+  ];
+  const top = rows[0][1] || 1;
   return (
-    <ul className="space-y-2">
-      {steps.map(([label, n], i) => {
-        const pct = (n / max) * 100;
-        const prev = i > 0 ? Number(steps[i - 1][1]) : n;
-        const dropRate = prev ? 1 - n / prev : 0;
-        return (
-          <li key={label}>
-            <div className="mb-1 flex justify-between text-sm">
-              <span>{label}</span>
-              <span className="tabular-nums text-muted-foreground">
-                {n}{" "}
-                {i > 0 && dropRate > 0 && (
-                  <em className="text-orange-500">-{(dropRate * 100).toFixed(0)}%</em>
-                )}
-              </span>
-            </div>
-            <div className="h-2 overflow-hidden rounded bg-muted">
-              <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
-            </div>
-          </li>
-        );
-      })}
+    <ul className="space-y-1 text-sm">
+      {rows.map(([label, n]) => (
+        <li key={label} className="grid grid-cols-[10rem_1fr_3rem] items-center gap-2">
+          <span>{label}</span>
+          <div className="h-2 rounded bg-muted">
+            <div
+              className="h-2 rounded bg-primary"
+              style={{ width: `${Math.min(100, (n / top) * 100)}%` }}
+            />
+          </div>
+          <span className="tabular-nums text-right">{n}</span>
+        </li>
+      ))}
     </ul>
   );
 }
 
 function TrafficSources({ rows }: { rows?: Awaited<ReturnType<typeof getTrafficSources>> }) {
   if (!rows) return <Skeleton />;
-  if (rows.length === 0) return <Empty msg="No traffic yet. Events appear as visitors arrive." />;
   return (
     <table className="w-full text-sm">
-      <thead className="text-left text-xs text-muted-foreground">
+      <thead className="text-left text-xs uppercase text-muted-foreground">
         <tr>
-          <th className="pb-2">Source</th>
+          <th>Source</th>
           <th>Users</th>
           <th>Enhanced</th>
           <th>Conv.</th>
         </tr>
       </thead>
       <tbody>
-        {rows.map((r) => (
-          <tr key={r.source} className="border-t border-border">
-            <td className="py-2 capitalize">{r.source}</td>
+        {rows.slice(0, 15).map((r) => (
+          <tr key={r.source} className="border-t border-border/50">
+            <td className="py-1">{r.source}</td>
             <td className="tabular-nums">{r.users}</td>
             <td className="tabular-nums">{r.enhanced}</td>
             <td className="tabular-nums">{(r.conversionRate * 100).toFixed(1)}%</td>
@@ -601,86 +338,42 @@ function TrafficSources({ rows }: { rows?: Awaited<ReturnType<typeof getTrafficS
   );
 }
 
-function Quality({
-  q,
-}: {
-  q?: { human: number; review: number; suspicious: number; total: number };
-}) {
+function Quality({ q }: { q?: Awaited<ReturnType<typeof getQualityAndFunnel>>["quality"] }) {
   if (!q) return <Skeleton />;
-  if (q.total === 0) return <Empty msg="No sessions yet." />;
-  const seg = (n: number, cls: string) => (
-    <div className={`h-8 ${cls}`} style={{ width: `${(n / q.total) * 100}%` }} />
-  );
+  const total = q.total || 1;
+  const pct = (n: number) => `${((n / total) * 100).toFixed(1)}%`;
   return (
-    <div>
-      <div className="flex overflow-hidden rounded-md">
-        {seg(q.human, "bg-emerald-500")}
-        {seg(q.review, "bg-amber-500")}
-        {seg(q.suspicious, "bg-red-500")}
-      </div>
-      <ul className="mt-3 grid grid-cols-3 gap-2 text-sm">
-        <li>
-          <span className="text-emerald-500">●</span> Likely human · <b>{q.human}</b>
-        </li>
-        <li>
-          <span className="text-amber-500">●</span> Needs review · <b>{q.review}</b>
-        </li>
-        <li>
-          <span className="text-red-500">●</span> Suspicious · <b>{q.suspicious}</b>
-        </li>
-      </ul>
-      <p className="mt-3 text-xs text-muted-foreground">
-        Heuristic score from UA signals, session depth, and meaningful interactions. Not a certainty
-        judgment — no user is uniquely identified.
-      </p>
+    <div className="grid grid-cols-3 gap-3 text-sm">
+      <KPI label="Engaged" value={q.human} sub={pct(q.human)} />
+      <KPI label="Casual" value={q.review} sub={pct(q.review)} />
+      <KPI label="Bounce/bot-like" value={q.suspicious} sub={pct(q.suspicious)} />
     </div>
   );
 }
 
 function Geography({ data }: { data?: Awaited<ReturnType<typeof getGeoBreakdown>> }) {
   if (!data) return <Skeleton />;
-  if (data.countries.length === 0) return <Empty msg="No geographic data yet." />;
-  const max = Math.max(1, ...data.countries.map((c) => c.users));
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <div>
-        <h3 className="mb-2 text-xs font-medium text-muted-foreground">Top countries</h3>
-        <ul className="space-y-1 text-sm">
-          {data.countries.slice(0, 10).map((c) => (
-            <li key={c.code} className="grid grid-cols-[3rem_1fr_2rem] items-center gap-2">
-              <span className="font-mono text-xs">{c.code}</span>
-              <div className="h-2 overflow-hidden rounded bg-muted">
-                <div className="h-full bg-primary" style={{ width: `${(c.users / max) * 100}%` }} />
-              </div>
-              <span className="text-right tabular-nums">{c.users}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div>
-        <h3 className="mb-2 text-xs font-medium text-muted-foreground">Languages</h3>
-        <ul className="space-y-1 text-sm">
-          {data.languages.slice(0, 8).map(([l, n]) => (
-            <li key={l} className="flex justify-between">
-              <span>{l}</span>
-              <span className="tabular-nums">{n}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+    <ul className="max-h-64 space-y-1 overflow-auto text-sm">
+      {data.countries.slice(0, 20).map((c) => (
+        <li key={c.code} className="flex justify-between border-b border-border/50 py-1">
+          <span>{c.code}</span>
+          <span className="tabular-nums">{c.users}</span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
 function DeviceBreakdown({ data }: { data?: Awaited<ReturnType<typeof getDeviceBreakdown>> }) {
   if (!data) return <Skeleton />;
-  const Row = ({ title, rows }: { title: string; rows: { label: string; users: number }[] }) => (
+  const Block = ({ title, rows }: { title: string; rows: { label: string; users: number }[] }) => (
     <div>
-      <h3 className="mb-2 text-xs font-medium text-muted-foreground">{title}</h3>
+      <h3 className="mb-1 text-xs uppercase text-muted-foreground">{title}</h3>
       <ul className="space-y-1 text-sm">
         {rows.slice(0, 6).map((r) => (
-          <li key={r.label} className="flex justify-between">
-            <span>{r.label}</span>
+          <li key={r.label} className="flex justify-between border-b border-border/50 py-1">
+            <span className="truncate">{r.label}</span>
             <span className="tabular-nums">{r.users}</span>
           </li>
         ))}
@@ -688,25 +381,21 @@ function DeviceBreakdown({ data }: { data?: Awaited<ReturnType<typeof getDeviceB
     </div>
   );
   return (
-    <div className="grid gap-4 md:grid-cols-3">
-      <Row title="Device" rows={data.device_type} />
-      <Row title="OS" rows={data.os} />
-      <Row title="Browser" rows={data.browser} />
+    <div className="grid grid-cols-3 gap-4">
+      <Block title="Device" rows={data.device_type} />
+      <Block title="OS" rows={data.os} />
+      <Block title="Browser" rows={data.browser} />
     </div>
   );
 }
 
 function Journeys({ rows }: { rows?: Awaited<ReturnType<typeof getJourneys>> }) {
   if (!rows) return <Skeleton />;
-  if (rows.length === 0) return <Empty msg="No journeys yet." />;
   return (
-    <ul className="space-y-2 text-sm">
-      {rows.map((r) => (
-        <li
-          key={r.signature}
-          className="flex items-center justify-between border-b border-border pb-2 last:border-b-0"
-        >
-          <span className="font-mono text-xs">{r.signature}</span>
+    <ul className="space-y-1 text-sm">
+      {rows.slice(0, 15).map((r, i) => (
+        <li key={i} className="flex justify-between gap-4 border-b border-border/50 py-1">
+          <span className="truncate">{r.signature}</span>
           <span className="tabular-nums text-muted-foreground">{r.sessions}</span>
         </li>
       ))}
@@ -714,1842 +403,67 @@ function Journeys({ rows }: { rows?: Awaited<ReturnType<typeof getJourneys>> }) 
   );
 }
 
-interface VitalMetric {
-  p75: number;
-  good: number;
-  needsImprovement: number;
-  poor: number;
-}
-function Vitals({ data }: { data?: { metrics?: Record<string, VitalMetric> } }) {
-  if (!data?.metrics) return <Skeleton />;
-  const names = ["LCP", "CLS", "INP", "FCP", "TTFB"] as const;
+function Vitals({ data }: { data?: { lcp?: number; cls?: number; inp?: number } | null }) {
+  if (!data) return <Skeleton />;
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-      {names.map((n) => {
-        const m = data.metrics?.[n];
-        if (!m) return null;
-        const rating =
-          m.poor > m.good ? "poor" : m.needsImprovement > m.good ? "needs-improvement" : "good";
-        const cls =
-          rating === "good"
-            ? "text-emerald-500"
-            : rating === "poor"
-              ? "text-red-500"
-              : "text-amber-500";
-        return (
-          <KPI
-            key={n}
-            label={n}
-            value={
-              <span className={cls}>
-                {n === "CLS" ? m.p75.toFixed(2) : `${Math.round(m.p75)}ms`}
-              </span>
-            }
-          />
-        );
-      })}
+    <div className="grid grid-cols-3 gap-3 text-sm">
+      <KPI label="LCP (p75)" value={`${Math.round(data.lcp ?? 0)}ms`} />
+      <KPI label="CLS (p75)" value={(data.cls ?? 0).toFixed(3)} />
+      <KPI label="INP (p75)" value={`${Math.round(data.inp ?? 0)}ms`} />
     </div>
   );
 }
 
-interface Reliability {
-  requests: number;
-  success: number;
-  failure: number;
-  successRate: number;
-  p95DurationMs: number;
-  errors: Record<string, number>;
-}
-function Reliability({ data }: { data?: { reliability?: Reliability } }) {
+function Reliability({
+  data,
+}: {
+  data?: {
+    reliability?: {
+      requests?: number;
+      successes?: number;
+      failures?: number;
+      successRate?: number;
+    };
+  } | null;
+}) {
   if (!data?.reliability) return <Skeleton />;
   const r = data.reliability;
   return (
-    <div>
-      <div className="grid grid-cols-4 gap-3">
-        <KPI label="Requests" value={r.requests} />
-        <KPI label="Success" value={`${(r.successRate * 100).toFixed(1)}%`} />
-        <KPI label="Failures" value={r.failure} />
-        <KPI label="p95" value={`${r.p95DurationMs}ms`} />
-      </div>
-      {Object.keys(r.errors).length > 0 && (
-        <ul className="mt-3 space-y-1 text-sm">
-          {Object.entries(r.errors).map(([code, n]) => (
-            <li key={code} className="flex justify-between">
-              <span className="font-mono text-xs">{code}</span>
-              <span className="tabular-nums text-red-500">{n}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="grid grid-cols-4 gap-3 text-sm">
+      <KPI label="Requests" value={r.requests ?? 0} />
+      <KPI label="Success" value={r.successes ?? 0} />
+      <KPI label="Failures" value={r.failures ?? 0} />
+      <KPI
+        label="Success rate"
+        value={`${((r.successRate ?? 0) * 100).toFixed(2)}%`}
+      />
     </div>
   );
 }
 
-interface GscSites {
-  connected: boolean;
-  sites: { siteUrl: string }[];
-}
-interface GscPerf {
-  totals: { clicks?: number; impressions?: number; ctr?: number; position?: number } | null;
-  byQuery: {
-    keys?: string[];
-    clicks?: number;
-    impressions?: number;
-    ctr?: number;
-    position?: number;
-  }[];
-  byPage: { keys?: string[]; clicks?: number; impressions?: number }[];
-}
-function SEO({ sites, perf }: { sites?: GscSites; perf?: GscPerf | null }) {
-  const connected = sites?.connected;
-  const site = sites?.sites?.[0]?.siteUrl;
-  if (!connected)
-    return (
-      <Empty msg="Search Console is linked but no verified property was found. Verify your domain in Search Console." />
-    );
-  if (!site) return <Empty msg="No verified properties." />;
+function SEO({
+  sites,
+  perf,
+}: {
+  sites?: Awaited<ReturnType<typeof listGscSites>>;
+  perf?: Awaited<ReturnType<typeof getGscPerformance>> | null;
+}) {
+  if (!sites) return <Skeleton />;
+  if (!sites.sites?.length)
+    return <div className="text-sm text-muted-foreground">No Search Console sites connected.</div>;
   if (!perf) return <Skeleton />;
-  const t = perf.totals ?? { clicks: 0, impressions: 0, ctr: 0, position: 0 };
+  const rows = (perf as { rows?: { keys?: string[]; clicks?: number; impressions?: number }[] })
+    .rows;
   return (
-    <div>
-      <div className="mb-3 text-xs text-muted-foreground">
-        Property: <span className="font-mono">{site}</span>
-      </div>
-      <div className="grid grid-cols-4 gap-3">
-        <KPI label="Clicks" value={t.clicks ?? 0} />
-        <KPI label="Impressions" value={t.impressions ?? 0} />
-        <KPI label="CTR" value={`${((t.ctr ?? 0) * 100).toFixed(2)}%`} />
-        <KPI label="Position" value={(t.position ?? 0).toFixed(1)} />
-      </div>
-      <div className="mt-4 grid gap-4 md:grid-cols-2">
-        <div>
-          <h3 className="mb-2 text-xs font-medium text-muted-foreground">Top queries</h3>
-          <ul className="space-y-1 text-sm">
-            {(perf.byQuery ?? []).slice(0, 10).map((row, i) => (
-              <li key={i} className="flex justify-between gap-2">
-                <span className="truncate">{row.keys?.[0]}</span>
-                <span className="tabular-nums text-muted-foreground">
-                  {row.clicks} / {row.impressions}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <h3 className="mb-2 text-xs font-medium text-muted-foreground">Top pages</h3>
-          <ul className="space-y-1 text-sm">
-            {(perf.byPage ?? []).slice(0, 10).map((row, i) => (
-              <li key={i} className="flex justify-between gap-2">
-                <span className="truncate font-mono text-xs">{row.keys?.[0]}</span>
-                <span className="tabular-nums text-muted-foreground">
-                  {row.clicks} / {row.impressions}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Skeleton() {
-  return <div className="h-24 animate-pulse rounded-md bg-muted/50" />;
-}
-function Empty({ msg }: { msg: string }) {
-  return <p className="text-sm text-muted-foreground">{msg}</p>;
-}
-
-function Intelligence({ data }: { data?: Awaited<ReturnType<typeof getIntelligence>> }) {
-  if (!data) return <Skeleton />;
-  const o = data.overall;
-  if (o.sessions === 0) return <Empty msg="No sessions in this window yet." />;
-  const cls =
-    o.classification === "high"
-      ? "text-emerald-500"
-      : o.classification === "low"
-        ? "text-red-500"
-        : "text-amber-500";
-  const label =
-    o.classification === "high"
-      ? "High confidence human traffic"
-      : o.classification === "low"
-        ? "Low quality — investigate"
-        : "Mixed quality";
-  const segEntries = Object.entries(data.segments).sort((a, b) => b[1] - a[1]);
-  return (
-    <div className="space-y-5">
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-xl border border-border p-4">
-          <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-            Traffic Quality Score
-          </div>
-          <div className={`mt-1 text-4xl font-bold tabular-nums ${cls}`}>{o.score}/100</div>
-          <div className={`text-sm ${cls}`}>{label}</div>
-        </div>
-        <div className="rounded-xl border border-border p-4">
-          <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-            Human likelihood
-          </div>
-          <div className="mt-1 text-4xl font-bold tabular-nums text-emerald-500">
-            {(o.humanPct * 100).toFixed(0)}%
-          </div>
-          <div className="text-xs text-muted-foreground">
-            Automation likelihood {(o.automationPct * 100).toFixed(0)}%
-          </div>
-        </div>
-        <div className="rounded-xl border border-border p-4">
-          <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-            Quality distribution
-          </div>
-          <div className="mt-2 flex overflow-hidden rounded-md">
-            <div
-              className="h-6 bg-emerald-500"
-              style={{ width: `${(data.distribution.high / o.sessions) * 100}%` }}
-            />
-            <div
-              className="h-6 bg-amber-500"
-              style={{ width: `${(data.distribution.medium / o.sessions) * 100}%` }}
-            />
-            <div
-              className="h-6 bg-red-500"
-              style={{ width: `${(data.distribution.low / o.sessions) * 100}%` }}
-            />
-          </div>
-          <div className="mt-2 flex justify-between text-xs text-muted-foreground">
-            <span>High {data.distribution.high}</span>
-            <span>Med {data.distribution.medium}</span>
-            <span>Low {data.distribution.low}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <h3 className="mb-2 text-xs font-medium text-muted-foreground">User segments</h3>
-          <ul className="space-y-1 text-sm">
-            {segEntries.map(([name, n]) => (
-              <li key={name} className="flex justify-between">
-                <span>{name}</span>
-                <span className="tabular-nums text-muted-foreground">{n}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <h3 className="mb-2 text-xs font-medium text-muted-foreground">Top quality signals</h3>
-          <ul className="space-y-1 text-sm">
-            {data.topReasons.length === 0 && (
-              <li className="text-muted-foreground">No signals aggregated yet.</li>
-            )}
-            {data.topReasons.map((r) => (
-              <li key={r.reason} className="flex justify-between">
-                <span>{r.reason}</span>
-                <span className="tabular-nums text-muted-foreground">{r.count}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      {data.insights.length > 0 && (
-        <div>
-          <h3 className="mb-2 text-xs font-medium text-muted-foreground">Automated insights</h3>
-          <ul className="space-y-2 text-sm">
-            {data.insights.map((line, i) => (
-              <li
-                key={i}
-                className="rounded-md border border-border bg-muted/30 px-3 py-2 leading-relaxed"
-              >
-                {line}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <p className="text-xs text-muted-foreground">
-        Retention cohorts (D1/D7/D30): <span className="text-foreground">Not computed.</span>{" "}
-        {data.retention.note}
-      </p>
-    </div>
-  );
-}
-
-function RealtimeCommandRoom({
-  data,
-}: {
-  data?: Awaited<ReturnType<typeof getRealtimeIntelligence>>;
-}) {
-  if (!data) return <Skeleton />;
-  if (data.active === 0) return <Empty msg="No live visitors right now." />;
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <KPI label="Active now" value={data.active} sub={`${data.windowSeconds}s window`} />
-        <KPI
-          label="Human likely"
-          value={<span className="text-emerald-500">{data.humanLikely}</span>}
-        />
-        <KPI label="Unknown" value={<span className="text-amber-500">{data.unknown}</span>} />
-        <KPI label="Suspicious" value={<span className="text-red-500">{data.suspicious}</span>} />
-      </div>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <KPI label="Uploading" value={data.currentlyUploading} />
-        <KPI label="Enhancing" value={data.currentlyEnhancing} />
-        <KPI label="Downloading" value={data.currentlyDownloading} />
-        <KPI label="Exploring" value={data.currentlyExploring} />
-      </div>
-      <div className="grid gap-4 md:grid-cols-3 text-sm">
-        <MiniList title="By country" rows={data.byCountry.map((c) => [c.code, c.n] as const)} />
-        <MiniList title="By device" rows={data.byDevice.map((c) => [c.device, c.n] as const)} />
-        <MiniList title="By source" rows={data.bySource.map((c) => [c.source, c.n] as const)} />
-      </div>
-    </div>
-  );
-}
-
-function MiniList({ title, rows }: { title: string; rows: (readonly [string, number])[] }) {
-  return (
-    <div>
-      <h3 className="mb-2 text-xs font-medium text-muted-foreground">{title}</h3>
-      <ul className="space-y-1">
-        {rows.length === 0 && <li className="text-muted-foreground">—</li>}
-        {rows.map(([k, n]) => (
-          <li key={k} className="flex justify-between">
-            <span className="truncate">{k}</span>
-            <span className="tabular-nums text-muted-foreground">{n}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function SourceIntel({ rows }: { rows?: Awaited<ReturnType<typeof getSourceIntelligence>> }) {
-  if (!rows) return <Skeleton />;
-  if (rows.length === 0) return <Empty msg="No source data yet." />;
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="text-left text-xs text-muted-foreground">
-          <tr>
-            <th className="pb-2">Source</th>
-            <th>Sessions</th>
-            <th>Human</th>
-            <th>Automation</th>
-            <th>Quality</th>
-            <th>Intent</th>
-            <th>Activation</th>
-            <th>Conv.</th>
-            <th>Top segment</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.source} className="border-t border-border">
-              <td className="py-2 capitalize">{r.source}</td>
-              <td className="tabular-nums">{r.sessions}</td>
-              <td className="tabular-nums text-emerald-500">{(r.humanPct * 100).toFixed(0)}%</td>
-              <td className="tabular-nums text-red-500">{(r.automationPct * 100).toFixed(0)}%</td>
-              <td className="tabular-nums">{r.avgQuality}</td>
-              <td className="tabular-nums">{r.avgIntent}</td>
-              <td className="tabular-nums">{(r.activationRate * 100).toFixed(1)}%</td>
-              <td className="tabular-nums">{(r.conversionRate * 100).toFixed(1)}%</td>
-              <td className="text-xs text-muted-foreground">
-                {r.topSegments.map((s) => `${s.segment} (${s.n})`).join(", ")}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-type FilterState = {
-  source: string;
-  device: string;
-  country: string;
-  segment: string;
-  quality: string;
-};
-
-function applyFilters(rows: Awaited<ReturnType<typeof getVisitorTimelines>>, f: FilterState) {
-  return rows.filter((v) => {
-    const c = v.classification;
-    if (f.source && (c.source ?? "unknown") !== f.source) return false;
-    if (f.device && (c.device ?? "unknown") !== f.device) return false;
-    if (f.country && (c.country ?? "??") !== f.country) return false;
-    if (f.segment && c.segment !== f.segment) return false;
-    if (f.quality === "high" && c.qualityScore < 70) return false;
-    if (f.quality === "medium" && (c.qualityScore < 40 || c.qualityScore >= 70)) return false;
-    if (f.quality === "low" && c.qualityScore >= 40) return false;
-    if (f.quality === "suspicious" && c.humanProbability > 0.4) return false;
-    return true;
-  });
-}
-
-function Filters({
-  data,
-  filters,
-  setFilters,
-}: {
-  data?: Awaited<ReturnType<typeof getVisitorTimelines>>;
-  filters: FilterState;
-  setFilters: (f: FilterState) => void;
-}) {
-  const uniq = (
-    fn: (v: Awaited<ReturnType<typeof getVisitorTimelines>>[number]) => string | null,
-  ) => {
-    const s = new Set<string>();
-    (data ?? []).forEach((v) => {
-      const val = fn(v);
-      if (val) s.add(val);
-    });
-    return Array.from(s).sort();
-  };
-  const sources = uniq((v) => v.classification.source);
-  const devices = uniq((v) => v.classification.device);
-  const countries = uniq((v) => v.classification.country);
-  const segments = uniq((v) => v.classification.segment);
-  const set = (k: keyof FilterState, val: string) => setFilters({ ...filters, [k]: val });
-  const Sel = ({ k, opts, label }: { k: keyof FilterState; opts: string[]; label: string }) => (
-    <label className="flex items-center gap-1 text-xs">
-      <span className="text-muted-foreground">{label}</span>
-      <select
-        value={filters[k]}
-        onChange={(e) => set(k, e.target.value)}
-        className="rounded-md border border-input bg-background px-2 py-1 text-xs"
-      >
-        <option value="">All</option>
-        {opts.map((o) => (
-          <option key={o} value={o}>
-            {o}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-  return (
-    <div className="mb-3 flex flex-wrap items-center gap-2">
-      <Sel k="source" opts={sources} label="Source" />
-      <Sel k="device" opts={devices} label="Device" />
-      <Sel k="country" opts={countries} label="Country" />
-      <Sel k="segment" opts={segments} label="Segment" />
-      <Sel k="quality" opts={["high", "medium", "low", "suspicious"]} label="Quality" />
-      <button
-        onClick={() =>
-          setFilters({ source: "", device: "", country: "", segment: "", quality: "" })
-        }
-        className="rounded-md border border-input px-2 py-1 text-xs hover:bg-accent"
-      >
-        Reset
-      </button>
-      <span className="ml-auto text-xs text-muted-foreground">
-        Showing {data ? applyFilters(data, filters).length : 0} / {data?.length ?? 0}
-      </span>
-    </div>
-  );
-}
-
-function VisitorList({
-  rows,
-  filters,
-}: {
-  rows?: Awaited<ReturnType<typeof getVisitorTimelines>>;
-  filters?: FilterState;
-}) {
-  if (!rows) return <Skeleton />;
-  const shown = filters ? applyFilters(rows, filters) : rows;
-  if (shown.length === 0) return <Empty msg="No visitor sessions match the current filters." />;
-  return (
-    <ul className="space-y-3">
-      {shown.map((v) => (
-        <VisitorRow key={v.classification.session_id} v={v} />
-      ))}
-    </ul>
-  );
-}
-
-function Executive({ data }: { data?: Awaited<ReturnType<typeof getExecutive>> }) {
-  if (!data) return <Skeleton />;
-  return (
-    <div className="space-y-3">
-      <p className="text-lg font-semibold">{data.headline}</p>
-      <ul className="space-y-1 text-sm">
-        {data.bullets.map((b, i) => (
-          <li key={i} className="rounded-md border border-border bg-muted/30 px-3 py-2">
-            {b}
-          </li>
-        ))}
-      </ul>
-      <div className="grid gap-3 text-sm md:grid-cols-2 lg:grid-cols-4">
-        <KPI
-          label="Top source (conv.)"
-          value={data.topPerformingSource?.source ?? "—"}
-          sub={
-            data.topPerformingSource
-              ? `${(data.topPerformingSource.conversionRate * 100).toFixed(1)}%`
-              : undefined
-          }
-        />
-        <KPI
-          label="Top country"
-          value={data.topCountry?.code ?? "—"}
-          sub={data.topCountry ? `${data.topCountry.sessions} sessions` : undefined}
-        />
-        <KPI
-          label="Top browser"
-          value={data.topBrowser?.name ?? "—"}
-          sub={data.topBrowser ? `${data.topBrowser.sessions} sessions` : undefined}
-        />
-        <KPI
-          label="Best landing"
-          value={<span className="font-mono text-sm">{data.bestPage?.path ?? "—"}</span>}
-          sub={data.bestPage ? `${data.bestPage.sessions} sessions` : undefined}
-        />
-      </div>
-      {data.suspiciousPatterns.length > 0 && (
-        <div>
-          <h3 className="mb-1 text-xs font-medium text-muted-foreground">Suspicious patterns</h3>
-          <ul className="space-y-1 text-sm">
-            {data.suspiciousPatterns.map((p, i) => (
-              <li key={i} className="text-red-500">
-                • {p}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function Alerts({ data }: { data?: Awaited<ReturnType<typeof getAlerts>> }) {
-  if (!data) return <Skeleton />;
-  if (data.length === 0)
-    return <Empty msg="No active alerts. System is within normal operating ranges." />;
-  return (
-    <ul className="space-y-2 text-sm">
-      {data.map((a) => {
-        const cls =
-          a.severity === "critical"
-            ? "border-red-500/50 bg-red-500/10 text-red-400"
-            : a.severity === "warning"
-              ? "border-amber-500/50 bg-amber-500/10 text-amber-400"
-              : "border-border bg-muted/30";
-        return (
-          <li key={a.id} className={`rounded-md border px-3 py-2 ${cls}`}>
-            <div className="text-xs uppercase tracking-wide">{a.severity}</div>
-            <div className="font-medium">{a.title}</div>
-            <div className="text-xs opacity-90">{a.detail}</div>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
-function Trends({ data }: { data?: Awaited<ReturnType<typeof getTrends>> }) {
-  if (!data) return <Skeleton />;
-  if (data.points.length === 0) return <Empty msg="No trend data yet." />;
-  const maxQ = Math.max(1, ...data.points.map((p) => p.quality));
-  const maxS = Math.max(1, ...data.points.map((p) => p.sessions));
-  const dirCls =
-    data.direction === "up"
-      ? "text-emerald-500"
-      : data.direction === "down"
-        ? "text-red-500"
-        : "text-muted-foreground";
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-3 text-sm">
-        <span>Direction:</span>
-        <span className={`font-medium ${dirCls}`}>
-          {data.direction} ({data.changePct}%)
-        </span>
-        <span className="ml-auto text-xs text-muted-foreground">
-          Forecast (next day, trailing mean): {data.forecastQualityNextDay ?? "—"}
-        </span>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-xs">
-          <thead className="text-left text-muted-foreground">
-            <tr>
-              <th className="pb-1">Date</th>
-              <th>Sessions</th>
-              <th>Quality</th>
-              <th>MA(3)</th>
-              <th>Human</th>
-              <th>Uploads</th>
-              <th>Downloads</th>
-              <th>Errors</th>
-              <th className="w-40">Quality bar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.points.map((p, i) => (
-              <tr key={p.date} className="border-t border-border">
-                <td className="py-1 font-mono">{p.date}</td>
-                <td className="tabular-nums">{p.sessions}</td>
-                <td className="tabular-nums">{p.quality}</td>
-                <td className="tabular-nums">{data.movingAverage[i]}</td>
-                <td className="tabular-nums">{(p.humanPct * 100).toFixed(0)}%</td>
-                <td className="tabular-nums">{p.uploads}</td>
-                <td className="tabular-nums">{p.downloads}</td>
-                <td className="tabular-nums">{p.errors}</td>
-                <td>
-                  <div className="flex h-2 gap-[1px]">
-                    <div
-                      className="bg-primary"
-                      style={{ width: `${(p.quality / maxQ) * 60}px`, height: 8 }}
-                    />
-                    <div
-                      className="bg-muted-foreground/50"
-                      style={{ width: `${(p.sessions / maxS) * 60}px`, height: 8 }}
-                    />
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p className="text-xs text-muted-foreground">{data.forecastNote}</p>
-    </div>
-  );
-}
-
-function VisitorRow({ v }: { v: Awaited<ReturnType<typeof getVisitorTimelines>>[number] }) {
-  const [open, setOpen] = useState(false);
-  const c = v.classification;
-  const confCls =
-    c.confidence === "high"
-      ? "text-emerald-500"
-      : c.confidence === "low"
-        ? "text-red-500"
-        : "text-amber-500";
-  const humanCls =
-    c.humanProbability >= 0.7
-      ? "text-emerald-500"
-      : c.humanProbability <= 0.3
-        ? "text-red-500"
-        : "text-amber-500";
-  const shortId = c.session_id.slice(0, 8);
-  const dur = Math.round(c.duration_ms / 1000);
-  return (
-    <li className="rounded-lg border border-border">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="flex w-full flex-wrap items-center gap-3 px-3 py-2 text-left text-sm hover:bg-accent/50"
-      >
-        <span className="font-mono text-xs text-muted-foreground">#{shortId}</span>
-        <span className="font-medium">{c.segment}</span>
-        <span className={`tabular-nums ${humanCls}`}>
-          Human {(c.humanProbability * 100).toFixed(0)}%
-        </span>
-        <span className={`text-xs ${confCls}`}>({c.confidence} conf.)</span>
-        <span className="tabular-nums text-muted-foreground">Q {c.qualityScore}</span>
-        <span className="tabular-nums text-muted-foreground">Intent {c.intentScore}</span>
-        <span
-          className={`text-[10px] uppercase ${c.riskLevel === "high" ? "text-red-500" : c.riskLevel === "medium" ? "text-amber-500" : "text-muted-foreground"}`}
-        >
-          risk: {c.riskLevel}
-        </span>
-        <span className="ml-auto text-xs text-muted-foreground">
-          {c.device ?? "?"} · {c.country ?? "??"} · {c.source ?? "?"} · {c.events} events · {dur}s
-        </span>
-      </button>
-      {open && (
-        <div className="grid gap-4 border-t border-border p-3 md:grid-cols-2 lg:grid-cols-3">
-          <div>
-            <h4 className="mb-2 text-xs font-medium text-muted-foreground">Evidence</h4>
-            <ul className="space-y-1 text-xs">
-              {c.evidence.map((e, i) => (
-                <li key={i} className="flex justify-between gap-2">
-                  <span
-                    className={e.direction === "positive" ? "text-emerald-500" : "text-red-500"}
-                  >
-                    {e.direction === "positive" ? "✓" : "✗"} {e.signal}
-                  </span>
-                  <span className="tabular-nums text-muted-foreground">±{e.weight}</span>
-                </li>
-              ))}
-              {c.evidence.length === 0 && (
-                <li className="text-muted-foreground">No evidence beyond baseline.</li>
-              )}
-            </ul>
-            {(c.rageClicks > 0 || c.deadClicks > 0) && (
-              <p className="mt-2 text-xs text-red-500">
-                Rage clicks: {c.rageClicks} · Dead clicks: {c.deadClicks}
-              </p>
-            )}
-          </div>
-          <div>
-            <h4 className="mb-2 text-xs font-medium text-muted-foreground">Behavior summary</h4>
-            {c.summary ? (
-              <SummaryPanel s={c.summary} />
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                No behavior summary captured (visitor didn&apos;t reach page-hide).
-              </p>
-            )}
-          </div>
-          <div>
-            <h4 className="mb-2 text-xs font-medium text-muted-foreground">Timeline</h4>
-            <ol className="space-y-1 text-xs">
-              {v.timeline.map((t, i) => (
-                <li key={i} className="grid grid-cols-[4rem_1fr] gap-2">
-                  <span className="font-mono tabular-nums text-muted-foreground">
-                    {Math.round(t.offset_ms / 1000)}s
-                  </span>
-                  <span>
-                    <b>{t.name}</b>
-                    {t.path && <span className="text-muted-foreground"> · {t.path}</span>}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      )}
-    </li>
-  );
-}
-
-function SummaryPanel({ s }: { s: Record<string, number | string | boolean | null> }) {
-  const rows: [string, string | number][] = [];
-  const add = (label: string, val: string | number | boolean | null | undefined) => {
-    if (val === null || val === undefined || val === "") return;
-    rows.push([label, typeof val === "boolean" ? (val ? "yes" : "no") : val]);
-  };
-  add("Reading mode", s.readingMode as string);
-  add("Scroll max", s.scrollMaxPct != null ? `${s.scrollMaxPct}%` : null);
-  add("Scroll avg", s.scrollAvgPct != null ? `${s.scrollAvgPct}%` : null);
-  add("Mouse moves", s.mouseMoves as number);
-  add("Mouse speed CV", s.mouseSpeedStd as number);
-  add("Clicks", s.clickCount as number);
-  add("Click CV", s.clickIntervalCV as number);
-  add("Bursts", s.burstClicks as number);
-  add("Hover count", s.hoverCount as number);
-  add("Hover abandon", s.hoverAbandonRate as number);
-  add("Idle ms", s.idleMs as number);
-  add("Active ms", s.activeMs as number);
-  add("Longest active", s.longestActiveStreakMs as number);
-  add("Network", s.effectiveType as string);
-  add("RTT", s.rtt as number);
-  add("Downlink", s.downlink as number);
-  add("Offline transitions", s.offlineTransitions as number);
-  add("LCP", s.lcpMs as number);
-  add("INP", s.inpMs as number);
-  add("CLS", s.cls as number);
-  add("Long tasks", s.longTasks as number);
-  add("Memory MB", s.memoryUsedMb as number);
-  add("Webdriver", s.webdriver as boolean);
-  add("Touch", s.hasTouch as boolean);
-  add("Languages", s.languages as number);
-  add("HW concurrency", s.hardwareConcurrency as number);
-  return (
-    <ul className="space-y-1 text-xs">
-      {rows.map(([k, v]) => (
-        <li key={k} className="flex justify-between gap-2">
-          <span className="text-muted-foreground">{k}</span>
-          <span className="tabular-nums">{v}</span>
+    <ul className="max-h-64 space-y-1 overflow-auto text-sm">
+      {rows?.slice(0, 20).map((r, i) => (
+        <li key={i} className="flex justify-between gap-4 border-b border-border/50 py-1">
+          <span className="truncate">{r.keys?.[0]}</span>
+          <span className="tabular-nums text-muted-foreground">
+            {r.clicks} clicks / {r.impressions} impr
+          </span>
         </li>
       ))}
-      {rows.length === 0 && <li className="text-muted-foreground">Empty.</li>}
     </ul>
-  );
-}
-
-function Validation({ data }: { data?: Awaited<ReturnType<typeof getValidation>> }) {
-  if (!data) return <p className="text-sm text-muted-foreground">Loading validation…</p>;
-  if (data.sessions === 0)
-    return (
-      <p className="text-sm text-muted-foreground">
-        No sessions yet — validation unlocks with traffic.
-      </p>
-    );
-  const a = data.averages;
-  const pct = (n: number) => `${Math.round(n * 100)}%`;
-  const cd = data.confidenceDistribution;
-  const rd = data.riskDistribution;
-  const Cell = ({ label, value }: { label: string; value: string | number }) => (
-    <div className="rounded-md border border-border bg-card p-3">
-      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className="mt-1 text-lg font-semibold">{value}</div>
-    </div>
-  );
-  return (
-    <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <Cell label="Sessions" value={data.sessions} />
-        <Cell label="Avg quality" value={`${a.qualityScore}/100`} />
-        <Cell label="Avg human" value={pct(a.humanProbability)} />
-        <Cell label="Avg automation" value={pct(a.automationProbability)} />
-        <Cell label="Avg confidence" value={pct(a.confidence)} />
-        <Cell label="Evidence strength" value={a.evidenceStrength} />
-      </div>
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-md border border-border bg-card p-3">
-          <div className="mb-2 text-sm font-semibold">Confidence distribution</div>
-          <ul className="space-y-1 text-sm">
-            <li>High: {cd.high}</li>
-            <li>Medium: {cd.medium}</li>
-            <li>Low: {cd.low}</li>
-          </ul>
-        </div>
-        <div className="rounded-md border border-border bg-card p-3">
-          <div className="mb-2 text-sm font-semibold">Risk distribution</div>
-          <ul className="space-y-1 text-sm">
-            <li>High: {rd.high}</li>
-            <li>Medium: {rd.medium}</li>
-            <li>Low: {rd.low}</li>
-          </ul>
-        </div>
-      </div>
-      {(data.falsePositiveCandidates.length > 0 || data.falseNegativeCandidates.length > 0) && (
-        <div className="grid gap-4 lg:grid-cols-2">
-          {data.falsePositiveCandidates.length > 0 && (
-            <div className="rounded-md border border-border bg-card p-3">
-              <div className="mb-2 text-sm font-semibold">Possible false-positive bot flags</div>
-              <ul className="space-y-1 text-xs">
-                {data.falsePositiveCandidates.map((c) => (
-                  <li key={c.session_id} className="text-muted-foreground">
-                    <span className="font-mono text-foreground">{c.session_id.slice(0, 10)}</span> —{" "}
-                    {c.reason}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {data.falseNegativeCandidates.length > 0 && (
-            <div className="rounded-md border border-border bg-card p-3">
-              <div className="mb-2 text-sm font-semibold">Possibly over-trusted sessions</div>
-              <ul className="space-y-1 text-xs">
-                {data.falseNegativeCandidates.map((c) => (
-                  <li key={c.session_id} className="text-muted-foreground">
-                    <span className="font-mono text-foreground">{c.session_id.slice(0, 10)}</span> —{" "}
-                    {c.reason}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
-      {data.notes.length > 0 && (
-        <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-          {data.notes.map((n, i) => (
-            <li key={i}>{n}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-// ---------- Enterprise Operations · Alert Center ----------
-
-type AlertActionPayload = {
-  alertId: string;
-  type: "acknowledge" | "resolve" | "mute" | "unmute" | "note" | "tag" | "untag";
-  note?: string;
-  tag?: string;
-  mutedUntil?: string;
-};
-
-function AlertCenter({
-  data,
-  onAction,
-  onSnapshot,
-}: {
-  data?: AlertLifecycle[];
-  onAction: (p: AlertActionPayload) => Promise<void>;
-  onSnapshot: () => Promise<void>;
-}) {
-  const [statusFilter, setStatusFilter] = useState<AlertStatus | "all">("all");
-  const [severityFilter, setSeverityFilter] = useState<AlertSeverity | "all">("all");
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<AlertSort>("severity");
-  const [expanded, setExpanded] = useState<string | null>(null);
-
-  if (!data) return <Skeleton />;
-
-  const filtered = sortAlerts(
-    filterAlerts(data, { status: statusFilter, severity: severityFilter, search }),
-    sort,
-  );
-  const active = data.filter((a) => a.status === "active").length;
-  const acked = data.filter((a) => a.status === "acknowledged").length;
-  const resolved = data.filter((a) => a.status === "resolved").length;
-  const muted = data.filter((a) => a.status === "muted").length;
-
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <KPI label="Active" value={active} />
-        <KPI label="Acknowledged" value={acked} />
-        <KPI label="Resolved" value={resolved} />
-        <KPI label="Muted" value={muted} />
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        <input
-          placeholder="Search title, detail, tag…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="min-w-[200px] flex-1 rounded-md border border-input bg-background px-2 py-1"
-        />
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as AlertStatus | "all")}
-          className="rounded-md border border-input bg-background px-2 py-1"
-        >
-          <option value="all">All statuses</option>
-          <option value="active">Active</option>
-          <option value="acknowledged">Acknowledged</option>
-          <option value="resolved">Resolved</option>
-          <option value="muted">Muted</option>
-        </select>
-        <select
-          value={severityFilter}
-          onChange={(e) => setSeverityFilter(e.target.value as AlertSeverity | "all")}
-          className="rounded-md border border-input bg-background px-2 py-1"
-        >
-          <option value="all">All severities</option>
-          <option value="critical">Critical</option>
-          <option value="warning">Warning</option>
-          <option value="info">Info</option>
-        </select>
-        <select
-          value={sort}
-          onChange={(e) => setSort(e.target.value as AlertSort)}
-          className="rounded-md border border-input bg-background px-2 py-1"
-        >
-          <option value="severity">Sort: severity</option>
-          <option value="lastDetected">Sort: last detected</option>
-          <option value="firstDetected">Sort: first detected</option>
-          <option value="occurrences">Sort: occurrences</option>
-          <option value="recurrence">Sort: recurrence</option>
-        </select>
-        <button
-          onClick={() => void onSnapshot()}
-          className="rounded-md border border-input px-3 py-1 hover:bg-accent"
-        >
-          Snapshot now
-        </button>
-      </div>
-
-      {filtered.length === 0 ? (
-        <Empty msg="No alerts match the current filters." />
-      ) : (
-        <ul className="space-y-2">
-          {filtered.map((a) => (
-            <AlertRow
-              key={a.id}
-              alert={a}
-              expanded={expanded === a.id}
-              onToggle={() => setExpanded(expanded === a.id ? null : a.id)}
-              onAction={onAction}
-            />
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-function AlertRow({
-  alert,
-  expanded,
-  onToggle,
-  onAction,
-}: {
-  alert: AlertLifecycle;
-  expanded: boolean;
-  onToggle: () => void;
-  onAction: (p: AlertActionPayload) => Promise<void>;
-}) {
-  const cls =
-    alert.severity === "critical"
-      ? "border-red-500/50 bg-red-500/5"
-      : alert.severity === "warning"
-        ? "border-amber-500/50 bg-amber-500/5"
-        : "border-border";
-  const statusCls =
-    alert.status === "active"
-      ? "bg-red-500/20 text-red-400"
-      : alert.status === "acknowledged"
-        ? "bg-amber-500/20 text-amber-400"
-        : alert.status === "resolved"
-          ? "bg-emerald-500/20 text-emerald-400"
-          : "bg-muted text-muted-foreground";
-  const duration = Math.round(alert.durationMs / 60_000);
-
-  return (
-    <li className={`rounded-md border px-3 py-2 text-sm ${cls}`}>
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full items-start justify-between text-left"
-      >
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">
-              {alert.severity}
-            </span>
-            <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase ${statusCls}`}>
-              {alert.status}
-            </span>
-            {alert.recurring && (
-              <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] uppercase text-purple-300">
-                recurring ×{alert.recurrenceCount}
-              </span>
-            )}
-            <span className="font-mono text-[10px] text-muted-foreground">{alert.id}</span>
-            {alert.tags.map((t) => (
-              <span
-                key={t}
-                className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary"
-              >
-                #{t}
-              </span>
-            ))}
-          </div>
-          <div className="mt-1 font-medium">{alert.title}</div>
-          <div className="text-xs text-muted-foreground">{alert.detail}</div>
-          <div className="mt-1 text-[10px] text-muted-foreground">
-            {alert.totalOccurrences} occurrence(s) · {duration}m span · first{" "}
-            {new Date(alert.firstDetected).toLocaleString()}
-          </div>
-        </div>
-        <span className="ml-3 text-xs text-muted-foreground">{expanded ? "▲" : "▼"}</span>
-      </button>
-
-      {expanded && (
-        <div className="mt-3 border-t border-border pt-3">
-          <div className="mb-3 flex flex-wrap gap-2">
-            {!alert.acknowledged && (
-              <button
-                className="rounded-md border border-input px-2 py-1 text-xs hover:bg-accent"
-                onClick={() => void onAction({ alertId: alert.id, type: "acknowledge" })}
-              >
-                Acknowledge
-              </button>
-            )}
-            {!alert.resolved && (
-              <button
-                className="rounded-md border border-input px-2 py-1 text-xs hover:bg-accent"
-                onClick={() => void onAction({ alertId: alert.id, type: "resolve" })}
-              >
-                Resolve
-              </button>
-            )}
-            {alert.muted ? (
-              <button
-                className="rounded-md border border-input px-2 py-1 text-xs hover:bg-accent"
-                onClick={() => void onAction({ alertId: alert.id, type: "unmute" })}
-              >
-                Unmute
-              </button>
-            ) : (
-              <button
-                className="rounded-md border border-input px-2 py-1 text-xs hover:bg-accent"
-                onClick={() =>
-                  void onAction({
-                    alertId: alert.id,
-                    type: "mute",
-                    mutedUntil: new Date(Date.now() + 24 * 3600_000).toISOString(),
-                  })
-                }
-              >
-                Mute 24h
-              </button>
-            )}
-            <button
-              className="rounded-md border border-input px-2 py-1 text-xs hover:bg-accent"
-              onClick={() => {
-                const note = window.prompt("Add note");
-                if (note) void onAction({ alertId: alert.id, type: "note", note });
-              }}
-            >
-              Add note
-            </button>
-            <button
-              className="rounded-md border border-input px-2 py-1 text-xs hover:bg-accent"
-              onClick={() => {
-                const tag = window.prompt("Add tag");
-                if (tag) void onAction({ alertId: alert.id, type: "tag", tag });
-              }}
-            >
-              Add tag
-            </button>
-          </div>
-
-          <div className="grid gap-3 text-xs md:grid-cols-2">
-            <div>
-              <div className="mb-1 font-semibold text-muted-foreground">Lifecycle timeline</div>
-              <ul className="space-y-1">
-                <li>
-                  First detected: <span className="font-mono">{alert.firstDetected}</span>
-                </li>
-                <li>
-                  Last detected: <span className="font-mono">{alert.lastDetected}</span>
-                </li>
-                {alert.acknowledged && (
-                  <li>
-                    Acknowledged by{" "}
-                    <span className="font-mono">{alert.acknowledgedBy?.slice(0, 8)}</span> at{" "}
-                    <span className="font-mono">{alert.acknowledgedAt}</span>
-                  </li>
-                )}
-                {alert.resolved && (
-                  <li>
-                    Resolved by <span className="font-mono">{alert.resolvedBy?.slice(0, 8)}</span>{" "}
-                    at <span className="font-mono">{alert.resolvedAt}</span>
-                  </li>
-                )}
-                {alert.muted && alert.mutedUntil && (
-                  <li>
-                    Muted until <span className="font-mono">{alert.mutedUntil}</span>
-                  </li>
-                )}
-                <li>
-                  Related group: <span className="font-mono">{alert.relatedGroup}</span>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <div className="mb-1 font-semibold text-muted-foreground">Severity history</div>
-              <ul className="space-y-1">
-                {alert.severityHistory.map((s, i) => (
-                  <li key={i}>
-                    <span className="font-mono">{s.at}</span> — {s.severity}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {alert.notes.length > 0 && (
-            <div className="mt-3 text-xs">
-              <div className="mb-1 font-semibold text-muted-foreground">Notes</div>
-              <ul className="space-y-1">
-                {alert.notes.map((n, i) => (
-                  <li key={i}>
-                    <span className="font-mono">{n.at}</span>{" "}
-                    <span className="text-muted-foreground">({n.actor.slice(0, 8)})</span> —{" "}
-                    {n.text}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
-    </li>
-  );
-}
-
-// ---------- Enterprise Operations · Intelligence Audit ----------
-
-function AuditPanel({ data }: { data?: Awaited<ReturnType<typeof getAuditSummary>> }) {
-  if (!data) return <Skeleton />;
-  const { summary, current, sampleAttribution } = data;
-  return (
-    <div className="space-y-4 text-sm">
-      <div className="grid gap-3 md:grid-cols-2">
-        <div className="rounded-md border border-border p-3">
-          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Current engine
-          </div>
-          <ul className="space-y-1 text-xs">
-            <li>
-              Engine: <span className="font-mono">{current.engineVersion}</span>
-            </li>
-            <li>
-              Intelligence: <span className="font-mono">{current.intelligenceVersion}</span>
-            </li>
-            <li>
-              Classification: <span className="font-mono">{current.classificationVersion}</span>
-            </li>
-            <li>
-              Rules: <span className="font-mono">{current.ruleVersion}</span>
-            </li>
-            <li>
-              Weights: <span className="font-mono">{current.weightVersion}</span>
-            </li>
-            <li>
-              Scoring: <span className="font-mono">{current.scoringVersion}</span>
-            </li>
-            <li>
-              Deployment: <span className="font-mono">{current.deploymentVersion}</span>
-            </li>
-            <li>
-              Build: <span className="font-mono">{current.buildVersion}</span> ·{" "}
-              <span className="font-mono">{current.buildCommit}</span>
-            </li>
-            <li>
-              Model config hash: <span className="font-mono">{current.modelConfigHash}</span>
-            </li>
-            <li>
-              Feature flags:{" "}
-              {current.featureFlags.map((f) => (
-                <span
-                  key={f}
-                  className="mr-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary"
-                >
-                  {f}
-                </span>
-              ))}
-            </li>
-          </ul>
-        </div>
-        <div className="rounded-md border border-border p-3">
-          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Audit inventory
-          </div>
-          <ul className="space-y-1 text-xs">
-            <li>Total records: {summary.totalRecords}</li>
-            <li>Historical (persisted): {data.totalHistorical}</li>
-            <li>Live (this window): {data.totalLive}</li>
-          </ul>
-          {sampleAttribution && (
-            <div className="mt-3 rounded-md bg-muted/40 p-2 font-mono text-[11px]">
-              {sampleAttribution}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <AuditGroup
-        title="Engine versions"
-        rows={summary.engineVersions.map((r) => ({
-          key: r.engineVersion,
-          count: r.count,
-          earliest: r.earliest,
-          latest: r.latest,
-        }))}
-      />
-      <AuditGroup
-        title="Rule versions"
-        rows={summary.ruleVersions.map((r) => ({
-          key: r.ruleVersion,
-          count: r.count,
-        }))}
-      />
-      <AuditGroup
-        title="Weight versions"
-        rows={summary.weightVersions.map((r) => ({
-          key: r.weightVersion,
-          count: r.count,
-        }))}
-      />
-      <AuditGroup
-        title="Model config hashes"
-        rows={summary.modelConfigHashes.map((r) => ({
-          key: r.hash,
-          count: r.count,
-        }))}
-      />
-      <AuditGroup
-        title="Deployment timeline"
-        rows={summary.deploymentTimeline.map((r) => ({
-          key: r.deploymentVersion,
-          count: r.count,
-          earliest: r.earliest,
-          latest: r.latest,
-        }))}
-      />
-    </div>
-  );
-}
-
-function AuditGroup({
-  title,
-  rows,
-}: {
-  title: string;
-  rows: { key: string; count: number; earliest?: string; latest?: string }[];
-}) {
-  if (rows.length === 0) return null;
-  return (
-    <div className="rounded-md border border-border p-3">
-      <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        {title}
-      </div>
-      <table className="w-full text-xs">
-        <thead className="text-left text-muted-foreground">
-          <tr>
-            <th className="pb-1">Version</th>
-            <th>Count</th>
-            {rows[0].earliest && <th>Earliest</th>}
-            {rows[0].latest && <th>Latest</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.key} className="border-t border-border/50">
-              <td className="py-1 font-mono">{r.key}</td>
-              <td className="tabular-nums">{r.count}</td>
-              {r.earliest && <td className="font-mono">{r.earliest}</td>}
-              {r.latest && <td className="font-mono">{r.latest}</td>}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-// ---------- Loop 1.1 · Alert Ops Metrics ----------
-
-function fmtDur(ms: number | null): string {
-  if (ms === null || !isFinite(ms)) return "—";
-  if (ms < 60_000) return `${Math.round(ms / 1000)}s`;
-  if (ms < 3600_000) return `${Math.round(ms / 60_000)}m`;
-  if (ms < 86_400_000) return `${(ms / 3600_000).toFixed(1)}h`;
-  return `${(ms / 86_400_000).toFixed(1)}d`;
-}
-
-function AlertOpsPanel({ data }: { data?: Awaited<ReturnType<typeof getAlertOps>> }) {
-  if (!data) return <Skeleton />;
-  const { metrics, incidents } = data;
-  if (metrics.totalAlerts === 0) return <Empty msg="No alerts in this window." />;
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <KPI label="MTTA (mean)" value={fmtDur(metrics.mttaMs)} sub={`median ${fmtDur(metrics.medianMttaMs)}`} />
-        <KPI label="MTTR (mean)" value={fmtDur(metrics.mttrMs)} sub={`p95 ${fmtDur(metrics.p95MttrMs)}`} />
-        <KPI label="Ack rate" value={`${Math.round(metrics.ackRate * 100)}%`} sub={`${metrics.acknowledgedAlerts}/${metrics.totalAlerts}`} />
-        <KPI label="Resolve rate" value={`${Math.round(metrics.resolveRate * 100)}%`} sub={`${metrics.resolvedAlerts}/${metrics.totalAlerts}`} />
-      </div>
-      <div className="grid gap-3 md:grid-cols-2">
-        <div className="rounded-md border border-border p-3 text-xs">
-          <div className="mb-2 font-semibold uppercase tracking-wide text-muted-foreground">
-            Top recurring
-          </div>
-          {metrics.topRecurring.length === 0 ? (
-            <p className="text-muted-foreground">No recurring alerts.</p>
-          ) : (
-            <ul className="space-y-1">
-              {metrics.topRecurring.map((r) => (
-                <li key={r.id} className="flex justify-between">
-                  <span className="truncate">{r.title}</span>
-                  <span className="ml-2 font-mono">×{r.recurrenceCount}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-        <div className="rounded-md border border-border p-3 text-xs">
-          <div className="mb-2 font-semibold uppercase tracking-wide text-muted-foreground">
-            Noisy alerts (≥20 occurrences)
-          </div>
-          {metrics.noisyAlerts.length === 0 ? (
-            <p className="text-muted-foreground">No noisy alerts.</p>
-          ) : (
-            <ul className="space-y-1">
-              {metrics.noisyAlerts.map((r) => (
-                <li key={r.id} className="flex justify-between">
-                  <span className="truncate">{r.title}</span>
-                  <span className="ml-2 font-mono">{r.occurrences}×</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-      <div className="rounded-md border border-border p-3 text-xs">
-        <div className="mb-2 font-semibold uppercase tracking-wide text-muted-foreground">
-          Correlated incidents ({incidents.length})
-        </div>
-        {incidents.length === 0 ? (
-          <p className="text-muted-foreground">
-            No correlated incidents — related alerts did not cluster in time.
-          </p>
-        ) : (
-          <ul className="space-y-2">
-            {incidents.map((inc) => (
-              <li key={inc.id} className="rounded border border-border/60 p-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] uppercase text-primary">
-                    {inc.group}
-                  </span>
-                  <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                    {inc.severity}
-                  </span>
-                  {inc.active && (
-                    <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] uppercase text-red-400">
-                      active
-                    </span>
-                  )}
-                  <span className="text-muted-foreground">
-                    {inc.alertCount} alerts · {fmtDur(Date.parse(inc.endedAt) - Date.parse(inc.startedAt))}
-                  </span>
-                </div>
-                <div className="mt-1 font-medium">{inc.title}</div>
-                <div className="text-muted-foreground">{inc.summary}</div>
-                <div className="mt-1 font-mono text-[10px] text-muted-foreground">
-                  {inc.startedAt} → {inc.endedAt}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ---------- Loop 1.1 · Audit Verification & Version History ----------
-
-function AuditVerificationPanel({
-  data,
-}: {
-  data?: Awaited<ReturnType<typeof getAuditOps>>;
-}) {
-  if (!data) return <Skeleton />;
-  const { verification, timeline } = data;
-  const badgeCls = verification.ok
-    ? "bg-emerald-500/20 text-emerald-400"
-    : "bg-red-500/20 text-red-400";
-  return (
-    <div className="space-y-4 text-sm">
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-        <div className="rounded-md border border-border p-3">
-          <div className="text-xs uppercase text-muted-foreground">Integrity</div>
-          <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] uppercase ${badgeCls}`}>
-            {verification.ok ? "append-only ok" : "issues detected"}
-          </span>
-        </div>
-        <KPI label="Records" value={verification.totalRecords} />
-        <KPI label="Out of order" value={verification.outOfOrder} />
-        <KPI label="Duplicates" value={verification.duplicateRecords} />
-        <KPI label="Invalid" value={verification.invalidRecords} />
-      </div>
-
-      {verification.issues.length > 0 && (
-        <div className="rounded-md border border-red-500/40 bg-red-500/5 p-3 text-xs">
-          <div className="mb-2 font-semibold text-red-400">
-            First {verification.issues.length} issue(s)
-          </div>
-          <ul className="space-y-1 font-mono">
-            {verification.issues.slice(0, 10).map((i, idx) => (
-              <li key={idx}>
-                [{i.code}] {i.message}
-                {i.sessionId ? ` · session ${i.sessionId.slice(0, 8)}` : ""}
-                {i.at ? ` @ ${i.at}` : ""}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <div className="rounded-md border border-border p-3">
-        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          Version history timeline ({timeline.length} window{timeline.length === 1 ? "" : "s"})
-        </div>
-        {timeline.length === 0 ? (
-          <p className="text-xs text-muted-foreground">No audit records in this window.</p>
-        ) : (
-          <ol className="space-y-2 text-xs">
-            {timeline.map((w, i) => (
-              <li key={i} className="rounded border border-border/60 p-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary">
-                    engine v{w.version.engineVersion}
-                  </span>
-                  <span className="font-mono text-[10px] text-muted-foreground">
-                    hash {w.version.modelConfigHash}
-                  </span>
-                  <span className="text-muted-foreground">rules {w.version.ruleVersion}</span>
-                  <span className="text-muted-foreground">weights {w.version.weightVersion}</span>
-                  <span className="ml-auto tabular-nums text-muted-foreground">
-                    {w.records} record{w.records === 1 ? "" : "s"}
-                  </span>
-                </div>
-                <div className="mt-1 font-mono text-[10px] text-muted-foreground">
-                  {w.from} → {w.to}
-                </div>
-              </li>
-            ))}
-          </ol>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ---------- Loop 2 · Rule Sandbox ----------
-
-type SimulationResponse = Awaited<ReturnType<typeof simulateRules>>;
-type HistoryResponse = Awaited<ReturnType<typeof getSandboxHistory>>;
-
-function RuleSandboxPanel({ days }: { days: number }) {
-  const simulateFn = useServerFn(simulateRules);
-  const historyFn = useServerFn(getSandboxHistory);
-  const [proposed, setProposed] = useState<RuleSet>(() => JSON.parse(JSON.stringify(DEFAULT_RULES)));
-  const [result, setResult] = useState<SimulationResponse | null>(null);
-  const [running, setRunning] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const history = useQuery({
-    queryKey: ["sandbox-history"],
-    queryFn: () => historyFn({ data: { days: 30 } }) as Promise<HistoryResponse>,
-  });
-
-  const rows = diffRuleSets(DEFAULT_RULES, proposed);
-  const validation = validateRuleSet(proposed);
-
-  const updateWeight = (k: WeightKey, v: number) =>
-    setProposed((p) => ({ ...p, weights: { ...p.weights, [k]: v } }));
-  const updateThreshold = (k: ThresholdKey, v: number) =>
-    setProposed((p) => ({ ...p, thresholds: { ...p.thresholds, [k]: v } }));
-
-  const run = async () => {
-    if (!validation.ok) return;
-    setRunning(true);
-    setError(null);
-    try {
-      const r = (await simulateFn({ data: { days, rules: proposed, limit: 1000 } })) as SimulationResponse;
-      setResult(r);
-      await history.refetch();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setRunning(false);
-    }
-  };
-
-  const reset = () => {
-    setProposed(JSON.parse(JSON.stringify(DEFAULT_RULES)));
-    setResult(null);
-  };
-
-  return (
-    <div className="space-y-4 text-sm">
-      <div className="grid gap-3 md:grid-cols-2">
-        <div className="rounded-md border border-border p-3">
-          <div className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
-            Weights (multipliers)
-          </div>
-          <ul className="space-y-1 text-xs">
-            {(Object.keys(WEIGHT_META) as WeightKey[]).map((k) => (
-              <RuleRow
-                key={k}
-                label={WEIGHT_META[k].label}
-                current={DEFAULT_RULES.weights[k]}
-                value={proposed.weights[k]}
-                min={WEIGHT_META[k].min}
-                max={WEIGHT_META[k].max}
-                step={0.05}
-                onChange={(v) => updateWeight(k, v)}
-              />
-            ))}
-          </ul>
-        </div>
-        <div className="rounded-md border border-border p-3">
-          <div className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
-            Thresholds
-          </div>
-          <ul className="space-y-1 text-xs">
-            {(Object.keys(THRESHOLD_META) as ThresholdKey[]).map((k) => (
-              <RuleRow
-                key={k}
-                label={THRESHOLD_META[k].label}
-                current={DEFAULT_RULES.thresholds[k]}
-                value={proposed.thresholds[k]}
-                min={THRESHOLD_META[k].min}
-                max={THRESHOLD_META[k].max}
-                step={THRESHOLD_META[k].max <= 1 ? 0.05 : 1}
-                onChange={(v) => updateThreshold(k, v)}
-              />
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2 text-xs">
-        <button
-          onClick={() => void run()}
-          disabled={!validation.ok || running}
-          className="rounded-md bg-primary px-3 py-1 text-primary-foreground disabled:opacity-50"
-        >
-          {running ? "Simulating…" : "Run simulation"}
-        </button>
-        <button
-          onClick={reset}
-          className="rounded-md border border-input px-3 py-1 hover:bg-accent"
-        >
-          Reset to defaults
-        </button>
-        <span className="text-muted-foreground">
-          Sample size: last {days} day(s), up to 1000 sessions.
-        </span>
-        {rows.filter((r) => r.delta !== 0).length > 0 && (
-          <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-primary">
-            {rows.filter((r) => r.delta !== 0).length} parameter change(s)
-          </span>
-        )}
-      </div>
-
-      {!validation.ok && (
-        <div className="rounded-md border border-red-500/40 bg-red-500/5 p-2 text-xs">
-          <div className="mb-1 font-semibold text-red-400">Validation blocked</div>
-          <ul className="space-y-1 font-mono">
-            {validation.issues.map((i, idx) => (
-              <li key={idx}>
-                [{i.code}] {i.field} — {i.message}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {error && (
-        <div className="rounded-md border border-red-500/40 bg-red-500/5 p-2 text-xs text-red-400">
-          {error}
-        </div>
-      )}
-
-      {result?.ok && result.result && <SimulationView result={result.result} />}
-
-      <SandboxHistory data={history.data} />
-    </div>
-  );
-}
-
-function RuleRow({
-  label,
-  current,
-  value,
-  min,
-  max,
-  step,
-  onChange,
-}: {
-  label: string;
-  current: number;
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  onChange: (v: number) => void;
-}) {
-  const delta = value - current;
-  const inRange = Number.isFinite(value) && value >= min && value <= max;
-  return (
-    <li className="flex flex-wrap items-center gap-2">
-      <span className="min-w-[180px] flex-1 truncate">{label}</span>
-      <input
-        type="number"
-        value={value}
-        min={min}
-        max={max}
-        step={step}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
-        className={`w-20 rounded border px-1 py-0.5 text-right font-mono text-[11px] ${
-          inRange ? "border-input bg-background" : "border-red-500 bg-red-500/10"
-        }`}
-      />
-      <span className="w-14 text-right font-mono text-[10px] text-muted-foreground">
-        cur {current}
-      </span>
-      <span
-        className={`w-14 text-right font-mono text-[10px] ${
-          delta === 0
-            ? "text-muted-foreground"
-            : delta > 0
-              ? "text-emerald-400"
-              : "text-amber-400"
-        }`}
-      >
-        {delta === 0 ? "±0" : delta > 0 ? `+${delta.toFixed(2)}` : delta.toFixed(2)}
-      </span>
-    </li>
-  );
-}
-
-function SimulationView({
-  result,
-}: {
-  result: NonNullable<Extract<SimulationResponse, { ok: true }>["result"]>;
-}) {
-  const verdictCls =
-    result.recommendation.verdict === "safe-to-deploy"
-      ? "bg-emerald-500/20 text-emerald-400"
-      : result.recommendation.verdict === "deploy-with-caution"
-        ? "bg-amber-500/20 text-amber-400"
-        : result.recommendation.verdict === "reject"
-          ? "bg-red-500/20 text-red-400"
-          : "bg-muted text-muted-foreground";
-  return (
-    <div className="space-y-3 rounded-md border border-border p-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase ${verdictCls}`}>
-          {result.recommendation.verdict}
-        </span>
-        <span className="text-xs text-muted-foreground">
-          {result.sampleSize} sessions · {result.durationMs}ms · sim {result.simulationId}
-        </span>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 text-xs">
-        <ComparisonKPI label="Human %" a={result.before.humanPct} b={result.after.humanPct} format="pct" />
-        <ComparisonKPI label="Bot %" a={result.before.botPct} b={result.after.botPct} format="pct" />
-        <ComparisonKPI label="Avg quality" a={result.before.avgQuality} b={result.after.avgQuality} format="num" />
-        <ComparisonKPI label="Avg human prob" a={result.before.avgHuman} b={result.after.avgHuman} format="pct" />
-      </div>
-
-      <div className="grid gap-3 md:grid-cols-2 text-xs">
-        <div className="rounded border border-border/60 p-2">
-          <div className="mb-1 font-semibold uppercase text-muted-foreground">
-            Confidence distribution
-          </div>
-          <DistTable a={result.before.confidence} b={result.after.confidence} />
-        </div>
-        <div className="rounded border border-border/60 p-2">
-          <div className="mb-1 font-semibold uppercase text-muted-foreground">
-            Risk distribution
-          </div>
-          <DistTable a={result.before.risk} b={result.after.risk} />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2 text-xs md:grid-cols-4">
-        <Impact label="Humans affected" v={result.impact.humansAffected} />
-        <Impact label="Bots affected" v={result.impact.botsAffected} />
-        <Impact label="High-risk changed" v={result.impact.highRiskChanged} />
-        <Impact label="Low-risk changed" v={result.impact.lowRiskChanged} />
-        <Impact label="Confidence ↑" v={result.impact.confidenceImprovements} />
-        <Impact label="Confidence ↓" v={result.impact.confidenceDegradations} />
-        <Impact label="FP candidates" v={result.impact.falsePositiveCandidates} />
-        <Impact label="FN candidates" v={result.impact.falseNegativeCandidates} />
-      </div>
-
-      <div className="rounded border border-border/60 p-2 text-xs">
-        <div className="mb-1 font-semibold uppercase text-muted-foreground">
-          Recommendation reasoning
-        </div>
-        <ul className="space-y-1">
-          {result.recommendation.reasons.map((r, i) => (
-            <li key={i}>
-              <span className="font-mono text-muted-foreground">[{r.code}]</span> {r.message}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
-function ComparisonKPI({
-  label,
-  a,
-  b,
-  format,
-}: {
-  label: string;
-  a: number;
-  b: number;
-  format: "pct" | "num";
-}) {
-  const fmt = (v: number) => (format === "pct" ? `${(v * 100).toFixed(1)}%` : v.toFixed(1));
-  const delta = b - a;
-  return (
-    <div className="rounded border border-border/60 p-2">
-      <div className="text-[10px] uppercase text-muted-foreground">{label}</div>
-      <div className="mt-1 flex items-baseline gap-2 font-mono">
-        <span className="text-muted-foreground">{fmt(a)}</span>
-        <span>→</span>
-        <span className="font-semibold">{fmt(b)}</span>
-      </div>
-      <div
-        className={`text-[10px] ${
-          delta === 0
-            ? "text-muted-foreground"
-            : delta > 0
-              ? "text-emerald-400"
-              : "text-amber-400"
-        }`}
-      >
-        {delta === 0 ? "±0" : delta > 0 ? `+${fmt(Math.abs(delta))}` : `-${fmt(Math.abs(delta))}`}
-      </div>
-    </div>
-  );
-}
-
-function DistTable({ a, b }: { a: Record<string, number>; b: Record<string, number> }) {
-  const keys = Array.from(new Set([...Object.keys(a), ...Object.keys(b)]));
-  return (
-    <table className="w-full">
-      <thead className="text-left text-muted-foreground">
-        <tr>
-          <th className="pb-1">Bucket</th>
-          <th className="pb-1">Before</th>
-          <th className="pb-1">After</th>
-          <th className="pb-1">Δ</th>
-        </tr>
-      </thead>
-      <tbody>
-        {keys.map((k) => {
-          const av = a[k] ?? 0;
-          const bv = b[k] ?? 0;
-          return (
-            <tr key={k} className="border-t border-border/50">
-              <td className="py-1 font-mono">{k}</td>
-              <td className="tabular-nums">{av}</td>
-              <td className="tabular-nums">{bv}</td>
-              <td className="tabular-nums">{bv - av >= 0 ? `+${bv - av}` : bv - av}</td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
-  );
-}
-
-function Impact({ label, v }: { label: string; v: number }) {
-  return (
-    <div className="rounded border border-border/60 px-2 py-1">
-      <div className="text-[10px] uppercase text-muted-foreground">{label}</div>
-      <div className="font-mono text-sm">{v}</div>
-    </div>
-  );
-}
-
-function SandboxHistory({ data }: { data?: HistoryResponse }) {
-  if (!data || data.entries.length === 0) return null;
-  return (
-    <div className="rounded-md border border-border p-3 text-xs">
-      <div className="mb-2 font-semibold uppercase text-muted-foreground">
-        Sandbox audit ({data.entries.length} run{data.entries.length === 1 ? "" : "s"})
-      </div>
-      <ul className="max-h-64 space-y-1 overflow-y-auto">
-        {data.entries.map((e: Record<string, unknown>, i: number) => {
-          const rec = String(e.recommendation ?? "");
-          const cls = rec === "safe-to-deploy"
-            ? "text-emerald-400"
-            : rec === "reject"
-              ? "text-red-400"
-              : "text-amber-400";
-          return (
-            <li key={i} className="flex flex-wrap gap-2">
-              <span className="font-mono text-muted-foreground">{String(e.ts)}</span>
-              <span className={`font-mono ${cls}`}>{rec}</span>
-              <span className="font-mono text-muted-foreground">
-                sample {String(e.sampleSize ?? "?")} · {String(e.durationMs ?? 0)}ms
-              </span>
-              <span className="font-mono text-muted-foreground">
-                sim {String(e.simulationId ?? "")}
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
   );
 }
