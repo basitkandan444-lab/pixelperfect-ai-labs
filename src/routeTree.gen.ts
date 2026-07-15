@@ -35,11 +35,13 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as ApiPublicVitalsRouteImport } from './routes/api/public/vitals'
 import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
+import { Route as ApiPublicReliabilityRouteImport } from './routes/api/public/reliability'
 import { Route as ApiPublicMetricsRouteImport } from './routes/api/public/metrics'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicEventsRouteImport } from './routes/api/public/events'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as ApiPublicHooksTelemetrySnapshotRouteImport } from './routes/api/public/hooks/telemetry-snapshot'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -174,6 +176,11 @@ const ApiPublicVersionRoute = ApiPublicVersionRouteImport.update({
   path: '/api/public/version',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicReliabilityRoute = ApiPublicReliabilityRouteImport.update({
+  id: '/api/public/reliability',
+  path: '/api/public/reliability',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicMetricsRoute = ApiPublicMetricsRouteImport.update({
   id: '/api/public/metrics',
   path: '/api/public/metrics',
@@ -200,6 +207,12 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksTelemetrySnapshotRoute =
+  ApiPublicHooksTelemetrySnapshotRouteImport.update({
+    id: '/api/public/hooks/telemetry-snapshot',
+    path: '/api/public/hooks/telemetry-snapshot',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -230,8 +243,10 @@ export interface FileRoutesByFullPath {
   '/api/public/events': typeof ApiPublicEventsRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
+  '/api/public/reliability': typeof ApiPublicReliabilityRoute
   '/api/public/version': typeof ApiPublicVersionRoute
   '/api/public/vitals': typeof ApiPublicVitalsRoute
+  '/api/public/hooks/telemetry-snapshot': typeof ApiPublicHooksTelemetrySnapshotRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -262,8 +277,10 @@ export interface FileRoutesByTo {
   '/api/public/events': typeof ApiPublicEventsRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
+  '/api/public/reliability': typeof ApiPublicReliabilityRoute
   '/api/public/version': typeof ApiPublicVersionRoute
   '/api/public/vitals': typeof ApiPublicVitalsRoute
+  '/api/public/hooks/telemetry-snapshot': typeof ApiPublicHooksTelemetrySnapshotRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -296,8 +313,10 @@ export interface FileRoutesById {
   '/api/public/events': typeof ApiPublicEventsRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
+  '/api/public/reliability': typeof ApiPublicReliabilityRoute
   '/api/public/version': typeof ApiPublicVersionRoute
   '/api/public/vitals': typeof ApiPublicVitalsRoute
+  '/api/public/hooks/telemetry-snapshot': typeof ApiPublicHooksTelemetrySnapshotRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -330,8 +349,10 @@ export interface FileRouteTypes {
     | '/api/public/events'
     | '/api/public/health'
     | '/api/public/metrics'
+    | '/api/public/reliability'
     | '/api/public/version'
     | '/api/public/vitals'
+    | '/api/public/hooks/telemetry-snapshot'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -362,8 +383,10 @@ export interface FileRouteTypes {
     | '/api/public/events'
     | '/api/public/health'
     | '/api/public/metrics'
+    | '/api/public/reliability'
     | '/api/public/version'
     | '/api/public/vitals'
+    | '/api/public/hooks/telemetry-snapshot'
   id:
     | '__root__'
     | '/'
@@ -395,8 +418,10 @@ export interface FileRouteTypes {
     | '/api/public/events'
     | '/api/public/health'
     | '/api/public/metrics'
+    | '/api/public/reliability'
     | '/api/public/version'
     | '/api/public/vitals'
+    | '/api/public/hooks/telemetry-snapshot'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -426,8 +451,10 @@ export interface RootRouteChildren {
   ApiPublicEventsRoute: typeof ApiPublicEventsRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicMetricsRoute: typeof ApiPublicMetricsRoute
+  ApiPublicReliabilityRoute: typeof ApiPublicReliabilityRoute
   ApiPublicVersionRoute: typeof ApiPublicVersionRoute
   ApiPublicVitalsRoute: typeof ApiPublicVitalsRoute
+  ApiPublicHooksTelemetrySnapshotRoute: typeof ApiPublicHooksTelemetrySnapshotRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -614,6 +641,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicVersionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/reliability': {
+      id: '/api/public/reliability'
+      path: '/api/public/reliability'
+      fullPath: '/api/public/reliability'
+      preLoaderRoute: typeof ApiPublicReliabilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/metrics': {
       id: '/api/public/metrics'
       path: '/api/public/metrics'
@@ -647,6 +681,13 @@ declare module '@tanstack/react-router' {
       path: '/.lovable/oauth/consent'
       fullPath: '/.lovable/oauth/consent'
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/telemetry-snapshot': {
+      id: '/api/public/hooks/telemetry-snapshot'
+      path: '/api/public/hooks/telemetry-snapshot'
+      fullPath: '/api/public/hooks/telemetry-snapshot'
+      preLoaderRoute: typeof ApiPublicHooksTelemetrySnapshotRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -695,8 +736,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicEventsRoute: ApiPublicEventsRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicMetricsRoute: ApiPublicMetricsRoute,
+  ApiPublicReliabilityRoute: ApiPublicReliabilityRoute,
   ApiPublicVersionRoute: ApiPublicVersionRoute,
   ApiPublicVitalsRoute: ApiPublicVitalsRoute,
+  ApiPublicHooksTelemetrySnapshotRoute: ApiPublicHooksTelemetrySnapshotRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
