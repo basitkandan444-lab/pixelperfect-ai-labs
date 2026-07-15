@@ -98,6 +98,51 @@ export type Database = {
         }
         Relationships: []
       }
+      experiments: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          goal_event: string
+          id: string
+          key: string
+          name: string
+          paused_at: string | null
+          status: Database["public"]["Enums"]["experiment_status"]
+          updated_at: string
+          variants: Json
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          goal_event?: string
+          id?: string
+          key: string
+          name: string
+          paused_at?: string | null
+          status?: Database["public"]["Enums"]["experiment_status"]
+          updated_at?: string
+          variants: Json
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          goal_event?: string
+          id?: string
+          key?: string
+          name?: string
+          paused_at?: string | null
+          status?: Database["public"]["Enums"]["experiment_status"]
+          updated_at?: string
+          variants?: Json
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -273,6 +318,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      experiment_status: "draft" | "running" | "paused" | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -401,6 +447,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      experiment_status: ["draft", "running", "paused", "archived"],
     },
   },
 } as const
