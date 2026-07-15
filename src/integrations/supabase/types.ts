@@ -224,6 +224,63 @@ export type Database = {
         }
         Relationships: []
       }
+      telemetry_snapshots: {
+        Row: {
+          avg_ms: number
+          cls_p75: number
+          deployment: string
+          errors: Json
+          failure: number
+          fcp_p75: number
+          id: string
+          inp_p75: number
+          lcp_p75: number
+          p95_ms: number
+          requests: number
+          samples: number
+          success: number
+          success_rate: number
+          ts: string
+          ttfb_p75: number
+        }
+        Insert: {
+          avg_ms?: number
+          cls_p75?: number
+          deployment?: string
+          errors?: Json
+          failure?: number
+          fcp_p75?: number
+          id?: string
+          inp_p75?: number
+          lcp_p75?: number
+          p95_ms?: number
+          requests?: number
+          samples?: number
+          success?: number
+          success_rate?: number
+          ts?: string
+          ttfb_p75?: number
+        }
+        Update: {
+          avg_ms?: number
+          cls_p75?: number
+          deployment?: string
+          errors?: Json
+          failure?: number
+          fcp_p75?: number
+          id?: string
+          inp_p75?: number
+          lcp_p75?: number
+          p95_ms?: number
+          requests?: number
+          samples?: number
+          success?: number
+          success_rate?: number
+          ts?: string
+          ttfb_p75?: number
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
