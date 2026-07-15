@@ -122,6 +122,54 @@ export type Database = {
         }
         Relationships: []
       }
+      reliability_alerts: {
+        Row: {
+          dedup_key: string
+          delivered_at: string | null
+          delivery_error: string | null
+          delivery_status: string | null
+          detail: string
+          evidence: Json
+          hour_bucket: string
+          id: string
+          kind: string
+          recommendation: string
+          severity: string
+          title: string
+          ts: string
+        }
+        Insert: {
+          dedup_key: string
+          delivered_at?: string | null
+          delivery_error?: string | null
+          delivery_status?: string | null
+          detail: string
+          evidence?: Json
+          hour_bucket?: string
+          id?: string
+          kind: string
+          recommendation: string
+          severity: string
+          title: string
+          ts?: string
+        }
+        Update: {
+          dedup_key?: string
+          delivered_at?: string | null
+          delivery_error?: string | null
+          delivery_status?: string | null
+          detail?: string
+          evidence?: Json
+          hour_bucket?: string
+          id?: string
+          kind?: string
+          recommendation?: string
+          severity?: string
+          title?: string
+          ts?: string
+        }
+        Relationships: []
+      }
       telemetry_snapshots: {
         Row: {
           avg_ms: number
