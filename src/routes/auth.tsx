@@ -81,7 +81,7 @@ function AuthPage() {
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-lg">
         <h1 className="text-2xl font-bold tracking-tight">Command Center</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Sign in to access the visitor intelligence dashboard.
+          Sign in to access the analytics dashboard.
         </p>
 
         <button
