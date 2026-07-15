@@ -6,8 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 
 function safeNext(v: unknown): string {
-  if (typeof v !== "string") return "/admin";
-  if (!v.startsWith("/") || v.startsWith("//")) return "/admin";
+  if (typeof v !== "string") return "/";
+  if (!v.startsWith("/") || v.startsWith("//")) return "/";
   return v;
 }
 
@@ -36,7 +36,7 @@ function AuthPage() {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       if (session) {
         if (target.startsWith("/")) window.location.href = target;
-        else navigate({ to: "/admin" });
+        else navigate({ to: "/" });
       }
     });
     return () => sub.subscription.unsubscribe();
