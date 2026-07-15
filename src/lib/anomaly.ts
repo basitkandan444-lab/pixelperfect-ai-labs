@@ -28,15 +28,16 @@ export function zscoreAnomalies(
     const slice = series.slice(i - window, i).map((p) => p.value);
     const mean = avg(slice);
     const std = stdDev(slice, mean);
-    if (std === 0 || !Number.isFinite(std)) continue;
-    const z = (series[i].value - mean) / std;
+    const diff = series[i].value - mean;
+    // std=0 baseline: any deviation is effectively infinite z-score.
+    const z = std === 0 || !Number.isFinite(std) ? (diff === 0 ? 0 : diff > 0 ? Infinity : -Infinity) : diff / std;
     if (Math.abs(z) >= threshold) {
       out.push({
         ts: series[i].ts,
         value: series[i].value,
         baseline_mean: round(mean),
         baseline_std: round(std),
-        z_score: round(z),
+        z_score: Number.isFinite(z) ? round(z) : z > 0 ? 9999 : -9999,
         direction: z > 0 ? "spike" : "drop",
       });
     }
