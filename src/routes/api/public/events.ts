@@ -20,6 +20,8 @@ const EVENT_NAMES = [
   "error",
   "feature_interaction",
   "session_summary",
+  "experiment_exposure",
+  "experiment_conversion",
 ] as const;
 
 const EventSchema = z.object({
