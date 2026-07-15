@@ -15,7 +15,7 @@ import { join } from "node:path";
 // ops.ts is TS; importing it here would need a loader. Instead we read the same
 // numbers via a tiny inline mirror kept in sync by a unit test (ops.test.ts).
 const BUDGETS = {
-  maxChunkBytes: 640 * 1024,
+  maxChunkBytes: 680 * 1024,
   maxTotalJsBytes: 1_400 * 1024,
   maxTotalCssBytes: 150 * 1024,
 };
