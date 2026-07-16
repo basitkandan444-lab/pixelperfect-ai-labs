@@ -416,52 +416,100 @@ function Index() {
         Skip to upload
       </a>
 
-      {/* Ambient glows */}
+      {/* Ambient aurora field */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
-        <div className="animate-glow-pulse absolute -top-40 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl" />
-        <div className="animate-float absolute top-1/3 -right-20 h-72 w-72 rounded-full bg-accent/20 blur-3xl" />
+        <div className="animate-glow-pulse absolute -top-40 left-1/2 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-primary/25 blur-[120px]" />
+        <div className="animate-float absolute top-1/3 -right-32 h-80 w-80 rounded-full bg-accent/25 blur-[100px]" />
+        <div
+          className="animate-float absolute bottom-0 -left-24 h-72 w-72 rounded-full blur-[100px]"
+          style={{ background: "var(--aurora-4)", opacity: 0.22, animationDelay: "1.5s" }}
+        />
+        <div className="grid-noise absolute inset-0 opacity-40" />
       </div>
 
-      <div className="relative mx-auto flex max-w-5xl flex-col px-5 pt-8 sm:px-8">
-        {/* Nav */}
-        <header className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-primary shadow-glow">
-              <Sparkles className="h-5 w-5 text-primary-foreground" aria-hidden="true" />
-            </div>
-            <span className="font-display text-lg font-bold tracking-tight">{SITE.name}</span>
-          </div>
-          <div className="flex items-center gap-3">
+      <div className="relative mx-auto flex max-w-5xl flex-col px-5 pt-6 sm:px-8">
+        {/* Floating frosted nav */}
+        <header className="sticky top-4 z-40 mx-auto w-full max-w-3xl">
+          <div className="glass-strong flex items-center justify-between rounded-full px-3 py-2 pl-4 shadow-cinema ease-spring transition-all duration-300">
             <Link
-              to="/contact"
-              className="rounded-full px-3 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              to="/"
+              className="flex items-center gap-2.5"
+              aria-label={`${SITE.name} home`}
             >
-              Contact
+              <span className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-primary shadow-glow">
+                <Sparkles className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
+                <span className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/25" />
+              </span>
+              <span className="font-display text-[15px] font-bold tracking-tight">
+                {SITE.name}
+              </span>
             </Link>
-            <span className="hidden items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs text-muted-foreground sm:flex">
-              <Zap className="h-3.5 w-3.5 text-primary" aria-hidden="true" /> Free · Powered by AI
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="hidden items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-muted-foreground sm:inline-flex">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-70" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+                </span>
+                On-device · Free
+              </span>
+              <Link
+                to="/contact"
+                className="rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                Contact
+              </Link>
+            </div>
           </div>
         </header>
 
         <main>
           {/* Hero */}
-          <section className="animate-fade-up mt-14 text-center sm:mt-20">
-            <span className="inline-flex items-center gap-2 rounded-full border border-border glass px-4 py-1.5 text-xs font-medium text-muted-foreground">
-              <span
-                className="h-2 w-2 animate-glow-pulse rounded-full bg-primary"
-                aria-hidden="true"
-              />
-              Free AI Image Enhancer
+          <section className="animate-fade-up relative mt-20 pb-6 text-center sm:mt-28">
+            <span className="eyebrow inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 backdrop-blur-xl">
+              <Sparkles className="h-3 w-3 text-primary" aria-hidden="true" />
+              Real-ESRGAN · WebGPU · zero uploads
             </span>
-            <h1 className="mx-auto mt-6 max-w-3xl font-display text-4xl font-bold leading-[1.1] tracking-tight sm:text-6xl">
-              Turn blurry photos into
-              <span className="text-gradient"> stunning 4K &amp; 8K</span>
+            <h1 className="relative mx-auto mt-8 max-w-4xl font-display text-[2.75rem] font-bold leading-[1.02] tracking-[-0.03em] sm:text-7xl">
+              <span className="block text-foreground">Turn blurry photos into</span>
+              <span className="relative mt-1 block">
+                <span className="text-aurora">stunning 4K &amp; 8K.</span>
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-x-8 -bottom-4 h-8 rounded-full bg-gradient-aurora opacity-40 blur-2xl"
+                />
+              </span>
             </h1>
-            <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground sm:text-lg">
-              Upload any low-quality image and let our AI photo enhancer sharpen blur, remove noise
-              and upscale it to razor-sharp 4K or 8K resolution in seconds — completely free.
+            <p className="mx-auto mt-7 max-w-xl text-base text-muted-foreground sm:text-lg">
+              Upload any image. On-device AI sharpens blur, removes noise and rebuilds detail at
+              razor-sharp resolution — in seconds, no uploads, no signup, no watermark.
             </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <a
+                href="#workspace"
+                className="group sheen inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-primary px-6 py-3.5 font-display text-sm font-semibold text-primary-foreground shadow-glow ease-spring transition-transform duration-300 hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <Wand2 className="h-4 w-4" aria-hidden="true" />
+                Enhance an image
+                <span className="ml-0.5 inline-block transition-transform duration-300 group-hover:translate-x-0.5">
+                  →
+                </span>
+              </a>
+              <a
+                href="#how-heading"
+                className="group inline-flex items-center gap-1.5 rounded-2xl px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                See how it works
+                <span className="relative inline-block h-px w-6 overflow-hidden bg-border">
+                  <span className="absolute inset-0 -translate-x-full bg-primary transition-transform duration-500 group-hover:translate-x-0" />
+                </span>
+              </a>
+            </div>
+            <div className="mx-auto mt-10 flex max-w-2xl flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
+              <span>◇ 100% on-device</span>
+              <span>◇ Zero uploads</span>
+              <span>◇ No watermark</span>
+              <span>◇ 4K &amp; 8K output</span>
+            </div>
           </section>
 
           {/* Workspace */}
