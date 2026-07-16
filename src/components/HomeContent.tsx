@@ -200,79 +200,138 @@ const FORMATS = [
   { name: "WEBP", desc: "A modern, efficient format used widely across the web." },
 ];
 
+function SectionHead({
+  eyebrow,
+  id,
+  title,
+  desc,
+}: {
+  eyebrow: string;
+  id: string;
+  title: string;
+  desc: string;
+}) {
+  return (
+    <div className="text-center">
+      <span className="eyebrow">
+        <span className="h-px w-6 bg-gradient-primary" aria-hidden="true" />
+        {eyebrow}
+      </span>
+      <h2
+        id={id}
+        className="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl"
+      >
+        {title}
+      </h2>
+      <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+        {desc}
+      </p>
+    </div>
+  );
+}
+
 export function HomeContent() {
   return (
     <>
       {/* How it works */}
-      <section className="mt-24" aria-labelledby="how-heading">
-        <div className="text-center">
-          <h2 id="how-heading" className="font-display text-2xl font-bold sm:text-3xl">
-            How Pixel Perfect Pro works
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Behind the single Enhance button, the AI moves through four stages. Here is what
-            actually happens to your photo — in plain language, without the hype.
-          </p>
-        </div>
-        <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map((s) => (
-            <li key={s.title} className="rounded-2xl glass p-6">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15">
-                <s.icon className="h-5 w-5 text-primary" aria-hidden="true" />
+      <section className="mt-28 md:mt-32" aria-labelledby="how-heading">
+        <SectionHead
+          eyebrow="How it works"
+          id="how-heading"
+          title="From soft pixel to sharp print in four steps"
+          desc="Behind the single Enhance button, the AI moves through four stages — in plain language, no hype."
+        />
+        <ol className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {STEPS.map((s, i) => (
+            <li
+              key={s.title}
+              className="group lift relative overflow-hidden rounded-3xl glass p-6 md:p-7"
+            >
+              <span
+                className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                style={{
+                  background:
+                    "radial-gradient(60% 60% at 20% 0%, color-mix(in oklab, var(--primary) 22%, transparent), transparent 70%)",
+                }}
+                aria-hidden="true"
+              />
+              <div className="relative flex items-center justify-between">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow ring-1 ring-inset ring-white/20">
+                  <s.icon className="h-5 w-5 text-primary-foreground" aria-hidden="true" />
+                </div>
+                <span className="font-display text-3xl font-bold text-muted-foreground/25">
+                  0{i + 1}
+                </span>
               </div>
-              <h3 className="mt-4 font-display text-base font-semibold">{s.title}</h3>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
+              <h3 className="relative mt-6 font-display text-base font-semibold tracking-tight">
+                {s.title}
+              </h3>
+              <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground">
+                {s.desc}
+              </p>
             </li>
           ))}
         </ol>
       </section>
 
       {/* Why use */}
-      <section className="mt-24" aria-labelledby="why-heading">
-        <div className="text-center">
-          <h2 id="why-heading" className="font-display text-2xl font-bold sm:text-3xl">
-            Why use Pixel Perfect Pro
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Each of these solves a specific, everyday problem with photos — not vague promises about
-            &ldquo;amazing&rdquo; results.
-          </p>
-        </div>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="mt-28 md:mt-32" aria-labelledby="why-heading">
+        <SectionHead
+          eyebrow="Why it matters"
+          id="why-heading"
+          title="Concrete problems. Concrete outcomes."
+          desc="Each card solves a specific, everyday photo problem — not vague promises."
+        />
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {BENEFITS.map((b) => (
-            <div key={b.title} className="rounded-2xl glass p-5">
-              <h3 className="font-display text-base font-semibold">{b.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                <span className="font-medium text-foreground/80">The problem: </span>
-                {b.problem}
-              </p>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                <span className="font-medium text-foreground/80">The outcome: </span>
-                {b.outcome}
-              </p>
+            <div
+              key={b.title}
+              className="group lift relative overflow-hidden rounded-3xl glass p-6 md:p-7"
+            >
+              <span
+                aria-hidden="true"
+                className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+              />
+              <h3 className="font-display text-base font-semibold tracking-tight">{b.title}</h3>
+              <div className="mt-4 flex flex-col gap-3 text-sm leading-relaxed">
+                <p className="text-muted-foreground">
+                  <span className="mr-1.5 inline-block rounded-md bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-destructive">
+                    Problem
+                  </span>
+                  {b.problem}
+                </p>
+                <p className="text-foreground/90">
+                  <span className="mr-1.5 inline-block rounded-md bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                    Outcome
+                  </span>
+                  {b.outcome}
+                </p>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Use cases / before & after */}
-      <section className="mt-24" aria-labelledby="usecases-heading">
-        <div className="text-center">
-          <h2 id="usecases-heading" className="font-display text-2xl font-bold sm:text-3xl">
-            What it works well on
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Different photos have different problems. Below is what the AI typically does for each
-            kind of image, and where to keep your expectations realistic.
-          </p>
-        </div>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Use cases */}
+      <section className="mt-28 md:mt-32" aria-labelledby="usecases-heading">
+        <SectionHead
+          eyebrow="Use cases"
+          id="usecases-heading"
+          title="What it works well on"
+          desc="Different photos have different problems. Here's what the AI typically does for each."
+        />
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {USE_CASES.map((u) => (
-            <div key={u.title} className="flex flex-col rounded-2xl glass p-5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15">
+            <div
+              key={u.title}
+              className="group lift flex flex-col rounded-3xl glass p-6"
+            >
+              <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/15 ring-1 ring-inset ring-primary/30 transition-transform duration-300 group-hover:scale-110">
                 <u.icon className="h-5 w-5 text-primary" aria-hidden="true" />
               </div>
-              <h3 className="mt-4 font-display text-base font-semibold">{u.title}</h3>
+              <h3 className="mt-5 font-display text-base font-semibold tracking-tight">
+                {u.title}
+              </h3>
               <dl className="mt-2 space-y-1.5 text-sm leading-relaxed text-muted-foreground">
                 <div>
                   <dt className="inline font-medium text-foreground/80">Problem: </dt>
@@ -283,47 +342,48 @@ export function HomeContent() {
                   <dd className="inline">{u.result}</dd>
                 </div>
               </dl>
-              <p className="mt-3 text-xs leading-relaxed text-muted-foreground/80">{u.note}</p>
+              <p className="mt-4 border-t border-border/40 pt-3 text-xs leading-relaxed text-muted-foreground/80">
+                {u.note}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Search intent Q&A */}
-      <section className="mt-24" aria-labelledby="learn-heading">
-        <div className="text-center">
-          <h2 id="learn-heading" className="font-display text-2xl font-bold sm:text-3xl">
-            Understanding AI image enhancement
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Honest answers to the questions people most often ask before enhancing a photo.
-          </p>
-        </div>
-        <div className="mx-auto mt-8 grid max-w-4xl gap-4 sm:grid-cols-2">
+      <section className="mt-28 md:mt-32" aria-labelledby="learn-heading">
+        <SectionHead
+          eyebrow="Learn"
+          id="learn-heading"
+          title="Understanding AI image enhancement"
+          desc="Honest answers to the questions people most often ask before enhancing a photo."
+        />
+        <div className="mx-auto mt-12 grid max-w-4xl gap-4 sm:grid-cols-2">
           {SEARCH_INTENT.map((item) => (
-            <article key={item.q} className="rounded-2xl glass p-5">
-              <h3 className="font-display text-base font-semibold">{item.q}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.a}</p>
+            <article key={item.q} className="lift rounded-3xl glass p-6">
+              <h3 className="font-display text-base font-semibold tracking-tight">{item.q}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.a}</p>
             </article>
           ))}
         </div>
       </section>
 
       {/* Supported formats */}
-      <section className="mt-24" aria-labelledby="formats-heading">
-        <div className="text-center">
-          <h2 id="formats-heading" className="font-display text-2xl font-bold sm:text-3xl">
-            Supported formats
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Upload the most common image types, up to a maximum file size of 15MB per image.
-          </p>
-        </div>
-        <div className="mx-auto mt-8 grid max-w-3xl gap-4 sm:grid-cols-3">
+      <section className="mt-28 md:mt-32" aria-labelledby="formats-heading">
+        <SectionHead
+          eyebrow="Formats"
+          id="formats-heading"
+          title="Supported formats"
+          desc="Upload the most common image types, up to 15MB per image."
+        />
+        <div className="mx-auto mt-12 grid max-w-3xl gap-4 sm:grid-cols-3">
           {FORMATS.map((f) => (
-            <div key={f.name} className="rounded-2xl glass p-5 text-center">
-              <p className="font-display text-lg font-bold text-gradient">{f.name}</p>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
+            <div
+              key={f.name}
+              className="group lift rounded-3xl glass p-6 text-center"
+            >
+              <p className="font-display text-2xl font-bold text-aurora">{f.name}</p>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
             </div>
           ))}
         </div>
