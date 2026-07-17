@@ -7,9 +7,15 @@ type Captured = { level: string; args: unknown[] }[];
 function captureConsole() {
   const captured: Captured = [];
   const spy = {
-    log: vi.spyOn(console, "log").mockImplementation((...a) => captured.push({ level: "info", args: a })),
-    warn: vi.spyOn(console, "warn").mockImplementation((...a) => captured.push({ level: "warn", args: a })),
-    error: vi.spyOn(console, "error").mockImplementation((...a) => captured.push({ level: "error", args: a })),
+    log: vi
+      .spyOn(console, "log")
+      .mockImplementation((...a) => captured.push({ level: "info", args: a })),
+    warn: vi
+      .spyOn(console, "warn")
+      .mockImplementation((...a) => captured.push({ level: "warn", args: a })),
+    error: vi
+      .spyOn(console, "error")
+      .mockImplementation((...a) => captured.push({ level: "error", args: a })),
   };
   return {
     captured,

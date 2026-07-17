@@ -19,14 +19,37 @@ function makeAlert(overrides: Partial<ReliabilityAlert> = {}): ReliabilityAlert 
 
 describe("alerts", () => {
   it("dedupKey is stable for similar evidence", () => {
-    const a = makeAlert({ evidence: { baseline: 10, current: 30, change: 2.03, samples: { baseline: 100, current: 120 } } });
-    const b = makeAlert({ evidence: { baseline: 12, current: 34, change: 1.97, samples: { baseline: 100, current: 120 } } });
+    const a = makeAlert({
+      evidence: {
+        baseline: 10,
+        current: 30,
+        change: 2.03,
+        samples: { baseline: 100, current: 120 },
+      },
+    });
+    const b = makeAlert({
+      evidence: {
+        baseline: 12,
+        current: 34,
+        change: 1.97,
+        samples: { baseline: 100, current: 120 },
+      },
+    });
     expect(dedupKey(a)).toBe(dedupKey(b));
   });
 
   it("dedupKey changes for material shifts", () => {
-    const mild = makeAlert({ evidence: { baseline: 10, current: 15, change: 0.5, samples: { baseline: 100, current: 120 } } });
-    const severe = makeAlert({ evidence: { baseline: 10, current: 100, change: 9, samples: { baseline: 100, current: 120 } } });
+    const mild = makeAlert({
+      evidence: {
+        baseline: 10,
+        current: 15,
+        change: 0.5,
+        samples: { baseline: 100, current: 120 },
+      },
+    });
+    const severe = makeAlert({
+      evidence: { baseline: 10, current: 100, change: 9, samples: { baseline: 100, current: 120 } },
+    });
     expect(dedupKey(mild)).not.toBe(dedupKey(severe));
   });
 
@@ -45,7 +68,10 @@ describe("alerts", () => {
   });
 
   it("webhookPayload includes a human-readable text summary", () => {
-    const payload = webhookPayload(toDeliverable(makeAlert({ severity: "critical" })), "pixelperfect");
+    const payload = webhookPayload(
+      toDeliverable(makeAlert({ severity: "critical" })),
+      "pixelperfect",
+    );
     expect(payload.text).toContain("CRITICAL");
     expect(payload.text).toContain("Error volume");
     expect(payload.source).toBe("pixelperfect");

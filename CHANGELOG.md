@@ -39,7 +39,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added — live time-to-complete countdown + faster first enhance
 
-
 - **Live ETA countdown.** When the user presses Enhance, a clock now shows a
   realistic "Ns remaining" countdown for their device, plus an up-front
   "Estimated time on your device" hint before they commit. Removes the
@@ -53,8 +52,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   background right after upload (while the user picks options), so pressing
   Enhance goes straight to inference instead of waiting on cold start. Still
   100% on-device, offline-after-first-load, SSR-safe — no server, no APIs.
-
-
 
 ### Added — Phase 1: production-grade tiled neural inference
 
@@ -85,8 +82,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   order-independent determinism. Full suite 103/103, typecheck clean, SSR
   bundle free of executable ML code, client JS 994.7 KB (within 1400 KB budget).
 
-
-
 ### Changed — Neural engine upgraded to Real-ESRGAN (evidence-based model swap)
 
 - **Replaced the Swin2SR (transformers.js) neural path with Real-ESRGAN
@@ -115,8 +110,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Bundle:** total client JS **dropped 1113 KB → 992 KB**; SSR/worker bundle
   verified free of onnxruntime; 86/86 tests and typecheck green.
 
-
-
 ### Changed — Restored pure browser-first architecture (removed all hosted AI)
 
 - **Removed the hosted "Max (Studio AI)" path entirely.** Deleted the server
@@ -141,7 +134,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added — Hybrid enhancement engine (classical + opt-in neural super-resolution)
 
 - **Forensic finding (evidence, not assumption):** a real browser-driven audit
-  proved the classical engine *does* modify the download substantially
+  proved the classical engine _does_ modify the download substantially
   (mean abs diff 8.27/255, 75% of pixels changed, ~180× the edge energy of a
   bicubic resize, 0 hosted-inference requests). The "looks the same" report had
   two real causes: (1) the compare slider/preview downscaled the 4K output to
@@ -164,8 +157,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Default unchanged:** the instant, zero-download classical engine remains the
   default ("Fast").
 
-
-
 ### Fixed — Enhancement produced visually identical output
 
 - **Detail-recovery pass was perceptually a no-op.** A forensic pixel-level
@@ -184,8 +175,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a regression test in `filters.test.ts` asserting a factor-matched
   radius sharpens a soft 4px edge >2× more than a fixed 1px radius, so the
   mismatch cannot silently return.
-
-
 
 ### Changed — Browser-first enhancement engine (zero hosted inference, zero credits)
 
@@ -214,8 +203,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   largest chunk is the TanStack Router vendor bundle (~612 KB raw / ~139 KB
   gzip), a single unsplittable dependency; the engine + worker are separate lazy
   chunks.
-
-
 
 ### Added — Architecture fitness functions (drift guardrails)
 

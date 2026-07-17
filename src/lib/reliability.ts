@@ -329,17 +329,25 @@ export function forecastTrends(rows: SnapshotRow[]): TrendForecast[] {
     let direction: TrendForecast["direction"] = "steady";
     const noise = Math.abs(mean(ys)) * 0.005 + 1e-6;
     if (Math.abs(slopePerHour) > noise) {
-      const worse =
-        metric === "success_rate" ? slopePerHour < 0 : slopePerHour > 0;
+      const worse = metric === "success_rate" ? slopePerHour < 0 : slopePerHour > 0;
       direction = worse ? "degrading" : "improving";
     }
     return { metric, slopePerHour, projected1h, projected24h, direction };
   }
 
   return [
-    forecast("success_rate", sorted.map((r) => r.success_rate)),
-    forecast("p95_ms", sorted.map((r) => r.p95_ms)),
-    forecast("lcp_p75", sorted.map((r) => r.lcp_p75)),
+    forecast(
+      "success_rate",
+      sorted.map((r) => r.success_rate),
+    ),
+    forecast(
+      "p95_ms",
+      sorted.map((r) => r.p95_ms),
+    ),
+    forecast(
+      "lcp_p75",
+      sorted.map((r) => r.lcp_p75),
+    ),
   ];
 }
 
@@ -350,10 +358,7 @@ export function riskScore(alerts: ReliabilityAlert[], trends: TrendForecast[]): 
     (sum, a) => sum + (a.severity === "critical" ? 0.4 : a.severity === "warning" ? 0.2 : 0.05),
     0,
   );
-  const trendWeight = trends.reduce(
-    (sum, t) => sum + (t.direction === "degrading" ? 0.15 : 0),
-    0,
-  );
+  const trendWeight = trends.reduce((sum, t) => sum + (t.direction === "degrading" ? 0.15 : 0), 0);
   return Math.max(0, Math.min(1, alertWeight + trendWeight));
 }
 

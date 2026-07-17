@@ -30,7 +30,13 @@ describe("estimateEnhanceMs", () => {
   });
 
   it("faster device tiers estimate shorter times", () => {
-    const base = { srcW: 1600, srcH: 1200, scale: "4k" as const, engine: "neural" as const, warm: true };
+    const base = {
+      srcW: 1600,
+      srcH: 1200,
+      scale: "4k" as const,
+      engine: "neural" as const,
+      warm: true,
+    };
     const high = estimateEnhanceMs({ ...base, tier: "high" });
     const medium = estimateEnhanceMs({ ...base, tier: "medium" });
     const low = estimateEnhanceMs({ ...base, tier: "low" });

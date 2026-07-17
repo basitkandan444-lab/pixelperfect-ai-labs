@@ -51,8 +51,10 @@ describe("computeFunnel", () => {
     const rows: { session_id: string; name: string; ts: string }[] = [];
     // 10 sessions view; 4 upload; 2 enhance_start
     for (let i = 0; i < 10; i++) rows.push({ session_id: `s${i}`, name: "page_view", ts: t(0) });
-    for (let i = 0; i < 4; i++) rows.push({ session_id: `s${i}`, name: "upload_completed", ts: t(1) });
-    for (let i = 0; i < 2; i++) rows.push({ session_id: `s${i}`, name: "enhance_started", ts: t(2) });
+    for (let i = 0; i < 4; i++)
+      rows.push({ session_id: `s${i}`, name: "upload_completed", ts: t(1) });
+    for (let i = 0; i < 2; i++)
+      rows.push({ session_id: `s${i}`, name: "enhance_started", ts: t(2) });
     const r = computeFunnel(rows, ["page_view", "upload_completed", "enhance_started"]);
     expect(r.steps[0].sessions).toBe(10);
     expect(r.steps[1].sessions).toBe(4);

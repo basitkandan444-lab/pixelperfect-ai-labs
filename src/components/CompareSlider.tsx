@@ -51,8 +51,7 @@ function Picture({
 }) {
   const widths = img.widths ?? [];
   const base = img.base;
-  const buildSrcSet = (ext: string) =>
-    widths.map((w) => `${base}-${w}.${ext} ${w}w`).join(", ");
+  const buildSrcSet = (ext: string) => widths.map((w) => `${base}-${w}.${ext} ${w}w`).join(", ");
   return (
     <picture>
       {base && widths.length > 0 && (

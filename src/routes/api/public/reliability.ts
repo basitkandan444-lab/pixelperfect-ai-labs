@@ -16,13 +16,18 @@ export const Route = createFileRoute("/api/public/reliability")({
       GET: async ({ request }) => {
         const requestId = newRequestId();
         const url = new URL(request.url);
-        const window = Math.min(168, Math.max(1, Number(url.searchParams.get("windowHours") ?? 24)));
+        const window = Math.min(
+          168,
+          Math.max(1, Number(url.searchParams.get("windowHours") ?? 24)),
+        );
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const since = new Date(Date.now() - window * 3_600_000).toISOString();
           const { data, error } = await supabaseAdmin
             .from("telemetry_snapshots")
-            .select("ts,requests,success_rate,avg_ms,p95_ms,lcp_p75,cls_p75,inp_p75,errors,deployment")
+            .select(
+              "ts,requests,success_rate,avg_ms,p95_ms,lcp_p75,cls_p75,inp_p75,errors,deployment",
+            )
             .gte("ts", since)
             .order("ts", { ascending: true })
             .limit(2000);

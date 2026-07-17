@@ -94,9 +94,7 @@ export const Route = createFileRoute("/api/public/intelligence")({
           const journeyRows = (journeyRes.data ?? []).map((r) => {
             const metrics = (r as { metrics?: Record<string, unknown> | null }).metrics ?? null;
             const feat =
-              metrics && typeof metrics.feature === "string"
-                ? (metrics.feature as string)
-                : null;
+              metrics && typeof metrics.feature === "string" ? (metrics.feature as string) : null;
             return {
               session_id: String(r.session_id),
               path: (r.path ?? null) as string | null,

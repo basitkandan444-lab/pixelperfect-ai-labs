@@ -1,11 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { jsonFail, jsonOk } from "@/lib/api-response";
-import {
-  computeCohorts,
-  DEFAULT_RETENTION_EVENTS,
-  type CohortGranularity,
-} from "@/lib/cohorts";
+import { computeCohorts, DEFAULT_RETENTION_EVENTS, type CohortGranularity } from "@/lib/cohorts";
 import { newRequestId } from "@/lib/logger";
 import { clientKeyFromRequest, createRateLimiter } from "@/lib/rate-limit";
 
@@ -47,8 +43,7 @@ export const Route = createFileRoute("/api/public/cohorts")({
           : 14;
 
         // Lookback horizon: pull enough raw event history to build the buckets.
-        const bucketDays =
-          granularity === "monthly" ? 31 : granularity === "weekly" ? 7 : 1;
+        const bucketDays = granularity === "monthly" ? 31 : granularity === "weekly" ? 7 : 1;
         const lookbackDays = Math.min(365, windowBuckets * bucketDays + 7);
         const since = new Date(Date.now() - lookbackDays * 86_400_000).toISOString();
 

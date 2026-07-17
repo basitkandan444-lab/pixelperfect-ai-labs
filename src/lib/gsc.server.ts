@@ -26,7 +26,11 @@ export type GscRow = {
 };
 export type GscTotals = { clicks?: number; impressions?: number; ctr?: number; position?: number };
 
-export async function fetchGscSites(): Promise<{ sites: GscSite[]; connected: boolean; error?: string }> {
+export async function fetchGscSites(): Promise<{
+  sites: GscSite[];
+  connected: boolean;
+  error?: string;
+}> {
   if (!isGscConfigured()) return { sites: [], connected: false };
   const res = await fetch(`${GATEWAY}/webmasters/v3/sites`, { headers: headers() });
   if (!res.ok) return { sites: [], connected: false, error: `${res.status}` };

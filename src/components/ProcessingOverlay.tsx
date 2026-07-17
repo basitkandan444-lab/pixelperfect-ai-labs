@@ -7,11 +7,7 @@
 import { Wand2, Check, Loader2 } from "lucide-react";
 
 import { formatRemaining } from "@/lib/enhance/estimate";
-import {
-  PROCESSING_STAGES,
-  stageIndex,
-  type ProcessingStage,
-} from "@/lib/enhance/predictor";
+import { PROCESSING_STAGES, stageIndex, type ProcessingStage } from "@/lib/enhance/predictor";
 
 export interface ProcessingOverlayProps {
   scale: "4k" | "8k";
@@ -61,9 +57,7 @@ export function ProcessingOverlay({
         <span className="font-display text-4xl font-bold tabular-nums text-gradient">
           {formatRemaining(etaRemainingMs)}
         </span>
-        <span className="text-xs text-muted-foreground">
-          Predicted with {accuracy}% accuracy
-        </span>
+        <span className="text-xs text-muted-foreground">Predicted with {accuracy}% accuracy</span>
       </div>
 
       {/* Smooth progress bar */}

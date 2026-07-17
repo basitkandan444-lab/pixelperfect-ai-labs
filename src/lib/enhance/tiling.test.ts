@@ -129,7 +129,12 @@ describe("tileBlendWeights", () => {
 
   it("ramps toward a feathered edge and is strictly positive", () => {
     const outW = 64;
-    const w = tileBlendWeights(outW, 64, { left: true, right: false, top: false, bottom: false }, 16);
+    const w = tileBlendWeights(
+      outW,
+      64,
+      { left: true, right: false, top: false, bottom: false },
+      16,
+    );
     expect(w[0]).toBeGreaterThan(0);
     expect(w[0]).toBeLessThan(w[10]);
     expect(w[20]).toBeCloseTo(1, 5); // beyond the feather band → full weight
@@ -142,8 +147,18 @@ describe("tileBlendWeights", () => {
     // removes seams. Use a 64² tile so the half-tile clamp does not shrink band.
     const outW = 64;
     const band = 16;
-    const wLeft = tileBlendWeights(outW, 64, { left: false, right: true, top: false, bottom: false }, band);
-    const wRight = tileBlendWeights(outW, 64, { left: true, right: false, top: false, bottom: false }, band);
+    const wLeft = tileBlendWeights(
+      outW,
+      64,
+      { left: false, right: true, top: false, bottom: false },
+      band,
+    );
+    const wRight = tileBlendWeights(
+      outW,
+      64,
+      { left: true, right: false, top: false, bottom: false },
+      band,
+    );
     for (let i = 0; i < band; i++) {
       const aRight = wLeft[outW - band + i]; // row 0 of the right feather
       const bLeft = wRight[i]; // row 0 of the left feather
@@ -240,4 +255,3 @@ describe("tiled reassembly (blend simulation)", () => {
     expect(maxDiff).toBeLessThan(1e-6);
   });
 });
-

@@ -14,12 +14,7 @@ import { renderEnhanced, type CanvasLike, type RenderTarget } from "./render";
 import { computeTarget, type Scale } from "./targets";
 
 export type EnhanceStage =
-  | "preparing"
-  | "detecting"
-  | "decoding"
-  | "upscaling"
-  | "finishing"
-  | "done";
+  "preparing" | "detecting" | "decoding" | "upscaling" | "finishing" | "done";
 
 export interface EnhanceProgress {
   stage: EnhanceStage;

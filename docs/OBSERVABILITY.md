@@ -112,4 +112,3 @@ reused by dashboards, MCP tooling, and notifiers.
   for dashboards and external monitors.
 - Dedup logic lives in `src/lib/alerts.ts` (`dedupKey`, `toDeliverable`,
   `webhookPayload`) — pure functions, unit-tested in `src/lib/alerts.test.ts`.
-

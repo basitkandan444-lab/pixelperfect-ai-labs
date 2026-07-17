@@ -30,7 +30,12 @@ export const Route = createFileRoute("/api/public/anomalies")({
             .order("ts", { ascending: true })
             .limit(2000);
           if (error) return jsonFail("internal_error", "Query failed.", { status: 500, requestId });
-          const rows = (data ?? []) as { ts: string; success_rate: number; p95_ms: number; lcp_p75: number }[];
+          const rows = (data ?? []) as {
+            ts: string;
+            success_rate: number;
+            p95_ms: number;
+            lcp_p75: number;
+          }[];
           const seriesFor = (k: "success_rate" | "p95_ms" | "lcp_p75") =>
             rows.map((r) => ({ ts: String(r.ts), value: Number(r[k]) || 0 }));
 

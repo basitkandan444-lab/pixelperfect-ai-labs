@@ -44,8 +44,7 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
     }
   },
   loader: async ({ location }) => {
-    const authorizationId =
-      new URLSearchParams(location.search).get("authorization_id") ?? "";
+    const authorizationId = new URLSearchParams(location.search).get("authorization_id") ?? "";
     const { data, error } = await oauth().getAuthorizationDetails(authorizationId);
     if (error) throw new Error(error.message);
     const immediate = data?.redirect_url ?? data?.redirect_to;
@@ -105,8 +104,8 @@ function Consent() {
           Connect {clientName} to Pixel Perfect Pro
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          This lets {clientName} act on your behalf while you are signed in.
-          It does not bypass this app's permissions or backend policies.
+          This lets {clientName} act on your behalf while you are signed in. It does not bypass this
+          app's permissions or backend policies.
         </p>
 
         {scopeList.length > 0 && (

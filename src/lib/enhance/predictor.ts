@@ -225,7 +225,11 @@ export function recordOutcome(
   const factor =
     prev.samples === 0
       ? observedFactor
-      : clamp(prev.factor * (1 - FACTOR_ALPHA) + observedFactor * FACTOR_ALPHA, MIN_FACTOR, MAX_FACTOR);
+      : clamp(
+          prev.factor * (1 - FACTOR_ALPHA) + observedFactor * FACTOR_ALPHA,
+          MIN_FACTOR,
+          MAX_FACTOR,
+        );
 
   // Relative error of the CALIBRATED prediction we would have shown (prev.factor
   // applied to this run's base) versus the actual — this is what confidence uses.
@@ -286,12 +290,7 @@ function clamp(v: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, v));
 }
 
-export type ProcessingStage =
-  | "preparing"
-  | "analysis"
-  | "enhancement"
-  | "blending"
-  | "finalizing";
+export type ProcessingStage = "preparing" | "analysis" | "enhancement" | "blending" | "finalizing";
 
 export interface StageInfo {
   id: ProcessingStage;

@@ -17,14 +17,18 @@ import {
 
 export const Route = createFileRoute("/ops/experiments")({
   head: () => ({
-    meta: [
-      { title: "Experiments — Ops" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
+    meta: [{ title: "Experiments — Ops" }, { name: "robots", content: "noindex, nofollow" }],
   }),
   beforeLoad: async () => {
     const { data } = await supabase.auth.getSession();
-    if (!data.session) throw redirect({ to: "/auth" });
+    if (!data.session) {
+      throw redirect({
+        to: "/auth",
+        search: {
+          next: "/ops/experiments",
+        },
+      });
+    }
   },
   component: ExperimentsAdmin,
 });
@@ -60,8 +64,10 @@ function ExperimentsAdmin() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["ops", "experiments"] }),
   });
   const statusMut = useMutation({
-    mutationFn: async (input: { id: string; status: "draft" | "running" | "paused" | "archived" }) =>
-      setStatus({ data: input }),
+    mutationFn: async (input: {
+      id: string;
+      status: "draft" | "running" | "paused" | "archived";
+    }) => setStatus({ data: input }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["ops", "experiments"] }),
   });
   const delMut = useMutation({
@@ -146,12 +152,22 @@ function ExperimentRowCard({
             </Button>
           )}
           {exp.status === "running" && (
-            <Button size="sm" variant="secondary" onClick={() => onSetStatus("paused")} disabled={statusPending}>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => onSetStatus("paused")}
+              disabled={statusPending}
+            >
               Pause (kill switch)
             </Button>
           )}
           {exp.status !== "archived" && (
-            <Button size="sm" variant="outline" onClick={() => onSetStatus("archived")} disabled={statusPending}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onSetStatus("archived")}
+              disabled={statusPending}
+            >
               Archive
             </Button>
           )}
@@ -213,7 +229,10 @@ function NewExperimentForm({
 
   function parseVariants(): NewExperimentInput["variants"] | { error: string } {
     const out: NewExperimentInput["variants"] = [];
-    const lines = variantsText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    const lines = variantsText
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter(Boolean);
     for (const line of lines) {
       const [id, weightStr, role] = line.split(":").map((s) => s.trim());
       if (!id) return { error: `bad line: ${line}` };
@@ -291,7 +310,9 @@ function NewExperimentForm({
             id="variants"
             className={`${inputCls} font-mono text-xs`}
             value={variantsText}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setVariantsText(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setVariantsText(e.target.value)
+            }
             rows={4}
           />
         </div>

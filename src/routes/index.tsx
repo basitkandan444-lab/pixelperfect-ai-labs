@@ -1,14 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  Sparkles,
-  UploadCloud,
-  Wand2,
-  Download,
-  RotateCcw,
-  Zap,
-  Gauge,
-} from "lucide-react";
+import { Sparkles, UploadCloud, Wand2, Download, RotateCcw, Zap, Gauge } from "lucide-react";
 
 import { toast } from "sonner";
 
@@ -35,8 +27,6 @@ import {
 // The browser enhancement engine (+ its worker) is lazy-loaded on first use so
 // it never weighs down the initial page bundle — see the dynamic import in
 // `enhance()` below.
-
-
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -135,7 +125,6 @@ function Index() {
   const progressRef = useRef(0);
   const runBaseMsRef = useRef(0);
 
-
   // Signal that React has hydrated and the upload handler is attached. The
   // server-rendered <input> exists before hydration, so a file set in that
   // window is silently dropped; consumers (and E2E specs) can wait for this
@@ -146,7 +135,6 @@ function Index() {
     setDeviceTier(caps.tier);
     setAccelLabel(caps.accelLabel);
   }, []);
-
 
   // Detect whether the neural (GPU) engine can run acceptably in this browser.
   // Client-only: navigator.gpu is not present during SSR. When unavailable we
@@ -216,7 +204,6 @@ function Index() {
       toast.success("Image ready. Choose a quality and enhance it.");
       trackEvent("upload", { format: file.type, size: file.size });
 
-
       // Capture natural dimensions so we can estimate the enhancement time as
       // soon as the user presses Enhance (used by the live countdown clock).
       const probe = new Image();
@@ -240,7 +227,6 @@ function Index() {
           })
           .catch(() => {});
       }
-
     };
     reader.readAsDataURL(file);
   }, []);
@@ -355,7 +341,6 @@ function Index() {
     }
   }, [clearResultUrl, original, scale, engine, fileInfo, stopCountdown]);
 
-
   const reset = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
@@ -395,7 +380,6 @@ function Index() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dims, scale, engine, deviceTier, neuralWarm, fileInfo, calibrationVersion]);
 
-
   const download = useCallback(() => {
     if (!result) return;
     const a = document.createElement("a");
@@ -431,18 +415,12 @@ function Index() {
         {/* Floating frosted nav */}
         <header className="sticky top-4 z-40 mx-auto w-full max-w-3xl">
           <div className="glass-strong flex items-center justify-between rounded-full px-3 py-2 pl-4 shadow-cinema ease-spring transition-all duration-300">
-            <Link
-              to="/"
-              className="flex items-center gap-2.5"
-              aria-label={`${SITE.name} home`}
-            >
+            <Link to="/" className="flex items-center gap-2.5" aria-label={`${SITE.name} home`}>
               <span className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-primary shadow-glow">
                 <Sparkles className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
                 <span className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/25" />
               </span>
-              <span className="font-display text-[15px] font-bold tracking-tight">
-                {SITE.name}
-              </span>
+              <span className="font-display text-[15px] font-bold tracking-tight">{SITE.name}</span>
             </Link>
             <div className="flex items-center gap-1.5">
               <span className="hidden items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-muted-foreground sm:inline-flex">
@@ -626,7 +604,6 @@ function Index() {
                           onCancel={reset}
                         />
                       )}
-
                     </div>
                   )}
                 </div>
@@ -728,10 +705,6 @@ function Index() {
                       neuralWarm={neuralWarm}
                     />
                   )}
-
-
-
-
 
                   <div className="flex flex-col gap-3 sm:flex-row">
                     {stage !== "done" ? (

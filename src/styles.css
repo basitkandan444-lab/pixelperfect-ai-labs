@@ -126,11 +126,8 @@
     var(--aurora-2) 60%,
     var(--aurora-4) 100%
   );
-  --gradient-hero: radial-gradient(
-      120% 90% at 50% -10%,
-      oklch(0.34 0.12 270) 0%,
-      transparent 55%
-    ),
+  --gradient-hero:
+    radial-gradient(120% 90% at 50% -10%, oklch(0.34 0.12 270) 0%, transparent 55%),
     radial-gradient(80% 60% at 85% 10%, oklch(0.3 0.13 210 / 0.7) 0%, transparent 60%),
     radial-gradient(70% 60% at 10% 20%, oklch(0.28 0.13 320 / 0.55) 0%, transparent 60%),
     oklch(0.14 0.02 265);
@@ -140,8 +137,7 @@
     0 24px 60px -24px color-mix(in oklab, var(--accent) 40%, transparent);
   --shadow-cinema:
     0 1px 0 0 color-mix(in oklab, white 10%, transparent) inset,
-    0 0 0 1px color-mix(in oklab, white 4%, transparent) inset,
-    0 40px 80px -30px oklch(0 0 0 / 0.6);
+    0 0 0 1px color-mix(in oklab, white 4%, transparent) inset, 0 40px 80px -30px oklch(0 0 0 / 0.6);
   --border-hairline: color-mix(in oklab, white 8%, transparent);
   --border-hairline-strong: color-mix(in oklab, white 14%, transparent);
   /* Operational status (traffic-light) tokens for the command center. */

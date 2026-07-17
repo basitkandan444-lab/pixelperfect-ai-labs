@@ -84,7 +84,9 @@ function bucketLabel(idx: number, g: CohortGranularity): string {
     const week =
       1 +
       Math.round(
-        ((target.getTime() - firstThursday.getTime()) / DAY - 3 + ((firstThursday.getUTCDay() + 6) % 7)) /
+        ((target.getTime() - firstThursday.getTime()) / DAY -
+          3 +
+          ((firstThursday.getUTCDay() + 6) % 7)) /
           7,
       );
     return `${target.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;

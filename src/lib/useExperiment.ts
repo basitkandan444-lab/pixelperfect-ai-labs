@@ -35,10 +35,7 @@ function isValidVariantArray(x: unknown): x is Variant[] {
     Array.isArray(x) &&
     x.every(
       (v): v is Variant =>
-        !!v &&
-        typeof v === "object" &&
-        "id" in v &&
-        typeof (v as { id: unknown }).id === "string",
+        !!v && typeof v === "object" && "id" in v && typeof (v as { id: unknown }).id === "string",
     )
   );
 }

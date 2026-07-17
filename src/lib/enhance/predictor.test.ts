@@ -72,7 +72,10 @@ describe("recordOutcome calibration", () => {
     const storage = memStorage();
     const before = predict(baseSignals, storage);
     // Actual took 2x the base — future estimates should grow.
-    recordOutcome({ engine: "neural", baseMs: before.baseMs, actualMs: before.baseMs * 2 }, storage);
+    recordOutcome(
+      { engine: "neural", baseMs: before.baseMs, actualMs: before.baseMs * 2 },
+      storage,
+    );
     const after = predict(baseSignals, storage);
     expect(after.estimateMs).toBeGreaterThan(before.estimateMs);
   });

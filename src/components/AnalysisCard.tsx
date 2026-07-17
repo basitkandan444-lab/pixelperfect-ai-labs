@@ -87,11 +87,7 @@ export function AnalysisCard({
 }: AnalysisCardProps) {
   const isNeural = engine === "neural";
   const mode = isNeural ? "Neural AI" : "Fast (Classical)";
-  const neuralStatus = !neuralAvailable
-    ? "Not available"
-    : neuralWarm
-      ? "Ready"
-      : "Warming up…";
+  const neuralStatus = !neuralAvailable ? "Not available" : neuralWarm ? "Ready" : "Warming up…";
   const accuracy = confidencePercent(prediction.confidence);
 
   return (

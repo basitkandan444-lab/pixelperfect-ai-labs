@@ -31,7 +31,10 @@ describe("assignVariant", () => {
   });
 
   it("respects weights", () => {
-    const vs = [{ id: "A", weight: 9, is_control: true }, { id: "B", weight: 1 }];
+    const vs = [
+      { id: "A", weight: 9, is_control: true },
+      { id: "B", weight: 1 },
+    ];
     let a = 0;
     const N = 5000;
     for (let i = 0; i < N; i++) if (assignVariant("exp-w", `s${i}`, vs) === "A") a += 1;
@@ -67,13 +70,48 @@ describe("twoProportionPValue", () => {
 
 describe("summarizeExperiments (declared control)", () => {
   const rows = [
-    { session_id: "s1", name: "experiment_exposure", ts: "", metrics: { experiment_id: "e", variant: "A" } },
-    { session_id: "s2", name: "experiment_exposure", ts: "", metrics: { experiment_id: "e", variant: "A" } },
-    { session_id: "s2", name: "experiment_conversion", ts: "", metrics: { experiment_id: "e", variant: "A" } },
-    { session_id: "s3", name: "experiment_exposure", ts: "", metrics: { experiment_id: "e", variant: "B" } },
-    { session_id: "s4", name: "experiment_exposure", ts: "", metrics: { experiment_id: "e", variant: "B" } },
-    { session_id: "s3", name: "experiment_conversion", ts: "", metrics: { experiment_id: "e", variant: "B" } },
-    { session_id: "s4", name: "experiment_conversion", ts: "", metrics: { experiment_id: "e", variant: "B" } },
+    {
+      session_id: "s1",
+      name: "experiment_exposure",
+      ts: "",
+      metrics: { experiment_id: "e", variant: "A" },
+    },
+    {
+      session_id: "s2",
+      name: "experiment_exposure",
+      ts: "",
+      metrics: { experiment_id: "e", variant: "A" },
+    },
+    {
+      session_id: "s2",
+      name: "experiment_conversion",
+      ts: "",
+      metrics: { experiment_id: "e", variant: "A" },
+    },
+    {
+      session_id: "s3",
+      name: "experiment_exposure",
+      ts: "",
+      metrics: { experiment_id: "e", variant: "B" },
+    },
+    {
+      session_id: "s4",
+      name: "experiment_exposure",
+      ts: "",
+      metrics: { experiment_id: "e", variant: "B" },
+    },
+    {
+      session_id: "s3",
+      name: "experiment_conversion",
+      ts: "",
+      metrics: { experiment_id: "e", variant: "B" },
+    },
+    {
+      session_id: "s4",
+      name: "experiment_conversion",
+      ts: "",
+      metrics: { experiment_id: "e", variant: "B" },
+    },
   ];
 
   it("computes lift vs the DECLARED control, not alphabetic first", () => {
@@ -100,7 +138,12 @@ describe("summarizeExperiments (declared control)", () => {
   it("uniquely counts exposures/conversions per session per variant", () => {
     const dupes = [
       ...rows,
-      { session_id: "s1", name: "experiment_exposure", ts: "", metrics: { experiment_id: "e", variant: "A" } }, // dupe
+      {
+        session_id: "s1",
+        name: "experiment_exposure",
+        ts: "",
+        metrics: { experiment_id: "e", variant: "A" },
+      }, // dupe
     ];
     const [s] = summarizeExperiments(dupes, [
       { id: "e", variants: [{ id: "A", is_control: true }, { id: "B" }] },
@@ -112,7 +155,12 @@ describe("summarizeExperiments (declared control)", () => {
   it("ignores events without experiment_id or variant", () => {
     const noise = [
       { session_id: "s1", name: "experiment_exposure", ts: "", metrics: null },
-      { session_id: "s1", name: "page_view", ts: "", metrics: { experiment_id: "e", variant: "A" } },
+      {
+        session_id: "s1",
+        name: "page_view",
+        ts: "",
+        metrics: { experiment_id: "e", variant: "A" },
+      },
     ];
     const out = summarizeExperiments(noise);
     expect(out).toEqual([]);

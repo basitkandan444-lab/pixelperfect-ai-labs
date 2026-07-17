@@ -175,12 +175,7 @@ export function summarizeExperiments(
  * Two-proportion z-test, two-sided. Returns p in [0,1] or null when either
  * arm has zero exposures / degenerate variance.
  */
-export function twoProportionPValue(
-  c1: number,
-  n1: number,
-  c2: number,
-  n2: number,
-): number | null {
+export function twoProportionPValue(c1: number, n1: number, c2: number, n2: number): number | null {
   if (n1 <= 0 || n2 <= 0) return null;
   const p = (c1 + c2) / (n1 + n2);
   const se = Math.sqrt(p * (1 - p) * (1 / n1 + 1 / n2));
@@ -200,7 +195,6 @@ export function normalCdf(x: number): number {
   const p =
     d *
     t *
-    (0.319381530 +
-      t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
+    (0.31938153 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
   return x > 0 ? 1 - p : p;
 }

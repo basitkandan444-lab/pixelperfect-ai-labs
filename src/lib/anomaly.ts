@@ -30,7 +30,14 @@ export function zscoreAnomalies(
     const std = stdDev(slice, mean);
     const diff = series[i].value - mean;
     // std=0 baseline: any deviation is effectively infinite z-score.
-    const z = std === 0 || !Number.isFinite(std) ? (diff === 0 ? 0 : diff > 0 ? Infinity : -Infinity) : diff / std;
+    const z =
+      std === 0 || !Number.isFinite(std)
+        ? diff === 0
+          ? 0
+          : diff > 0
+            ? Infinity
+            : -Infinity
+        : diff / std;
     if (Math.abs(z) >= threshold) {
       out.push({
         ts: series[i].ts,
@@ -55,7 +62,14 @@ export type Trend = {
 
 export function linearTrend(series: SeriesPoint[]): Trend {
   const n = series.length;
-  if (n < 2) return { slope: 0, intercept: n ? series[0].value : 0, r_squared: 0, direction: "flat", points: n };
+  if (n < 2)
+    return {
+      slope: 0,
+      intercept: n ? series[0].value : 0,
+      r_squared: 0,
+      direction: "flat",
+      points: n,
+    };
   const xs = series.map((_, i) => i);
   const ys = series.map((p) => p.value);
   const mx = avg(xs);
@@ -76,8 +90,7 @@ export function linearTrend(series: SeriesPoint[]): Trend {
     ssTot += (ys[i] - my) ** 2;
   }
   const r2 = ssTot ? 1 - ssRes / ssTot : 0;
-  const direction: Trend["direction"] =
-    Math.abs(slope) < 1e-9 ? "flat" : slope > 0 ? "up" : "down";
+  const direction: Trend["direction"] = Math.abs(slope) < 1e-9 ? "flat" : slope > 0 ? "up" : "down";
   return {
     slope: round(slope),
     intercept: round(intercept),

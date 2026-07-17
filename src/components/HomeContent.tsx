@@ -322,10 +322,7 @@ export function HomeContent() {
         />
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {USE_CASES.map((u) => (
-            <div
-              key={u.title}
-              className="group lift flex flex-col rounded-3xl glass p-6"
-            >
+            <div key={u.title} className="group lift flex flex-col rounded-3xl glass p-6">
               <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/15 ring-1 ring-inset ring-primary/30 transition-transform duration-300 group-hover:scale-110">
                 <u.icon className="h-5 w-5 text-primary" aria-hidden="true" />
               </div>
@@ -378,10 +375,7 @@ export function HomeContent() {
         />
         <div className="mx-auto mt-12 grid max-w-3xl gap-4 sm:grid-cols-3">
           {FORMATS.map((f) => (
-            <div
-              key={f.name}
-              className="group lift rounded-3xl glass p-6 text-center"
-            >
+            <div key={f.name} className="group lift rounded-3xl glass p-6 text-center">
               <p className="font-display text-2xl font-bold text-aurora">{f.name}</p>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
             </div>

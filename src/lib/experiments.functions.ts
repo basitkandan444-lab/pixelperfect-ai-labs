@@ -9,14 +9,22 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const VariantSchema = z.object({
-  id: z.string().min(1).max(64).regex(/^[a-zA-Z0-9_-]+$/),
+  id: z
+    .string()
+    .min(1)
+    .max(64)
+    .regex(/^[a-zA-Z0-9_-]+$/),
   weight: z.number().positive().finite().max(1_000_000).optional(),
   is_control: z.boolean().optional(),
   label: z.string().max(128).optional(),
 });
 
 const ExperimentInputSchema = z.object({
-  key: z.string().min(2).max(64).regex(/^[a-z0-9_-]+$/),
+  key: z
+    .string()
+    .min(2)
+    .max(64)
+    .regex(/^[a-z0-9_-]+$/),
   name: z.string().min(1).max(200),
   description: z.string().max(2000).default(""),
   goal_event: z.string().min(1).max(64).default("experiment_conversion"),
@@ -70,14 +78,26 @@ type UntypedClient = {
   rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
   from: (table: string) => {
     select: (cols: string) => {
-      order: (col: string, opts: { ascending: boolean }) => Promise<{ data: unknown; error: unknown }>;
-      eq: (col: string, val: string) => { single: () => Promise<{ data: unknown; error: unknown }> };
+      order: (
+        col: string,
+        opts: { ascending: boolean },
+      ) => Promise<{ data: unknown; error: unknown }>;
+      eq: (
+        col: string,
+        val: string,
+      ) => { single: () => Promise<{ data: unknown; error: unknown }> };
     };
-    upsert: (row: Record<string, unknown>, opts: { onConflict: string }) => {
+    upsert: (
+      row: Record<string, unknown>,
+      opts: { onConflict: string },
+    ) => {
       select: (cols: string) => { single: () => Promise<{ data: unknown; error: unknown }> };
     };
     update: (row: Record<string, unknown>) => {
-      eq: (col: string, val: string) => {
+      eq: (
+        col: string,
+        val: string,
+      ) => {
         select: (cols: string) => { single: () => Promise<{ data: unknown; error: unknown }> };
       };
     };
@@ -136,7 +156,15 @@ export const upsertExperiment = createServerFn({ method: "POST" })
           : "insert_failed";
       throw new Error(msg);
     }
-    return { experiment: out as { id: string; key: string; name: string; status: string; variants: ExperimentRow["variants"] } };
+    return {
+      experiment: out as {
+        id: string;
+        key: string;
+        name: string;
+        status: string;
+        variants: ExperimentRow["variants"];
+      },
+    };
   });
 
 export const updateExperimentStatus = createServerFn({ method: "POST" })

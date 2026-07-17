@@ -13,7 +13,14 @@ export interface BehaviorMetrics {
   // Scroll
   scrollMaxPct: number;
   scrollAvgPct: number;
-  scrollMilestones: { p10: boolean; p25: boolean; p50: boolean; p75: boolean; p90: boolean; p100: boolean };
+  scrollMilestones: {
+    p10: boolean;
+    p25: boolean;
+    p50: boolean;
+    p75: boolean;
+    p90: boolean;
+    p100: boolean;
+  };
   scrollUpCount: number;
   scrollPauseCount: number;
   scrollVelocityMean: number;
@@ -136,9 +143,10 @@ function elKey(el: EventTarget | null): string {
   const e = el as Element | null;
   if (!e || !e.tagName) return "unknown";
   const id = (e as HTMLElement).id ? `#${(e as HTMLElement).id}` : "";
-  const cls = (e as HTMLElement).className && typeof (e as HTMLElement).className === "string"
-    ? "." + ((e as HTMLElement).className as string).split(/\s+/).slice(0, 2).join(".")
-    : "";
+  const cls =
+    (e as HTMLElement).className && typeof (e as HTMLElement).className === "string"
+      ? "." + ((e as HTMLElement).className as string).split(/\s+/).slice(0, 2).join(".")
+      : "";
   return `${e.tagName.toLowerCase()}${id}${cls}`.slice(0, 80);
 }
 
@@ -262,7 +270,12 @@ function initBehaviorInternal() {
       track({
         name: "feature_interaction",
         feature: "rage_click",
-        metrics: { feature: "rage_click", element: key, count: rc.t.length, path: location.pathname },
+        metrics: {
+          feature: "rage_click",
+          element: key,
+          count: rc.t.length,
+          path: location.pathname,
+        },
       });
       rc.t = [];
     }
@@ -385,7 +398,8 @@ export function snapshot(): BehaviorMetrics {
   const sv = stats(R.scrollVelocities);
   const ms = stats(R.mouseSpeeds);
   const intervals: number[] = [];
-  for (let i = 1; i < R.clickTimes.length; i++) intervals.push(R.clickTimes[i] - R.clickTimes[i - 1]);
+  for (let i = 1; i < R.clickTimes.length; i++)
+    intervals.push(R.clickTimes[i] - R.clickTimes[i - 1]);
   const ci = stats(intervals);
   const bursts = intervals.filter((x) => x < 200).length;
   const hv = stats(R.hoverDurations);
