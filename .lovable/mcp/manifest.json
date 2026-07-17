@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "sdk_version": "0.21.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://pyxfszretybpjvwttvcg.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "pixel-perfect-pro-mcp",
+      "version": "1.0.0",
+      "title": "Pixel Perfect Pro"
+    },
+    "tools": []
+  }
+}

@@ -1,0 +1,13 @@
+import { createFileRoute } from "@tanstack/react-router";
+
+import { LandingPage } from "@/components/LandingPage";
+import { getLanding, landingHead } from "@/lib/landing";
+import { originLoader } from "@/lib/origin.functions";
+
+const content = getLanding("ai-image-enhancer");
+
+export const Route = createFileRoute("/ai-image-enhancer")({
+  component: () => <LandingPage data={content} />,
+  loader: originLoader,
+  head: ({ loaderData }) => landingHead(loaderData?.origin, content),
+});

@@ -1,0 +1,24 @@
+{
+  "name": "Pixel Perfect Pro — AI Image Enhancer & Photo Upscaler",
+  "short_name": "Pixel Perfect Pro",
+  "description": "Free AI image enhancer and photo upscaler. Turn blurry, low-quality photos into sharp 4K & 8K images online.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f1729",
+  "theme_color": "#0f1729",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
