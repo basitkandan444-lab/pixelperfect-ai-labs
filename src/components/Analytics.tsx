@@ -42,6 +42,41 @@ export function Analytics() {
 
     initTracker();
     initBehavior();
+
+    // Global failure intelligence — nothing may be invisible.
+    // 1) Uncaught runtime errors → track('error') with taxonomy
+    const onError = (e: ErrorEvent) => {
+      track({
+        name: "error",
+        ok: false,
+        error_code: (e.error && (e.error as Error).name) || "uncaught_error",
+        metrics: {
+          message: String(e.message ?? "").slice(0, 200),
+          source: String(e.filename ?? "").slice(0, 200),
+          lineno: e.lineno ?? 0,
+          colno: e.colno ?? 0,
+        },
+      });
+    };
+    // 2) Unhandled promise rejections → often mask worker crashes / OOM
+    const onRejection = (e: PromiseRejectionEvent) => {
+      const reason = e.reason;
+      const isError = reason instanceof Error;
+      track({
+        name: "error",
+        ok: false,
+        error_code: isError ? reason.name : "unhandled_rejection",
+        metrics: {
+          message: String(isError ? reason.message : reason).slice(0, 200),
+        },
+      });
+    };
+    window.addEventListener("error", onError);
+    window.addEventListener("unhandledrejection", onRejection);
+    return () => {
+      window.removeEventListener("error", onError);
+      window.removeEventListener("unhandledrejection", onRejection);
+    };
   }, []);
 
   // Fire a first-party page_view on every route change (SPA nav included).
