@@ -19,6 +19,7 @@ const JOURNEY_EVENT_NAMES = [
   "upload_completed",
   "enhance_started",
   "enhance_completed",
+  "enhance_failed",
   "download_completed",
   "error",
   "feature_interaction",
