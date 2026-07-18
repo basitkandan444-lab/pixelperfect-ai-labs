@@ -4,20 +4,34 @@ import { z } from "zod";
 import { jsonFail, jsonOk } from "@/lib/api-response";
 import { newRequestId } from "@/lib/logger";
 
-// Privacy-preserving event ingestion. No PII: we do NOT store IP, user-agent
-// strings, or user IDs. Only the classified/derived fields the client sent.
+// Privacy-preserving event ingestion. No PII: we do NOT store IPs, user-agent
+// strings, or user IDs. Only classified/derived fields the client sent.
+//
+// DATA TRUST guarantees implemented here:
+//   • event_id uniqueness → duplicate beacons are dropped, ingest is idempotent
+//   • seq per session      → server can detect gaps (missing events) later
+//   • client_ts            → out-of-order events can be reordered downstream
+//   • server ACK           → client learns which event_ids landed
 //
 // This endpoint is public by design (browsers post here). It is size-capped
 // and validates every field to keep the store clean and bounded.
 
 const EVENT_NAMES = [
   "page_view",
+  "route_change",
   "upload_started",
   "upload_completed",
   "enhance_started",
   "enhance_completed",
   "enhance_failed",
+  "enhance_abandoned",
+  "download_started",
   "download_completed",
+  "retry_performed",
+  "timeout_occurred",
+  "visibility_change",
+  "tab_closed",
+  "worker_crashed",
   "error",
   "feature_interaction",
   "session_summary",
@@ -26,6 +40,9 @@ const EVENT_NAMES = [
 ] as const;
 
 const EventSchema = z.object({
+  event_id: z.string().uuid().optional(),
+  seq: z.number().int().nonnegative().max(1_000_000).optional(),
+  client_ts: z.string().datetime().optional(),
   session_id: z.string().min(8).max(64),
   name: z.enum(EVENT_NAMES),
   path: z.string().max(512).optional(),
@@ -46,7 +63,6 @@ const EventSchema = z.object({
   error_code: z.string().max(64).optional(),
   ua_kind: z.enum(["likely_human", "needs_review", "suspicious"]).optional(),
   feature: z.string().max(64).optional(),
-  // Anonymous behavioral / performance / network summaries. No PII.
   metrics: z.record(z.string(), z.unknown()).optional(),
 });
 
@@ -57,9 +73,9 @@ export const Route = createFileRoute("/api/public/events")({
     handlers: {
       POST: async ({ request }) => {
         const requestId = newRequestId();
-        // Cap body size: 24 KB accommodates 20 events × ~1 KB (with metrics blobs).
+        // 32 KB cap accommodates 20 events × ~1.5 KB (with metrics + integrity fields).
         const text = await request.text();
-        if (text.length > 24_576) {
+        if (text.length > 32_768) {
           return jsonFail("invalid_request", "Payload too large.", { status: 413, requestId });
         }
         let raw: unknown;
@@ -77,13 +93,15 @@ export const Route = createFileRoute("/api/public/events")({
         }
         const samples = Array.isArray(parsed.data) ? parsed.data : [parsed.data];
 
-        // Country derived from Cloudflare edge header (workerd sets CF-IPCountry).
-        // No IP is ever read or stored.
+        // Country derived from Cloudflare edge header. No IP is ever read.
         const country =
           request.headers.get("cf-ipcountry") ?? request.headers.get("x-vercel-ip-country") ?? null;
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const rows = samples.map((s) => ({
+          event_id: s.event_id ?? null,
+          seq: s.seq ?? null,
+          client_ts: s.client_ts ?? null,
           session_id: s.session_id,
           name: s.name,
           path: s.path ?? null,
@@ -109,15 +127,50 @@ export const Route = createFileRoute("/api/public/events")({
           metrics: s.metrics ?? null,
         }));
 
-        const { error } = await supabaseAdmin
-          .from("events")
-          // Cast: `metrics jsonb` was added in a later migration; generated
-          // types may not yet reflect it. Runtime shape is validated by Zod.
-          .insert(rows as unknown as never);
-        if (error) {
-          return jsonFail("internal_error", "Ingestion failed.", { status: 500, requestId });
+        // Deduplicate via upsert on event_id. Rows with event_id=null
+        // fall back to plain insert (legacy clients / server-side emits).
+        const withId = rows.filter((r) => r.event_id);
+        const withoutId = rows.filter((r) => !r.event_id);
+        const acceptedIds: string[] = [];
+
+        if (withId.length > 0) {
+          const { data, error } = await supabaseAdmin
+            .from("events")
+            // ignoreDuplicates: true → PostgREST returns nothing for existing
+            // rows and inserts new ones. We report acceptance by echoing the
+            // ids we know are now stored (either newly inserted or already
+            // present from a prior beacon).
+            .upsert(withId as unknown as never, {
+              onConflict: "event_id",
+              ignoreDuplicates: true,
+            })
+            .select("event_id");
+          if (error) {
+            return jsonFail("internal_error", "Ingestion failed.", { status: 500, requestId });
+          }
+          for (const row of data ?? []) {
+            const id = (row as { event_id?: string | null }).event_id;
+            if (id) acceptedIds.push(id);
+          }
+          // Even duplicates are "accepted" from the client's perspective — the
+          // row is durably stored. Echo every submitted id.
+          for (const r of withId) {
+            const id = r.event_id as string;
+            if (!acceptedIds.includes(id)) acceptedIds.push(id);
+          }
         }
-        return jsonOk({ accepted: rows.length }, { status: 202, requestId });
+
+        if (withoutId.length > 0) {
+          const { error } = await supabaseAdmin.from("events").insert(withoutId as unknown as never);
+          if (error) {
+            return jsonFail("internal_error", "Ingestion failed.", { status: 500, requestId });
+          }
+        }
+
+        return jsonOk(
+          { accepted: rows.length, accepted_ids: acceptedIds },
+          { status: 202, requestId },
+        );
       },
     },
   },
