@@ -13,7 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@/components/Analytics";
-import { AdsterraScript } from "@/components/AdsterraScript";
+
 import { WebVitals } from "@/components/WebVitals";
 import { ANALYTICS } from "@/lib/analytics";
 import { SITE, KEYWORDS } from "@/lib/site";
@@ -192,7 +192,7 @@ function RootComponent() {
       <Outlet />
       <Toaster position="top-center" />
       <Analytics />
-      <AdsterraScript />
+      
       <WebVitals />
     </QueryClientProvider>
   );
