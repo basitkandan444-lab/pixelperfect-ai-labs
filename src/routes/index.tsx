@@ -471,8 +471,17 @@ function Index() {
     document.body.appendChild(a);
     a.click();
     a.remove();
-    trackEvent("download", { scale });
-  }, [result, scale]);
+    trackEvent("download", {
+      ok: true,
+      scale,
+      engine,
+      path: resultInfo?.path ?? "",
+      out_w: resultInfo?.width ?? 0,
+      out_h: resultInfo?.height ?? 0,
+      out_pixels: resultInfo ? resultInfo.width * resultInfo.height : 0,
+      durationMs: resultInfo?.durationMs ?? 0,
+    });
+  }, [result, scale, engine, resultInfo]);
 
   return (
     <div className="min-h-dvh bg-hero">
