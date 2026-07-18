@@ -185,14 +185,37 @@ function Index() {
   const loadFile = useCallback((file: File) => {
     if (!isAcceptedImage(file)) {
       toast.error("Unsupported format. Please upload a JPG, PNG or WEBP image.");
+      trackEvent("upload_start", {
+        ok: false,
+        error_code: "unsupported_format",
+        format: file.type || "unknown",
+        size: file.size,
+      });
       return;
     }
     if (file.size > MAX_BYTES) {
       toast.error("Image is too large. Maximum size is 15MB.");
+      trackEvent("upload_start", {
+        ok: false,
+        error_code: "too_large",
+        format: file.type || "unknown",
+        size: file.size,
+      });
       return;
     }
+    trackEvent("upload_start", { format: file.type, size: file.size });
+    const readStartedAt = Date.now();
     const reader = new FileReader();
-    reader.onerror = () => toast.error("Could not read that file. Please try another image.");
+    reader.onerror = () => {
+      toast.error("Could not read that file. Please try another image.");
+      trackEvent("upload", {
+        ok: false,
+        error_code: "read_failed",
+        format: file.type,
+        size: file.size,
+        durationMs: Date.now() - readStartedAt,
+      });
+    };
     reader.onload = () => {
       const dataUrl = reader.result as string;
       setOriginal(dataUrl);
@@ -202,7 +225,12 @@ function Index() {
       setStage("ready");
       setFileInfo({ bytes: file.size, type: file.type || "" });
       toast.success("Image ready. Choose a quality and enhance it.");
-      trackEvent("upload", { format: file.type, size: file.size });
+      trackEvent("upload", {
+        ok: true,
+        format: file.type,
+        size: file.size,
+        durationMs: Date.now() - readStartedAt,
+      });
 
       // Capture natural dimensions so we can estimate the enhancement time as
       // soon as the user presses Enhance (used by the live countdown clock).
@@ -246,15 +274,31 @@ function Index() {
     setProcStage("preparing");
     setStatusMessage("Preparing local AI engine…");
     setStage("loading");
-    trackEvent("enhance_start", { scale, engine });
+    const dims = dimensionsRef.current;
+    const caps = detectCapabilities();
+    trackEvent("enhance_start", {
+      scale,
+      engine,
+      accel: caps.accel,
+      tier: caps.tier,
+      warm: engine === "neural" ? neuralWarmRef.current : true,
+      src_w: dims?.w ?? 0,
+      src_h: dims?.h ?? 0,
+      src_pixels: dims ? dims.w * dims.h : 0,
+      file_bytes: fileInfo?.bytes ?? 0,
+      format: fileInfo?.type ?? "",
+    });
 
     // Predict how long this will take on THIS device using the self-calibrating
     // prediction engine, then start a live countdown so the user knows the wait
     // up-front instead of staring at an open-ended spinner. The prediction folds
     // in the real dimensions, chosen quality/engine, device tier, warm state,
     // file size and the learned per-device correction factor.
-    const dims = dimensionsRef.current;
-    const caps = detectCapabilities();
+    // Predict how long this will take on THIS device using the self-calibrating
+    // prediction engine, then start a live countdown so the user knows the wait
+    // up-front instead of staring at an open-ended spinner. The prediction folds
+    // in the real dimensions, chosen quality/engine, device tier, warm state,
+    // file size and the learned per-device correction factor.
     const prediction = dims
       ? predict({
           srcW: dims.w,
@@ -322,18 +366,57 @@ function Index() {
       toast.success(`Enhanced to ${scale.toUpperCase()} quality!`);
       trackEvent("enhance_complete", {
         scale,
-        engine: res.path,
+        engine,
+        path: res.path,
         accel: res.capabilities.accel,
+        tier: res.capabilities.tier,
         durationMs: res.durationMs,
+        out_w: res.width,
+        out_h: res.height,
+        out_pixels: res.width * res.height,
+        src_w: dims?.w ?? 0,
+        src_h: dims?.h ?? 0,
+        src_pixels: dims ? dims.w * dims.h : 0,
+        file_bytes: fileInfo?.bytes ?? 0,
+        format: fileInfo?.type ?? "",
       });
     } catch (err) {
       // A user-initiated cancel is not an error — reset() already handled UI.
-      if (err instanceof DOMException && err.name === "AbortError") return;
-      if (err instanceof Error && err.name === "UnsupportedBrowserError") {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        trackEvent("enhance_fail", {
+          scale,
+          engine,
+          error_code: "aborted",
+          durationMs: Date.now() - startedAt,
+          progress: progressRef.current,
+        });
+        return;
+      }
+      const errorCode =
+        err instanceof Error && err.name === "UnsupportedBrowserError"
+          ? "unsupported_browser"
+          : err instanceof Error && err.name
+            ? err.name
+            : "unknown";
+      if (errorCode === "unsupported_browser") {
         toast.error("Your browser does not support this enhancement mode. Try a modern browser.");
       } else {
         toast.error("Enhancement failed. Please try a different image.");
       }
+      trackEvent("enhance_fail", {
+        scale,
+        engine,
+        accel: caps.accel,
+        tier: caps.tier,
+        error_code: errorCode,
+        durationMs: Date.now() - startedAt,
+        progress: progressRef.current,
+        src_w: dims?.w ?? 0,
+        src_h: dims?.h ?? 0,
+        src_pixels: dims ? dims.w * dims.h : 0,
+        file_bytes: fileInfo?.bytes ?? 0,
+        format: fileInfo?.type ?? "",
+      });
       setStage("ready");
     } finally {
       stopCountdown();
@@ -388,8 +471,17 @@ function Index() {
     document.body.appendChild(a);
     a.click();
     a.remove();
-    trackEvent("download", { scale });
-  }, [result, scale]);
+    trackEvent("download", {
+      ok: true,
+      scale,
+      engine,
+      path: resultInfo?.path ?? "",
+      out_w: resultInfo?.width ?? 0,
+      out_h: resultInfo?.height ?? 0,
+      out_pixels: resultInfo ? resultInfo.width * resultInfo.height : 0,
+      durationMs: resultInfo?.durationMs ?? 0,
+    });
+  }, [result, scale, engine, resultInfo]);
 
   return (
     <div className="min-h-dvh bg-hero">
