@@ -20,10 +20,12 @@ export type Database = {
           bytes: number | null
           campaign: string | null
           city: string | null
+          client_ts: string | null
           country: string | null
           device_type: string | null
           duration_ms: number | null
           error_code: string | null
+          event_id: string | null
           id: number
           language: string | null
           medium: string | null
@@ -36,6 +38,7 @@ export type Database = {
           region: string | null
           screen_h: number | null
           screen_w: number | null
+          seq: number | null
           session_id: string
           source: string | null
           timezone: string | null
@@ -47,10 +50,12 @@ export type Database = {
           bytes?: number | null
           campaign?: string | null
           city?: string | null
+          client_ts?: string | null
           country?: string | null
           device_type?: string | null
           duration_ms?: number | null
           error_code?: string | null
+          event_id?: string | null
           id?: number
           language?: string | null
           medium?: string | null
@@ -63,6 +68,7 @@ export type Database = {
           region?: string | null
           screen_h?: number | null
           screen_w?: number | null
+          seq?: number | null
           session_id: string
           source?: string | null
           timezone?: string | null
@@ -74,10 +80,12 @@ export type Database = {
           bytes?: number | null
           campaign?: string | null
           city?: string | null
+          client_ts?: string | null
           country?: string | null
           device_type?: string | null
           duration_ms?: number | null
           error_code?: string | null
+          event_id?: string | null
           id?: number
           language?: string | null
           medium?: string | null
@@ -90,6 +98,7 @@ export type Database = {
           region?: string | null
           screen_h?: number | null
           screen_w?: number | null
+          seq?: number | null
           session_id?: string
           source?: string | null
           timezone?: string | null
