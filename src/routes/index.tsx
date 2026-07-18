@@ -185,14 +185,37 @@ function Index() {
   const loadFile = useCallback((file: File) => {
     if (!isAcceptedImage(file)) {
       toast.error("Unsupported format. Please upload a JPG, PNG or WEBP image.");
+      trackEvent("upload_start", {
+        ok: false,
+        error_code: "unsupported_format",
+        format: file.type || "unknown",
+        size: file.size,
+      });
       return;
     }
     if (file.size > MAX_BYTES) {
       toast.error("Image is too large. Maximum size is 15MB.");
+      trackEvent("upload_start", {
+        ok: false,
+        error_code: "too_large",
+        format: file.type || "unknown",
+        size: file.size,
+      });
       return;
     }
+    trackEvent("upload_start", { format: file.type, size: file.size });
+    const readStartedAt = Date.now();
     const reader = new FileReader();
-    reader.onerror = () => toast.error("Could not read that file. Please try another image.");
+    reader.onerror = () => {
+      toast.error("Could not read that file. Please try another image.");
+      trackEvent("upload", {
+        ok: false,
+        error_code: "read_failed",
+        format: file.type,
+        size: file.size,
+        durationMs: Date.now() - readStartedAt,
+      });
+    };
     reader.onload = () => {
       const dataUrl = reader.result as string;
       setOriginal(dataUrl);
@@ -202,7 +225,12 @@ function Index() {
       setStage("ready");
       setFileInfo({ bytes: file.size, type: file.type || "" });
       toast.success("Image ready. Choose a quality and enhance it.");
-      trackEvent("upload", { format: file.type, size: file.size });
+      trackEvent("upload", {
+        ok: true,
+        format: file.type,
+        size: file.size,
+        durationMs: Date.now() - readStartedAt,
+      });
 
       // Capture natural dimensions so we can estimate the enhancement time as
       // soon as the user presses Enhance (used by the live countdown clock).
