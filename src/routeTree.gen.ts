@@ -33,6 +33,7 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as ApiPublicVitalsRouteImport } from './routes/api/public/vitals'
 import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
 import { Route as ApiPublicReliabilityRouteImport } from './routes/api/public/reliability'
+import { Route as ApiPublicReconciliationRouteImport } from './routes/api/public/reconciliation'
 import { Route as ApiPublicMetricsRouteImport } from './routes/api/public/metrics'
 import { Route as ApiPublicJourneysRouteImport } from './routes/api/public/journeys'
 import { Route as ApiPublicIntelligenceRouteImport } from './routes/api/public/intelligence'
@@ -170,6 +171,11 @@ const ApiPublicReliabilityRoute = ApiPublicReliabilityRouteImport.update({
   path: '/api/public/reliability',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicReconciliationRoute = ApiPublicReconciliationRouteImport.update({
+  id: '/api/public/reconciliation',
+  path: '/api/public/reconciliation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicMetricsRoute = ApiPublicMetricsRouteImport.update({
   id: '/api/public/metrics',
   path: '/api/public/metrics',
@@ -278,6 +284,7 @@ export interface FileRoutesByFullPath {
   '/api/public/intelligence': typeof ApiPublicIntelligenceRoute
   '/api/public/journeys': typeof ApiPublicJourneysRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
+  '/api/public/reconciliation': typeof ApiPublicReconciliationRoute
   '/api/public/reliability': typeof ApiPublicReliabilityRoute
   '/api/public/version': typeof ApiPublicVersionRoute
   '/api/public/vitals': typeof ApiPublicVitalsRoute
@@ -318,6 +325,7 @@ export interface FileRoutesByTo {
   '/api/public/intelligence': typeof ApiPublicIntelligenceRoute
   '/api/public/journeys': typeof ApiPublicJourneysRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
+  '/api/public/reconciliation': typeof ApiPublicReconciliationRoute
   '/api/public/reliability': typeof ApiPublicReliabilityRoute
   '/api/public/version': typeof ApiPublicVersionRoute
   '/api/public/vitals': typeof ApiPublicVitalsRoute
@@ -359,6 +367,7 @@ export interface FileRoutesById {
   '/api/public/intelligence': typeof ApiPublicIntelligenceRoute
   '/api/public/journeys': typeof ApiPublicJourneysRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
+  '/api/public/reconciliation': typeof ApiPublicReconciliationRoute
   '/api/public/reliability': typeof ApiPublicReliabilityRoute
   '/api/public/version': typeof ApiPublicVersionRoute
   '/api/public/vitals': typeof ApiPublicVitalsRoute
@@ -401,6 +410,7 @@ export interface FileRouteTypes {
     | '/api/public/intelligence'
     | '/api/public/journeys'
     | '/api/public/metrics'
+    | '/api/public/reconciliation'
     | '/api/public/reliability'
     | '/api/public/version'
     | '/api/public/vitals'
@@ -441,6 +451,7 @@ export interface FileRouteTypes {
     | '/api/public/intelligence'
     | '/api/public/journeys'
     | '/api/public/metrics'
+    | '/api/public/reconciliation'
     | '/api/public/reliability'
     | '/api/public/version'
     | '/api/public/vitals'
@@ -481,6 +492,7 @@ export interface FileRouteTypes {
     | '/api/public/intelligence'
     | '/api/public/journeys'
     | '/api/public/metrics'
+    | '/api/public/reconciliation'
     | '/api/public/reliability'
     | '/api/public/version'
     | '/api/public/vitals'
@@ -521,6 +533,7 @@ export interface RootRouteChildren {
   ApiPublicIntelligenceRoute: typeof ApiPublicIntelligenceRoute
   ApiPublicJourneysRoute: typeof ApiPublicJourneysRoute
   ApiPublicMetricsRoute: typeof ApiPublicMetricsRoute
+  ApiPublicReconciliationRoute: typeof ApiPublicReconciliationRoute
   ApiPublicReliabilityRoute: typeof ApiPublicReliabilityRoute
   ApiPublicVersionRoute: typeof ApiPublicVersionRoute
   ApiPublicVitalsRoute: typeof ApiPublicVitalsRoute
@@ -698,6 +711,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicReliabilityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/reconciliation': {
+      id: '/api/public/reconciliation'
+      path: '/api/public/reconciliation'
+      fullPath: '/api/public/reconciliation'
+      preLoaderRoute: typeof ApiPublicReconciliationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/metrics': {
       id: '/api/public/metrics'
       path: '/api/public/metrics'
@@ -843,6 +863,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicIntelligenceRoute: ApiPublicIntelligenceRoute,
   ApiPublicJourneysRoute: ApiPublicJourneysRoute,
   ApiPublicMetricsRoute: ApiPublicMetricsRoute,
+  ApiPublicReconciliationRoute: ApiPublicReconciliationRoute,
   ApiPublicReliabilityRoute: ApiPublicReliabilityRoute,
   ApiPublicVersionRoute: ApiPublicVersionRoute,
   ApiPublicVitalsRoute: ApiPublicVitalsRoute,
