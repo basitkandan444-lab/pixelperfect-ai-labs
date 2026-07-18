@@ -274,15 +274,31 @@ function Index() {
     setProcStage("preparing");
     setStatusMessage("Preparing local AI engine…");
     setStage("loading");
-    trackEvent("enhance_start", { scale, engine });
+    const dims = dimensionsRef.current;
+    const caps = detectCapabilities();
+    trackEvent("enhance_start", {
+      scale,
+      engine,
+      accel: caps.accel,
+      tier: caps.tier,
+      warm: engine === "neural" ? neuralWarmRef.current : true,
+      src_w: dims?.w ?? 0,
+      src_h: dims?.h ?? 0,
+      src_pixels: dims ? dims.w * dims.h : 0,
+      file_bytes: fileInfo?.bytes ?? 0,
+      format: fileInfo?.type ?? "",
+    });
 
     // Predict how long this will take on THIS device using the self-calibrating
     // prediction engine, then start a live countdown so the user knows the wait
     // up-front instead of staring at an open-ended spinner. The prediction folds
     // in the real dimensions, chosen quality/engine, device tier, warm state,
     // file size and the learned per-device correction factor.
-    const dims = dimensionsRef.current;
-    const caps = detectCapabilities();
+    // Predict how long this will take on THIS device using the self-calibrating
+    // prediction engine, then start a live countdown so the user knows the wait
+    // up-front instead of staring at an open-ended spinner. The prediction folds
+    // in the real dimensions, chosen quality/engine, device tier, warm state,
+    // file size and the learned per-device correction factor.
     const prediction = dims
       ? predict({
           srcW: dims.w,
@@ -350,18 +366,57 @@ function Index() {
       toast.success(`Enhanced to ${scale.toUpperCase()} quality!`);
       trackEvent("enhance_complete", {
         scale,
-        engine: res.path,
+        engine,
+        path: res.path,
         accel: res.capabilities.accel,
+        tier: res.capabilities.tier,
         durationMs: res.durationMs,
+        out_w: res.width,
+        out_h: res.height,
+        out_pixels: res.width * res.height,
+        src_w: dims?.w ?? 0,
+        src_h: dims?.h ?? 0,
+        src_pixels: dims ? dims.w * dims.h : 0,
+        file_bytes: fileInfo?.bytes ?? 0,
+        format: fileInfo?.type ?? "",
       });
     } catch (err) {
       // A user-initiated cancel is not an error — reset() already handled UI.
-      if (err instanceof DOMException && err.name === "AbortError") return;
-      if (err instanceof Error && err.name === "UnsupportedBrowserError") {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        trackEvent("enhance_fail", {
+          scale,
+          engine,
+          error_code: "aborted",
+          durationMs: Date.now() - startedAt,
+          progress: progressRef.current,
+        });
+        return;
+      }
+      const errorCode =
+        err instanceof Error && err.name === "UnsupportedBrowserError"
+          ? "unsupported_browser"
+          : err instanceof Error && err.name
+            ? err.name
+            : "unknown";
+      if (errorCode === "unsupported_browser") {
         toast.error("Your browser does not support this enhancement mode. Try a modern browser.");
       } else {
         toast.error("Enhancement failed. Please try a different image.");
       }
+      trackEvent("enhance_fail", {
+        scale,
+        engine,
+        accel: caps.accel,
+        tier: caps.tier,
+        error_code: errorCode,
+        durationMs: Date.now() - startedAt,
+        progress: progressRef.current,
+        src_w: dims?.w ?? 0,
+        src_h: dims?.h ?? 0,
+        src_pixels: dims ? dims.w * dims.h : 0,
+        file_bytes: fileInfo?.bytes ?? 0,
+        format: fileInfo?.type ?? "",
+      });
       setStage("ready");
     } finally {
       stopCountdown();
