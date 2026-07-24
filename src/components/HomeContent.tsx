@@ -233,8 +233,96 @@ function SectionHead({
 export function HomeContent() {
   return (
     <>
+      {/* Bento feature grid — Apple Noir */}
+      <section className="mt-28 md:mt-32" aria-labelledby="bento-heading">
+        <h2 id="bento-heading" className="sr-only">
+          Why Pixel Perfect Pro
+        </h2>
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-3 md:grid-cols-12 md:gap-4">
+          {/* Privacy — wide */}
+          <div className="relative overflow-hidden rounded-[2rem] border border-white/5 bg-[oklch(0.04_0_0)] p-8 sm:p-10 md:col-span-8">
+            <div className="relative z-10 max-w-md">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
+                Privacy by design
+              </span>
+              <h3 className="mt-4 font-display text-4xl italic tracking-tight text-foreground sm:text-5xl">
+                100% on-device.
+              </h3>
+              <p className="mt-4 text-sm font-light leading-relaxed text-muted-foreground">
+                Your photos never leave your machine. Every pixel is processed locally in the
+                browser using WebGPU — no server, no upload, no API call.
+              </p>
+            </div>
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-16 -bottom-16 h-72 w-72 rounded-full bg-primary/15 blur-3xl"
+            />
+          </div>
+
+          {/* Speed */}
+          <div className="rounded-[2rem] border border-white/5 bg-[oklch(0.04_0_0)] p-8 text-center sm:p-10 md:col-span-4">
+            <div className="flex h-full flex-col items-center justify-center gap-2">
+              <div className="font-display text-6xl italic text-primary">0.4s</div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                Avg. processing time
+              </div>
+            </div>
+          </div>
+
+          {/* Formats */}
+          <div className="rounded-[2rem] border border-white/5 bg-[oklch(0.04_0_0)] p-8 md:col-span-4">
+            <div className="flex flex-wrap gap-1.5">
+              {["JPG", "PNG", "WEBP"].map((f) => (
+                <span
+                  key={f}
+                  className="rounded-md border border-white/10 bg-black/40 px-2 py-1 text-[10px] font-semibold tracking-wider text-muted-foreground"
+                >
+                  {f}
+                </span>
+              ))}
+            </div>
+            <h4 className="mt-8 font-display text-3xl italic tracking-tight text-foreground">
+              All formats.
+            </h4>
+            <p className="mt-2 text-sm font-light text-muted-foreground">
+              Up to 15MB. Exported as a full-resolution PNG.
+            </p>
+          </div>
+
+          {/* 8K */}
+          <div className="rounded-[2rem] border border-white/5 bg-[oklch(0.04_0_0)] p-8 md:col-span-4">
+            <div className="flex items-baseline gap-1">
+              <div className="h-6 w-1 bg-primary" />
+              <div className="h-6 w-1 bg-primary" />
+              <div className="h-6 w-1 bg-primary/30" />
+            </div>
+            <h4 className="mt-8 font-display text-3xl italic tracking-tight text-foreground">
+              8K upscaling.
+            </h4>
+            <p className="mt-2 text-sm font-light text-muted-foreground">
+              Real-ESRGAN reconstructs texture — sharpness beyond limits.
+            </p>
+          </div>
+
+          {/* Free — accent tile */}
+          <div className="flex flex-col items-center justify-center rounded-[2rem] bg-primary p-8 text-center text-primary-foreground md:col-span-4">
+            <h4 className="font-display text-3xl italic leading-none">Forever free.</h4>
+            <span className="mt-3 text-xs font-medium opacity-80">
+              No subscriptions. No accounts. Ever.
+            </span>
+          </div>
+        </div>
+      </section>
+
       {/* How it works */}
       <section className="mt-28 md:mt-32" aria-labelledby="how-heading">
+        <SectionHead
+          eyebrow="How it works"
+          id="how-heading"
+          title="From soft pixel to sharp print in four steps"
+          desc="Behind the single Enhance button, the AI moves through four stages — in plain language, no hype."
+        />
+
         <SectionHead
           eyebrow="How it works"
           id="how-heading"
