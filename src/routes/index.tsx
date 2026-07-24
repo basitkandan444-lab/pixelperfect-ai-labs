@@ -649,7 +649,8 @@ function Index() {
 
 
             {stage !== "idle" && original && (
-              <div className="flex flex-col gap-6">
+              <div className="mx-auto flex max-w-4xl flex-col gap-6 rounded-3xl border border-white/10 bg-[oklch(0.04_0_0)] p-4 shadow-cinema sm:p-6">
+
                 <div className="relative">
                   {stage === "done" && result ? (
                     <div className="space-y-3">
