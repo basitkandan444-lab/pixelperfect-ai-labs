@@ -323,12 +323,7 @@ export function HomeContent() {
           desc="Behind the single Enhance button, the AI moves through four stages — in plain language, no hype."
         />
 
-        <SectionHead
-          eyebrow="How it works"
-          id="how-heading"
-          title="From soft pixel to sharp print in four steps"
-          desc="Behind the single Enhance button, the AI moves through four stages — in plain language, no hype."
-        />
+
         <ol className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((s, i) => (
             <li
