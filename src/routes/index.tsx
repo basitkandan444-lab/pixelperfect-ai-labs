@@ -492,93 +492,104 @@ function Index() {
         Skip to upload
       </a>
 
-      {/* Ambient aurora field */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
-        <div className="animate-glow-pulse absolute -top-40 left-1/2 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-primary/25 blur-[120px]" />
-        <div className="animate-float absolute top-1/3 -right-32 h-80 w-80 rounded-full bg-accent/25 blur-[100px]" />
-        <div
-          className="animate-float absolute bottom-0 -left-24 h-72 w-72 rounded-full blur-[100px]"
-          style={{ background: "var(--aurora-4)", opacity: 0.22, animationDelay: "1.5s" }}
-        />
-        <div className="grid-noise absolute inset-0 opacity-40" />
+      {/* Ambient — a single hushed electric-blue bloom behind the hero. */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 h-[70vh] overflow-hidden" aria-hidden="true">
+        <div className="absolute left-1/2 top-[-20%] h-[42rem] w-[42rem] -translate-x-1/2 rounded-full bg-primary/15 blur-[140px]" />
       </div>
 
-      <div className="relative mx-auto flex max-w-5xl flex-col px-5 pt-6 sm:px-8">
-        {/* Floating frosted nav */}
-        <header className="sticky top-4 z-40 mx-auto w-full max-w-3xl">
-          <div className="glass-strong flex items-center justify-between rounded-full px-3 py-2 pl-4 shadow-cinema ease-spring transition-all duration-300">
-            <Link to="/" className="flex items-center gap-2.5" aria-label={`${SITE.name} home`}>
-              <span className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-primary shadow-glow">
-                <Sparkles className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
-                <span className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/25" />
+      <div className="relative mx-auto flex max-w-6xl flex-col px-5 pt-6 sm:px-8">
+        {/* Floating brand pill — Apple Noir */}
+        <header className="fixed left-1/2 top-6 z-50 w-[calc(100%-2.5rem)] max-w-2xl -translate-x-1/2">
+          <div className="flex items-center justify-between rounded-full border border-white/10 bg-[oklch(0.09_0_0/0.75)] px-5 py-2.5 shadow-cinema backdrop-blur-xl">
+            <Link to="/" className="flex items-center gap-2" aria-label={`${SITE.name} home`}>
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary">
+                <Sparkles className="h-3.5 w-3.5 text-primary-foreground" aria-hidden="true" />
               </span>
-              <span className="font-display text-[15px] font-bold tracking-tight">{SITE.name}</span>
+              <span className="font-display text-lg italic tracking-tight text-foreground">
+                {SITE.name}
+              </span>
             </Link>
-            <div className="flex items-center gap-1.5">
-              <span className="hidden items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-muted-foreground sm:inline-flex">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-70" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
-                </span>
-                On-device · Free
-              </span>
+            <nav className="flex items-center gap-1 sm:gap-2">
+              <a
+                href="#workspace"
+                className="hidden rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+              >
+                Enhance
+              </a>
+              <a
+                href="#how-heading"
+                className="hidden rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+              >
+                How it works
+              </a>
               <Link
                 to="/contact"
-                className="rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="hidden rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
               >
                 Contact
               </Link>
-            </div>
+              <a
+                href="#workspace"
+                className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground transition-all hover:brightness-110"
+              >
+                Launch App
+              </a>
+            </nav>
           </div>
         </header>
 
         <main>
-          {/* Hero */}
-          <section className="animate-fade-up relative mt-20 pb-6 text-center sm:mt-28">
-            <span className="eyebrow inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 backdrop-blur-xl">
-              <Sparkles className="h-3 w-3 text-primary" aria-hidden="true" />
-              Real-ESRGAN · WebGPU · zero uploads
-            </span>
-            <h1 className="relative mx-auto mt-8 max-w-4xl font-display text-[2.75rem] font-bold leading-[1.02] tracking-[-0.03em] sm:text-7xl">
-              <span className="block text-foreground">Turn blurry photos into</span>
-              <span className="relative mt-1 block">
-                <span className="text-aurora">stunning 4K &amp; 8K.</span>
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-8 -bottom-4 h-8 rounded-full bg-gradient-aurora opacity-40 blur-2xl"
-                />
-              </span>
+          {/* Hero — cinematic serif */}
+          <section className="animate-fade-up relative pt-40 pb-20 text-center sm:pt-48">
+            <h1 className="mx-auto max-w-5xl font-display text-[3.25rem] leading-[0.95] tracking-[-0.02em] text-foreground sm:text-7xl md:text-8xl">
+              Image enhancement,
+              <br />
+              <span className="italic text-foreground/95">perfected on-device.</span>
             </h1>
-            <p className="mx-auto mt-7 max-w-xl text-base text-muted-foreground sm:text-lg">
-              Upload any image. On-device AI sharpens blur, removes noise and rebuilds detail at
-              razor-sharp resolution — in seconds, no uploads, no signup, no watermark.
+            <p className="mx-auto mt-8 max-w-xl text-base font-light leading-relaxed text-muted-foreground sm:text-lg">
+              Zero uploads. Zero watermarks. Zero cost.
+              <br className="hidden sm:block" />
+              A browser-first engine that respects your privacy.
             </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mt-10 flex flex-col items-center gap-4">
               <a
                 href="#workspace"
-                className="group sheen inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-primary px-6 py-3.5 font-display text-sm font-semibold text-primary-foreground shadow-glow ease-spring transition-transform duration-300 hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="group inline-flex items-center justify-center gap-2 rounded-full bg-primary px-9 py-4 text-base font-semibold text-primary-foreground shadow-[0_0_40px_-8px_color-mix(in_oklab,var(--primary)_55%,transparent)] transition-transform duration-300 hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <Wand2 className="h-4 w-4" aria-hidden="true" />
-                Enhance an image
-                <span className="ml-0.5 inline-block transition-transform duration-300 group-hover:translate-x-0.5">
+                Start enhancing free
+                <span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5">
                   →
                 </span>
               </a>
               <a
                 href="#how-heading"
-                className="group inline-flex items-center gap-1.5 rounded-2xl px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
               >
                 See how it works
-                <span className="relative inline-block h-px w-6 overflow-hidden bg-border">
-                  <span className="absolute inset-0 -translate-x-full bg-primary transition-transform duration-500 group-hover:translate-x-0" />
-                </span>
+                <svg
+                  className="h-3.5 w-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
               </a>
             </div>
-            <div className="mx-auto mt-10 flex max-w-2xl flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
-              <span>◇ 100% on-device</span>
-              <span>◇ Zero uploads</span>
-              <span>◇ No watermark</span>
-              <span>◇ 4K &amp; 8K output</span>
+            <div className="mx-auto mt-14 flex max-w-2xl flex-wrap items-center justify-center gap-x-8 gap-y-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70">
+              <span>100% on-device</span>
+              <span aria-hidden="true">·</span>
+              <span>Zero uploads</span>
+              <span aria-hidden="true">·</span>
+              <span>No watermark</span>
+              <span aria-hidden="true">·</span>
+              <span>4K &amp; 8K output</span>
             </div>
           </section>
 
@@ -586,50 +597,60 @@ function Index() {
           <section
             id="workspace"
             aria-label="Image enhancer"
-            className="animate-fade-up mt-12 rounded-3xl glass p-4 shadow-elegant sm:p-6"
+            className="animate-fade-up relative mt-4 sm:mt-8"
             style={{ animationDelay: "0.1s" }}
           >
             {stage === "idle" && (
-              <label
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  setDragOver(true);
-                }}
-                onDragLeave={() => setDragOver(false)}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  setDragOver(false);
-                  const f = e.dataTransfer.files?.[0];
-                  if (f) loadFile(f);
-                }}
-                className={`flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-16 text-center transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-ring sm:py-24 ${
-                  dragOver ? "border-primary bg-primary/5" : "border-border hover:border-primary/60"
-                }`}
-              >
-                <input
-                  ref={inputRef}
-                  type="file"
-                  accept={ACCEPT_ATTR}
-                  className="sr-only"
-                  aria-label="Upload an image to enhance"
-                  data-hydrated={hydrated ? "true" : undefined}
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
+              <div className="relative mx-auto max-w-4xl">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -inset-1 rounded-[2rem] bg-gradient-to-r from-primary/20 via-transparent to-primary/10 opacity-30 blur-xl"
+                />
+                <label
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setDragOver(true);
+                  }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDragOver(false);
+                    const f = e.dataTransfer.files?.[0];
                     if (f) loadFile(f);
                   }}
-                />
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow">
-                  <UploadCloud className="h-8 w-8 text-primary-foreground" aria-hidden="true" />
-                </div>
-                <p className="mt-5 font-display text-lg font-semibold">
-                  Drop your image here, or tap to upload
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">JPG, PNG or WEBP — up to 15MB</p>
-              </label>
+                  className={`relative flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed bg-[oklch(0.04_0_0)] px-6 py-20 text-center transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-ring sm:py-28 ${
+                    dragOver ? "border-primary bg-primary/5" : "border-white/10 hover:border-primary/50"
+                  }`}
+                >
+                  <input
+                    ref={inputRef}
+                    type="file"
+                    accept={ACCEPT_ATTR}
+                    className="sr-only"
+                    aria-label="Upload an image to enhance"
+                    data-hydrated={hydrated ? "true" : undefined}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) loadFile(f);
+                    }}
+                  />
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-[oklch(0.09_0_0)]">
+                    <UploadCloud className="h-7 w-7 text-primary" aria-hidden="true" />
+                  </div>
+                  <h3 className="mt-6 font-display text-3xl italic text-foreground sm:text-4xl">
+                    Drop your image here
+                  </h3>
+                  <p className="mt-2 text-sm font-light text-muted-foreground">
+                    Supports JPG, PNG and WEBP — up to 15MB
+                  </p>
+                </label>
+              </div>
             )}
 
+
             {stage !== "idle" && original && (
-              <div className="flex flex-col gap-6">
+              <div className="mx-auto flex max-w-4xl flex-col gap-6 rounded-3xl border border-white/10 bg-[oklch(0.04_0_0)] p-4 shadow-cinema sm:p-6">
+
                 <div className="relative">
                   {stage === "done" && result ? (
                     <div className="space-y-3">

@@ -96,7 +96,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { name: "description", content: SITE.description },
         { name: "keywords", content: KEYWORDS },
         { name: "author", content: SITE.name },
-        { name: "theme-color", content: "#0f1729" },
+        { name: "theme-color", content: "#000000" },
         { name: "application-name", content: SITE.name },
         {
           name: "google-site-verification",
@@ -123,21 +123,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { rel: "icon", href: "/icon.png", type: "image/png", sizes: "512x512" },
         { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
         { rel: "manifest", href: "/site.webmanifest" },
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
         {
-          rel: "preload",
-          href: "/fonts/inter-latin.woff2",
-          as: "font",
-          type: "font/woff2",
-          crossOrigin: "anonymous",
-        },
-        {
-          rel: "preload",
-          href: "/fonts/space-grotesk-latin.woff2",
-          as: "font",
-          type: "font/woff2",
-          crossOrigin: "anonymous",
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@300;400;500;600;700&display=swap",
         },
       ],
+
       scripts: [
         {
           type: "application/ld+json",
