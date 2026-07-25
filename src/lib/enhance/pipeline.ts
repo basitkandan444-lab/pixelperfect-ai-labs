@@ -36,6 +36,13 @@ export interface EnhanceOptions {
    * key, no credits.
    */
   engine?: "classical" | "neural";
+  /**
+   * "free" (default) or "premium". Premium routes the final upscaled image
+   * through the on-device Oklab color pipeline + edge-preserving denoise +
+   * CLAHE local contrast + gradient-gated micro-contrast, delivered as a
+   * lazy-loaded chunk. Still 100% on-device — no hosted inference, no credits.
+   */
+  tier?: "free" | "premium";
   signal?: AbortSignal;
   onProgress?: (p: EnhanceProgress) => void;
   /** Injectable for tests; defaults to runtime detection. */
