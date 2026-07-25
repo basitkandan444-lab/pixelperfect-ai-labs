@@ -149,3 +149,4 @@ the publish dialog; backend changes (server routes) deploy automatically.
 
 - Preview: https://id-preview--34446754-4199-4528-b011-72bc3e10d075.lovable.app
 - Production: https://pixelperfect-ai-labs.lovable.app
+DEPLOYMENT TEST
