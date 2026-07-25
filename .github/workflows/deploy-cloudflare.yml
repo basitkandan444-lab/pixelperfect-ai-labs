@@ -5,10 +5,6 @@ on:
     branches:
       - main
 
-concurrency:
-  group: cloudflare-deploy-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
 
@@ -16,7 +12,6 @@ jobs:
   deploy:
     name: Build and Deploy
     runs-on: ubuntu-latest
-    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -30,14 +25,12 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Build Cloudflare Worker
+      - name: Build
         run: bun run build
 
-      - name: Deploy Worker
-        uses: cloudflare/wrangler-action@v3
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v4
         with:
-          wranglerVersion: "4"
-          command: deploy --config .output/server/wrangler.json --assets .output/public
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --config .output/server/wrangler.json
