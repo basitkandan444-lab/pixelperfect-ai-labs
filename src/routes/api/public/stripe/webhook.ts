@@ -129,7 +129,7 @@ async function upsertSubscription(
     stripe_subscription_id: string;
     plan: string;
     status: string;
-    current_period_end: string;
+    current_period_end: string | null;
   },
 ) {
   const { error } = await admin
