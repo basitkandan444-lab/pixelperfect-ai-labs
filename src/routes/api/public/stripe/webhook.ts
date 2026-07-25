@@ -1,6 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type Stripe from "stripe";
 
+function periodEndISO(sub: Stripe.Subscription): string | null {
+  // Stripe moved `current_period_end` off the subscription onto its items in
+  // recent API versions. Read from either location, whichever the SDK returns.
+  const anySub = sub as unknown as { current_period_end?: number };
+  const fromSub = typeof anySub.current_period_end === "number" ? anySub.current_period_end : null;
+  const fromItem = sub.items?.data?.[0] as unknown as { current_period_end?: number } | undefined;
+  const ts = fromSub ?? fromItem?.current_period_end ?? null;
+  return ts ? new Date(ts * 1000).toISOString() : null;
+}
+
+
 /**
  * Stripe webhook handler.
  * - Verifies Stripe-Signature with `constructEventAsync` (Web Crypto — Worker-safe).
@@ -54,8 +65,9 @@ export const Route = createFileRoute("/api/public/stripe/webhook")({
                 stripe_subscription_id: sub.id,
                 plan: "premium",
                 status: sub.status,
-                current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+                current_period_end: periodEndISO(sub),
               });
+
               break;
             }
             case "customer.subscription.created":
@@ -86,8 +98,9 @@ export const Route = createFileRoute("/api/public/stripe/webhook")({
                 stripe_subscription_id: sub.id,
                 plan: "premium",
                 status: event.type === "customer.subscription.deleted" ? "canceled" : sub.status,
-                current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+                current_period_end: periodEndISO(sub),
               });
+
               break;
             }
             default:
