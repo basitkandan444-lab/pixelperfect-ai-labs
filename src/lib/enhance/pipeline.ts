@@ -324,7 +324,57 @@ export async function enhanceImageInBrowser(
   }
   throwIfAborted(signal);
 
-  onProgress?.({ stage: "finishing", value: 0.98, message: "Finishing up…" });
+  // PREMIUM POST-PASS: on-device perceptual color + edge-preserving denoise +
+  // CLAHE local contrast + gradient-gated micro-contrast. Lazy-loaded so free
+  // users pay zero bundle cost. Guarded so a browser without OffscreenCanvas /
+  // ImageBitmap for reading the blob back still succeeds (falls through).
+  if (opts.tier === "premium" && typeof createImageBitmap === "function") {
+    try {
+      onProgress?.({ stage: "finishing", value: 0.92, message: "Applying premium finish…" });
+      const { applyPremiumPost } = await import("./premium/pipeline");
+      const bm = await createImageBitmap(blob!);
+      const w = bm.width, h = bm.height;
+      let canvasLike: OffscreenCanvas | HTMLCanvasElement;
+      if (typeof OffscreenCanvas !== "undefined") {
+        canvasLike = new OffscreenCanvas(w, h);
+      } else {
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        canvasLike = c;
+      }
+      const ctx = (canvasLike as OffscreenCanvas).getContext("2d") as
+        | OffscreenCanvasRenderingContext2D
+        | CanvasRenderingContext2D
+        | null;
+      if (ctx) {
+        ctx.drawImage(bm as unknown as CanvasImageSource, 0, 0);
+        bm.close();
+        const src = ctx.getImageData(0, 0, w, h);
+        const outPixels = applyPremiumPost(src.data, w, h, {
+          onProgress: (v, m) =>
+            onProgress?.({ stage: "finishing", value: 0.92 + v * 0.06, message: m }),
+        });
+        const outImg = new ImageData(outPixels, w, h);
+        ctx.putImageData(outImg, 0, 0);
+        blob =
+          canvasLike instanceof OffscreenCanvas
+            ? await canvasLike.convertToBlob({ type: "image/png" })
+            : await new Promise<Blob>((resolve, reject) =>
+                (canvasLike as HTMLCanvasElement).toBlob(
+                  (b) => (b ? resolve(b) : reject(new Error("Encode failed"))),
+                  "image/png",
+                ),
+              );
+      } else {
+        bm.close();
+      }
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") throw err;
+      console.warn("Premium finish failed; using base engine output.", err);
+    }
+  }
+
+  onProgress?.({ stage: "finishing", value: 0.99, message: "Finishing up…" });
   const image = URL.createObjectURL(blob!);
   onProgress?.({ stage: "done", value: 1, message: "Done" });
 
