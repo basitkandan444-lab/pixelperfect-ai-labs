@@ -15,6 +15,7 @@ import { Route as SharpenImageRouteImport } from './routes/sharpen-image'
 import { Route as RestoreOldPhotoRouteImport } from './routes/restore-old-photo'
 import { Route as RemoveImageNoiseRouteImport } from './routes/remove-image-noise'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as OpsRouteImport } from './routes/ops'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as IncreaseImageResolutionRouteImport } from './routes/increase-image-resolution'
@@ -78,6 +79,11 @@ const RemoveImageNoiseRoute = RemoveImageNoiseRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OpsRoute = OpsRouteImport.update({
@@ -269,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/increase-image-resolution': typeof IncreaseImageResolutionRoute
   '/mcp': typeof McpRoute
   '/ops': typeof OpsRouteWithChildren
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/remove-image-noise': typeof RemoveImageNoiseRoute
   '/restore-old-photo': typeof RestoreOldPhotoRoute
@@ -311,6 +318,7 @@ export interface FileRoutesByTo {
   '/increase-image-resolution': typeof IncreaseImageResolutionRoute
   '/mcp': typeof McpRoute
   '/ops': typeof OpsRouteWithChildren
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/remove-image-noise': typeof RemoveImageNoiseRoute
   '/restore-old-photo': typeof RestoreOldPhotoRoute
@@ -354,6 +362,7 @@ export interface FileRoutesById {
   '/increase-image-resolution': typeof IncreaseImageResolutionRoute
   '/mcp': typeof McpRoute
   '/ops': typeof OpsRouteWithChildren
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/remove-image-noise': typeof RemoveImageNoiseRoute
   '/restore-old-photo': typeof RestoreOldPhotoRoute
@@ -398,6 +407,7 @@ export interface FileRouteTypes {
     | '/increase-image-resolution'
     | '/mcp'
     | '/ops'
+    | '/pricing'
     | '/privacy'
     | '/remove-image-noise'
     | '/restore-old-photo'
@@ -440,6 +450,7 @@ export interface FileRouteTypes {
     | '/increase-image-resolution'
     | '/mcp'
     | '/ops'
+    | '/pricing'
     | '/privacy'
     | '/remove-image-noise'
     | '/restore-old-photo'
@@ -482,6 +493,7 @@ export interface FileRouteTypes {
     | '/increase-image-resolution'
     | '/mcp'
     | '/ops'
+    | '/pricing'
     | '/privacy'
     | '/remove-image-noise'
     | '/restore-old-photo'
@@ -525,6 +537,7 @@ export interface RootRouteChildren {
   IncreaseImageResolutionRoute: typeof IncreaseImageResolutionRoute
   McpRoute: typeof McpRoute
   OpsRoute: typeof OpsRouteWithChildren
+  PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   RemoveImageNoiseRoute: typeof RemoveImageNoiseRoute
   RestoreOldPhotoRoute: typeof RestoreOldPhotoRoute
@@ -596,6 +609,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ops': {
@@ -862,6 +882,7 @@ const rootRouteChildren: RootRouteChildren = {
   IncreaseImageResolutionRoute: IncreaseImageResolutionRoute,
   McpRoute: McpRoute,
   OpsRoute: OpsRouteWithChildren,
+  PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   RemoveImageNoiseRoute: RemoveImageNoiseRoute,
   RestoreOldPhotoRoute: RestoreOldPhotoRoute,
