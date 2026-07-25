@@ -429,6 +429,7 @@ function Index() {
       const res = await enhanceImageInBrowser(original, {
         scale,
         engine,
+        tier: isPremium ? "premium" : "free",
         signal: controller.signal,
         onProgress: (p) => {
           const pct = Math.round(p.value * 100);
