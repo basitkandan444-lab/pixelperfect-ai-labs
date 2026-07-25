@@ -304,11 +304,11 @@ export function HomeContent() {
             </p>
           </div>
 
-          {/* Free — accent tile */}
+          {/* Start free — accent tile */}
           <div className="sheen group flex flex-col items-center justify-center rounded-[2rem] bg-primary p-8 text-center text-primary-foreground transition-transform duration-500 hover:-translate-y-1 md:col-span-4">
-            <h4 className="font-display text-3xl italic leading-none">Forever free.</h4>
+            <h4 className="font-display text-3xl italic leading-none">Start free.</h4>
             <span className="mt-3 text-xs font-medium opacity-80">
-              No subscriptions. No accounts. Ever.
+              5 enhancements on us. Upgrade any time.
             </span>
           </div>
         </div>

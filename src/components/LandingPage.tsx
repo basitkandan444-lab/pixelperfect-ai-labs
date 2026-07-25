@@ -107,7 +107,7 @@ export function LandingPage({ data }: { data: LandingContent }) {
                   {data.cta}
                 </Link>
                 <p className="text-xs text-muted-foreground">
-                  Free forever · No signup · No watermark
+                  Start free · Private on-device · No watermark
                 </p>
               </section>
 

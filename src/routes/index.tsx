@@ -573,7 +573,7 @@ function Index() {
               className="animate-hero-in mx-auto mt-8 max-w-xl text-base font-light leading-relaxed text-muted-foreground sm:text-lg"
               style={{ animationDelay: "0.35s" }}
             >
-              Zero uploads. Zero watermarks. Zero cost.
+              Zero uploads. Zero watermarks. Start free.
               <br className="hidden sm:block" />
               A browser-first engine that respects your privacy.
             </p>
