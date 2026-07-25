@@ -1,8 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Sparkles, UploadCloud, Wand2, Download, RotateCcw, Zap, Gauge } from "lucide-react";
 
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 
 import { Button } from "@/components/ui/button";
 import { CompareSlider } from "@/components/CompareSlider";
@@ -11,10 +13,18 @@ import { HomeContent } from "@/components/HomeContent";
 import { BeforeAfterGallery } from "@/components/BeforeAfterGallery";
 import { AnalysisCard } from "@/components/AnalysisCard";
 import { ProcessingOverlay } from "@/components/ProcessingOverlay";
+import { UpgradeWall } from "@/components/UpgradeWall";
 import { trackEvent } from "@/lib/analytics";
 import { SITE, FAQS, absoluteUrl } from "@/lib/site";
 import { originLoader } from "@/lib/origin.functions";
 import { detectCapabilities } from "@/lib/enhance/capabilities";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  consumeEnhancement,
+  createCheckoutSession,
+  getMyEntitlement,
+} from "@/lib/subscription.functions";
+import { FREE_CAP, getLocalUsed, incrementLocalUsed } from "@/lib/entitlement";
 
 import {
   predict,
@@ -124,6 +134,60 @@ function Index() {
   const neuralWarmRef = useRef(false);
   const progressRef = useRef(0);
   const runBaseMsRef = useRef(0);
+
+  // ---- Task 4: Free-tier gating + upgrade wall -----------------------------
+  const navigate = useNavigate();
+  const entitlementFn = useServerFn(getMyEntitlement);
+  const consumeFn = useServerFn(consumeEnhancement);
+  const checkoutFn = useServerFn(createCheckoutSession);
+  const [wallOpen, setWallOpen] = useState(false);
+  const [wallPending, setWallPending] = useState(false);
+  const [localUsed, setLocalUsed] = useState(0);
+
+  const sessionQuery = useQuery({
+    queryKey: ["auth-session"],
+    queryFn: async () => (await supabase.auth.getSession()).data.session,
+  });
+  const isSignedIn = !!sessionQuery.data;
+
+  const entitlementQuery = useQuery({
+    queryKey: ["entitlement"],
+    queryFn: () => entitlementFn({}),
+    enabled: isSignedIn,
+    staleTime: 30_000,
+  });
+  const isPremium = entitlementQuery.data?.isPremium ?? false;
+  const serverUsed = entitlementQuery.data?.used ?? 0;
+  const usedCount = isSignedIn ? serverUsed : localUsed;
+  const remaining = Math.max(0, FREE_CAP - usedCount);
+
+  useEffect(() => {
+    setLocalUsed(getLocalUsed());
+  }, []);
+
+  const openUpgradeWall = useCallback(() => {
+    setWallOpen(true);
+    trackEvent("upgrade_wall_shown", { used: usedCount, cap: FREE_CAP, signedIn: isSignedIn });
+  }, [usedCount, isSignedIn]);
+
+  const handleUpgrade = useCallback(async () => {
+    trackEvent("upgrade_wall_cta", { signedIn: isSignedIn });
+    if (!isSignedIn) {
+      navigate({ to: "/auth", search: { next: "/pricing" } });
+      return;
+    }
+    try {
+      setWallPending(true);
+      const { url } = await checkoutFn({ data: {} });
+      if (url) window.location.href = url;
+      else toast.error("Checkout URL missing");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Checkout failed");
+    } finally {
+      setWallPending(false);
+    }
+  }, [isSignedIn, navigate, checkoutFn]);
+
 
   // Signal that React has hydrated and the upload handler is attached. The
   // server-rendered <input> exists before hydration, so a file set in that
@@ -266,6 +330,35 @@ function Index() {
     // `import()` below from the server build so workerd never tries to load it.
     if (import.meta.env.SSR) return;
     if (!original) return;
+
+    // Task 4 — Free tier gate. Premium bypasses. Signed-in users are gated
+    // server-side (SECURITY DEFINER consume_free_enhancement). Anonymous
+    // visitors are gated locally as UX only; the server-side path is the
+    // security boundary once signed in.
+    if (!isPremium) {
+      if (isSignedIn) {
+        try {
+          const { allowed } = await consumeFn({});
+          if (!allowed) {
+            openUpgradeWall();
+            return;
+          }
+        } catch (err) {
+          console.warn("[entitlement] consume failed", err);
+          // Fail closed — never let a broken check silently unlock unlimited use.
+          toast.error("Could not verify your plan. Please try again.");
+          return;
+        }
+        // Refresh the entitlement badge in the background.
+        entitlementQuery.refetch();
+      } else {
+        if (getLocalUsed() >= FREE_CAP) {
+          openUpgradeWall();
+          return;
+        }
+        setLocalUsed(incrementLocalUsed());
+      }
+    }
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -422,7 +515,7 @@ function Index() {
       stopCountdown();
       if (abortRef.current === controller) abortRef.current = null;
     }
-  }, [clearResultUrl, original, scale, engine, fileInfo, stopCountdown]);
+  }, [clearResultUrl, original, scale, engine, fileInfo, stopCountdown, isPremium, isSignedIn, consumeFn, entitlementQuery, openUpgradeWall]);
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
@@ -535,6 +628,12 @@ function Index() {
               >
                 How it works
               </a>
+              <Link
+                to="/pricing"
+                className="hidden rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+              >
+                Pricing
+              </Link>
               <Link
                 to="/contact"
                 className="hidden rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
@@ -890,6 +989,24 @@ function Index() {
       </div>
 
       <SiteFooter />
+
+      <UpgradeWall
+        open={wallOpen}
+        onClose={() => setWallOpen(false)}
+        used={usedCount}
+        cap={FREE_CAP}
+        isSignedIn={isSignedIn}
+        onUpgrade={handleUpgrade}
+        pending={wallPending}
+      />
+      {!isPremium && stage !== "idle" && (
+        <div className="pointer-events-none fixed bottom-4 left-1/2 z-40 -translate-x-1/2 rounded-full border border-white/10 bg-black/60 px-3 py-1.5 text-[11px] text-white/70 backdrop-blur">
+          {remaining} of {FREE_CAP} free enhancements left ·{" "}
+          <Link to="/pricing" className="pointer-events-auto underline hover:text-white">
+            Upgrade
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
