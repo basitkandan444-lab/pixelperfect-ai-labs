@@ -46,6 +46,7 @@ import { Route as ApiPublicAnomaliesRouteImport } from './routes/api/public/anom
 import { Route as ApiPublicAlertsRouteImport } from './routes/api/public/alerts'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe/webhook'
 import { Route as ApiPublicHooksTelemetrySnapshotRouteImport } from './routes/api/public/hooks/telemetry-snapshot'
 import { Route as ApiPublicHooksReliabilityScanRouteImport } from './routes/api/public/hooks/reliability-scan'
 
@@ -237,6 +238,11 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
+  id: '/api/public/stripe/webhook',
+  path: '/api/public/stripe/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksTelemetrySnapshotRoute =
   ApiPublicHooksTelemetrySnapshotRouteImport.update({
     id: '/api/public/hooks/telemetry-snapshot',
@@ -290,6 +296,7 @@ export interface FileRoutesByFullPath {
   '/api/public/vitals': typeof ApiPublicVitalsRoute
   '/api/public/hooks/reliability-scan': typeof ApiPublicHooksReliabilityScanRoute
   '/api/public/hooks/telemetry-snapshot': typeof ApiPublicHooksTelemetrySnapshotRoute
+  '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -331,6 +338,7 @@ export interface FileRoutesByTo {
   '/api/public/vitals': typeof ApiPublicVitalsRoute
   '/api/public/hooks/reliability-scan': typeof ApiPublicHooksReliabilityScanRoute
   '/api/public/hooks/telemetry-snapshot': typeof ApiPublicHooksTelemetrySnapshotRoute
+  '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -373,6 +381,7 @@ export interface FileRoutesById {
   '/api/public/vitals': typeof ApiPublicVitalsRoute
   '/api/public/hooks/reliability-scan': typeof ApiPublicHooksReliabilityScanRoute
   '/api/public/hooks/telemetry-snapshot': typeof ApiPublicHooksTelemetrySnapshotRoute
+  '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -416,6 +425,7 @@ export interface FileRouteTypes {
     | '/api/public/vitals'
     | '/api/public/hooks/reliability-scan'
     | '/api/public/hooks/telemetry-snapshot'
+    | '/api/public/stripe/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -457,6 +467,7 @@ export interface FileRouteTypes {
     | '/api/public/vitals'
     | '/api/public/hooks/reliability-scan'
     | '/api/public/hooks/telemetry-snapshot'
+    | '/api/public/stripe/webhook'
   id:
     | '__root__'
     | '/'
@@ -498,6 +509,7 @@ export interface FileRouteTypes {
     | '/api/public/vitals'
     | '/api/public/hooks/reliability-scan'
     | '/api/public/hooks/telemetry-snapshot'
+    | '/api/public/stripe/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -539,6 +551,7 @@ export interface RootRouteChildren {
   ApiPublicVitalsRoute: typeof ApiPublicVitalsRoute
   ApiPublicHooksReliabilityScanRoute: typeof ApiPublicHooksReliabilityScanRoute
   ApiPublicHooksTelemetrySnapshotRoute: typeof ApiPublicHooksTelemetrySnapshotRoute
+  ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -802,6 +815,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/stripe/webhook': {
+      id: '/api/public/stripe/webhook'
+      path: '/api/public/stripe/webhook'
+      fullPath: '/api/public/stripe/webhook'
+      preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/telemetry-snapshot': {
       id: '/api/public/hooks/telemetry-snapshot'
       path: '/api/public/hooks/telemetry-snapshot'
@@ -869,6 +889,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicVitalsRoute: ApiPublicVitalsRoute,
   ApiPublicHooksReliabilityScanRoute: ApiPublicHooksReliabilityScanRoute,
   ApiPublicHooksTelemetrySnapshotRoute: ApiPublicHooksTelemetrySnapshotRoute,
+  ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
