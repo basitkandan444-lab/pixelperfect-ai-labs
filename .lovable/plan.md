@@ -1,165 +1,143 @@
-# Premium Intelligence Engine — Tasks 5 + 6 Completion Plan
+# Tasks 7 + 8 — Production Intelligence & Capability Expansion
 
-## Objectives
-Turn the premium path from a fixed post-pass into an **image-adaptive** engine that:
-1. Analyzes each input image.
-2. Dynamically selects which premium capabilities/models/optimizations to run.
-3. Caches models across sessions.
-4. Continuously verifies itself via benchmarks and regression harness.
-
-All existing invariants preserved: 100% on-device, no hosted inference, no credits, free path untouched, bundle budgets held, lazy-loaded premium chunk, SSR-safe.
+## Objective
+Turn the premium engine into a **plug-and-play platform**: every future capability registers itself once and automatically inherits intelligence, optimization, verification, benchmarking, telemetry, and compatibility gating. Zero impact on free path, bundle, or browser-first invariants.
 
 ## Architecture
 
 ```text
 src/lib/enhance/premium/
-  intelligence/
-    analyzer.ts        image feature extraction (pure JS, ~10ms on 512² thumbnail)
-    selector.ts        capability + model selection policy (pure, deterministic)
-    plan.ts            types: ImageProfile, PremiumPlan, Capability
-    analyzer.test.ts
-    selector.test.ts
-  optimize/
-    scheduler.ts       stage runner: budget-aware, cancellable, progress-weighted
-    memory.ts          AccumulatorPool + bitmap lifecycle helpers
-    backend.ts         WebGPU feature-detect → WASM SIMD → JS fallback
-  models/
-    registry.ts        model manifest (id, url, sha256, size, purpose)
-    cache.ts           CacheStorage("ppp-models-v1") + SHA-256 verify + LRU evict
-    loader.ts          lazy ORT session factory, shared across runs
+  capabilities/
+    types.ts              CapabilityDescriptor, CapabilityContext, CapabilityResult
+    registry.ts           register/list/get; frozen after boot; dev-only warnings on dup
+    builtins.ts           registers today's 8 stages (deblock, bilateral, clahe, wb,
+                          microContrast, sCurve, vibrance, faceRestore) via descriptors
     registry.test.ts
-    cache.test.ts
-  bench/
-    harness.ts         PSNR / SSIM / ΔE00 / wall-time over fixture set
-    fixtures/          tiny PNGs committed under 200KB total
-    harness.test.ts
-  pipeline.ts          orchestrator: analyze → plan → execute → verify
+  production/
+    performance/
+      profiler.ts         perf.now() spans; per-stage timing; memory hints (deviceMemory)
+      predictor.ts        rolling EMA of stage costs → informs selector budgets
+    quality/
+      metrics.ts          PSNR, SSIM (small-window), ΔE00, edge-preservation ratio
+      verifier.ts         runs metrics vs pre-stage snapshot; flags regressions
+    verification/
+      gate.ts             composable checks: arch, memory, bundle, browser, regression
+      report.ts           structured VerificationReport type
+    telemetry/
+      collector.ts        dev-only sink (import.meta.env.DEV); ring buffer, no network
+      report.ts           renders FINAL SCORE object for devtools/console.debug
+    compatibility/
+      matrix.ts           feature probes: WebGPU, WASM SIMD, OffscreenCanvas, Workers,
+                          Canvas2D, createImageBitmap; cached, SSR-safe
+      policy.ts           capability→required-features gate; downgrades plan cleanly
+    benchmarks/
+      runner.ts           wraps existing bench/harness; adds per-capability scoring
+      thresholds.ts       min PSNR/SSIM/time per backend; JSON, editable
+    bundle/
+      guard.ts            build-time assertion helpers used by scripts/check-bundle-size
+    analytics/
+      aggregate.ts        dev-only aggregation of telemetry across runs (in-memory)
+    optimization/
+      advisor.ts          reads profiler+quality+compat → suggests plan tweaks to
+                          selector on next run (pure, deterministic)
+    index.ts              barrel: initProductionLayer() wires everything, dev-gated
 ```
 
-`enhanceImageInBrowser` still calls `import("./premium/pipeline")` — no change to public API or free path.
+All production/* modules are **tree-shakeable** and **dev-gated by default**; nothing new ships to free users, and nothing adds runtime work to premium users unless they enable the dev telemetry flag.
+
+## Capability contract (Task 8 core)
+
+```ts
+export interface CapabilityDescriptor<P = unknown> {
+  id: Capability | string;                 // extends the union at registration time
+  version: string;                         // semver, used by cache & benchmarks
+  requires: FeatureFlag[];                 // e.g. ["webgpu"] | ["wasm-simd"]
+  budget: { memMB: number; timeMsPerMP: number };
+  select(profile: ImageProfile, env: SelectorEnv): P | null; // null = skip
+  run(buf: Uint8ClampedArray, ctx: CapabilityContext<P>): Promise<Uint8ClampedArray>;
+  verify?(before: Uint8ClampedArray, after: Uint8ClampedArray, ctx): QualitySignal;
+  bench?: BenchSpec;                       // fixtures + thresholds
+}
+```
+
+Selector is refactored to iterate the registry instead of a hardcoded switch. Today's 8 stages become descriptors in `capabilities/builtins.ts` — behavior identical, code path uniform.
 
 ## Data flow
 
 ```text
-RGBA (post-upscale)
-   │
-   ▼
-analyzer.ts ─► ImageProfile { faces?, jpegBlockiness, noiseSigma,
-                              lowlightRatio, colorCastLab, sharpnessVar,
-                              gamutClipPct, chromaMean, edgeDensity, dims }
-   │
-   ▼
-selector.ts ─► PremiumPlan {
-     stages: ["deblock"?, "bilateral"?, "clahe"?, "wb"?, "vibrance"?,
-              "microContrast"?, "sCurve"?, "faceRestore"?],
-     params:   per-stage tuned from profile,
-     backend:  "webgpu" | "wasm" | "js",
-     modelIds: string[]      (only what's needed)
-   }
-   │
-   ▼
-scheduler.ts ─► executes stages, streams progress, honors AbortSignal,
-                pulls models via models/loader → cache
-   │
-   ▼
-bench/harness.ts (dev + CI only) validates output vs fixtures
+ImageProfile ─► registry.list()
+                    │
+                    ▼
+        capability.select(profile,env)  ──skip if null / features missing──►
+                    │
+                    ▼
+              PremiumPlan (existing shape, now registry-derived)
+                    │
+                    ▼
+          scheduler → capability.run → optional verify
+                    │
+                    ▼
+   dev-only telemetry.collector.record(stage, timing, mem, quality, compat)
+                    │
+                    ▼
+              advisor updates EMA for next run
 ```
 
-## Selection policy (deterministic, testable)
+Public API (`applyPremiumPost`, `applyPremiumPostAsync`, `planForImage`) unchanged.
 
-| Profile signal | Threshold | Enables |
-|---|---|---|
-| jpegBlockiness ≥ 0.35 | high | deblock + stronger bilateral |
-| noiseSigma ≥ 6 | high | bilateral (sigmaRange scaled) |
-| lowlightRatio ≥ 0.30 | dark image | CLAHE clip 2.6, S-curve +0.05 |
-| |colorCastLab| ≥ 3 ΔE | cast | grayWorldWhiteBalance strength up |
-| chromaMean ≤ 0.03 | flat color | vibrance up to 0.24 |
-| edgeDensity ≥ 0.12 | detailed | microContrast on, gated |
-| edgeDensity < 0.04 | flat | microContrast off (avoid noise amp) |
-| faces detected ≥ 1 | portrait | queue face model (only if premium + cached or user-consented download) |
-| dims ≥ 12 MP AND memoryGB ≤ 4 | tight | force backend "wasm", disable face restore |
+## Verification loops
 
-Policy is a pure function `(profile, caps) → plan`; 100% unit-testable, no side effects.
+1. Unit: registry lifecycle, descriptor validation, compatibility gating, advisor math.
+2. Round-trip: existing 34 premium tests must stay green; builtins parity test proves refactor is behavior-preserving.
+3. Bench: `benchmarks/runner` runs per-capability against fixtures; thresholds enforced in CI subset.
+4. Bundle: `scripts/check-bundle-size.mjs` gate extended — free chunk delta must be **0 bytes**, premium chunk ≤ current +8 KB gz.
+5. Compat: matrix probed under jsdom (feature-detect returns "js" fallback path).
+6. SSR: every new module short-circuits under `import.meta.env.SSR`.
+7. Telemetry: guarded by `import.meta.env.DEV`; production build assertion that the collector module is tree-shaken out of the client chunk.
 
-## Model management
-
-- `registry.ts` lists models (`realesrgan-x4v3` already asset-hosted; face model **not shipped by default** — only fetched on first premium use with visible progress + user gesture, per existing memory constraint).
-- `cache.ts` uses `caches.open("ppp-models-v1")`, verifies SHA-256, evicts oldest when >150MB.
-- `loader.ts` memoizes ORT `InferenceSession` per model id for the tab lifetime.
-- No new hard dependencies; no hosted inference.
-
-## Optimization layer
-
-- `backend.ts`: `navigator.gpu` probe → WebGPU; else `crossOriginIsolated && SIMD` → WASM SIMD; else JS. Result cached per session.
-- `scheduler.ts`: stage weights sum to 1.0 for smooth progress; each stage checks `signal.aborted` and yields via `await new Promise(r => setTimeout(r))` between tiles.
-- `memory.ts`: `AccumulatorPool` reuses `Float32Array` buffers across stages; explicit `bitmap.close()`.
-
-## Benchmarking / verification
-
-- `bench/harness.ts` compares premium output vs stored reference for 4 fixtures (portrait, JPEG-crushed, low-light, high-detail):
-  - PSNR ≥ baseline
-  - SSIM ≥ 0.90 vs reference
-  - Wall-time budget per backend
-- Runs under Vitest (fast subset) + optional full run via `scripts/bench-premium.ts`.
-- Playwright `e2e/network.spec.ts` extended to assert zero fetches to non-first-party inference hosts during premium enhance.
-
-## Files to be modified/created
-
-**New**: everything under `src/lib/enhance/premium/{intelligence,optimize,models,bench}/*` + tests.
-**Modified**: `src/lib/enhance/premium/pipeline.ts` (delegates to intelligence + scheduler; keeps signature).
-**Untouched**: `pipeline.ts` (top-level), `neural.ts`, `enhance.worker.ts`, all free path, entitlement, Stripe, UI routes.
+## Non-negotiables preserved
+- Free path: untouched. Zero import into free bundle (asserted).
+- Browser-first: no hosted inference, no cloud GPU, no new network fetches.
+- Stripe / entitlement / routes / UI: not modified.
+- Public API of pipeline: unchanged.
+- No new hard dependencies.
 
 ## Trade-offs
-
-- Adds ~15–25 KB gz to the **premium** chunk (still ≤200 KB gz budget).
-- Analyzer runs on a 512² downsample → <10 ms even on low-end mobile.
-- Deterministic selector avoids "AI picking AI" opacity: every decision is inspectable and testable.
-- Face restoration remains gated behind explicit first-use download to honor the "no surprise 40 MB fetch" rule.
-
-## Performance implications
-
-- Free path: **zero** change in bundle, runtime, or behavior.
-- Premium path: same or faster than current fixed post-pass for most images (skips unneeded stages); slower only when profile genuinely warrants more work.
-- Progress reporting becomes more accurate (weighted by planned stages).
-
-## Verification loops (per feature)
-
-1. Unit tests for analyzer signals (synthetic inputs with known properties).
-2. Unit tests for selector policy (table-driven).
-3. Round-trip tests on pipeline (profile → plan → execute → shape assertions).
-4. Bench harness: PSNR/SSIM vs reference fixtures.
-5. Playwright: premium enhance completes; zero external inference calls.
-6. Bundle-size guard: `scripts/check-bundle-size.mjs` gate.
-7. SSR guard: `import.meta.env.SSR` short-circuits in every new client-only entry.
+- +~15 KB gz to premium chunk (dev-tel excluded from prod build).
+- One extra indirection in selector (registry lookup) — negligible.
+- Verifier metrics on full-res images are expensive; run on 256² downsample by default, opt-in for full.
 
 ## Risks & mitigations
-
 | Risk | Mitigation |
 |---|---|
-| Analyzer misclassifies → wrong plan | Deterministic thresholds + unit tests; plan is logged to `console.debug` in dev only |
-| Model cache corruption | SHA-256 verify on read; auto-evict + refetch on mismatch |
-| WebGPU flakiness on Safari | Automatic fallback to WASM; feature-detected, no UA sniffing |
-| Bundle growth | Per-subfolder dynamic imports; bundle-size CI check |
-| Face model download surprise | Gated behind explicit user gesture; visible progress; skippable |
+| Refactor breaks existing plans | Parity test: for a fixed profile matrix, new selector must produce byte-identical PremiumPlan vs current |
+| Telemetry ships to prod | Build-time assert + `DEV`-guarded imports; e2e checks bundle for collector symbol |
+| Advisor destabilizes params | Advisor is opt-in; default off; deterministic bounds |
+| Feature-detect flakiness | Cached per session, safe fallbacks, no UA sniffing |
+
+## Files
+**New:** everything under `src/lib/enhance/premium/{capabilities,production}/*` + tests.
+**Modified:** `premium/intelligence/selector.ts` (iterate registry), `premium/pipeline.ts` (delegate stage build to registry), `scripts/check-bundle-size.mjs` (per-chunk cap tightening).
+**Untouched:** free path, routes, UI, Stripe, entitlement, worker, models registry semantics.
 
 ## Rollout order
-
-1. `intelligence/plan.ts` + `analyzer.ts` + tests.
-2. `intelligence/selector.ts` + tests.
-3. `optimize/{backend,memory,scheduler}.ts` + tests.
-4. `models/{registry,cache,loader}.ts` + tests.
-5. Refactor `premium/pipeline.ts` to delegate (keeps existing stages as capabilities).
-6. `bench/harness.ts` + fixtures + tests.
-7. Extend `e2e/network.spec.ts`; run full verification loop.
-8. Report: bundle deltas, bench numbers, coverage, invariant checks.
+1. `capabilities/{types,registry}.ts` + tests.
+2. `capabilities/builtins.ts` — register existing 8 stages; parity test.
+3. Refactor `selector.ts` + `pipeline.ts` to consume registry (behavior-preserving).
+4. `production/compatibility/*` + `production/performance/*` (pure, no wiring).
+5. `production/quality/*` + `verification/*`.
+6. `production/telemetry/*` (DEV-gated) + `analytics/aggregate`.
+7. `production/optimization/advisor` (opt-in).
+8. `production/benchmarks/*` + thresholds, wire into existing bench harness.
+9. `production/index.ts` `initProductionLayer()` — called only from dev entry.
+10. Bundle guard tightening + full verification loop; report deltas.
 
 ## Out of scope
-
-- Any change to free path, Stripe, entitlement, routes, UI.
-- Any hosted/cloud inference.
-- Any change to `pipeline.ts` public API.
-- New models beyond the already-shipped Real-ESRGAN unless explicitly approved.
+- Any new user-visible capability (face restore stays gated as today).
+- Any change to free path, Stripe, routes, UI.
+- Any hosted/cloud inference or GPU service.
+- Any change to public premium pipeline API.
 
 ---
 
-Reply **APPROVE**, **SKIP**, or **REQUEST CHANGES**. I will not begin implementation until approval.
+Reply **APPROVE**, **SKIP**, or **REQUEST CHANGES**. No code will be written until approval.
