@@ -240,7 +240,7 @@ export function HomeContent() {
         </h2>
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-3 md:grid-cols-12 md:gap-4">
           {/* Privacy — wide */}
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/5 bg-[oklch(0.04_0_0)] p-8 sm:p-10 md:col-span-8">
+          <div className="card-premium group relative overflow-hidden rounded-[2rem] border border-white/5 bg-[oklch(0.04_0_0)] p-8 sm:p-10 md:col-span-8">
             <div className="relative z-10 max-w-md">
               <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
                 Privacy by design
@@ -255,12 +255,12 @@ export function HomeContent() {
             </div>
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -right-16 -bottom-16 h-72 w-72 rounded-full bg-primary/15 blur-3xl"
+              className="pointer-events-none absolute -right-16 -bottom-16 h-72 w-72 rounded-full bg-primary/15 blur-3xl transition-all duration-700 group-hover:scale-125 group-hover:bg-primary/25"
             />
           </div>
 
           {/* Speed */}
-          <div className="rounded-[2rem] border border-white/5 bg-[oklch(0.04_0_0)] p-8 text-center sm:p-10 md:col-span-4">
+          <div className="card-premium rounded-[2rem] border border-white/5 bg-[oklch(0.04_0_0)] p-8 text-center sm:p-10 md:col-span-4">
             <div className="flex h-full flex-col items-center justify-center gap-2">
               <div className="font-display text-6xl italic text-primary">0.4s</div>
               <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
@@ -270,12 +270,12 @@ export function HomeContent() {
           </div>
 
           {/* Formats */}
-          <div className="rounded-[2rem] border border-white/5 bg-[oklch(0.04_0_0)] p-8 md:col-span-4">
+          <div className="card-premium rounded-[2rem] border border-white/5 bg-[oklch(0.04_0_0)] p-8 md:col-span-4">
             <div className="flex flex-wrap gap-1.5">
               {["JPG", "PNG", "WEBP"].map((f) => (
                 <span
                   key={f}
-                  className="rounded-md border border-white/10 bg-black/40 px-2 py-1 text-[10px] font-semibold tracking-wider text-muted-foreground"
+                  className="rounded-md border border-white/10 bg-black/40 px-2 py-1 text-[10px] font-semibold tracking-wider text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
                 >
                   {f}
                 </span>
@@ -290,11 +290,11 @@ export function HomeContent() {
           </div>
 
           {/* 8K */}
-          <div className="rounded-[2rem] border border-white/5 bg-[oklch(0.04_0_0)] p-8 md:col-span-4">
+          <div className="card-premium group rounded-[2rem] border border-white/5 bg-[oklch(0.04_0_0)] p-8 md:col-span-4">
             <div className="flex items-baseline gap-1">
-              <div className="h-6 w-1 bg-primary" />
-              <div className="h-6 w-1 bg-primary" />
-              <div className="h-6 w-1 bg-primary/30" />
+              <div className="h-6 w-1 bg-primary transition-all duration-500 group-hover:h-8" />
+              <div className="h-6 w-1 bg-primary transition-all delay-75 duration-500 group-hover:h-10" />
+              <div className="h-6 w-1 bg-primary/30 transition-all delay-150 duration-500 group-hover:h-7 group-hover:bg-primary/70" />
             </div>
             <h4 className="mt-8 font-display text-3xl italic tracking-tight text-foreground">
               8K upscaling.
@@ -305,7 +305,7 @@ export function HomeContent() {
           </div>
 
           {/* Free — accent tile */}
-          <div className="flex flex-col items-center justify-center rounded-[2rem] bg-primary p-8 text-center text-primary-foreground md:col-span-4">
+          <div className="sheen group flex flex-col items-center justify-center rounded-[2rem] bg-primary p-8 text-center text-primary-foreground transition-transform duration-500 hover:-translate-y-1 md:col-span-4">
             <h4 className="font-display text-3xl italic leading-none">Forever free.</h4>
             <span className="mt-3 text-xs font-medium opacity-80">
               No subscriptions. No accounts. Ever.

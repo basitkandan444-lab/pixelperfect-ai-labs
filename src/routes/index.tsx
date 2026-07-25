@@ -492,18 +492,31 @@ function Index() {
         Skip to upload
       </a>
 
-      {/* Ambient — a single hushed electric-blue bloom behind the hero. */}
-      <div className="pointer-events-none fixed inset-x-0 top-0 h-[70vh] overflow-hidden" aria-hidden="true">
-        <div className="absolute left-1/2 top-[-20%] h-[42rem] w-[42rem] -translate-x-1/2 rounded-full bg-primary/15 blur-[140px]" />
+      {/* Ambient — twin drifting electric-blue blooms behind the hero, forming
+          a slow, cinematic aurora that reacts subtly to page life. */}
+      <div
+        className="pointer-events-none fixed inset-x-0 top-0 h-[85vh] overflow-hidden"
+        aria-hidden="true"
+      >
+        <div className="animate-aurora-drift absolute left-1/2 top-[-18%] h-[46rem] w-[46rem] -translate-x-1/2 rounded-full bg-primary/20 blur-[150px]" />
+        <div
+          className="animate-aurora-drift absolute right-[-10%] top-[15%] h-[28rem] w-[28rem] rounded-full bg-primary/10 blur-[120px]"
+          style={{ animationDelay: "-6s", animationDuration: "22s" }}
+        />
+        <div
+          className="animate-aurora-drift absolute left-[-8%] top-[35%] h-[24rem] w-[24rem] rounded-full bg-primary/10 blur-[130px]"
+          style={{ animationDelay: "-12s", animationDuration: "26s" }}
+        />
       </div>
 
       <div className="relative mx-auto flex max-w-6xl flex-col px-5 pt-6 sm:px-8">
         {/* Floating brand pill — Apple Noir */}
-        <header className="fixed left-1/2 top-6 z-50 w-[calc(100%-2.5rem)] max-w-2xl -translate-x-1/2">
-          <div className="flex items-center justify-between rounded-full border border-white/10 bg-[oklch(0.09_0_0/0.75)] px-5 py-2.5 shadow-cinema backdrop-blur-xl">
-            <Link to="/" className="flex items-center gap-2" aria-label={`${SITE.name} home`}>
-              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary">
+        <header className="animate-fade-up fixed left-1/2 top-6 z-50 w-[calc(100%-2.5rem)] max-w-2xl -translate-x-1/2">
+          <div className="flex items-center justify-between rounded-full border border-white/10 bg-[oklch(0.09_0_0/0.72)] px-5 py-2.5 shadow-cinema backdrop-blur-xl transition-shadow duration-500 hover:shadow-glow">
+            <Link to="/" className="flex items-center gap-2 group" aria-label={`${SITE.name} home`}>
+              <span className="relative flex h-6 w-6 items-center justify-center rounded-md bg-primary transition-transform duration-500 group-hover:rotate-[8deg] group-hover:scale-110">
                 <Sparkles className="h-3.5 w-3.5 text-primary-foreground" aria-hidden="true" />
+                <span className="absolute inset-0 rounded-md bg-primary opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-70" />
               </span>
               <span className="font-display text-lg italic tracking-tight text-foreground">
                 {SITE.name}
@@ -530,7 +543,7 @@ function Index() {
               </Link>
               <a
                 href="#workspace"
-                className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground transition-all hover:brightness-110"
+                className="sheen inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground transition-all duration-300 hover:brightness-110 hover:shadow-[0_0_20px_-2px_color-mix(in_oklab,var(--primary)_70%,transparent)]"
               >
                 Launch App
               </a>
@@ -539,25 +552,41 @@ function Index() {
         </header>
 
         <main>
-          {/* Hero — cinematic serif */}
-          <section className="animate-fade-up relative pt-40 pb-20 text-center sm:pt-48">
-            <h1 className="mx-auto max-w-5xl font-display text-[3.25rem] leading-[0.95] tracking-[-0.02em] text-foreground sm:text-7xl md:text-8xl">
+          {/* Hero — cinematic serif with staggered blur-in entrance */}
+          <section className="relative pt-40 pb-20 text-center sm:pt-48">
+            <div
+              className="animate-hero-in mx-auto mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground backdrop-blur"
+              style={{ animationDelay: "0.05s" }}
+            >
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+              </span>
+              On-device AI · v2
+            </div>
+            <h1 className="animate-hero-in mx-auto max-w-5xl font-display text-[3.25rem] leading-[0.95] tracking-[-0.02em] text-foreground sm:text-7xl md:text-8xl" style={{ animationDelay: "0.15s" }}>
               Image enhancement,
               <br />
-              <span className="italic text-foreground/95">perfected on-device.</span>
+              <span className="text-shimmer italic">perfected on-device.</span>
             </h1>
-            <p className="mx-auto mt-8 max-w-xl text-base font-light leading-relaxed text-muted-foreground sm:text-lg">
+            <p
+              className="animate-hero-in mx-auto mt-8 max-w-xl text-base font-light leading-relaxed text-muted-foreground sm:text-lg"
+              style={{ animationDelay: "0.35s" }}
+            >
               Zero uploads. Zero watermarks. Zero cost.
               <br className="hidden sm:block" />
               A browser-first engine that respects your privacy.
             </p>
-            <div className="mt-10 flex flex-col items-center gap-4">
+            <div
+              className="animate-hero-in mt-10 flex flex-col items-center gap-4"
+              style={{ animationDelay: "0.5s" }}
+            >
               <a
                 href="#workspace"
-                className="group inline-flex items-center justify-center gap-2 rounded-full bg-primary px-9 py-4 text-base font-semibold text-primary-foreground shadow-[0_0_40px_-8px_color-mix(in_oklab,var(--primary)_55%,transparent)] transition-transform duration-300 hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="sheen group relative inline-flex items-center justify-center gap-2 rounded-full bg-primary px-9 py-4 text-base font-semibold text-primary-foreground shadow-[0_0_40px_-8px_color-mix(in_oklab,var(--primary)_55%,transparent)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_60px_-8px_color-mix(in_oklab,var(--primary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 Start enhancing free
-                <span className="inline-block transition-transform duration-300 group-hover:translate-x-0.5">
+                <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
                   →
                 </span>
               </a>
@@ -567,7 +596,7 @@ function Index() {
               >
                 See how it works
                 <svg
-                  className="h-3.5 w-3.5"
+                  className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-y-0.5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -582,7 +611,10 @@ function Index() {
                 </svg>
               </a>
             </div>
-            <div className="mx-auto mt-14 flex max-w-2xl flex-wrap items-center justify-center gap-x-8 gap-y-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70">
+            <div
+              className="animate-hero-in mx-auto mt-14 flex max-w-2xl flex-wrap items-center justify-center gap-x-8 gap-y-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70"
+              style={{ animationDelay: "0.7s" }}
+            >
               <span>100% on-device</span>
               <span aria-hidden="true">·</span>
               <span>Zero uploads</span>
@@ -592,6 +624,7 @@ function Index() {
               <span>4K &amp; 8K output</span>
             </div>
           </section>
+
 
           {/* Workspace */}
           <section
