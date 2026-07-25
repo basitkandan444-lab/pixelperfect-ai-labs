@@ -331,6 +331,35 @@ function Index() {
     if (import.meta.env.SSR) return;
     if (!original) return;
 
+    // Task 4 — Free tier gate. Premium bypasses. Signed-in users are gated
+    // server-side (SECURITY DEFINER consume_free_enhancement). Anonymous
+    // visitors are gated locally as UX only; the server-side path is the
+    // security boundary once signed in.
+    if (!isPremium) {
+      if (isSignedIn) {
+        try {
+          const { allowed } = await consumeFn({});
+          if (!allowed) {
+            openUpgradeWall();
+            return;
+          }
+        } catch (err) {
+          console.warn("[entitlement] consume failed", err);
+          // Fail closed — never let a broken check silently unlock unlimited use.
+          toast.error("Could not verify your plan. Please try again.");
+          return;
+        }
+        // Refresh the entitlement badge in the background.
+        entitlementQuery.refetch();
+      } else {
+        if (getLocalUsed() >= FREE_CAP) {
+          openUpgradeWall();
+          return;
+        }
+        setLocalUsed(incrementLocalUsed());
+      }
+    }
+
     const controller = new AbortController();
     abortRef.current = controller;
     setProgress(4);
