@@ -48,8 +48,12 @@ import { Route as ApiPublicAlertsRouteImport } from './routes/api/public/alerts'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe/webhook'
+import { Route as ApiPublicIntelligenceRevenueRouteImport } from './routes/api/public/intelligence/revenue'
+import { Route as ApiPublicIntelligencePerformanceRouteImport } from './routes/api/public/intelligence/performance'
+import { Route as ApiPublicIntelligenceConversionRouteImport } from './routes/api/public/intelligence/conversion'
 import { Route as ApiPublicHooksTelemetrySnapshotRouteImport } from './routes/api/public/hooks/telemetry-snapshot'
 import { Route as ApiPublicHooksReliabilityScanRouteImport } from './routes/api/public/hooks/reliability-scan'
+import { Route as ApiPublicEvolutionRecommendationsRouteImport } from './routes/api/public/evolution/recommendations'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -249,6 +253,24 @@ const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   path: '/api/public/stripe/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicIntelligenceRevenueRoute =
+  ApiPublicIntelligenceRevenueRouteImport.update({
+    id: '/revenue',
+    path: '/revenue',
+    getParentRoute: () => ApiPublicIntelligenceRoute,
+  } as any)
+const ApiPublicIntelligencePerformanceRoute =
+  ApiPublicIntelligencePerformanceRouteImport.update({
+    id: '/performance',
+    path: '/performance',
+    getParentRoute: () => ApiPublicIntelligenceRoute,
+  } as any)
+const ApiPublicIntelligenceConversionRoute =
+  ApiPublicIntelligenceConversionRouteImport.update({
+    id: '/conversion',
+    path: '/conversion',
+    getParentRoute: () => ApiPublicIntelligenceRoute,
+  } as any)
 const ApiPublicHooksTelemetrySnapshotRoute =
   ApiPublicHooksTelemetrySnapshotRouteImport.update({
     id: '/api/public/hooks/telemetry-snapshot',
@@ -259,6 +281,12 @@ const ApiPublicHooksReliabilityScanRoute =
   ApiPublicHooksReliabilityScanRouteImport.update({
     id: '/api/public/hooks/reliability-scan',
     path: '/api/public/hooks/reliability-scan',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicEvolutionRecommendationsRoute =
+  ApiPublicEvolutionRecommendationsRouteImport.update({
+    id: '/api/public/evolution/recommendations',
+    path: '/api/public/evolution/recommendations',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -294,15 +322,19 @@ export interface FileRoutesByFullPath {
   '/api/public/experiments': typeof ApiPublicExperimentsRoute
   '/api/public/funnel': typeof ApiPublicFunnelRoute
   '/api/public/health': typeof ApiPublicHealthRoute
-  '/api/public/intelligence': typeof ApiPublicIntelligenceRoute
+  '/api/public/intelligence': typeof ApiPublicIntelligenceRouteWithChildren
   '/api/public/journeys': typeof ApiPublicJourneysRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
   '/api/public/reconciliation': typeof ApiPublicReconciliationRoute
   '/api/public/reliability': typeof ApiPublicReliabilityRoute
   '/api/public/version': typeof ApiPublicVersionRoute
   '/api/public/vitals': typeof ApiPublicVitalsRoute
+  '/api/public/evolution/recommendations': typeof ApiPublicEvolutionRecommendationsRoute
   '/api/public/hooks/reliability-scan': typeof ApiPublicHooksReliabilityScanRoute
   '/api/public/hooks/telemetry-snapshot': typeof ApiPublicHooksTelemetrySnapshotRoute
+  '/api/public/intelligence/conversion': typeof ApiPublicIntelligenceConversionRoute
+  '/api/public/intelligence/performance': typeof ApiPublicIntelligencePerformanceRoute
+  '/api/public/intelligence/revenue': typeof ApiPublicIntelligenceRevenueRoute
   '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -337,15 +369,19 @@ export interface FileRoutesByTo {
   '/api/public/experiments': typeof ApiPublicExperimentsRoute
   '/api/public/funnel': typeof ApiPublicFunnelRoute
   '/api/public/health': typeof ApiPublicHealthRoute
-  '/api/public/intelligence': typeof ApiPublicIntelligenceRoute
+  '/api/public/intelligence': typeof ApiPublicIntelligenceRouteWithChildren
   '/api/public/journeys': typeof ApiPublicJourneysRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
   '/api/public/reconciliation': typeof ApiPublicReconciliationRoute
   '/api/public/reliability': typeof ApiPublicReliabilityRoute
   '/api/public/version': typeof ApiPublicVersionRoute
   '/api/public/vitals': typeof ApiPublicVitalsRoute
+  '/api/public/evolution/recommendations': typeof ApiPublicEvolutionRecommendationsRoute
   '/api/public/hooks/reliability-scan': typeof ApiPublicHooksReliabilityScanRoute
   '/api/public/hooks/telemetry-snapshot': typeof ApiPublicHooksTelemetrySnapshotRoute
+  '/api/public/intelligence/conversion': typeof ApiPublicIntelligenceConversionRoute
+  '/api/public/intelligence/performance': typeof ApiPublicIntelligencePerformanceRoute
+  '/api/public/intelligence/revenue': typeof ApiPublicIntelligenceRevenueRoute
   '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
@@ -381,15 +417,19 @@ export interface FileRoutesById {
   '/api/public/experiments': typeof ApiPublicExperimentsRoute
   '/api/public/funnel': typeof ApiPublicFunnelRoute
   '/api/public/health': typeof ApiPublicHealthRoute
-  '/api/public/intelligence': typeof ApiPublicIntelligenceRoute
+  '/api/public/intelligence': typeof ApiPublicIntelligenceRouteWithChildren
   '/api/public/journeys': typeof ApiPublicJourneysRoute
   '/api/public/metrics': typeof ApiPublicMetricsRoute
   '/api/public/reconciliation': typeof ApiPublicReconciliationRoute
   '/api/public/reliability': typeof ApiPublicReliabilityRoute
   '/api/public/version': typeof ApiPublicVersionRoute
   '/api/public/vitals': typeof ApiPublicVitalsRoute
+  '/api/public/evolution/recommendations': typeof ApiPublicEvolutionRecommendationsRoute
   '/api/public/hooks/reliability-scan': typeof ApiPublicHooksReliabilityScanRoute
   '/api/public/hooks/telemetry-snapshot': typeof ApiPublicHooksTelemetrySnapshotRoute
+  '/api/public/intelligence/conversion': typeof ApiPublicIntelligenceConversionRoute
+  '/api/public/intelligence/performance': typeof ApiPublicIntelligencePerformanceRoute
+  '/api/public/intelligence/revenue': typeof ApiPublicIntelligenceRevenueRoute
   '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
@@ -433,8 +473,12 @@ export interface FileRouteTypes {
     | '/api/public/reliability'
     | '/api/public/version'
     | '/api/public/vitals'
+    | '/api/public/evolution/recommendations'
     | '/api/public/hooks/reliability-scan'
     | '/api/public/hooks/telemetry-snapshot'
+    | '/api/public/intelligence/conversion'
+    | '/api/public/intelligence/performance'
+    | '/api/public/intelligence/revenue'
     | '/api/public/stripe/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -476,8 +520,12 @@ export interface FileRouteTypes {
     | '/api/public/reliability'
     | '/api/public/version'
     | '/api/public/vitals'
+    | '/api/public/evolution/recommendations'
     | '/api/public/hooks/reliability-scan'
     | '/api/public/hooks/telemetry-snapshot'
+    | '/api/public/intelligence/conversion'
+    | '/api/public/intelligence/performance'
+    | '/api/public/intelligence/revenue'
     | '/api/public/stripe/webhook'
   id:
     | '__root__'
@@ -519,8 +567,12 @@ export interface FileRouteTypes {
     | '/api/public/reliability'
     | '/api/public/version'
     | '/api/public/vitals'
+    | '/api/public/evolution/recommendations'
     | '/api/public/hooks/reliability-scan'
     | '/api/public/hooks/telemetry-snapshot'
+    | '/api/public/intelligence/conversion'
+    | '/api/public/intelligence/performance'
+    | '/api/public/intelligence/revenue'
     | '/api/public/stripe/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -555,13 +607,14 @@ export interface RootRouteChildren {
   ApiPublicExperimentsRoute: typeof ApiPublicExperimentsRoute
   ApiPublicFunnelRoute: typeof ApiPublicFunnelRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
-  ApiPublicIntelligenceRoute: typeof ApiPublicIntelligenceRoute
+  ApiPublicIntelligenceRoute: typeof ApiPublicIntelligenceRouteWithChildren
   ApiPublicJourneysRoute: typeof ApiPublicJourneysRoute
   ApiPublicMetricsRoute: typeof ApiPublicMetricsRoute
   ApiPublicReconciliationRoute: typeof ApiPublicReconciliationRoute
   ApiPublicReliabilityRoute: typeof ApiPublicReliabilityRoute
   ApiPublicVersionRoute: typeof ApiPublicVersionRoute
   ApiPublicVitalsRoute: typeof ApiPublicVitalsRoute
+  ApiPublicEvolutionRecommendationsRoute: typeof ApiPublicEvolutionRecommendationsRoute
   ApiPublicHooksReliabilityScanRoute: typeof ApiPublicHooksReliabilityScanRoute
   ApiPublicHooksTelemetrySnapshotRoute: typeof ApiPublicHooksTelemetrySnapshotRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
@@ -842,6 +895,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/intelligence/revenue': {
+      id: '/api/public/intelligence/revenue'
+      path: '/revenue'
+      fullPath: '/api/public/intelligence/revenue'
+      preLoaderRoute: typeof ApiPublicIntelligenceRevenueRouteImport
+      parentRoute: typeof ApiPublicIntelligenceRoute
+    }
+    '/api/public/intelligence/performance': {
+      id: '/api/public/intelligence/performance'
+      path: '/performance'
+      fullPath: '/api/public/intelligence/performance'
+      preLoaderRoute: typeof ApiPublicIntelligencePerformanceRouteImport
+      parentRoute: typeof ApiPublicIntelligenceRoute
+    }
+    '/api/public/intelligence/conversion': {
+      id: '/api/public/intelligence/conversion'
+      path: '/conversion'
+      fullPath: '/api/public/intelligence/conversion'
+      preLoaderRoute: typeof ApiPublicIntelligenceConversionRouteImport
+      parentRoute: typeof ApiPublicIntelligenceRoute
+    }
     '/api/public/hooks/telemetry-snapshot': {
       id: '/api/public/hooks/telemetry-snapshot'
       path: '/api/public/hooks/telemetry-snapshot'
@@ -856,6 +930,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksReliabilityScanRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/evolution/recommendations': {
+      id: '/api/public/evolution/recommendations'
+      path: '/api/public/evolution/recommendations'
+      fullPath: '/api/public/evolution/recommendations'
+      preLoaderRoute: typeof ApiPublicEvolutionRecommendationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -868,6 +949,23 @@ const OpsRouteChildren: OpsRouteChildren = {
 }
 
 const OpsRouteWithChildren = OpsRoute._addFileChildren(OpsRouteChildren)
+
+interface ApiPublicIntelligenceRouteChildren {
+  ApiPublicIntelligenceConversionRoute: typeof ApiPublicIntelligenceConversionRoute
+  ApiPublicIntelligencePerformanceRoute: typeof ApiPublicIntelligencePerformanceRoute
+  ApiPublicIntelligenceRevenueRoute: typeof ApiPublicIntelligenceRevenueRoute
+}
+
+const ApiPublicIntelligenceRouteChildren: ApiPublicIntelligenceRouteChildren = {
+  ApiPublicIntelligenceConversionRoute: ApiPublicIntelligenceConversionRoute,
+  ApiPublicIntelligencePerformanceRoute: ApiPublicIntelligencePerformanceRoute,
+  ApiPublicIntelligenceRevenueRoute: ApiPublicIntelligenceRevenueRoute,
+}
+
+const ApiPublicIntelligenceRouteWithChildren =
+  ApiPublicIntelligenceRoute._addFileChildren(
+    ApiPublicIntelligenceRouteChildren,
+  )
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -901,13 +999,15 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicExperimentsRoute: ApiPublicExperimentsRoute,
   ApiPublicFunnelRoute: ApiPublicFunnelRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
-  ApiPublicIntelligenceRoute: ApiPublicIntelligenceRoute,
+  ApiPublicIntelligenceRoute: ApiPublicIntelligenceRouteWithChildren,
   ApiPublicJourneysRoute: ApiPublicJourneysRoute,
   ApiPublicMetricsRoute: ApiPublicMetricsRoute,
   ApiPublicReconciliationRoute: ApiPublicReconciliationRoute,
   ApiPublicReliabilityRoute: ApiPublicReliabilityRoute,
   ApiPublicVersionRoute: ApiPublicVersionRoute,
   ApiPublicVitalsRoute: ApiPublicVitalsRoute,
+  ApiPublicEvolutionRecommendationsRoute:
+    ApiPublicEvolutionRecommendationsRoute,
   ApiPublicHooksReliabilityScanRoute: ApiPublicHooksReliabilityScanRoute,
   ApiPublicHooksTelemetrySnapshotRoute: ApiPublicHooksTelemetrySnapshotRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
