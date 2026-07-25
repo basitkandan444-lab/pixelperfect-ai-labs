@@ -9,124 +9,49 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TermsRouteImport } from './routes/terms'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as SharpenImageRouteImport } from './routes/sharpen-image'
-import { Route as RestoreOldPhotoRouteImport } from './routes/restore-old-photo'
-import { Route as RemoveImageNoiseRouteImport } from './routes/remove-image-noise'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as OpsRouteImport } from './routes/ops'
-import { Route as McpRouteImport } from './routes/mcp'
-import { Route as IncreaseImageResolutionRouteImport } from './routes/increase-image-resolution'
-import { Route as ImageUpscalerRouteImport } from './routes/image-upscaler'
-import { Route as FixBlurryPhotoRouteImport } from './routes/fix-blurry-photo'
-import { Route as EnhanceLowQualityPhotoRouteImport } from './routes/enhance-low-quality-photo'
-import { Route as CookiesRouteImport } from './routes/cookies'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AiImageEnhancerRouteImport } from './routes/ai-image-enhancer'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as OpsExperimentsRouteImport } from './routes/ops.experiments'
-import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AiImageEnhancerRouteImport } from './routes/ai-image-enhancer'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as EnhanceLowQualityPhotoRouteImport } from './routes/enhance-low-quality-photo'
+import { Route as FixBlurryPhotoRouteImport } from './routes/fix-blurry-photo'
+import { Route as ImageUpscalerRouteImport } from './routes/image-upscaler'
+import { Route as IncreaseImageResolutionRouteImport } from './routes/increase-image-resolution'
+import { Route as McpRouteImport } from './routes/mcp'
+import { Route as OpsRouteImport } from './routes/ops'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as RemoveImageNoiseRouteImport } from './routes/remove-image-noise'
+import { Route as RestoreOldPhotoRouteImport } from './routes/restore-old-photo'
+import { Route as SharpenImageRouteImport } from './routes/sharpen-image'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
-import { Route as ApiPublicVitalsRouteImport } from './routes/api/public/vitals'
-import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
-import { Route as ApiPublicReliabilityRouteImport } from './routes/api/public/reliability'
-import { Route as ApiPublicReconciliationRouteImport } from './routes/api/public/reconciliation'
-import { Route as ApiPublicMetricsRouteImport } from './routes/api/public/metrics'
-import { Route as ApiPublicJourneysRouteImport } from './routes/api/public/journeys'
-import { Route as ApiPublicIntelligenceRouteImport } from './routes/api/public/intelligence'
-import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
-import { Route as ApiPublicFunnelRouteImport } from './routes/api/public/funnel'
-import { Route as ApiPublicExperimentsRouteImport } from './routes/api/public/experiments'
-import { Route as ApiPublicEventsRouteImport } from './routes/api/public/events'
-import { Route as ApiPublicCohortsRouteImport } from './routes/api/public/cohorts'
-import { Route as ApiPublicAnomaliesRouteImport } from './routes/api/public/anomalies'
-import { Route as ApiPublicAlertsRouteImport } from './routes/api/public/alerts'
-import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as OpsExperimentsRouteImport } from './routes/ops.experiments'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
-import { Route as ApiPublicHooksTelemetrySnapshotRouteImport } from './routes/api/public/hooks/telemetry-snapshot'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as ApiPublicAlertsRouteImport } from './routes/api/public/alerts'
+import { Route as ApiPublicAnomaliesRouteImport } from './routes/api/public/anomalies'
+import { Route as ApiPublicCohortsRouteImport } from './routes/api/public/cohorts'
+import { Route as ApiPublicEventsRouteImport } from './routes/api/public/events'
+import { Route as ApiPublicExperimentsRouteImport } from './routes/api/public/experiments'
+import { Route as ApiPublicFunnelRouteImport } from './routes/api/public/funnel'
+import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
+import { Route as ApiPublicIntelligenceRouteImport } from './routes/api/public/intelligence'
+import { Route as ApiPublicJourneysRouteImport } from './routes/api/public/journeys'
+import { Route as ApiPublicMetricsRouteImport } from './routes/api/public/metrics'
+import { Route as ApiPublicReconciliationRouteImport } from './routes/api/public/reconciliation'
+import { Route as ApiPublicReliabilityRouteImport } from './routes/api/public/reliability'
+import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
+import { Route as ApiPublicVitalsRouteImport } from './routes/api/public/vitals'
 import { Route as ApiPublicHooksReliabilityScanRouteImport } from './routes/api/public/hooks/reliability-scan'
+import { Route as ApiPublicHooksTelemetrySnapshotRouteImport } from './routes/api/public/hooks/telemetry-snapshot'
 
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SharpenImageRoute = SharpenImageRouteImport.update({
-  id: '/sharpen-image',
-  path: '/sharpen-image',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RestoreOldPhotoRoute = RestoreOldPhotoRouteImport.update({
-  id: '/restore-old-photo',
-  path: '/restore-old-photo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RemoveImageNoiseRoute = RemoveImageNoiseRouteImport.update({
-  id: '/remove-image-noise',
-  path: '/remove-image-noise',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OpsRoute = OpsRouteImport.update({
-  id: '/ops',
-  path: '/ops',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const McpRoute = McpRouteImport.update({
-  id: '/mcp',
-  path: '/mcp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IncreaseImageResolutionRoute = IncreaseImageResolutionRouteImport.update({
-  id: '/increase-image-resolution',
-  path: '/increase-image-resolution',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ImageUpscalerRoute = ImageUpscalerRouteImport.update({
-  id: '/image-upscaler',
-  path: '/image-upscaler',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FixBlurryPhotoRoute = FixBlurryPhotoRouteImport.update({
-  id: '/fix-blurry-photo',
-  path: '/fix-blurry-photo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnhanceLowQualityPhotoRoute = EnhanceLowQualityPhotoRouteImport.update({
-  id: '/enhance-low-quality-photo',
-  path: '/enhance-low-quality-photo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CookiesRoute = CookiesRouteImport.update({
-  id: '/cookies',
-  path: '/cookies',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AiImageEnhancerRoute = AiImageEnhancerRouteImport.update({
-  id: '/ai-image-enhancer',
-  path: '/ai-image-enhancer',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -134,96 +59,106 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AiImageEnhancerRoute = AiImageEnhancerRouteImport.update({
+  id: '/ai-image-enhancer',
+  path: '/ai-image-enhancer',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OpsExperimentsRoute = OpsExperimentsRouteImport.update({
-  id: '/experiments',
-  path: '/experiments',
-  getParentRoute: () => OpsRoute,
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const Char91DotwellKnownChar93OauthProtectedResourceRoute =
-  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
-    id: '/.well-known/oauth-protected-resource',
-    path: '/.well-known/oauth-protected-resource',
-    getParentRoute: () => rootRouteImport,
-  } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnhanceLowQualityPhotoRoute = EnhanceLowQualityPhotoRouteImport.update({
+  id: '/enhance-low-quality-photo',
+  path: '/enhance-low-quality-photo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FixBlurryPhotoRoute = FixBlurryPhotoRouteImport.update({
+  id: '/fix-blurry-photo',
+  path: '/fix-blurry-photo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImageUpscalerRoute = ImageUpscalerRouteImport.update({
+  id: '/image-upscaler',
+  path: '/image-upscaler',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IncreaseImageResolutionRoute = IncreaseImageResolutionRouteImport.update({
+  id: '/increase-image-resolution',
+  path: '/increase-image-resolution',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpsRoute = OpsRouteImport.update({
+  id: '/ops',
+  path: '/ops',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RemoveImageNoiseRoute = RemoveImageNoiseRouteImport.update({
+  id: '/remove-image-noise',
+  path: '/remove-image-noise',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RestoreOldPhotoRoute = RestoreOldPhotoRouteImport.update({
+  id: '/restore-old-photo',
+  path: '/restore-old-photo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SharpenImageRoute = SharpenImageRouteImport.update({
+  id: '/sharpen-image',
+  path: '/sharpen-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Char91DotmcpChar93ListToolsRoute =
   Char91DotmcpChar93ListToolsRouteImport.update({
     id: '/.mcp/list-tools',
     path: '/.mcp/list-tools',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicVitalsRoute = ApiPublicVitalsRouteImport.update({
-  id: '/api/public/vitals',
-  path: '/api/public/vitals',
-  getParentRoute: () => rootRouteImport,
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const OpsExperimentsRoute = OpsExperimentsRouteImport.update({
+  id: '/experiments',
+  path: '/experiments',
+  getParentRoute: () => OpsRoute,
 } as any)
-const ApiPublicVersionRoute = ApiPublicVersionRouteImport.update({
-  id: '/api/public/version',
-  path: '/api/public/version',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicReliabilityRoute = ApiPublicReliabilityRouteImport.update({
-  id: '/api/public/reliability',
-  path: '/api/public/reliability',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicReconciliationRoute = ApiPublicReconciliationRouteImport.update({
-  id: '/api/public/reconciliation',
-  path: '/api/public/reconciliation',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicMetricsRoute = ApiPublicMetricsRouteImport.update({
-  id: '/api/public/metrics',
-  path: '/api/public/metrics',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicJourneysRoute = ApiPublicJourneysRouteImport.update({
-  id: '/api/public/journeys',
-  path: '/api/public/journeys',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicIntelligenceRoute = ApiPublicIntelligenceRouteImport.update({
-  id: '/api/public/intelligence',
-  path: '/api/public/intelligence',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
-  id: '/api/public/health',
-  path: '/api/public/health',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicFunnelRoute = ApiPublicFunnelRouteImport.update({
-  id: '/api/public/funnel',
-  path: '/api/public/funnel',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicExperimentsRoute = ApiPublicExperimentsRouteImport.update({
-  id: '/api/public/experiments',
-  path: '/api/public/experiments',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicEventsRoute = ApiPublicEventsRouteImport.update({
-  id: '/api/public/events',
-  path: '/api/public/events',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicCohortsRoute = ApiPublicCohortsRouteImport.update({
-  id: '/api/public/cohorts',
-  path: '/api/public/cohorts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicAnomaliesRoute = ApiPublicAnomaliesRouteImport.update({
-  id: '/api/public/anomalies',
-  path: '/api/public/anomalies',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicAlertsRoute = ApiPublicAlertsRouteImport.update({
-  id: '/api/public/alerts',
-  path: '/api/public/alerts',
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
@@ -232,21 +167,86 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
-const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
-  id: '/.lovable/oauth/consent',
-  path: '/.lovable/oauth/consent',
+const ApiPublicAlertsRoute = ApiPublicAlertsRouteImport.update({
+  id: '/api/public/alerts',
+  path: '/api/public/alerts',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicHooksTelemetrySnapshotRoute =
-  ApiPublicHooksTelemetrySnapshotRouteImport.update({
-    id: '/api/public/hooks/telemetry-snapshot',
-    path: '/api/public/hooks/telemetry-snapshot',
-    getParentRoute: () => rootRouteImport,
-  } as any)
+const ApiPublicAnomaliesRoute = ApiPublicAnomaliesRouteImport.update({
+  id: '/api/public/anomalies',
+  path: '/api/public/anomalies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicCohortsRoute = ApiPublicCohortsRouteImport.update({
+  id: '/api/public/cohorts',
+  path: '/api/public/cohorts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicEventsRoute = ApiPublicEventsRouteImport.update({
+  id: '/api/public/events',
+  path: '/api/public/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicExperimentsRoute = ApiPublicExperimentsRouteImport.update({
+  id: '/api/public/experiments',
+  path: '/api/public/experiments',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicFunnelRoute = ApiPublicFunnelRouteImport.update({
+  id: '/api/public/funnel',
+  path: '/api/public/funnel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
+  id: '/api/public/health',
+  path: '/api/public/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicIntelligenceRoute = ApiPublicIntelligenceRouteImport.update({
+  id: '/api/public/intelligence',
+  path: '/api/public/intelligence',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicJourneysRoute = ApiPublicJourneysRouteImport.update({
+  id: '/api/public/journeys',
+  path: '/api/public/journeys',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicMetricsRoute = ApiPublicMetricsRouteImport.update({
+  id: '/api/public/metrics',
+  path: '/api/public/metrics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicReconciliationRoute = ApiPublicReconciliationRouteImport.update({
+  id: '/api/public/reconciliation',
+  path: '/api/public/reconciliation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicReliabilityRoute = ApiPublicReliabilityRouteImport.update({
+  id: '/api/public/reliability',
+  path: '/api/public/reliability',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicVersionRoute = ApiPublicVersionRouteImport.update({
+  id: '/api/public/version',
+  path: '/api/public/version',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicVitalsRoute = ApiPublicVitalsRouteImport.update({
+  id: '/api/public/vitals',
+  path: '/api/public/vitals',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksReliabilityScanRoute =
   ApiPublicHooksReliabilityScanRouteImport.update({
     id: '/api/public/hooks/reliability-scan',
     path: '/api/public/hooks/reliability-scan',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksTelemetrySnapshotRoute =
+  ApiPublicHooksTelemetrySnapshotRouteImport.update({
+    id: '/api/public/hooks/telemetry-snapshot',
+    path: '/api/public/hooks/telemetry-snapshot',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -543,116 +543,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sharpen-image': {
-      id: '/sharpen-image'
-      path: '/sharpen-image'
-      fullPath: '/sharpen-image'
-      preLoaderRoute: typeof SharpenImageRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/restore-old-photo': {
-      id: '/restore-old-photo'
-      path: '/restore-old-photo'
-      fullPath: '/restore-old-photo'
-      preLoaderRoute: typeof RestoreOldPhotoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/remove-image-noise': {
-      id: '/remove-image-noise'
-      path: '/remove-image-noise'
-      fullPath: '/remove-image-noise'
-      preLoaderRoute: typeof RemoveImageNoiseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ops': {
-      id: '/ops'
-      path: '/ops'
-      fullPath: '/ops'
-      preLoaderRoute: typeof OpsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mcp': {
-      id: '/mcp'
-      path: '/mcp'
-      fullPath: '/mcp'
-      preLoaderRoute: typeof McpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/increase-image-resolution': {
-      id: '/increase-image-resolution'
-      path: '/increase-image-resolution'
-      fullPath: '/increase-image-resolution'
-      preLoaderRoute: typeof IncreaseImageResolutionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/image-upscaler': {
-      id: '/image-upscaler'
-      path: '/image-upscaler'
-      fullPath: '/image-upscaler'
-      preLoaderRoute: typeof ImageUpscalerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/fix-blurry-photo': {
-      id: '/fix-blurry-photo'
-      path: '/fix-blurry-photo'
-      fullPath: '/fix-blurry-photo'
-      preLoaderRoute: typeof FixBlurryPhotoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/enhance-low-quality-photo': {
-      id: '/enhance-low-quality-photo'
-      path: '/enhance-low-quality-photo'
-      fullPath: '/enhance-low-quality-photo'
-      preLoaderRoute: typeof EnhanceLowQualityPhotoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cookies': {
-      id: '/cookies'
-      path: '/cookies'
-      fullPath: '/cookies'
-      preLoaderRoute: typeof CookiesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ai-image-enhancer': {
-      id: '/ai-image-enhancer'
-      path: '/ai-image-enhancer'
-      fullPath: '/ai-image-enhancer'
-      preLoaderRoute: typeof AiImageEnhancerRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -662,25 +557,116 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/ai-image-enhancer': {
+      id: '/ai-image-enhancer'
+      path: '/ai-image-enhancer'
+      fullPath: '/ai-image-enhancer'
+      preLoaderRoute: typeof AiImageEnhancerRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ops/experiments': {
-      id: '/ops/experiments'
-      path: '/experiments'
-      fullPath: '/ops/experiments'
-      preLoaderRoute: typeof OpsExperimentsRouteImport
-      parentRoute: typeof OpsRoute
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/.well-known/oauth-protected-resource': {
-      id: '/.well-known/oauth-protected-resource'
-      path: '/.well-known/oauth-protected-resource'
-      fullPath: '/.well-known/oauth-protected-resource'
-      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/enhance-low-quality-photo': {
+      id: '/enhance-low-quality-photo'
+      path: '/enhance-low-quality-photo'
+      fullPath: '/enhance-low-quality-photo'
+      preLoaderRoute: typeof EnhanceLowQualityPhotoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fix-blurry-photo': {
+      id: '/fix-blurry-photo'
+      path: '/fix-blurry-photo'
+      fullPath: '/fix-blurry-photo'
+      preLoaderRoute: typeof FixBlurryPhotoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/image-upscaler': {
+      id: '/image-upscaler'
+      path: '/image-upscaler'
+      fullPath: '/image-upscaler'
+      preLoaderRoute: typeof ImageUpscalerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/increase-image-resolution': {
+      id: '/increase-image-resolution'
+      path: '/increase-image-resolution'
+      fullPath: '/increase-image-resolution'
+      preLoaderRoute: typeof IncreaseImageResolutionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ops': {
+      id: '/ops'
+      path: '/ops'
+      fullPath: '/ops'
+      preLoaderRoute: typeof OpsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/remove-image-noise': {
+      id: '/remove-image-noise'
+      path: '/remove-image-noise'
+      fullPath: '/remove-image-noise'
+      preLoaderRoute: typeof RemoveImageNoiseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/restore-old-photo': {
+      id: '/restore-old-photo'
+      path: '/restore-old-photo'
+      fullPath: '/restore-old-photo'
+      preLoaderRoute: typeof RestoreOldPhotoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sharpen-image': {
+      id: '/sharpen-image'
+      path: '/sharpen-image'
+      fullPath: '/sharpen-image'
+      preLoaderRoute: typeof SharpenImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/list-tools': {
@@ -690,102 +676,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/vitals': {
-      id: '/api/public/vitals'
-      path: '/api/public/vitals'
-      fullPath: '/api/public/vitals'
-      preLoaderRoute: typeof ApiPublicVitalsRouteImport
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/version': {
-      id: '/api/public/version'
-      path: '/api/public/version'
-      fullPath: '/api/public/version'
-      preLoaderRoute: typeof ApiPublicVersionRouteImport
-      parentRoute: typeof rootRouteImport
+    '/ops/experiments': {
+      id: '/ops/experiments'
+      path: '/experiments'
+      fullPath: '/ops/experiments'
+      preLoaderRoute: typeof OpsExperimentsRouteImport
+      parentRoute: typeof OpsRoute
     }
-    '/api/public/reliability': {
-      id: '/api/public/reliability'
-      path: '/api/public/reliability'
-      fullPath: '/api/public/reliability'
-      preLoaderRoute: typeof ApiPublicReliabilityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/reconciliation': {
-      id: '/api/public/reconciliation'
-      path: '/api/public/reconciliation'
-      fullPath: '/api/public/reconciliation'
-      preLoaderRoute: typeof ApiPublicReconciliationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/metrics': {
-      id: '/api/public/metrics'
-      path: '/api/public/metrics'
-      fullPath: '/api/public/metrics'
-      preLoaderRoute: typeof ApiPublicMetricsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/journeys': {
-      id: '/api/public/journeys'
-      path: '/api/public/journeys'
-      fullPath: '/api/public/journeys'
-      preLoaderRoute: typeof ApiPublicJourneysRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/intelligence': {
-      id: '/api/public/intelligence'
-      path: '/api/public/intelligence'
-      fullPath: '/api/public/intelligence'
-      preLoaderRoute: typeof ApiPublicIntelligenceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/health': {
-      id: '/api/public/health'
-      path: '/api/public/health'
-      fullPath: '/api/public/health'
-      preLoaderRoute: typeof ApiPublicHealthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/funnel': {
-      id: '/api/public/funnel'
-      path: '/api/public/funnel'
-      fullPath: '/api/public/funnel'
-      preLoaderRoute: typeof ApiPublicFunnelRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/experiments': {
-      id: '/api/public/experiments'
-      path: '/api/public/experiments'
-      fullPath: '/api/public/experiments'
-      preLoaderRoute: typeof ApiPublicExperimentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/events': {
-      id: '/api/public/events'
-      path: '/api/public/events'
-      fullPath: '/api/public/events'
-      preLoaderRoute: typeof ApiPublicEventsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/cohorts': {
-      id: '/api/public/cohorts'
-      path: '/api/public/cohorts'
-      fullPath: '/api/public/cohorts'
-      preLoaderRoute: typeof ApiPublicCohortsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/anomalies': {
-      id: '/api/public/anomalies'
-      path: '/api/public/anomalies'
-      fullPath: '/api/public/anomalies'
-      preLoaderRoute: typeof ApiPublicAnomaliesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/alerts': {
-      id: '/api/public/alerts'
-      path: '/api/public/alerts'
-      fullPath: '/api/public/alerts'
-      preLoaderRoute: typeof ApiPublicAlertsRouteImport
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/invoke-tool/$tool': {
@@ -795,18 +704,102 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/.lovable/oauth/consent': {
-      id: '/.lovable/oauth/consent'
-      path: '/.lovable/oauth/consent'
-      fullPath: '/.lovable/oauth/consent'
-      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+    '/api/public/alerts': {
+      id: '/api/public/alerts'
+      path: '/api/public/alerts'
+      fullPath: '/api/public/alerts'
+      preLoaderRoute: typeof ApiPublicAlertsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/hooks/telemetry-snapshot': {
-      id: '/api/public/hooks/telemetry-snapshot'
-      path: '/api/public/hooks/telemetry-snapshot'
-      fullPath: '/api/public/hooks/telemetry-snapshot'
-      preLoaderRoute: typeof ApiPublicHooksTelemetrySnapshotRouteImport
+    '/api/public/anomalies': {
+      id: '/api/public/anomalies'
+      path: '/api/public/anomalies'
+      fullPath: '/api/public/anomalies'
+      preLoaderRoute: typeof ApiPublicAnomaliesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/cohorts': {
+      id: '/api/public/cohorts'
+      path: '/api/public/cohorts'
+      fullPath: '/api/public/cohorts'
+      preLoaderRoute: typeof ApiPublicCohortsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/events': {
+      id: '/api/public/events'
+      path: '/api/public/events'
+      fullPath: '/api/public/events'
+      preLoaderRoute: typeof ApiPublicEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/experiments': {
+      id: '/api/public/experiments'
+      path: '/api/public/experiments'
+      fullPath: '/api/public/experiments'
+      preLoaderRoute: typeof ApiPublicExperimentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/funnel': {
+      id: '/api/public/funnel'
+      path: '/api/public/funnel'
+      fullPath: '/api/public/funnel'
+      preLoaderRoute: typeof ApiPublicFunnelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/health': {
+      id: '/api/public/health'
+      path: '/api/public/health'
+      fullPath: '/api/public/health'
+      preLoaderRoute: typeof ApiPublicHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/intelligence': {
+      id: '/api/public/intelligence'
+      path: '/api/public/intelligence'
+      fullPath: '/api/public/intelligence'
+      preLoaderRoute: typeof ApiPublicIntelligenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/journeys': {
+      id: '/api/public/journeys'
+      path: '/api/public/journeys'
+      fullPath: '/api/public/journeys'
+      preLoaderRoute: typeof ApiPublicJourneysRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/metrics': {
+      id: '/api/public/metrics'
+      path: '/api/public/metrics'
+      fullPath: '/api/public/metrics'
+      preLoaderRoute: typeof ApiPublicMetricsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/reconciliation': {
+      id: '/api/public/reconciliation'
+      path: '/api/public/reconciliation'
+      fullPath: '/api/public/reconciliation'
+      preLoaderRoute: typeof ApiPublicReconciliationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/reliability': {
+      id: '/api/public/reliability'
+      path: '/api/public/reliability'
+      fullPath: '/api/public/reliability'
+      preLoaderRoute: typeof ApiPublicReliabilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/version': {
+      id: '/api/public/version'
+      path: '/api/public/version'
+      fullPath: '/api/public/version'
+      preLoaderRoute: typeof ApiPublicVersionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/vitals': {
+      id: '/api/public/vitals'
+      path: '/api/public/vitals'
+      fullPath: '/api/public/vitals'
+      preLoaderRoute: typeof ApiPublicVitalsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/reliability-scan': {
@@ -814,6 +807,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/reliability-scan'
       fullPath: '/api/public/hooks/reliability-scan'
       preLoaderRoute: typeof ApiPublicHooksReliabilityScanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/telemetry-snapshot': {
+      id: '/api/public/hooks/telemetry-snapshot'
+      path: '/api/public/hooks/telemetry-snapshot'
+      fullPath: '/api/public/hooks/telemetry-snapshot'
+      preLoaderRoute: typeof ApiPublicHooksTelemetrySnapshotRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
