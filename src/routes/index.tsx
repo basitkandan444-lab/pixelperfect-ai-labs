@@ -515,7 +515,7 @@ function Index() {
       stopCountdown();
       if (abortRef.current === controller) abortRef.current = null;
     }
-  }, [clearResultUrl, original, scale, engine, fileInfo, stopCountdown]);
+  }, [clearResultUrl, original, scale, engine, fileInfo, stopCountdown, isPremium, isSignedIn, consumeFn, entitlementQuery, openUpgradeWall]);
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
