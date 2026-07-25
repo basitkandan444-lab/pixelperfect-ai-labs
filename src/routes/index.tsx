@@ -629,6 +629,12 @@ function Index() {
                 How it works
               </a>
               <Link
+                to="/pricing"
+                className="hidden rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+              >
+                Pricing
+              </Link>
+              <Link
                 to="/contact"
                 className="hidden rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
               >
