@@ -1,8 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Sparkles, UploadCloud, Wand2, Download, RotateCcw, Zap, Gauge } from "lucide-react";
 
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 
 import { Button } from "@/components/ui/button";
 import { CompareSlider } from "@/components/CompareSlider";
@@ -11,10 +13,18 @@ import { HomeContent } from "@/components/HomeContent";
 import { BeforeAfterGallery } from "@/components/BeforeAfterGallery";
 import { AnalysisCard } from "@/components/AnalysisCard";
 import { ProcessingOverlay } from "@/components/ProcessingOverlay";
+import { UpgradeWall } from "@/components/UpgradeWall";
 import { trackEvent } from "@/lib/analytics";
 import { SITE, FAQS, absoluteUrl } from "@/lib/site";
 import { originLoader } from "@/lib/origin.functions";
 import { detectCapabilities } from "@/lib/enhance/capabilities";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  consumeEnhancement,
+  createCheckoutSession,
+  getMyEntitlement,
+} from "@/lib/subscription.functions";
+import { FREE_CAP, getLocalUsed, incrementLocalUsed } from "@/lib/entitlement";
 
 import {
   predict,
