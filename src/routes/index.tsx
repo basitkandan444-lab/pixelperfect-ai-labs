@@ -989,6 +989,24 @@ function Index() {
       </div>
 
       <SiteFooter />
+
+      <UpgradeWall
+        open={wallOpen}
+        onClose={() => setWallOpen(false)}
+        used={usedCount}
+        cap={FREE_CAP}
+        isSignedIn={isSignedIn}
+        onUpgrade={handleUpgrade}
+        pending={wallPending}
+      />
+      {!isPremium && stage !== "idle" && (
+        <div className="pointer-events-none fixed bottom-4 left-1/2 z-40 -translate-x-1/2 rounded-full border border-white/10 bg-black/60 px-3 py-1.5 text-[11px] text-white/70 backdrop-blur">
+          {remaining} of {FREE_CAP} free enhancements left ·{" "}
+          <Link to="/pricing" className="pointer-events-auto underline hover:text-white">
+            Upgrade
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
