@@ -354,7 +354,7 @@ export async function enhanceImageInBrowser(
           onProgress: (v, m) =>
             onProgress?.({ stage: "finishing", value: 0.92 + v * 0.06, message: m }),
         });
-        const outImg = new ImageData(outPixels, w, h);
+        const outImg = new ImageData(new Uint8ClampedArray(outPixels), w, h);
         ctx.putImageData(outImg, 0, 0);
         blob =
           canvasLike instanceof OffscreenCanvas
