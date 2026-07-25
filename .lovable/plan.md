@@ -1,142 +1,131 @@
-# Tasks 7 + 8 — Production Intelligence & Capability Expansion
+# Tasks 9 + 10 — Production/Conversion Intelligence & Elite Evolution Engine
 
 ## Objective
-Turn the premium engine into a **plug-and-play platform**: every future capability registers itself once and automatically inherits intelligence, optimization, verification, benchmarking, telemetry, and compatibility gating. Zero impact on free path, bundle, or browser-first invariants.
+Close the Pixel Perfect Pro architecture with two additive layers that turn existing signals (telemetry, capability registry, Stripe subscriptions, first-party events) into **evidence-driven recommendations** — without touching the free path, the browser-first engine, or any public API.
+
+- **Task 9** — Production & Conversion Intelligence: unify what already exists (events, subscriptions, capabilities, vitals, reliability) into a single query surface answering "who did what, why, and what did it cost / earn".
+- **Task 10** — Elite Evolution Engine: a pure recommendations layer that reads Task 9's aggregates + the capability registry + bundle/perf budgets and emits ranked, typed recommendations. Read-only. Never auto-applies.
 
 ## Architecture
 
 ```text
-src/lib/enhance/premium/
-  capabilities/
-    types.ts              CapabilityDescriptor, CapabilityContext, CapabilityResult
-    registry.ts           register/list/get; frozen after boot; dev-only warnings on dup
-    builtins.ts           registers today's 8 stages (deblock, bilateral, clahe, wb,
-                          microContrast, sCurve, vibrance, faceRestore) via descriptors
-    registry.test.ts
-  production/
-    performance/
-      profiler.ts         perf.now() spans; per-stage timing; memory hints (deviceMemory)
-      predictor.ts        rolling EMA of stage costs → informs selector budgets
-    quality/
-      metrics.ts          PSNR, SSIM (small-window), ΔE00, edge-preservation ratio
-      verifier.ts         runs metrics vs pre-stage snapshot; flags regressions
-    verification/
-      gate.ts             composable checks: arch, memory, bundle, browser, regression
-      report.ts           structured VerificationReport type
-    telemetry/
-      collector.ts        dev-only sink (import.meta.env.DEV); ring buffer, no network
-      report.ts           renders FINAL SCORE object for devtools/console.debug
-    compatibility/
-      matrix.ts           feature probes: WebGPU, WASM SIMD, OffscreenCanvas, Workers,
-                          Canvas2D, createImageBitmap; cached, SSR-safe
-      policy.ts           capability→required-features gate; downgrades plan cleanly
-    benchmarks/
-      runner.ts           wraps existing bench/harness; adds per-capability scoring
-      thresholds.ts       min PSNR/SSIM/time per backend; JSON, editable
-    bundle/
-      guard.ts            build-time assertion helpers used by scripts/check-bundle-size
-    analytics/
-      aggregate.ts        dev-only aggregation of telemetry across runs (in-memory)
-    optimization/
-      advisor.ts          reads profiler+quality+compat → suggests plan tweaks to
-                          selector on next run (pure, deterministic)
-    index.ts              barrel: initProductionLayer() wires everything, dev-gated
+src/lib/intelligence/                         (server-only aggregation)
+  conversion/
+    funnel.ts           upload→enhance→download→wall→checkout→active
+    upgrade-reasons.ts  last capability + plan before checkout_started
+    retention.ts        active / churned / grace from subscriptions
+    capability-value.ts capability × (completion, download, upgrade) rates
+  performance/
+    by-browser.ts       p50/p95 enhance_ms grouped by browser/os/device
+    by-capability.ts    per-stage cost from telemetry snapshots
+    bottlenecks.ts      slowest stage vs budget from capability registry
+  revenue/
+    mrr.ts              active subs × price → MRR / ARR bands
+    ltv.ts              avg lifetime months × price (bounded, no PII)
+  intelligence.server.ts   thin barrel; each fn is createServerFn + admin role gate
+
+src/lib/evolution/                            (pure, deterministic)
+  types.ts              Recommendation, Severity, Evidence, Category
+  rules/
+    conversion.ts       wall-abandon > X% ⇒ improve messaging
+    performance.ts      browser slowdown > X% ⇒ fallback tuning
+    capability.ts       usage skew ⇒ prioritize / expand / retire
+    bundle.ts           free-chunk delta > 0 ⇒ split premium
+    quality.ts          verifier warn rate > X% ⇒ tune stage
+    memory.ts           peak MB > budget ⇒ pool / tile
+  engine.ts             runs rules(inputs) → Recommendation[]; sorted, deduped
+  engine.test.ts
+
+src/routes/api/public/
+  intelligence/conversion.ts   GET aggregates (admin-gated via has_role)
+  intelligence/performance.ts  GET aggregates
+  intelligence/revenue.ts      GET aggregates (bands only, no PII)
+  evolution/recommendations.ts GET Recommendation[]  (rules(engine(inputs)))
 ```
 
-All production/* modules are **tree-shakeable** and **dev-gated by default**; nothing new ships to free users, and nothing adds runtime work to premium users unless they enable the dev telemetry flag.
+No new tables. No new secrets. No new client bundles. All reads go through `requireSupabaseAuth` + `has_role(_, 'admin')`; non-admins get 403.
 
-## Capability contract (Task 8 core)
+## Data sources (already in production)
+- `events` — funnel, capability usage, wall hits, abandonments, error_code, metrics blob
+- `subscriptions` — active / cancelled / current_period_end → retention, MRR, LTV bands
+- `telemetry_snapshots` — perf/vitals aggregates by browser/device
+- `reliability_alerts` — quality/perf regressions feed evolution rules
+- Capability registry (`src/lib/enhance/premium/capabilities/*`) — budgets, requires, version
+- Bundle guard output (`scripts/check-bundle-size.mjs`) — free-chunk delta
+
+## Recommendation contract
 
 ```ts
-export interface CapabilityDescriptor<P = unknown> {
-  id: Capability | string;                 // extends the union at registration time
-  version: string;                         // semver, used by cache & benchmarks
-  requires: FeatureFlag[];                 // e.g. ["webgpu"] | ["wasm-simd"]
-  budget: { memMB: number; timeMsPerMP: number };
-  select(profile: ImageProfile, env: SelectorEnv): P | null; // null = skip
-  run(buf: Uint8ClampedArray, ctx: CapabilityContext<P>): Promise<Uint8ClampedArray>;
-  verify?(before: Uint8ClampedArray, after: Uint8ClampedArray, ctx): QualitySignal;
-  bench?: BenchSpec;                       // fixtures + thresholds
+export type Category = "conversion" | "performance" | "capability" | "bundle" | "quality" | "memory";
+export type Severity = "info" | "warn" | "critical";
+
+export interface Evidence { metric: string; value: number; threshold: number; window: string; sample: number; }
+export interface Recommendation {
+  id: string;              // stable hash of {category, subject, window}
+  category: Category;
+  severity: Severity;
+  subject: string;         // e.g. "capability:faceRestore", "browser:safari"
+  title: string;           // one-line action
+  rationale: string;       // human, evidence-linked
+  evidence: Evidence[];
+  action: { kind: "plan-required"; note: string };  // never auto-apply
+  createdAt: string;
 }
 ```
 
-Selector is refactored to iterate the registry instead of a hardcoded switch. Today's 8 stages become descriptors in `capabilities/builtins.ts` — behavior identical, code path uniform.
-
-## Data flow
-
-```text
-ImageProfile ─► registry.list()
-                    │
-                    ▼
-        capability.select(profile,env)  ──skip if null / features missing──►
-                    │
-                    ▼
-              PremiumPlan (existing shape, now registry-derived)
-                    │
-                    ▼
-          scheduler → capability.run → optional verify
-                    │
-                    ▼
-   dev-only telemetry.collector.record(stage, timing, mem, quality, compat)
-                    │
-                    ▼
-              advisor updates EMA for next run
-```
-
-Public API (`applyPremiumPost`, `applyPremiumPostAsync`, `planForImage`) unchanged.
+Engine is pure: `engine(inputs) → Recommendation[]`. No I/O, fully unit-testable.
 
 ## Verification loops
-
-1. Unit: registry lifecycle, descriptor validation, compatibility gating, advisor math.
-2. Round-trip: existing 34 premium tests must stay green; builtins parity test proves refactor is behavior-preserving.
-3. Bench: `benchmarks/runner` runs per-capability against fixtures; thresholds enforced in CI subset.
-4. Bundle: `scripts/check-bundle-size.mjs` gate extended — free chunk delta must be **0 bytes**, premium chunk ≤ current +8 KB gz.
-5. Compat: matrix probed under jsdom (feature-detect returns "js" fallback path).
-6. SSR: every new module short-circuits under `import.meta.env.SSR`.
-7. Telemetry: guarded by `import.meta.env.DEV`; production build assertion that the collector module is tree-shaken out of the client chunk.
+1. Unit: each rule with fixture inputs → expected recommendations (sorted, deduped, stable ids).
+2. Aggregation: SQL fns tested against seeded rows; bounded row counts; no PII in output.
+3. RBAC: non-admin GET → 403; admin GET → 200 with typed payload.
+4. Free-path: bundle guard must show **0 bytes** delta on the free chunk (asserted in CI).
+5. SSR: every new module short-circuits on `import.meta.env.SSR` where it touches browser APIs (none should).
+6. Registry parity: existing 34 premium tests + capability registry tests stay green.
+7. Determinism: engine output stable for a fixed input snapshot (golden test).
 
 ## Non-negotiables preserved
-- Free path: untouched. Zero import into free bundle (asserted).
-- Browser-first: no hosted inference, no cloud GPU, no new network fetches.
-- Stripe / entitlement / routes / UI: not modified.
-- Public API of pipeline: unchanged.
-- No new hard dependencies.
+- Free path, worker, models, routes, UI: untouched.
+- Browser-first: no hosted inference, no cloud GPU, no new network calls from client.
+- Stripe/entitlement: read-only consumers of `subscriptions` / `has_premium`.
+- Public premium API: unchanged.
+- No new tables, no schema migrations, no new secrets.
+- Recommendations are advisory; they gate on human APPROVE — nothing self-applies.
 
 ## Trade-offs
-- +~15 KB gz to premium chunk (dev-tel excluded from prod build).
-- One extra indirection in selector (registry lookup) — negligible.
-- Verifier metrics on full-res images are expensive; run on 256² downsample by default, opt-in for full.
+- Aggregations run on-demand per admin request; if load grows, add a nightly materialized snapshot (out of scope now).
+- Rule thresholds start conservative and are versioned in `evolution/rules/*` — tuning is a normal PR.
+- LTV is a bounded estimate (avg months × price), not per-user — deliberately no PII.
 
 ## Risks & mitigations
 | Risk | Mitigation |
 |---|---|
-| Refactor breaks existing plans | Parity test: for a fixed profile matrix, new selector must produce byte-identical PremiumPlan vs current |
-| Telemetry ships to prod | Build-time assert + `DEV`-guarded imports; e2e checks bundle for collector symbol |
-| Advisor destabilizes params | Advisor is opt-in; default off; deterministic bounds |
-| Feature-detect flakiness | Cached per session, safe fallbacks, no UA sniffing |
+| Query cost on `events` | Time-window filter + indexed columns already in place; cap row scan per call |
+| PII leakage in aggregates | Aggregates only; no user_id / email in responses; typed response contracts |
+| Recommendation noise | Severity thresholds + dedup by stable id + min sample size per rule |
+| Free bundle regression | Everything server-only under `src/lib/intelligence` / `src/lib/evolution`; bundle guard asserts 0-byte delta |
+| Rule drift | Golden fixture test per rule; engine determinism test |
 
 ## Files
-**New:** everything under `src/lib/enhance/premium/{capabilities,production}/*` + tests.
-**Modified:** `premium/intelligence/selector.ts` (iterate registry), `premium/pipeline.ts` (delegate stage build to registry), `scripts/check-bundle-size.mjs` (per-chunk cap tightening).
-**Untouched:** free path, routes, UI, Stripe, entitlement, worker, models registry semantics.
+**New:** `src/lib/intelligence/**`, `src/lib/evolution/**`, `src/routes/api/public/intelligence/*.ts`, `src/routes/api/public/evolution/recommendations.ts`, matching `*.test.ts`.
+**Modified:** none in free path. `scripts/check-bundle-size.mjs` reads unchanged; assertion tightened if needed.
+**Untouched:** enhance engine, premium pipeline, capability registry semantics, routes/UI, Stripe, worker, models.
 
 ## Rollout order
-1. `capabilities/{types,registry}.ts` + tests.
-2. `capabilities/builtins.ts` — register existing 8 stages; parity test.
-3. Refactor `selector.ts` + `pipeline.ts` to consume registry (behavior-preserving).
-4. `production/compatibility/*` + `production/performance/*` (pure, no wiring).
-5. `production/quality/*` + `verification/*`.
-6. `production/telemetry/*` (DEV-gated) + `analytics/aggregate`.
-7. `production/optimization/advisor` (opt-in).
-8. `production/benchmarks/*` + thresholds, wire into existing bench harness.
-9. `production/index.ts` `initProductionLayer()` — called only from dev entry.
-10. Bundle guard tightening + full verification loop; report deltas.
+1. `evolution/types.ts` + `engine.ts` + tests (pure, no deps).
+2. Rules one at a time with fixtures: bundle → capability → performance → conversion → quality → memory.
+3. `intelligence/*` aggregators, each with a SQL-level test.
+4. Admin-gated API routes; RBAC tests.
+5. Wire evolution route to consume intelligence aggregates.
+6. Bundle-guard verification + full test suite.
+7. Report deltas: LOC, bundle bytes (free = 0), test count.
 
 ## Out of scope
-- Any new user-visible capability (face restore stays gated as today).
-- Any change to free path, Stripe, routes, UI.
-- Any hosted/cloud inference or GPU service.
-- Any change to public premium pipeline API.
+- Any UI surface (no admin dashboard reintroduced — memory forbids it).
+- Any new capability, model, or pipeline change.
+- Auto-applying recommendations, background jobs, or cron.
+- Per-user analytics or any PII surface.
+- Hosted/cloud inference of any kind.
 
 ---
 
