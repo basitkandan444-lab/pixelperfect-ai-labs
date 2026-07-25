@@ -157,6 +157,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          enhancements_used: number
           id: string
           updated_at: string
         }
@@ -164,6 +165,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          enhancements_used?: number
           id: string
           updated_at?: string
         }
@@ -171,6 +173,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          enhancements_used?: number
           id?: string
           updated_at?: string
         }
@@ -221,6 +224,42 @@ export type Database = {
           severity?: string
           title?: string
           ts?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          plan: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -317,6 +356,11 @@ export type Database = {
       }
     }
     Functions: {
+      consume_free_enhancement: {
+        Args: { _free_cap?: number; _user_id: string }
+        Returns: boolean
+      }
+      has_premium: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
