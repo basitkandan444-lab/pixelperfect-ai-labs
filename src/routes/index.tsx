@@ -135,6 +135,60 @@ function Index() {
   const progressRef = useRef(0);
   const runBaseMsRef = useRef(0);
 
+  // ---- Task 4: Free-tier gating + upgrade wall -----------------------------
+  const navigate = useNavigate();
+  const entitlementFn = useServerFn(getMyEntitlement);
+  const consumeFn = useServerFn(consumeEnhancement);
+  const checkoutFn = useServerFn(createCheckoutSession);
+  const [wallOpen, setWallOpen] = useState(false);
+  const [wallPending, setWallPending] = useState(false);
+  const [localUsed, setLocalUsed] = useState(0);
+
+  const sessionQuery = useQuery({
+    queryKey: ["auth-session"],
+    queryFn: async () => (await supabase.auth.getSession()).data.session,
+  });
+  const isSignedIn = !!sessionQuery.data;
+
+  const entitlementQuery = useQuery({
+    queryKey: ["entitlement"],
+    queryFn: () => entitlementFn({}),
+    enabled: isSignedIn,
+    staleTime: 30_000,
+  });
+  const isPremium = entitlementQuery.data?.isPremium ?? false;
+  const serverUsed = entitlementQuery.data?.used ?? 0;
+  const usedCount = isSignedIn ? serverUsed : localUsed;
+  const remaining = Math.max(0, FREE_CAP - usedCount);
+
+  useEffect(() => {
+    setLocalUsed(getLocalUsed());
+  }, []);
+
+  const openUpgradeWall = useCallback(() => {
+    setWallOpen(true);
+    trackEvent("upgrade_wall_shown", { used: usedCount, cap: FREE_CAP, signedIn: isSignedIn });
+  }, [usedCount, isSignedIn]);
+
+  const handleUpgrade = useCallback(async () => {
+    trackEvent("upgrade_wall_cta", { signedIn: isSignedIn });
+    if (!isSignedIn) {
+      navigate({ to: "/auth", search: { next: "/pricing" } });
+      return;
+    }
+    try {
+      setWallPending(true);
+      const { url } = await checkoutFn({ data: {} });
+      if (url) window.location.href = url;
+      else toast.error("Checkout URL missing");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Checkout failed");
+    } finally {
+      setWallPending(false);
+    }
+  }, [isSignedIn, navigate, checkoutFn]);
+
+
   // Signal that React has hydrated and the upload handler is attached. The
   // server-rendered <input> exists before hydration, so a file set in that
   // window is silently dropped; consumers (and E2E specs) can wait for this
