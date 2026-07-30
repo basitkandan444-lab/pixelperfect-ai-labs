@@ -144,10 +144,7 @@ function Index() {
   const [wallPending, setWallPending] = useState(false);
   const [localUsed, setLocalUsed] = useState(0);
 
-  const sessionQuery = useQuery({
-    queryKey: ["auth-session"],
-    queryFn: async () => (await supabase.auth.getSession()).data.session,
-  });
+  const sessionQuery = useSession();
   const isSignedIn = !!sessionQuery.data;
 
   const entitlementQuery = useQuery({
