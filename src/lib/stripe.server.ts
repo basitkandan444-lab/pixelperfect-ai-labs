@@ -12,3 +12,10 @@ export function getStripe(): Stripe {
   });
   return cached;
 }
+
+/** Server-only read of the configured subscription price. */
+export function getPriceId(): string {
+  const priceId = process.env.STRIPE_PRICE_ID;
+  if (!priceId) throw new Error("STRIPE_PRICE_ID is not configured");
+  return priceId;
+}

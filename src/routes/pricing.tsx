@@ -5,7 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { supabase } from "@/integrations/supabase/client";
+import { useSession } from "@/hooks/use-session";
 import {
   createBillingPortalSession,
   createCheckoutSession,
@@ -43,10 +43,7 @@ function PricingPage() {
   const portal = useServerFn(createBillingPortalSession);
   const entitlementFn = useServerFn(getMyEntitlement);
 
-  const sessionQuery = useQuery({
-    queryKey: ["auth-session"],
-    queryFn: async () => (await supabase.auth.getSession()).data.session,
-  });
+  const sessionQuery = useSession();
   const isSignedIn = !!sessionQuery.data;
 
   const entitlement = useQuery({
