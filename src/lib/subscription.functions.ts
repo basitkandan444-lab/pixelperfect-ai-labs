@@ -72,9 +72,8 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId, claims } = context;
-    const priceId = process.env.STRIPE_PRICE_ID;
-    if (!priceId) throw new Error("STRIPE_PRICE_ID not configured");
-    const { getStripe } = await import("./stripe.server");
+    const { getStripe, getPriceId } = await import("./stripe.server");
+    const priceId = getPriceId();
     const stripe = getStripe();
 
     // Reuse an existing customer if we've already created one for this user.
