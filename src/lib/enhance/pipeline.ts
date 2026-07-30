@@ -275,8 +275,7 @@ export async function enhanceImageInBrowser(
   // WebGPU, model fetch failure, OOM) falls back to the classical engine so the
   // user always gets a result — and it all stays 100% on-device, offline-capable.
   let neuralDone = false;
-  const doneEarly = false;
-  if (!doneEarly && opts.engine === "neural") {
+  if (opts.engine === "neural") {
     try {
       const { enhanceNeural } = await import("./neural");
       const res = await enhanceNeural(
