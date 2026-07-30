@@ -302,7 +302,7 @@ export async function enhanceImageInBrowser(
     }
   }
 
-  if (!doneEarly && !neuralDone) {
+  if (!neuralDone) {
     if (canWorker && bitmap) {
       try {
         blob = await runInWorker(bitmap, srcW, srcH, target, filter, signal, onPass);
