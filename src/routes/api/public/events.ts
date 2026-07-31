@@ -171,7 +171,9 @@ export const Route = createFileRoute("/api/public/events")({
         }
 
         if (withoutId.length > 0) {
-          const { error } = await supabaseAdmin.from("events").insert(withoutId as unknown as never);
+          const { error } = await supabaseAdmin
+            .from("events")
+            .insert(withoutId as unknown as never);
           if (error) {
             return jsonFail("internal_error", "Ingestion failed.", { status: 500, requestId });
           }
