@@ -3,17 +3,27 @@ import { createFileRoute } from "@tanstack/react-router";
 import { linearTrend, zscoreAnomalies } from "@/lib/anomaly";
 import { jsonFail, jsonOk } from "@/lib/api-response";
 import { newRequestId } from "@/lib/logger";
+import { clientKeyFromRequest, createRateLimiter } from "@/lib/rate-limit";
 
 // Runs anomaly + trend detection over the persisted telemetry_snapshots table.
 // Detects anomalies on success_rate, p95_ms, and lcp_p75 across the last N hours.
 
 const MAX_HOURS = 720;
+const limiter = createRateLimiter({ limit: 60, windowMs: 60_000 });
 
 export const Route = createFileRoute("/api/public/anomalies")({
   server: {
     handlers: {
       GET: async ({ request }) => {
         const requestId = newRequestId();
+        const rate = limiter.check(`anomalies:${clientKeyFromRequest(request)}`);
+        if (!rate.allowed) {
+          return jsonFail("rate_limited", "Too many requests.", {
+            status: 429,
+            requestId,
+            headers: { "Retry-After": String(rate.resetSec) },
+          });
+        }
         const url = new URL(request.url);
         const hoursRaw = Number(url.searchParams.get("hours") ?? "24");
         const hours = Number.isFinite(hoursRaw)

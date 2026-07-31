@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { jsonFail, jsonOk } from "@/lib/api-response";
 import { newRequestId } from "@/lib/logger";
+import { clientKeyFromRequest, createRateLimiter } from "@/lib/rate-limit";
 import { vitals, VITAL_NAMES } from "@/lib/vitals-store";
 
 // Web Vitals ingestion + read-back. The browser beacons real field measurements
@@ -22,6 +23,7 @@ const SampleSchema = z.object({
 
 // Accept either a single sample or a small batch (sendBeacon flushes several).
 const PayloadSchema = z.union([SampleSchema, z.array(SampleSchema).min(1).max(20)]);
+const limiter = createRateLimiter({ limit: 120, windowMs: 60_000 });
 
 export const Route = createFileRoute("/api/public/vitals")({
   server: {
@@ -30,6 +32,14 @@ export const Route = createFileRoute("/api/public/vitals")({
 
       POST: async ({ request }) => {
         const requestId = newRequestId();
+        const rate = limiter.check(`vitals:${clientKeyFromRequest(request)}`);
+        if (!rate.allowed) {
+          return jsonFail("rate_limited", "Too many requests.", {
+            status: 429,
+            requestId,
+            headers: { "Retry-After": String(rate.resetSec) },
+          });
+        }
         let raw: unknown;
         try {
           raw = await request.json();

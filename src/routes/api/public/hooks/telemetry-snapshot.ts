@@ -4,6 +4,7 @@ import { jsonFail, jsonOk } from "@/lib/api-response";
 import { log, newRequestId } from "@/lib/logger";
 import { metrics } from "@/lib/metrics";
 import { deploymentStatus } from "@/lib/ops";
+import { clientKeyFromRequest, createRateLimiter } from "@/lib/rate-limit";
 import { vitals } from "@/lib/vitals-store";
 
 // Persistent Observability Storage — cron sink.
@@ -15,12 +16,21 @@ import { vitals } from "@/lib/vitals-store";
 //
 // Access control: callers must present the app-issued INTERNAL_CRON_SECRET.
 // A publishable browser key is intentionally never accepted as authentication.
+const limiter = createRateLimiter({ limit: 12, windowMs: 60_000 });
 
 export const Route = createFileRoute("/api/public/hooks/telemetry-snapshot")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         const requestId = newRequestId();
+        const rate = limiter.check(`telemetry-hook:${clientKeyFromRequest(request)}`);
+        if (!rate.allowed) {
+          return jsonFail("rate_limited", "Too many requests.", {
+            status: 429,
+            requestId,
+            headers: { "Retry-After": String(rate.resetSec) },
+          });
+        }
         const expected = process.env.INTERNAL_CRON_SECRET;
         const provided = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
         if (!expected || !provided || provided !== expected) {
