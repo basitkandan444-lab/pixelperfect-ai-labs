@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { jsonFail, jsonOk } from "@/lib/api-response";
 import { newRequestId } from "@/lib/logger";
+import { clientKeyFromRequest, createRateLimiter } from "@/lib/rate-limit";
 
 // Privacy-preserving event ingestion. No PII: we do NOT store IPs, user-agent
 // strings, or user IDs. Only classified/derived fields the client sent.
@@ -67,12 +68,21 @@ const EventSchema = z.object({
 });
 
 const Payload = z.union([EventSchema, z.array(EventSchema).min(1).max(20)]);
+const limiter = createRateLimiter({ limit: 120, windowMs: 60_000 });
 
 export const Route = createFileRoute("/api/public/events")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         const requestId = newRequestId();
+        const rate = limiter.check(`events:${clientKeyFromRequest(request)}`);
+        if (!rate.allowed) {
+          return jsonFail("rate_limited", "Too many requests.", {
+            status: 429,
+            requestId,
+            headers: { "Retry-After": String(rate.resetSec) },
+          });
+        }
         // 32 KB cap accommodates 20 events × ~1.5 KB (with metrics + integrity fields).
         const text = await request.text();
         if (text.length > 32_768) {
@@ -161,7 +171,9 @@ export const Route = createFileRoute("/api/public/events")({
         }
 
         if (withoutId.length > 0) {
-          const { error } = await supabaseAdmin.from("events").insert(withoutId as unknown as never);
+          const { error } = await supabaseAdmin
+            .from("events")
+            .insert(withoutId as unknown as never);
           if (error) {
             return jsonFail("internal_error", "Ingestion failed.", { status: 500, requestId });
           }

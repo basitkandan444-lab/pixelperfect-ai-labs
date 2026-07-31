@@ -1,10 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequestHeader } from "@tanstack/react-start/server";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-const FREE_CAP = 5;
+import { FREE_CAP } from "@/lib/entitlement";
 
 /**
  * Return the caller's plan status, usage, and premium flag.
@@ -27,7 +26,7 @@ export const getMyEntitlement = createServerFn({ method: "GET" })
     const now = Date.now();
     const isPremium =
       !!sub &&
-      sub.status === "active" &&
+      (sub.status === "active" || sub.status === "trialing") &&
       (!sub.current_period_end || new Date(sub.current_period_end).getTime() > now);
     return {
       isPremium,
@@ -62,60 +61,136 @@ export const consumeEnhancement = createServerFn({ method: "POST" })
  */
 export const createCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw) =>
-    z
-      .object({
-        successPath: z.string().startsWith("/").max(256).optional(),
-        cancelPath: z.string().startsWith("/").max(256).optional(),
-      })
-      .parse(raw ?? {}),
-  )
-  .handler(async ({ context, data }) => {
+  .handler(async ({ context }) => {
     const { supabase, userId, claims } = context;
-    const { getStripe, getPriceId } = await import("./stripe.server");
+    const { getStripe, getPriceId, getRequestOrigin } = await import("./stripe.server");
     const priceId = getPriceId();
     const stripe = getStripe();
 
     // Reuse an existing customer if we've already created one for this user.
     const { data: existing } = await supabase
       .from("subscriptions")
-      .select("stripe_customer_id")
+      .select("stripe_customer_id, status, current_period_end")
       .eq("user_id", userId)
       .not("stripe_customer_id", "is", null)
       .order("updated_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    let customerId = existing?.stripe_customer_id ?? undefined;
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: claims.email as string | undefined,
-        metadata: { user_id: userId },
-      });
-      customerId = customer.id;
+    const existingIsActive =
+      existing &&
+      (existing.status === "active" || existing.status === "trialing") &&
+      (!existing.current_period_end ||
+        new Date(existing.current_period_end).getTime() > Date.now());
+    if (existingIsActive) throw new Error("Premium is already active for this account");
+
+    const price = await stripe.prices.retrieve(priceId);
+    if (
+      !price.active ||
+      price.currency !== "usd" ||
+      price.unit_amount !== 99 ||
+      price.recurring?.interval !== "month" ||
+      price.type !== "recurring"
+    ) {
+      throw new Error("Premium billing is temporarily unavailable");
     }
 
-    // Derive origin from the request so redirects work in preview + prod.
-    const origin =
-      getRequestHeader("origin") ??
-      (getRequestHeader("host") ? `https://${getRequestHeader("host")}` : "https://pixelperfect-ai-labs.lovable.app");
+    let customerId = existing?.stripe_customer_id ?? undefined;
+    if (!customerId) {
+      const customer = await stripe.customers.create(
+        {
+          email: claims.email as string | undefined,
+          metadata: { user_id: userId },
+        },
+        { idempotencyKey: `pixel-perfect-customer-${userId}` },
+      );
+      customerId = customer.id;
 
-    const successPath = data.successPath ?? "/pricing?upgrade=success";
-    const cancelPath = data.cancelPath ?? "/pricing?upgrade=cancelled";
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { error: customerStoreError } = await supabaseAdmin.from("subscriptions").upsert(
+        {
+          user_id: userId,
+          stripe_customer_id: customerId,
+          plan: "free",
+          status: "free",
+        },
+        { onConflict: "user_id" },
+      );
+      if (customerStoreError) throw new Error("Could not initialize billing profile");
+    }
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      customer: customerId,
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${origin}${successPath}`,
-      cancel_url: `${origin}${cancelPath}`,
-      allow_promotion_codes: true,
-      client_reference_id: userId,
-      metadata: { user_id: userId },
-      subscription_data: { metadata: { user_id: userId } },
-    });
+    const origin = getRequestOrigin(getRequest());
 
+    const session = await stripe.checkout.sessions.create(
+      {
+        mode: "subscription",
+        customer: customerId,
+        line_items: [{ price: priceId, quantity: 1 }],
+        success_url: `${origin}/pricing?upgrade=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${origin}/pricing?upgrade=cancelled`,
+        allow_promotion_codes: true,
+        client_reference_id: userId,
+        metadata: { user_id: userId },
+        subscription_data: { metadata: { user_id: userId } },
+      },
+      { idempotencyKey: `pixel-perfect-checkout-${userId}-${Math.floor(Date.now() / 60_000)}` },
+    );
+
+    if (!session.url) throw new Error("Stripe did not return a checkout URL");
     return { url: session.url, sessionId: session.id };
+  });
+
+export const finalizeCheckoutSession = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw) =>
+    z
+      .object({
+        sessionId: z
+          .string()
+          .trim()
+          .regex(/^cs_(?:test_|live_)?[A-Za-z0-9]+$/)
+          .max(255),
+      })
+      .parse(raw),
+  )
+  .handler(async ({ context, data }) => {
+    const { getStripe } = await import("./stripe.server");
+    const stripe = getStripe();
+    const session = await stripe.checkout.sessions.retrieve(data.sessionId);
+    const ownerId = session.metadata?.user_id ?? session.client_reference_id;
+    if (ownerId !== context.userId)
+      throw new Error("Checkout session does not belong to this account");
+    if (session.status !== "complete" || !session.subscription) {
+      throw new Error("Checkout is not complete");
+    }
+
+    const subscriptionId =
+      typeof session.subscription === "string" ? session.subscription : session.subscription.id;
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    if (subscription.status !== "active" && subscription.status !== "trialing") {
+      throw new Error("Subscription is not active");
+    }
+
+    const item = subscription.items.data[0] as unknown as
+      { current_period_end?: number } | undefined;
+    const legacy = subscription as unknown as { current_period_end?: number };
+    const periodEnd = legacy.current_period_end ?? item?.current_period_end;
+    const customerId =
+      typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("subscriptions").upsert(
+      {
+        user_id: context.userId,
+        stripe_customer_id: customerId,
+        stripe_subscription_id: subscription.id,
+        plan: "premium",
+        status: subscription.status,
+        current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
+      },
+      { onConflict: "user_id" },
+    );
+    if (error) throw new Error("Could not activate Premium");
+    return { activated: true, subscriptionId: subscription.id };
   });
 
 /**
@@ -134,11 +209,9 @@ export const createBillingPortalSession = createServerFn({ method: "POST" })
       .limit(1)
       .maybeSingle();
     if (!sub?.stripe_customer_id) throw new Error("No Stripe customer on file");
-    const { getStripe } = await import("./stripe.server");
+    const { getStripe, getRequestOrigin } = await import("./stripe.server");
     const stripe = getStripe();
-    const origin =
-      getRequestHeader("origin") ??
-      (getRequestHeader("host") ? `https://${getRequestHeader("host")}` : "https://pixelperfect-ai-labs.lovable.app");
+    const origin = getRequestOrigin(getRequest());
     const portal = await stripe.billingPortal.sessions.create({
       customer: sub.stripe_customer_id,
       return_url: `${origin}/pricing`,

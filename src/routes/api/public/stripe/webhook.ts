@@ -11,7 +11,6 @@ function periodEndISO(sub: Stripe.Subscription): string | null {
   return ts ? new Date(ts * 1000).toISOString() : null;
 }
 
-
 /**
  * Stripe webhook handler.
  * - Verifies Stripe-Signature with `constructEventAsync` (Web Crypto — Worker-safe).
@@ -51,11 +50,13 @@ export const Route = createFileRoute("/api/public/stripe/webhook")({
             case "checkout.session.completed": {
               const session = event.data.object as Stripe.Checkout.Session;
               const userId = (session.metadata?.user_id ?? session.client_reference_id) as
-                | string
-                | undefined;
-              const customerId = typeof session.customer === "string" ? session.customer : session.customer?.id;
+                string | undefined;
+              const customerId =
+                typeof session.customer === "string" ? session.customer : session.customer?.id;
               const subscriptionId =
-                typeof session.subscription === "string" ? session.subscription : session.subscription?.id;
+                typeof session.subscription === "string"
+                  ? session.subscription
+                  : session.subscription?.id;
               if (!userId || !subscriptionId) break;
 
               const sub = await stripe.subscriptions.retrieve(subscriptionId);
@@ -73,7 +74,11 @@ export const Route = createFileRoute("/api/public/stripe/webhook")({
             case "customer.subscription.created":
             case "customer.subscription.updated":
             case "customer.subscription.deleted": {
-              const sub = event.data.object as Stripe.Subscription;
+              const eventSub = event.data.object as Stripe.Subscription;
+              const sub =
+                event.type === "customer.subscription.deleted"
+                  ? eventSub
+                  : await stripe.subscriptions.retrieve(eventSub.id);
               const userId = (sub.metadata?.user_id as string | undefined) ?? null;
               const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
 
@@ -132,9 +137,7 @@ async function upsertSubscription(
     current_period_end: string | null;
   },
 ) {
-  const { error } = await admin
-    .from("subscriptions")
-    .upsert(row, { onConflict: "stripe_subscription_id" });
+  const { error } = await admin.from("subscriptions").upsert(row, { onConflict: "user_id" });
   if (error) throw error;
 }
 

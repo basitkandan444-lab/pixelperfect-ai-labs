@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { jsonFail, jsonOk } from "@/lib/api-response";
 import { newRequestId } from "@/lib/logger";
+import { clientKeyFromRequest, createRateLimiter } from "@/lib/rate-limit";
 import { buildReport, type SnapshotRow } from "@/lib/reliability";
 
 // Reliability Intelligence — public read-back.
@@ -9,12 +10,21 @@ import { buildReport, type SnapshotRow } from "@/lib/reliability";
 // Returns the last `windowHours` (default 24, max 168) of telemetry snapshots,
 // plus rule-based alerts and short-horizon trend forecasts. PII-free: rows are
 // aggregate numbers, never user data.
+const limiter = createRateLimiter({ limit: 60, windowMs: 60_000 });
 
 export const Route = createFileRoute("/api/public/reliability")({
   server: {
     handlers: {
       GET: async ({ request }) => {
         const requestId = newRequestId();
+        const rate = limiter.check(`reliability:${clientKeyFromRequest(request)}`);
+        if (!rate.allowed) {
+          return jsonFail("rate_limited", "Too many requests.", {
+            status: 429,
+            requestId,
+            headers: { "Retry-After": String(rate.resetSec) },
+          });
+        }
         const url = new URL(request.url);
         const window = Math.min(
           168,

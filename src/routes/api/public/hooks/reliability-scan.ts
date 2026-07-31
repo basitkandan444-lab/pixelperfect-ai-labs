@@ -4,6 +4,7 @@ import { jsonFail, jsonOk } from "@/lib/api-response";
 import { toDeliverable, webhookPayload } from "@/lib/alerts";
 import { log, newRequestId } from "@/lib/logger";
 import { buildReport, type SnapshotRow } from "@/lib/reliability";
+import { clientKeyFromRequest, createRateLimiter } from "@/lib/rate-limit";
 
 // Alert Delivery Layer — cron scan.
 //
@@ -13,17 +14,26 @@ import { buildReport, type SnapshotRow } from "@/lib/reliability";
 // If RELIABILITY_ALERT_WEBHOOK_URL is configured, each freshly-inserted alert
 // is POSTed there (Slack/Discord/HTTP-compatible payload).
 //
-// Auth: caller must present SUPABASE_PUBLISHABLE_KEY in `apikey` header.
+// Auth: callers must present the app-issued INTERNAL_CRON_SECRET.
+const limiter = createRateLimiter({ limit: 12, windowMs: 60_000 });
 
 export const Route = createFileRoute("/api/public/hooks/reliability-scan")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         const requestId = newRequestId();
-        const expected = process.env.SUPABASE_PUBLISHABLE_KEY;
-        const provided = request.headers.get("apikey");
+        const rate = limiter.check(`reliability-hook:${clientKeyFromRequest(request)}`);
+        if (!rate.allowed) {
+          return jsonFail("rate_limited", "Too many requests.", {
+            status: 429,
+            requestId,
+            headers: { "Retry-After": String(rate.resetSec) },
+          });
+        }
+        const expected = process.env.INTERNAL_CRON_SECRET;
+        const provided = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
         if (!expected || !provided || provided !== expected) {
-          return jsonFail("unauthorized", "Invalid or missing apikey.", {
+          return jsonFail("unauthorized", "Invalid or missing credentials.", {
             status: 401,
             requestId,
           });

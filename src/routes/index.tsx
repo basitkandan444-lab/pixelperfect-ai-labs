@@ -175,7 +175,7 @@ function Index() {
     }
     try {
       setWallPending(true);
-      const { url } = await checkoutFn({ data: {} });
+      const { url } = await checkoutFn({});
       if (url) window.location.href = url;
       else toast.error("Checkout URL missing");
     } catch (err) {
