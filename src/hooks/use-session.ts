@@ -18,18 +18,33 @@ export function useSession() {
 
   const query = useQuery<Session | null>({
     queryKey: ["auth-session"],
-    queryFn: async () => (await supabase.auth.getSession()).data.session,
+    queryFn: async () => {
+      try {
+        return (await supabase.auth.getSession()).data.session;
+      } catch (error) {
+        // Auth is optional for the browser-first enhancement flow. A missing or
+        // misconfigured backend must degrade to "signed out", never crash the page.
+        console.warn("[auth] session unavailable:", error);
+        return null;
+      }
+    },
     enabled: typeof window !== "undefined",
     retry: false,
     staleTime: 30_000,
   });
 
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      queryClient.setQueryData(["auth-session"], session);
-      queryClient.invalidateQueries({ queryKey: ["entitlement"] });
-    });
-    return () => data.subscription.unsubscribe();
+    // Same rule as above: never let auth wiring take down the render tree.
+    try {
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        queryClient.setQueryData(["auth-session"], session);
+        queryClient.invalidateQueries({ queryKey: ["entitlement"] });
+      });
+      return () => data.subscription.unsubscribe();
+    } catch (error) {
+      console.warn("[auth] auth state listener unavailable:", error);
+      return undefined;
+    }
   }, [queryClient]);
 
   return query;
