@@ -70,12 +70,29 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
     // Reuse an existing customer if we've already created one for this user.
     const { data: existing } = await supabase
       .from("subscriptions")
-      .select("stripe_customer_id")
+      .select("stripe_customer_id, status, current_period_end")
       .eq("user_id", userId)
       .not("stripe_customer_id", "is", null)
       .order("updated_at", { ascending: false })
       .limit(1)
       .maybeSingle();
+
+    const existingIsActive =
+      existing &&
+      (existing.status === "active" || existing.status === "trialing") &&
+      (!existing.current_period_end || new Date(existing.current_period_end).getTime() > Date.now());
+    if (existingIsActive) throw new Error("Premium is already active for this account");
+
+    const price = await stripe.prices.retrieve(priceId);
+    if (
+      !price.active ||
+      price.currency !== "usd" ||
+      price.unit_amount !== 99 ||
+      price.recurring?.interval !== "month" ||
+      price.type !== "recurring"
+    ) {
+      throw new Error("Premium billing is temporarily unavailable");
+    }
 
     let customerId = existing?.stripe_customer_id ?? undefined;
     if (!customerId) {

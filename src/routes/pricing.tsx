@@ -140,10 +140,20 @@ function PricingPage() {
           </p>
         </header>
 
-        {upgrade === "success" && (
+        {upgrade === "success" && finalization.isPending && (
           <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-emerald-400/30 bg-emerald-400/10 p-4 text-center text-sm text-emerald-100">
-            Payment received. Premium is being activated — refresh in a moment if the badge hasn't
-            updated.
+            Payment received. Securely activating Premium…
+          </div>
+        )}
+        {upgrade === "success" && finalization.data?.activated && (
+          <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-emerald-400/30 bg-emerald-400/10 p-4 text-center text-sm text-emerald-100">
+            Premium is active. Thank you for upgrading.
+          </div>
+        )}
+        {upgrade === "success" && finalization.isError && (
+          <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-red-400/30 bg-red-400/10 p-4 text-center text-sm text-red-100">
+            We couldn't verify this checkout. No account changes were made; please retry from this
+            page or manage the payment through Stripe.
           </div>
         )}
         {upgrade === "cancelled" && (
