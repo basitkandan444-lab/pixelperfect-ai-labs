@@ -68,13 +68,13 @@ export function UpgradeWall({
           You&rsquo;ve used all {cap} free enhancements.
         </h2>
         <p className="mt-3 text-sm text-white/65">
-          Your image is safe — nothing was lost. Upgrade to Premium for unlimited enhancements at
+          Your image is safe — nothing was lost. Upgrade to Premium for 100 ultra quality images every month at
           just <span className="font-semibold text-white">$0.99/month</span>. Cancel anytime.
         </p>
 
         <ul className="mt-6 space-y-2.5 text-sm text-white/85">
           {[
-            "Unlimited on-device enhancements",
+            "100 ultra quality images / month",
             "Priority processing pipeline",
             "8K exports",
             "Cancel anytime",
