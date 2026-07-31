@@ -5,9 +5,16 @@ type BillingStatusResponse = { success: true; data: { configured: boolean; missi
 async function fetchBillingStatus(): Promise<{ configured: boolean }> {
   try {
     const res = await fetch("/api/public/stripe/status", { headers: { accept: "application/json" } });
-    if (!res.ok) return { configured: false };
+    // A missing/stale status route, preview proxy failure, or temporary server
+    // error must not disable a checkout that may be perfectly healthy. Only a
+    // successful, explicit { configured: false } response may block the CTA;
+    // the real authenticated checkout remains the source of truth.
+    if (!res.ok) return { configured: true };
     const body = (await res.json()) as BillingStatusResponse;
-    return { configured: !!body.data?.configured };
+    if (body.success !== true || typeof body.data?.configured !== "boolean") {
+      return { configured: true };
+    }
+    return { configured: body.data.configured };
   } catch {
     // Network failure while probing config should not itself block the CTA —
     // fall back to "assume configured" and let the real checkout attempt
