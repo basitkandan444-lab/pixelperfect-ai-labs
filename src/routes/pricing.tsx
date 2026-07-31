@@ -29,12 +29,12 @@ export const Route = createFileRoute("/pricing")({
       {
         name: "description",
         content:
-          "Start free with 5 on-device enhancements. Upgrade to Premium for $0.99/month — unlimited enhancements, priority pipeline, 8K exports.",
+          "Start free with 5 on-device enhancements. Upgrade to Premium for $0.99/month — 100 ultra quality images per month, priority pipeline, 8K exports.",
       },
       { property: "og:title", content: "Pricing — Pixel Perfect Pro" },
       {
         property: "og:description",
-        content: "Premium for $0.99/month. Unlimited on-device AI enhancement.",
+        content: "Premium for $0.99/month. 100 ultra quality on-device AI enhancements every month.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -192,7 +192,7 @@ function PricingPage() {
             accent
             highlight={isPremium}
             features={[
-              "Unlimited enhancements",
+              "100 ultra quality images / month",
               "Balanced neural engine (Real-ESRGAN, on-device)",
               "Priority pipeline",
               "8K exports",
