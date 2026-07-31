@@ -10,6 +10,9 @@ interface UpgradeWallProps {
   isSignedIn: boolean;
   onUpgrade: () => void;
   pending?: boolean;
+  /** False when the deployment's Stripe env is not configured — disables the
+   * paid CTA instead of letting the user hit a confusing mid-checkout error. */
+  billingAvailable?: boolean;
 }
 
 /**
@@ -25,6 +28,7 @@ export function UpgradeWall({
   isSignedIn,
   onUpgrade,
   pending,
+  billingAvailable = true,
 }: UpgradeWallProps) {
   useEffect(() => {
     if (!open) return;
@@ -86,17 +90,29 @@ export function UpgradeWall({
           ))}
         </ul>
 
+        {!billingAvailable && (
+          <p
+            role="status"
+            className="mt-4 rounded-xl border border-amber-400/25 bg-amber-400/10 px-4 py-2.5 text-xs text-amber-100"
+          >
+            Premium checkout is temporarily unavailable. Your image and free usage are unaffected —
+            please try upgrading again shortly.
+          </p>
+        )}
+
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <button
             onClick={onUpgrade}
-            disabled={pending}
+            disabled={pending || !billingAvailable}
             className="flex-1 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black shadow-[0_0_40px_-8px_rgba(10,132,255,0.6)] transition hover:bg-white/90 disabled:opacity-60"
           >
-            {pending
-              ? "Opening checkout…"
-              : isSignedIn
-                ? "Upgrade — $0.99 / month"
-                : "Sign in to upgrade"}
+            {!billingAvailable
+              ? "Checkout unavailable"
+              : pending
+                ? "Opening checkout…"
+                : isSignedIn
+                  ? "Upgrade — $0.99 / month"
+                  : "Sign in to upgrade"}
           </button>
           <Link
             to="/pricing"
