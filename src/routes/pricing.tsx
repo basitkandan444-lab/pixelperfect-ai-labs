@@ -82,6 +82,29 @@ function PricingPage() {
   const used = entitlement.data?.used ?? 0;
   const cap = entitlement.data?.cap ?? 5;
 
+  /**
+   * Stripe's hosted pages refuse to render inside an iframe (the Lovable
+   * preview is an iframe). Escape to the top-level window, and fall back to a
+   * new tab when the parent frame is cross-origin and can't be navigated.
+   */
+  function openExternal(url: string) {
+    const inIframe = typeof window !== "undefined" && window.self !== window.top;
+    if (!inIframe) {
+      window.location.href = url;
+      return;
+    }
+    try {
+      if (window.top) {
+        window.top.location.href = url;
+        return;
+      }
+    } catch {
+      /* cross-origin parent — fall through to new tab */
+    }
+    const win = window.open(url, "_blank", "noopener,noreferrer");
+    if (!win) toast.error("Popup blocked — allow popups, or open the app in a new tab to pay.");
+  }
+
   async function onUpgrade() {
     if (!billingAvailable) {
       toast.error("Premium checkout is temporarily unavailable. Please try again shortly.");
@@ -94,7 +117,7 @@ function PricingPage() {
     try {
       setPending("checkout");
       const { url } = await checkout({});
-      if (url) window.location.href = url;
+      if (url) openExternal(url);
       else toast.error("Checkout URL missing");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Checkout failed");
@@ -107,7 +130,7 @@ function PricingPage() {
     try {
       setPending("portal");
       const { url } = await portal({});
-      if (url) window.location.href = url;
+      if (url) openExternal(url);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Portal failed");
     } finally {
