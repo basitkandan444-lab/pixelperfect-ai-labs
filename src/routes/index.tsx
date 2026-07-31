@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { CompareSlider } from "@/components/CompareSlider";
 import { SiteFooter } from "@/components/SiteFooter";
 import { HomeContent } from "@/components/HomeContent";
+import { HomeTopSections } from "@/components/HomeTopSections";
 import { BeforeAfterGallery } from "@/components/BeforeAfterGallery";
 import { AnalysisCard } from "@/components/AnalysisCard";
 import { ProcessingOverlay } from "@/components/ProcessingOverlay";
