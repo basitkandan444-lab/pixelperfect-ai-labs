@@ -80,7 +80,8 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
     const existingIsActive =
       existing &&
       (existing.status === "active" || existing.status === "trialing") &&
-      (!existing.current_period_end || new Date(existing.current_period_end).getTime() > Date.now());
+      (!existing.current_period_end ||
+        new Date(existing.current_period_end).getTime() > Date.now());
     if (existingIsActive) throw new Error("Premium is already active for this account");
 
     const price = await stripe.prices.retrieve(priceId);
