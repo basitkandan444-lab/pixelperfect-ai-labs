@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { useSession } from "@/hooks/use-session";
+import { useBillingStatus } from "@/hooks/use-billing-status";
 import {
   createBillingPortalSession,
   createCheckoutSession,
@@ -54,6 +55,8 @@ function PricingPage() {
 
   const sessionQuery = useSession();
   const isSignedIn = !!sessionQuery.data;
+  const billingStatus = useBillingStatus();
+  const billingAvailable = billingStatus.data?.configured ?? true;
 
   const finalization = useQuery({
     queryKey: ["checkout-finalization", sessionId],
@@ -79,6 +82,10 @@ function PricingPage() {
   const cap = entitlement.data?.cap ?? 5;
 
   async function onUpgrade() {
+    if (!billingAvailable) {
+      toast.error("Premium checkout is temporarily unavailable. Please try again shortly.");
+      return;
+    }
     if (!isSignedIn) {
       navigate({ to: "/auth", search: { next: "/pricing" } });
       return;
@@ -161,6 +168,15 @@ function PricingPage() {
             Checkout cancelled — no charge was made.
           </div>
         )}
+        {!billingAvailable && (
+          <div
+            role="status"
+            className="mx-auto mt-8 max-w-xl rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4 text-center text-sm text-amber-100"
+          >
+            Premium checkout is temporarily unavailable. The Free plan works as usual — please try
+            upgrading again shortly.
+          </div>
+        )}
 
         <div className="mt-14 grid gap-6 md:grid-cols-2">
           <Plan
@@ -210,18 +226,20 @@ function PricingPage() {
               ) : (
                 <button
                   onClick={onUpgrade}
-                  disabled={pending === "checkout"}
+                  disabled={pending === "checkout" || !billingAvailable}
                   className="block w-full rounded-full bg-white py-3 text-center text-sm font-semibold text-black shadow-[0_0_40px_-8px_rgba(10,132,255,0.6)] transition hover:bg-white/90 disabled:opacity-60"
                 >
-                  {pending === "checkout"
-                    ? "Opening checkout…"
-                    : isSignedIn
-                      ? "Upgrade — $0.99/mo"
-                      : "Sign in to upgrade"}
+                  {!billingAvailable
+                    ? "Checkout unavailable"
+                    : pending === "checkout"
+                      ? "Opening checkout…"
+                      : isSignedIn
+                        ? "Upgrade — $0.99/mo"
+                        : "Sign in to upgrade"}
                 </button>
               )
             }
-            footnote={isPremium ? "Active — thank you 🖤" : "Secure checkout via Stripe"}
+            footnote={isPremium ? "Active — thank you 🖤" : billingAvailable ? "Secure checkout via Stripe" : "Checkout temporarily unavailable"}
           />
         </div>
 
