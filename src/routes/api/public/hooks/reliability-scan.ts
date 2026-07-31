@@ -13,17 +13,17 @@ import { buildReport, type SnapshotRow } from "@/lib/reliability";
 // If RELIABILITY_ALERT_WEBHOOK_URL is configured, each freshly-inserted alert
 // is POSTed there (Slack/Discord/HTTP-compatible payload).
 //
-// Auth: caller must present SUPABASE_PUBLISHABLE_KEY in `apikey` header.
+// Auth: callers must present the app-issued INTERNAL_CRON_SECRET.
 
 export const Route = createFileRoute("/api/public/hooks/reliability-scan")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         const requestId = newRequestId();
-        const expected = process.env.SUPABASE_PUBLISHABLE_KEY;
-        const provided = request.headers.get("apikey");
+        const expected = process.env.INTERNAL_CRON_SECRET;
+        const provided = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
         if (!expected || !provided || provided !== expected) {
-          return jsonFail("unauthorized", "Invalid or missing apikey.", {
+          return jsonFail("unauthorized", "Invalid or missing credentials.", {
             status: 401,
             requestId,
           });

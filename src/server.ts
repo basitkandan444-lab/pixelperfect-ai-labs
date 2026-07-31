@@ -44,21 +44,20 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
-// Content-Security-Policy scoped to directives that harden injection,
-// clickjacking and data-exfiltration vectors WITHOUT a `default-src`. Omitting
-// default-src (and script-src/style-src/img-src) leaves those resource types
-// unrestricted, so inline JSON-LD, the analytics bootstrap, external analytics
-// and Tailwind styles keep working while these four directives still close real
-// attack surface:
-//   - object-src 'none'      -> no plugin/embed injection (Flash/PDF vectors)
-//   - base-uri 'self'        -> blocks <base> hijacking of relative URLs
-//   - frame-ancestors 'self' -> clickjacking defense (mirrors X-Frame-Options)
-//   - form-action 'self'     -> blocks form-based credential exfiltration
 const CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.clarity.ms",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' https://fonts.gstatic.com data:",
+  "img-src 'self' data: blob: https:",
+  "connect-src 'self' https: wss:",
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",
   "frame-ancestors 'self'",
   "form-action 'self'",
+  "upgrade-insecure-requests",
 ].join("; ");
 
 const SECURITY_HEADERS: Record<string, string> = {
@@ -68,6 +67,8 @@ const SECURITY_HEADERS: Record<string, string> = {
   "Permissions-Policy": "camera=(), microphone=(), geolocation=(), interest-cohort=()",
   "X-XSS-Protection": "1; mode=block",
   "Cross-Origin-Opener-Policy": "same-origin",
+  "Cross-Origin-Resource-Policy": "same-origin",
+  "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
   "Content-Security-Policy": CONTENT_SECURITY_POLICY,
 };
 

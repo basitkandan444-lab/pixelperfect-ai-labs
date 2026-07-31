@@ -7,7 +7,6 @@ export function getStripe(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error("STRIPE_SECRET_KEY is not configured");
   cached = new Stripe(key, {
-    apiVersion: "2024-11-20.acacia" as Stripe.LatestApiVersion,
     httpClient: Stripe.createFetchHttpClient(),
   });
   return cached;
@@ -18,4 +17,12 @@ export function getPriceId(): string {
   const priceId = process.env.STRIPE_PRICE_ID;
   if (!priceId) throw new Error("STRIPE_PRICE_ID is not configured");
   return priceId;
+}
+
+export function getRequestOrigin(request: Request): string {
+  const url = new URL(request.url);
+  if (url.protocol !== "https:" && url.hostname !== "localhost") {
+    throw new Error("Checkout requires a secure origin");
+  }
+  return url.origin;
 }

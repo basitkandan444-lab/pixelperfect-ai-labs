@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -9,6 +9,7 @@ import { useSession } from "@/hooks/use-session";
 import {
   createBillingPortalSession,
   createCheckoutSession,
+  finalizeCheckoutSession,
   getMyEntitlement,
 } from "@/lib/subscription.functions";
 
@@ -16,7 +17,10 @@ export const Route = createFileRoute("/pricing")({
   ssr: false,
   validateSearch: (s: Record<string, unknown>) =>
     z
-      .object({ upgrade: z.enum(["success", "cancelled"]).optional() })
+      .object({
+        upgrade: z.enum(["success", "cancelled"]).optional(),
+        session_id: z.string().max(255).optional(),
+      })
       .parse(s),
   component: PricingPage,
   head: () => ({
@@ -28,7 +32,10 @@ export const Route = createFileRoute("/pricing")({
           "Start free with 5 on-device enhancements. Upgrade to Premium for $0.99/month — unlimited enhancements, priority pipeline, 8K exports.",
       },
       { property: "og:title", content: "Pricing — Pixel Perfect Pro" },
-      { property: "og:description", content: "Premium for $0.99/month. Unlimited on-device AI enhancement." },
+      {
+        property: "og:description",
+        content: "Premium for $0.99/month. Unlimited on-device AI enhancement.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -36,22 +43,36 @@ export const Route = createFileRoute("/pricing")({
 });
 
 function PricingPage() {
-  const { upgrade } = Route.useSearch();
+  const { upgrade, session_id: sessionId } = Route.useSearch();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [pending, setPending] = useState<"checkout" | "portal" | null>(null);
   const checkout = useServerFn(createCheckoutSession);
   const portal = useServerFn(createBillingPortalSession);
   const entitlementFn = useServerFn(getMyEntitlement);
+  const finalizeCheckout = useServerFn(finalizeCheckoutSession);
 
   const sessionQuery = useSession();
   const isSignedIn = !!sessionQuery.data;
 
+  const finalization = useQuery({
+    queryKey: ["checkout-finalization", sessionId],
+    queryFn: () => finalizeCheckout({ data: { sessionId: sessionId ?? "" } }),
+    enabled: isSignedIn && upgrade === "success" && !!sessionId,
+    retry: 2,
+  });
+
   const entitlement = useQuery({
-    queryKey: ["entitlement"],
+    queryKey: ["entitlement", finalization.data?.subscriptionId],
     queryFn: () => entitlementFn({}),
     enabled: isSignedIn,
-    refetchInterval: upgrade === "success" ? 2000 : false,
+    refetchInterval: upgrade === "success" && !finalization.data?.activated ? 2000 : false,
   });
+
+  useEffect(() => {
+    if (finalization.data?.activated)
+      void queryClient.invalidateQueries({ queryKey: ["entitlement"] });
+  }, [finalization.data?.activated, queryClient]);
 
   const isPremium = entitlement.data?.isPremium ?? false;
   const used = entitlement.data?.used ?? 0;
@@ -64,7 +85,7 @@ function PricingPage() {
     }
     try {
       setPending("checkout");
-      const { url } = await checkout({ data: {} });
+      const { url } = await checkout({});
       if (url) window.location.href = url;
       else toast.error("Checkout URL missing");
     } catch (err) {
@@ -121,7 +142,8 @@ function PricingPage() {
 
         {upgrade === "success" && (
           <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-emerald-400/30 bg-emerald-400/10 p-4 text-center text-sm text-emerald-100">
-            Payment received. Premium is being activated — refresh in a moment if the badge hasn't updated.
+            Payment received. Premium is being activated — refresh in a moment if the badge hasn't
+            updated.
           </div>
         )}
         {upgrade === "cancelled" && (
@@ -181,7 +203,11 @@ function PricingPage() {
                   disabled={pending === "checkout"}
                   className="block w-full rounded-full bg-white py-3 text-center text-sm font-semibold text-black shadow-[0_0_40px_-8px_rgba(10,132,255,0.6)] transition hover:bg-white/90 disabled:opacity-60"
                 >
-                  {pending === "checkout" ? "Opening checkout…" : isSignedIn ? "Upgrade — $0.99/mo" : "Sign in to upgrade"}
+                  {pending === "checkout"
+                    ? "Opening checkout…"
+                    : isSignedIn
+                      ? "Upgrade — $0.99/mo"
+                      : "Sign in to upgrade"}
                 </button>
               )
             }
@@ -190,7 +216,8 @@ function PricingPage() {
         </div>
 
         <p className="mt-10 text-center text-xs text-white/40">
-          Prices in USD. Sales tax may apply. Payments processed by Stripe. Cancel anytime — access continues to the end of the paid period.
+          Prices in USD. Sales tax may apply. Payments processed by Stripe. Cancel anytime — access
+          continues to the end of the paid period.
         </p>
       </section>
     </main>
@@ -231,7 +258,9 @@ function Plan({
       )}
       <div className="flex items-baseline justify-between">
         <h3 className="font-serif text-2xl italic">{name}</h3>
-        {highlight && <span className="text-[10px] uppercase tracking-widest text-white/60">Current plan</span>}
+        {highlight && (
+          <span className="text-[10px] uppercase tracking-widest text-white/60">Current plan</span>
+        )}
       </div>
       <div className="mt-6 flex items-baseline gap-2">
         <span className="font-serif text-5xl">{price}</span>
