@@ -30,7 +30,7 @@ export const getMyEntitlement = createServerFn({ method: "GET" })
       (!sub.current_period_end || new Date(sub.current_period_end).getTime() > now);
     return {
       isPremium,
-      plan: isPremium ? sub!.plan : "free",
+      plan: isPremium ? (sub?.plan ?? "free") : "free",
       status: sub?.status ?? "none",
       used: prof?.enhancements_used ?? 0,
       cap: FREE_CAP,
@@ -142,7 +142,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
 
 export const finalizeCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw) =>
+  .validator((raw) =>
     z
       .object({
         sessionId: z

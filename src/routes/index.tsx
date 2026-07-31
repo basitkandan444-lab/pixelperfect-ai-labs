@@ -20,6 +20,7 @@ import { SITE, FAQS, absoluteUrl } from "@/lib/site";
 import { originLoader } from "@/lib/origin.functions";
 import { detectCapabilities } from "@/lib/enhance/capabilities";
 import { useSession } from "@/hooks/use-session";
+import { useBillingStatus } from "@/hooks/use-billing-status";
 import {
   consumeEnhancement,
   createCheckoutSession,
@@ -147,6 +148,8 @@ function Index() {
 
   const sessionQuery = useSession();
   const isSignedIn = !!sessionQuery.data;
+  const billingStatus = useBillingStatus();
+  const billingAvailable = billingStatus.data?.configured ?? true;
 
   const entitlementQuery = useQuery({
     queryKey: ["entitlement"],
@@ -170,6 +173,10 @@ function Index() {
 
   const handleUpgrade = useCallback(async () => {
     trackEvent("upgrade_wall_cta", { signedIn: isSignedIn });
+    if (!billingAvailable) {
+      toast.error("Premium checkout is temporarily unavailable. Please try again shortly.");
+      return;
+    }
     if (!isSignedIn) {
       navigate({ to: "/auth", search: { next: "/pricing" } });
       return;
@@ -184,7 +191,7 @@ function Index() {
     } finally {
       setWallPending(false);
     }
-  }, [isSignedIn, navigate, checkoutFn]);
+  }, [isSignedIn, navigate, checkoutFn, billingAvailable]);
 
 
   // Signal that React has hydrated and the upload handler is attached. The
@@ -999,6 +1006,7 @@ function Index() {
         isSignedIn={isSignedIn}
         onUpgrade={handleUpgrade}
         pending={wallPending}
+        billingAvailable={billingAvailable}
       />
       {!isPremium && stage !== "idle" && (
         <div className="pointer-events-none fixed bottom-4 left-1/2 z-40 -translate-x-1/2 rounded-full border border-white/10 bg-black/60 px-3 py-1.5 text-[11px] text-white/70 backdrop-blur">

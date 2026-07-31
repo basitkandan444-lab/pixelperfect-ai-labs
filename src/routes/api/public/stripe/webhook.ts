@@ -24,16 +24,30 @@ export const Route = createFileRoute("/api/public/stripe/webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const secret = process.env.STRIPE_WEBHOOK_SECRET;
-        if (!secret) return new Response("webhook secret not configured", { status: 500 });
+        const { getStripe, getWebhookSecret, BillingConfigError } = await import(
+          "@/lib/stripe.server"
+        );
+
+        let secret: string;
+        let stripe: ReturnType<typeof getStripe>;
+        try {
+          secret = getWebhookSecret();
+          stripe = getStripe();
+        } catch (err) {
+          // Config errors are an operator problem, not a Stripe protocol
+          // problem — respond 500 (not 400) so Stripe retries once the
+          // secret is fixed, instead of permanently dropping the event.
+          console.error("[stripe-webhook] billing not configured", err);
+          return new Response(
+            err instanceof BillingConfigError ? err.message : "webhook not configured",
+            { status: 500 },
+          );
+        }
 
         const signature = request.headers.get("stripe-signature");
         if (!signature) return new Response("missing stripe-signature", { status: 400 });
 
         const rawBody = await request.text();
-
-        const { getStripe } = await import("@/lib/stripe.server");
-        const stripe = getStripe();
 
         let event: Stripe.Event;
         try {

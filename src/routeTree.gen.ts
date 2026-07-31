@@ -48,6 +48,7 @@ import { Route as ApiPublicAlertsRouteImport } from './routes/api/public/alerts'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe/webhook'
+import { Route as ApiPublicStripeStatusRouteImport } from './routes/api/public/stripe/status'
 import { Route as ApiPublicIntelligenceRevenueRouteImport } from './routes/api/public/intelligence/revenue'
 import { Route as ApiPublicIntelligencePerformanceRouteImport } from './routes/api/public/intelligence/performance'
 import { Route as ApiPublicIntelligenceConversionRouteImport } from './routes/api/public/intelligence/conversion'
@@ -253,6 +254,11 @@ const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   path: '/api/public/stripe/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicStripeStatusRoute = ApiPublicStripeStatusRouteImport.update({
+  id: '/api/public/stripe/status',
+  path: '/api/public/stripe/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicIntelligenceRevenueRoute =
   ApiPublicIntelligenceRevenueRouteImport.update({
     id: '/revenue',
@@ -335,6 +341,7 @@ export interface FileRoutesByFullPath {
   '/api/public/intelligence/conversion': typeof ApiPublicIntelligenceConversionRoute
   '/api/public/intelligence/performance': typeof ApiPublicIntelligencePerformanceRoute
   '/api/public/intelligence/revenue': typeof ApiPublicIntelligenceRevenueRoute
+  '/api/public/stripe/status': typeof ApiPublicStripeStatusRoute
   '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -382,6 +389,7 @@ export interface FileRoutesByTo {
   '/api/public/intelligence/conversion': typeof ApiPublicIntelligenceConversionRoute
   '/api/public/intelligence/performance': typeof ApiPublicIntelligencePerformanceRoute
   '/api/public/intelligence/revenue': typeof ApiPublicIntelligenceRevenueRoute
+  '/api/public/stripe/status': typeof ApiPublicStripeStatusRoute
   '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
@@ -430,6 +438,7 @@ export interface FileRoutesById {
   '/api/public/intelligence/conversion': typeof ApiPublicIntelligenceConversionRoute
   '/api/public/intelligence/performance': typeof ApiPublicIntelligencePerformanceRoute
   '/api/public/intelligence/revenue': typeof ApiPublicIntelligenceRevenueRoute
+  '/api/public/stripe/status': typeof ApiPublicStripeStatusRoute
   '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
@@ -479,6 +488,7 @@ export interface FileRouteTypes {
     | '/api/public/intelligence/conversion'
     | '/api/public/intelligence/performance'
     | '/api/public/intelligence/revenue'
+    | '/api/public/stripe/status'
     | '/api/public/stripe/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -526,6 +536,7 @@ export interface FileRouteTypes {
     | '/api/public/intelligence/conversion'
     | '/api/public/intelligence/performance'
     | '/api/public/intelligence/revenue'
+    | '/api/public/stripe/status'
     | '/api/public/stripe/webhook'
   id:
     | '__root__'
@@ -573,6 +584,7 @@ export interface FileRouteTypes {
     | '/api/public/intelligence/conversion'
     | '/api/public/intelligence/performance'
     | '/api/public/intelligence/revenue'
+    | '/api/public/stripe/status'
     | '/api/public/stripe/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -617,6 +629,7 @@ export interface RootRouteChildren {
   ApiPublicEvolutionRecommendationsRoute: typeof ApiPublicEvolutionRecommendationsRoute
   ApiPublicHooksReliabilityScanRoute: typeof ApiPublicHooksReliabilityScanRoute
   ApiPublicHooksTelemetrySnapshotRoute: typeof ApiPublicHooksTelemetrySnapshotRoute
+  ApiPublicStripeStatusRoute: typeof ApiPublicStripeStatusRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
@@ -895,6 +908,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/stripe/status': {
+      id: '/api/public/stripe/status'
+      path: '/api/public/stripe/status'
+      fullPath: '/api/public/stripe/status'
+      preLoaderRoute: typeof ApiPublicStripeStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/intelligence/revenue': {
       id: '/api/public/intelligence/revenue'
       path: '/revenue'
@@ -1010,6 +1030,7 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicEvolutionRecommendationsRoute,
   ApiPublicHooksReliabilityScanRoute: ApiPublicHooksReliabilityScanRoute,
   ApiPublicHooksTelemetrySnapshotRoute: ApiPublicHooksTelemetrySnapshotRoute,
+  ApiPublicStripeStatusRoute: ApiPublicStripeStatusRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
