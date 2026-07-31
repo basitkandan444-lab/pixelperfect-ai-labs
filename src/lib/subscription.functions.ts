@@ -142,7 +142,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
 
 export const finalizeCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw) =>
+  .validator((raw) =>
     z
       .object({
         sessionId: z
