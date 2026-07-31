@@ -722,6 +722,8 @@ function Index() {
             </div>
           </section>
 
+          <HomeTopSections />
+
 
           {/* Workspace */}
           <section
