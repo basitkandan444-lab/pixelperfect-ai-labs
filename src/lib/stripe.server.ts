@@ -47,7 +47,7 @@ export function getStripe(): Stripe {
     httpClient: Stripe.createFetchHttpClient(),
     // Pin an explicit API version so a Stripe-side upgrade can never silently
     // change response shapes (e.g. `current_period_end` placement) under us.
-    apiVersion: "2025-08-27.basil",
+    apiVersion: "2026-06-24.dahlia",
     maxNetworkRetries: 2,
   });
   return cached;
