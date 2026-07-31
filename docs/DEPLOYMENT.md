@@ -33,6 +33,15 @@ through **Lovable** onto a Cloudflare Workers (edge) runtime.
 | `VITE_GA4_ID`           | client | Google Analytics 4 measurement ID              |
 | `VITE_CLARITY_ID`       | client | Microsoft Clarity project ID                   |
 | `VITE_GSC_VERIFICATION` | client | Extra Google Search Console verification token |
+| `STRIPE_SECRET_KEY`     | server | Required for Premium upgrade checkout          |
+| `STRIPE_PRICE_ID`       | server | Required for Premium upgrade checkout          |
+| `STRIPE_WEBHOOK_SECRET` | server | Required to verify/activate Stripe webhooks    |
+| `PUBLIC_APP_ORIGIN`     | server | Optional override for Stripe redirect origin   |
+
+Free enhancements work with none of the Stripe vars set. If any are missing,
+`/api/public/stripe/status` reports `configured: false` and the Upgrade UI
+self-disables with a "temporarily unavailable" message instead of throwing at
+checkout time — verify this endpoint after any billing-related deploy.
 
 `VITE_*` values ship in the client bundle (public by design). Server secrets are
 read only inside route handlers.
