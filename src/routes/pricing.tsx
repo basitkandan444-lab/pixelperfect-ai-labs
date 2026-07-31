@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import { useSession } from "@/hooks/use-session";
 import { useBillingStatus } from "@/hooks/use-billing-status";
+import { Button } from "@/components/ui/button";
 import {
   createBillingPortalSession,
   createCheckoutSession,
@@ -159,8 +160,17 @@ function PricingPage() {
         )}
         {upgrade === "success" && finalization.isError && (
           <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-red-400/30 bg-red-400/10 p-4 text-center text-sm text-red-100">
-            We couldn't verify this checkout. No account changes were made; please retry from this
-            page or manage the payment through Stripe.
+            <p>We couldn't verify this checkout yet. Your payment status remains safe.</p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-3"
+              disabled={finalization.isFetching}
+              onClick={() => void finalization.refetch()}
+            >
+              {finalization.isFetching ? "Checking…" : "Check payment again"}
+            </Button>
           </div>
         )}
         {upgrade === "cancelled" && (
