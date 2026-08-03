@@ -307,8 +307,9 @@ function PricingPage() {
         </div>
 
         <p className="mt-10 text-center text-xs text-white/40">
-          Prices in USD. Sales tax may apply. Payments processed by Stripe. Cancel anytime — access
-          continues to the end of the paid period.
+          Prices in USD. Sales tax may apply. Payments processed by Stripe. Yearly plans can be
+          cancelled anytime — access continues to the end of the paid year. Lifetime is a single
+          one-time payment.
         </p>
       </section>
     </main>
