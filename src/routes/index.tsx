@@ -669,7 +669,7 @@ function Index() {
               </span>
               On-device AI · v2
             </div>
-            <h1 className="animate-hero-in mx-auto max-w-5xl font-display text-[3.25rem] leading-[0.95] tracking-[-0.02em] text-foreground sm:text-7xl md:text-8xl" style={{ animationDelay: "0.15s" }}>
+            <h1 className="animate-hero-in mx-auto max-w-4xl font-display text-[2.75rem] font-extrabold leading-[1.02] tracking-[-0.04em] text-foreground sm:text-6xl md:text-7xl" style={{ animationDelay: "0.15s" }}>
               Image enhancement,
               <br />
               <span className="text-shimmer">perfected on-device.</span>
