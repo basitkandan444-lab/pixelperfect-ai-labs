@@ -48,7 +48,7 @@ function PricingPage() {
   const { upgrade, session_id: sessionId } = Route.useSearch();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [pending, setPending] = useState<"checkout" | "portal" | null>(null);
+  const [pending, setPending] = useState<"yearly" | "lifetime" | "portal" | null>(null);
   const checkout = useServerFn(createCheckoutSession);
   const portal = useServerFn(createBillingPortalSession);
   const entitlementFn = useServerFn(getMyEntitlement);
