@@ -19,15 +19,48 @@ function readEnv(name: string): string | undefined {
 }
 
 /**
+ * The premium plan catalog. Prices are resolved (and self-provisioned) in the
+ * connected Stripe account by `lookup_key`, so checkout never depends on an
+ * operator pasting the right `STRIPE_PRICE_ID` — the #1 historical cause of
+ * "Premium checkout is temporarily unavailable".
+ */
+export const PREMIUM_PLANS = {
+  yearly: {
+    lookupKey: "pixel_perfect_premium_yearly_499_v1",
+    unitAmount: 499,
+    interval: "year" as const,
+    mode: "subscription" as const,
+    productName: "Pixel Perfect Pro Premium (Yearly)",
+    envOverride: "STRIPE_PRICE_ID_YEARLY",
+  },
+  lifetime: {
+    lookupKey: "pixel_perfect_premium_lifetime_1968_v1",
+    unitAmount: 1968,
+    interval: null,
+    mode: "payment" as const,
+    productName: "Pixel Perfect Pro Premium (Lifetime)",
+    envOverride: "STRIPE_PRICE_ID_LIFETIME",
+  },
+} as const;
+
+export type PremiumPlan = keyof typeof PREMIUM_PLANS;
+
+export function isPremiumPlan(value: unknown): value is PremiumPlan {
+  return value === "yearly" || value === "lifetime";
+}
+
+/**
  * Non-throwing check of whether billing is fully configured on this
  * deployment. Safe to call from public (unauthenticated) endpoints — it never
  * touches the Stripe API or leaks secret values, just confirms presence/shape.
+ *
+ * Only the secret key is required: prices are provisioned on demand and the
+ * webhook secret only affects background reconciliation (checkout is finalized
+ * synchronously on return), so neither may block the upgrade button.
  */
 export function getBillingConfigStatus(): { configured: boolean; missing: string[] } {
   const missing: string[] = [];
   if (!readEnv("STRIPE_SECRET_KEY")) missing.push("STRIPE_SECRET_KEY");
-  if (!readEnv("STRIPE_PRICE_ID")) missing.push("STRIPE_PRICE_ID");
-  if (!readEnv("STRIPE_WEBHOOK_SECRET")) missing.push("STRIPE_WEBHOOK_SECRET");
   return { configured: missing.length === 0, missing };
 }
 
@@ -53,15 +86,64 @@ export function getStripe(): Stripe {
   return cached;
 }
 
-/** Server-only read of the configured subscription price. */
-export function getPriceId(): string {
-  const priceId = readEnv("STRIPE_PRICE_ID");
-  if (!priceId) {
-    throw new BillingConfigError(
-      "STRIPE_PRICE_ID is not configured — Premium checkout is temporarily unavailable",
-    );
+const priceCache = new Map<PremiumPlan, string>();
+
+/**
+ * Resolve the Stripe price for a plan, creating it if the account doesn't have
+ * it yet. Order of preference:
+ *   1. explicit env override (`STRIPE_PRICE_ID_YEARLY` / `_LIFETIME`)
+ *   2. an existing active price carrying our `lookup_key` with the right amount
+ *   3. a freshly created product + price stamped with that `lookup_key`
+ */
+export async function resolvePriceId(stripe: Stripe, plan: PremiumPlan): Promise<string> {
+  const cachedId = priceCache.get(plan);
+  if (cachedId) return cachedId;
+
+  const spec = PREMIUM_PLANS[plan];
+
+  const override = readEnv(spec.envOverride);
+  if (override) {
+    priceCache.set(plan, override);
+    return override;
   }
-  return priceId;
+
+  const existing = await stripe.prices.list({
+    lookup_keys: [spec.lookupKey],
+    active: true,
+    limit: 1,
+  });
+  const match = existing.data[0];
+  if (
+    match &&
+    match.unit_amount === spec.unitAmount &&
+    match.currency === "usd" &&
+    (spec.interval === null
+      ? match.type === "one_time"
+      : match.recurring?.interval === spec.interval)
+  ) {
+    priceCache.set(plan, match.id);
+    return match.id;
+  }
+
+  const product = await stripe.products.create(
+    { name: spec.productName, metadata: { plan } },
+    { idempotencyKey: `pixel-perfect-product-${spec.lookupKey}` },
+  );
+
+  const price = await stripe.prices.create(
+    {
+      product: product.id,
+      currency: "usd",
+      unit_amount: spec.unitAmount,
+      lookup_key: spec.lookupKey,
+      transfer_lookup_key: true,
+      ...(spec.interval ? { recurring: { interval: spec.interval } } : {}),
+    },
+    { idempotencyKey: `pixel-perfect-price-${spec.lookupKey}` },
+  );
+
+  priceCache.set(plan, price.id);
+  return price.id;
 }
 
 /** Server-only read of the webhook signing secret. */
