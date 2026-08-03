@@ -31,12 +31,12 @@ export const Route = createFileRoute("/pricing")({
       {
         name: "description",
         content:
-          "Start free with 5 on-device enhancements. Upgrade to Premium for $0.99/month — 100 ultra quality images per month, priority pipeline, 8K exports.",
+          "Start free with 5 on-device enhancements. Premium is $4.99 for a full year, or $19.68 once for lifetime access — 100 ultra quality images per month, 8K exports.",
       },
       { property: "og:title", content: "Pricing — Pixel Perfect Pro" },
       {
         property: "og:description",
-        content: "Premium for $0.99/month. 100 ultra quality on-device AI enhancements every month.",
+        content: "Premium for $4.99/year or $19.68 lifetime. On-device AI image enhancement.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -48,7 +48,7 @@ function PricingPage() {
   const { upgrade, session_id: sessionId } = Route.useSearch();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [pending, setPending] = useState<"checkout" | "portal" | null>(null);
+  const [pending, setPending] = useState<"yearly" | "lifetime" | "portal" | null>(null);
   const checkout = useServerFn(createCheckoutSession);
   const portal = useServerFn(createBillingPortalSession);
   const entitlementFn = useServerFn(getMyEntitlement);
@@ -105,18 +105,14 @@ function PricingPage() {
     if (!win) toast.error("Popup blocked — allow popups, or open the app in a new tab to pay.");
   }
 
-  async function onUpgrade() {
-    if (!billingAvailable) {
-      toast.error("Premium checkout is temporarily unavailable. Please try again shortly.");
-      return;
-    }
+  async function onUpgrade(plan: "yearly" | "lifetime") {
     if (!isSignedIn) {
       navigate({ to: "/auth", search: { next: "/pricing" } });
       return;
     }
     try {
-      setPending("checkout");
-      const { url } = await checkout({});
+      setPending(plan);
+      const { url } = await checkout({ data: { plan } });
       if (url) openExternal(url);
       else toast.error("Checkout URL missing");
     } catch (err) {
@@ -211,7 +207,7 @@ function PricingPage() {
           </div>
         )}
 
-        <div className="mt-14 grid gap-6 md:grid-cols-2">
+        <div className="mt-14 grid gap-6 md:grid-cols-3">
           <Plan
             name="Free"
             price="$0"
@@ -235,11 +231,11 @@ function PricingPage() {
           />
 
           <Plan
-            name="Premium"
-            price="$0.99"
-            cadence="per month"
+            name="Premium Yearly"
+            price="$4.99"
+            cadence="per year"
             accent
-            highlight={isPremium}
+            highlight={isPremium && entitlement.data?.plan !== "lifetime"}
             features={[
               "100 ultra quality images / month",
               "Balanced neural engine (Real-ESRGAN, on-device)",
@@ -258,27 +254,62 @@ function PricingPage() {
                 </button>
               ) : (
                 <button
-                  onClick={onUpgrade}
-                  disabled={pending === "checkout" || !billingAvailable}
-                  className="block w-full rounded-full bg-white py-3 text-center text-sm font-semibold text-black shadow-[0_0_40px_-8px_rgba(10,132,255,0.6)] transition hover:bg-white/90 disabled:opacity-60"
+                  onClick={() => void onUpgrade("yearly")}
+                  disabled={pending !== null}
+                  className="block w-full rounded-full bg-white py-3 text-center text-sm font-semibold text-black transition hover:bg-white/90 disabled:opacity-60"
                 >
-                  {!billingAvailable
-                    ? "Checkout unavailable"
-                    : pending === "checkout"
-                      ? "Opening checkout…"
-                      : isSignedIn
-                        ? "Upgrade — $0.99/mo"
-                        : "Sign in to upgrade"}
+                  {pending === "yearly"
+                    ? "Opening checkout…"
+                    : isSignedIn
+                      ? "Upgrade — $4.99/yr"
+                      : "Sign in to upgrade"}
                 </button>
               )
             }
-            footnote={isPremium ? "Active — thank you 🖤" : billingAvailable ? "Secure checkout via Stripe" : "Checkout temporarily unavailable"}
+            footnote={
+              isPremium ? "Active — thank you 🖤" : "Just 42¢ a month, billed once a year"
+            }
+          />
+
+          <Plan
+            name="Lifetime"
+            price="$19.68"
+            cadence="one time"
+            highlight={entitlement.data?.plan === "lifetime"}
+            features={[
+              "Everything in Premium Yearly",
+              "100 ultra quality images / month, forever",
+              "All future engine upgrades included",
+              "No renewals, no subscription",
+              "Pay once, own it",
+            ]}
+            cta={
+              isPremium ? (
+                <div className="block w-full rounded-full border border-white/10 bg-white/5 py-3 text-center text-sm text-white/60">
+                  {entitlement.data?.plan === "lifetime" ? "You own this" : "Premium already active"}
+                </div>
+              ) : (
+                <button
+                  onClick={() => void onUpgrade("lifetime")}
+                  disabled={pending !== null}
+                  className="block w-full rounded-full border border-white/25 bg-white/10 py-3 text-center text-sm font-semibold text-white transition hover:bg-white/20 disabled:opacity-60"
+                >
+                  {pending === "lifetime"
+                    ? "Opening checkout…"
+                    : isSignedIn
+                      ? "Buy lifetime — $19.68"
+                      : "Sign in to buy"}
+                </button>
+              )
+            }
+            footnote="Best value — under 4 years of yearly"
           />
         </div>
 
         <p className="mt-10 text-center text-xs text-white/40">
-          Prices in USD. Sales tax may apply. Payments processed by Stripe. Cancel anytime — access
-          continues to the end of the paid period.
+          Prices in USD. Sales tax may apply. Payments processed by Stripe. Yearly plans can be
+          cancelled anytime — access continues to the end of the paid year. Lifetime is a single
+          one-time payment.
         </p>
       </section>
     </main>

@@ -61,8 +61,8 @@ export interface FaqItem {
 
 export const FAQS: FaqItem[] = [
   {
-    q: "Is Pixel Perfect Pro really free?",
-    a: "Yes. Pixel Perfect Pro is completely free to use. There is no subscription, trial, watermark or payment step — you can upload a photo and download the enhanced version without ever entering card details.",
+    q: "Is Pixel Perfect Pro free?",
+    a: "Yes — you get 5 full-quality enhancements free, with no watermark and no card details. Premium is optional: $4.99 for a year or $19.68 once for lifetime access, which unlocks 100 ultra quality images every month.",
   },
   {
     q: "Do I need to create an account?",

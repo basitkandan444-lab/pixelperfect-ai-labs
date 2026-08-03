@@ -72,8 +72,9 @@ export function UpgradeWall({
           You&rsquo;ve used all {cap} free enhancements.
         </h2>
         <p className="mt-3 text-sm text-white/65">
-          Your image is safe — nothing was lost. Upgrade to Premium for 100 ultra quality images every month at
-          just <span className="font-semibold text-white">$0.99/month</span>. Cancel anytime.
+          Your image is safe — nothing was lost. Upgrade to Premium for 100 ultra quality images
+          every month at just <span className="font-semibold text-white">$4.99 a year</span> — or
+          pay <span className="font-semibold text-white">$19.68 once</span> for lifetime access.
         </p>
 
         <ul className="mt-6 space-y-2.5 text-sm text-white/85">
@@ -111,7 +112,7 @@ export function UpgradeWall({
               : pending
                 ? "Opening checkout…"
                 : isSignedIn
-                  ? "Upgrade — $0.99 / month"
+                  ? "Upgrade — $4.99 / year"
                   : "Sign in to upgrade"}
           </button>
           <Link
