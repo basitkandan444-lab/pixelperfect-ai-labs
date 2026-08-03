@@ -105,18 +105,14 @@ function PricingPage() {
     if (!win) toast.error("Popup blocked — allow popups, or open the app in a new tab to pay.");
   }
 
-  async function onUpgrade() {
-    if (!billingAvailable) {
-      toast.error("Premium checkout is temporarily unavailable. Please try again shortly.");
-      return;
-    }
+  async function onUpgrade(plan: "yearly" | "lifetime") {
     if (!isSignedIn) {
       navigate({ to: "/auth", search: { next: "/pricing" } });
       return;
     }
     try {
-      setPending("checkout");
-      const { url } = await checkout({});
+      setPending(plan);
+      const { url } = await checkout({ data: { plan } });
       if (url) openExternal(url);
       else toast.error("Checkout URL missing");
     } catch (err) {
