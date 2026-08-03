@@ -245,7 +245,7 @@ export function HomeContent() {
               <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
                 Privacy by design
               </span>
-              <h3 className="mt-4 font-display text-4xl italic tracking-tight text-foreground sm:text-5xl">
+              <h3 className="mt-4 font-display text-4xl tracking-tight text-foreground sm:text-5xl">
                 100% on-device.
               </h3>
               <p className="mt-4 text-sm font-light leading-relaxed text-muted-foreground">
@@ -281,7 +281,7 @@ export function HomeContent() {
                 </span>
               ))}
             </div>
-            <h4 className="mt-8 font-display text-3xl italic tracking-tight text-foreground">
+            <h4 className="mt-8 font-display text-3xl tracking-tight text-foreground">
               All formats.
             </h4>
             <p className="mt-2 text-sm font-light text-muted-foreground">
@@ -296,7 +296,7 @@ export function HomeContent() {
               <div className="h-6 w-1 bg-primary transition-all delay-75 duration-500 group-hover:h-10" />
               <div className="h-6 w-1 bg-primary/30 transition-all delay-150 duration-500 group-hover:h-7 group-hover:bg-primary/70" />
             </div>
-            <h4 className="mt-8 font-display text-3xl italic tracking-tight text-foreground">
+            <h4 className="mt-8 font-display text-3xl tracking-tight text-foreground">
               8K upscaling.
             </h4>
             <p className="mt-2 text-sm font-light text-muted-foreground">
@@ -306,7 +306,7 @@ export function HomeContent() {
 
           {/* Start free — accent tile */}
           <div className="sheen group flex flex-col items-center justify-center rounded-[2rem] bg-primary p-8 text-center text-primary-foreground transition-transform duration-500 hover:-translate-y-1 md:col-span-4">
-            <h4 className="font-display text-3xl italic leading-none">Start free.</h4>
+            <h4 className="font-display text-3xl leading-none">Start free.</h4>
             <span className="mt-3 text-xs font-medium opacity-80">
               5 enhancements on us. Upgrade any time.
             </span>

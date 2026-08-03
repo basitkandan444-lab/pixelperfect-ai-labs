@@ -68,7 +68,7 @@ export function UpgradeWall({
           Free limit reached
         </div>
 
-        <h2 id="upgrade-wall-title" className="mt-4 font-display text-3xl italic leading-tight md:text-4xl">
+        <h2 id="upgrade-wall-title" className="mt-4 font-display text-3xl leading-tight md:text-4xl">
           You&rsquo;ve used all {cap} free enhancements.
         </h2>
         <p className="mt-3 text-sm text-white/65">

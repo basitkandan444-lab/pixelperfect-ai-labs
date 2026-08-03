@@ -617,7 +617,7 @@ function Index() {
                 <Sparkles className="h-3.5 w-3.5 text-primary-foreground" aria-hidden="true" />
                 <span className="absolute inset-0 rounded-md bg-primary opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-70" />
               </span>
-              <span className="font-display text-lg italic tracking-tight text-foreground">
+              <span className="font-display text-lg tracking-tight text-foreground">
                 {SITE.name}
               </span>
             </Link>
@@ -672,7 +672,7 @@ function Index() {
             <h1 className="animate-hero-in mx-auto max-w-5xl font-display text-[3.25rem] leading-[0.95] tracking-[-0.02em] text-foreground sm:text-7xl md:text-8xl" style={{ animationDelay: "0.15s" }}>
               Image enhancement,
               <br />
-              <span className="text-shimmer italic">perfected on-device.</span>
+              <span className="text-shimmer">perfected on-device.</span>
             </h1>
             <p
               className="animate-hero-in mx-auto mt-8 max-w-xl text-base font-light leading-relaxed text-muted-foreground sm:text-lg"

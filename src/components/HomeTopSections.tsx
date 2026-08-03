@@ -34,7 +34,7 @@ export function HomeTopSections() {
               </div>
               <h2
                 id="pricing-spotlight-heading"
-                className="mt-5 font-display text-4xl italic leading-[1.05] tracking-[-0.02em] sm:text-5xl"
+                className="mt-5 font-display text-4xl leading-[1.05] tracking-[-0.02em] sm:text-5xl"
               >
                 100 ultra quality images
                 <br />
@@ -79,7 +79,7 @@ export function HomeTopSections() {
       >
         <h2
           id="why-browser-first-heading"
-          className="text-center font-display text-3xl italic tracking-[-0.02em] sm:text-4xl"
+          className="text-center font-display text-3xl tracking-[-0.02em] sm:text-4xl"
         >
           Your photos never leave your device.
         </h2>
@@ -127,7 +127,7 @@ export function HomeTopSections() {
           ].map(({ icon: Icon, value, label }) => (
             <div key={label} className="text-center">
               <Icon className="mx-auto h-4 w-4 text-primary" aria-hidden />
-              <div className="mt-3 font-display text-4xl italic tracking-tight">{value}</div>
+              <div className="mt-3 font-display text-4xl tracking-tight">{value}</div>
               <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
                 {label}
               </div>
