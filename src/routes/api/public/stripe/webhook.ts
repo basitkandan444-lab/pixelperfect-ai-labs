@@ -67,11 +67,27 @@ export const Route = createFileRoute("/api/public/stripe/webhook")({
                 string | undefined;
               const customerId =
                 typeof session.customer === "string" ? session.customer : session.customer?.id;
+              if (!userId) break;
+
+              // Lifetime plan is a one-time payment — there is no subscription.
+              if (session.mode === "payment") {
+                if (session.payment_status !== "paid") break;
+                await upsertSubscription(supabaseAdmin, {
+                  user_id: userId,
+                  stripe_customer_id: customerId ?? null,
+                  stripe_subscription_id: null,
+                  plan: "lifetime",
+                  status: "active",
+                  current_period_end: null,
+                });
+                break;
+              }
+
               const subscriptionId =
                 typeof session.subscription === "string"
                   ? session.subscription
                   : session.subscription?.id;
-              if (!userId || !subscriptionId) break;
+              if (!subscriptionId) break;
 
               const sub = await stripe.subscriptions.retrieve(subscriptionId);
               await upsertSubscription(supabaseAdmin, {
