@@ -161,7 +161,7 @@ async function upsertSubscription(
   row: {
     user_id: string;
     stripe_customer_id: string | null;
-    stripe_subscription_id: string;
+    stripe_subscription_id: string | null;
     plan: string;
     status: string;
     current_period_end: string | null;
