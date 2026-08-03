@@ -408,11 +408,11 @@
 .text-shimmer {
   background: linear-gradient(
     100deg,
-    oklch(0.94 0.003 250) 0%,
-    oklch(0.94 0.003 250) 35%,
-    oklch(0.78 0.16 258) 50%,
-    oklch(0.94 0.003 250) 65%,
-    oklch(0.94 0.003 250) 100%
+    oklch(0.96 0.01 90) 0%,
+    oklch(0.82 0.1 88) 30%,
+    oklch(0.92 0.09 92) 45%,
+    oklch(0.72 0.11 82) 60%,
+    oklch(0.96 0.01 90) 100%
   );
   background-size: 200% auto;
   -webkit-background-clip: text;
