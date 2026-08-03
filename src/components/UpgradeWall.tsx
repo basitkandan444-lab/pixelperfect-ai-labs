@@ -112,7 +112,7 @@ export function UpgradeWall({
               : pending
                 ? "Opening checkout…"
                 : isSignedIn
-                  ? "Upgrade — $0.99 / month"
+                  ? "Upgrade — $4.99 / year"
                   : "Sign in to upgrade"}
           </button>
           <Link
