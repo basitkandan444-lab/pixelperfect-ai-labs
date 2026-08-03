@@ -617,7 +617,7 @@ function Index() {
                 <Sparkles className="h-3.5 w-3.5 text-primary-foreground" aria-hidden="true" />
                 <span className="absolute inset-0 rounded-md bg-primary opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-70" />
               </span>
-              <span className="font-display text-lg italic tracking-tight text-foreground">
+              <span className="font-display text-lg tracking-tight text-foreground">
                 {SITE.name}
               </span>
             </Link>
@@ -669,10 +669,10 @@ function Index() {
               </span>
               On-device AI · v2
             </div>
-            <h1 className="animate-hero-in mx-auto max-w-5xl font-display text-[3.25rem] leading-[0.95] tracking-[-0.02em] text-foreground sm:text-7xl md:text-8xl" style={{ animationDelay: "0.15s" }}>
+            <h1 className="animate-hero-in mx-auto max-w-4xl font-display text-[2.75rem] font-extrabold leading-[1.02] tracking-[-0.04em] text-foreground sm:text-6xl md:text-7xl" style={{ animationDelay: "0.15s" }}>
               Image enhancement,
               <br />
-              <span className="text-shimmer italic">perfected on-device.</span>
+              <span className="text-shimmer">perfected on-device.</span>
             </h1>
             <p
               className="animate-hero-in mx-auto mt-8 max-w-xl text-base font-light leading-relaxed text-muted-foreground sm:text-lg"
@@ -777,7 +777,7 @@ function Index() {
                   <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-[oklch(0.09_0_0)]">
                     <UploadCloud className="h-7 w-7 text-primary" aria-hidden="true" />
                   </div>
-                  <h3 className="mt-6 font-display text-3xl italic text-foreground sm:text-4xl">
+                  <h3 className="mt-6 font-display text-3xl text-foreground sm:text-4xl">
                     Drop your image here
                   </h3>
                   <p className="mt-2 text-sm font-light text-muted-foreground">

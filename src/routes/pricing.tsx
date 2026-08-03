@@ -149,7 +149,7 @@ function PricingPage() {
         }}
       />
       <nav className="relative z-10 flex items-center justify-between px-6 py-6 md:px-10">
-        <Link to="/" className="font-serif text-xl italic tracking-tight">
+        <Link to="/" className="font-serif text-xl tracking-tight">
           Pixel Perfect Pro
         </Link>
         <Link
@@ -163,7 +163,7 @@ function PricingPage() {
       <section className="relative z-10 mx-auto max-w-5xl px-6 pb-24 pt-8 md:pt-16">
         <header className="text-center">
           <p className="text-xs uppercase tracking-[0.3em] text-white/50">Pricing</p>
-          <h1 className="mt-4 font-serif text-5xl italic leading-[1.05] md:text-7xl">
+          <h1 className="mt-4 font-serif text-5xl leading-[1.05] md:text-7xl">
             Beautifully simple.
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-base text-white/60 md:text-lg">
@@ -318,7 +318,7 @@ function Plan({
         </span>
       )}
       <div className="flex items-baseline justify-between">
-        <h3 className="font-serif text-2xl italic">{name}</h3>
+        <h3 className="font-serif text-2xl">{name}</h3>
         {highlight && (
           <span className="text-[10px] uppercase tracking-widest text-white/60">Current plan</span>
         )}
