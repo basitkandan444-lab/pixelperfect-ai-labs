@@ -164,9 +164,30 @@ export const finalizeCheckoutSession = createServerFn({ method: "POST" })
     const ownerId = session.metadata?.user_id ?? session.client_reference_id;
     if (ownerId !== context.userId)
       throw new Error("Checkout session does not belong to this account");
-    if (session.status !== "complete" || !session.subscription) {
-      throw new Error("Checkout is not complete");
+    if (session.status !== "complete") throw new Error("Checkout is not complete");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Lifetime = one-time payment: no subscription object exists.
+    if (session.mode === "payment") {
+      if (session.payment_status !== "paid") throw new Error("Payment is not complete");
+      const customerId =
+        typeof session.customer === "string" ? session.customer : (session.customer?.id ?? null);
+      const { error: lifetimeError } = await supabaseAdmin.from("subscriptions").upsert(
+        {
+          user_id: context.userId,
+          stripe_customer_id: customerId,
+          plan: "lifetime",
+          status: "active",
+          current_period_end: null,
+        },
+        { onConflict: "user_id" },
+      );
+      if (lifetimeError) throw new Error("Could not activate Premium");
+      return { activated: true, plan: "lifetime" as const, subscriptionId: null };
     }
+
+    if (!session.subscription) throw new Error("Checkout is not complete");
 
     const subscriptionId =
       typeof session.subscription === "string" ? session.subscription : session.subscription.id;
@@ -181,7 +202,6 @@ export const finalizeCheckoutSession = createServerFn({ method: "POST" })
     const periodEnd = legacy.current_period_end ?? item?.current_period_end;
     const customerId =
       typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("subscriptions").upsert(
       {
         user_id: context.userId,
@@ -194,7 +214,7 @@ export const finalizeCheckoutSession = createServerFn({ method: "POST" })
       { onConflict: "user_id" },
     );
     if (error) throw new Error("Could not activate Premium");
-    return { activated: true, subscriptionId: subscription.id };
+    return { activated: true, plan: "premium" as const, subscriptionId: subscription.id };
   });
 
 /**
