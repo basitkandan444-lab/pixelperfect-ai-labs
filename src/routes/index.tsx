@@ -777,7 +777,7 @@ function Index() {
                   <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-[oklch(0.09_0_0)]">
                     <UploadCloud className="h-7 w-7 text-primary" aria-hidden="true" />
                   </div>
-                  <h3 className="mt-6 font-display text-3xl italic text-foreground sm:text-4xl">
+                  <h3 className="mt-6 font-display text-3xl text-foreground sm:text-4xl">
                     Drop your image here
                   </h3>
                   <p className="mt-2 text-sm font-light text-muted-foreground">

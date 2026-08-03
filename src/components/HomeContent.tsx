@@ -262,7 +262,7 @@ export function HomeContent() {
           {/* Speed */}
           <div className="card-premium rounded-[2rem] border border-white/5 bg-[oklch(0.04_0_0)] p-8 text-center sm:p-10 md:col-span-4">
             <div className="flex h-full flex-col items-center justify-center gap-2">
-              <div className="font-display text-6xl italic text-primary">0.4s</div>
+              <div className="font-display text-6xl text-primary">0.4s</div>
               <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
                 Avg. processing time
               </div>
