@@ -13,7 +13,10 @@ export const Route = createFileRoute("/api/public/intelligence/performance")({
         if (!gate.ok) return jsonFail(gate.code, gate.message, { status: gate.status, requestId });
         try {
           const url = new URL(request.url);
-          const hours = Math.max(1, Math.min(720, Math.floor(Number(url.searchParams.get("hours") ?? "168"))));
+          const hours = Math.max(
+            1,
+            Math.min(720, Math.floor(Number(url.searchParams.get("hours") ?? "168"))),
+          );
           const sinceIso = new Date(Date.now() - hours * 3600_000).toISOString();
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const byBrowser = await aggregateBrowserPerf(supabaseAdmin, sinceIso);

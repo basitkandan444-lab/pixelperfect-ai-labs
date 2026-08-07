@@ -28,8 +28,11 @@ export function verifyStage(
   const s = ssim(before, after, width, height);
   const e = edgePreservation(before, after, width, height);
   const reasons: string[] = [];
-  if (thresholds.minPSNR !== undefined && p < thresholds.minPSNR) reasons.push(`psnr<${thresholds.minPSNR}`);
-  if (thresholds.minSSIM !== undefined && s < thresholds.minSSIM) reasons.push(`ssim<${thresholds.minSSIM}`);
-  if (thresholds.minEdges !== undefined && e < thresholds.minEdges) reasons.push(`edges<${thresholds.minEdges}`);
+  if (thresholds.minPSNR !== undefined && p < thresholds.minPSNR)
+    reasons.push(`psnr<${thresholds.minPSNR}`);
+  if (thresholds.minSSIM !== undefined && s < thresholds.minSSIM)
+    reasons.push(`ssim<${thresholds.minSSIM}`);
+  if (thresholds.minEdges !== undefined && e < thresholds.minEdges)
+    reasons.push(`edges<${thresholds.minEdges}`);
   return { psnr: p, ssim: s, edges: e, ok: reasons.length === 0, reasons };
 }

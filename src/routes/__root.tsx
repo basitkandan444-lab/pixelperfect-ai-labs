@@ -185,7 +185,7 @@ function RootComponent() {
       <Outlet />
       <Toaster position="top-center" />
       <Analytics />
-      
+
       <WebVitals />
     </QueryClientProvider>
   );

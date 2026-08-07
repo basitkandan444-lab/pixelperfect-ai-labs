@@ -14,7 +14,11 @@ beforeEach(() => __resetRegistryForTests());
 describe("capability registry", () => {
   it("registers and retrieves", () => {
     registerCapability({
-      id: "x", version: "1", label: "X", requires: [], weight: 0.1,
+      id: "x",
+      version: "1",
+      label: "X",
+      requires: [],
+      weight: 0.1,
       budget: { memMBPerMP: 1, timeMsPerMP: 1 },
     });
     expect(getCapability("x")?.id).toBe("x");
@@ -23,11 +27,19 @@ describe("capability registry", () => {
 
   it("gates by required features", () => {
     registerCapability({
-      id: "gpu", version: "1", label: "GPU", requires: ["webgpu"], weight: 0.1,
+      id: "gpu",
+      version: "1",
+      label: "GPU",
+      requires: ["webgpu"],
+      weight: 0.1,
       budget: { memMBPerMP: 1, timeMsPerMP: 1 },
     });
     registerCapability({
-      id: "cpu", version: "1", label: "CPU", requires: ["canvas2d"], weight: 0.1,
+      id: "cpu",
+      version: "1",
+      label: "CPU",
+      requires: ["canvas2d"],
+      weight: 0.1,
       budget: { memMBPerMP: 1, timeMsPerMP: 1 },
     });
     const avail = new Set<FeatureFlag>(["canvas2d"]);
@@ -36,12 +48,20 @@ describe("capability registry", () => {
 
   it("ignores duplicate ids after freeze", () => {
     registerCapability({
-      id: "y", version: "1", label: "Y", requires: [], weight: 0.1,
+      id: "y",
+      version: "1",
+      label: "Y",
+      requires: [],
+      weight: 0.1,
       budget: { memMBPerMP: 1, timeMsPerMP: 1 },
     });
     freezeRegistry();
     registerCapability({
-      id: "z", version: "1", label: "Z", requires: [], weight: 0.1,
+      id: "z",
+      version: "1",
+      label: "Z",
+      requires: [],
+      weight: 0.1,
       budget: { memMBPerMP: 1, timeMsPerMP: 1 },
     });
     expect(getCapability("z")).toBeUndefined();
@@ -49,10 +69,18 @@ describe("capability registry", () => {
 
   it("registers all 8 built-ins", async () => {
     await import("./builtins");
-    const ids = listCapabilities().map((c) => c.id).sort();
+    const ids = listCapabilities()
+      .map((c) => c.id)
+      .sort();
     expect(ids).toEqual([
-      "bilateral", "clahe", "deblock", "faceRestore",
-      "microContrast", "sCurve", "vibrance", "whiteBalance",
+      "bilateral",
+      "clahe",
+      "deblock",
+      "faceRestore",
+      "microContrast",
+      "sCurve",
+      "vibrance",
+      "whiteBalance",
     ]);
   });
 });

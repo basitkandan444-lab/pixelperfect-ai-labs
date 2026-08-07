@@ -15,13 +15,15 @@ export function memoryRule(inputs: EvolutionInputs, now: string): Recommendation
       subject: `stage:${r.id}`,
       title: `Reduce memory for "${r.id}"`,
       rationale: `Peak memory ${r.peakMB.toFixed(1)}MB exceeds budget ${r.budgetMB}MB.`,
-      evidence: [{
-        metric: "peak_mb",
-        value: Number(r.peakMB.toFixed(2)),
-        threshold: r.budgetMB,
-        window: inputs.window,
-        sample: 1,
-      }],
+      evidence: [
+        {
+          metric: "peak_mb",
+          value: Number(r.peakMB.toFixed(2)),
+          threshold: r.budgetMB,
+          window: inputs.window,
+          sample: 1,
+        },
+      ],
       action: { kind: "plan-required", note: "Draft plan to pool buffers or tile the stage." },
       createdAt: now,
     });

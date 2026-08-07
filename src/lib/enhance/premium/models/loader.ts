@@ -25,15 +25,21 @@ export function loadModel(id: string, opts: LoadModelOptions = {}): Promise<Arra
   const entry = getModel(id);
   if (!entry) return Promise.reject(new Error(`Unknown model: ${id}`));
   const p = fetchModel({
-    url: entry.url, sha256: entry.sha256, signal: opts.signal, onProgress: opts.onProgress,
-  }).then((buf) => {
-    resolved.set(id, buf);
-    inflight.delete(id);
-    return buf;
-  }, (err) => {
-    inflight.delete(id);
-    throw err;
-  });
+    url: entry.url,
+    sha256: entry.sha256,
+    signal: opts.signal,
+    onProgress: opts.onProgress,
+  }).then(
+    (buf) => {
+      resolved.set(id, buf);
+      inflight.delete(id);
+      return buf;
+    },
+    (err) => {
+      inflight.delete(id);
+      throw err;
+    },
+  );
   inflight.set(id, p);
   return p;
 }

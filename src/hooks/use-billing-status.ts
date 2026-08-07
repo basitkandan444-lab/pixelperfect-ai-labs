@@ -4,7 +4,9 @@ type BillingStatusResponse = { success: true; data: { configured: boolean; missi
 
 async function fetchBillingStatus(): Promise<{ configured: boolean }> {
   try {
-    const res = await fetch("/api/public/stripe/status", { headers: { accept: "application/json" } });
+    const res = await fetch("/api/public/paddle/status", {
+      headers: { accept: "application/json" },
+    });
     // A missing/stale status route, preview proxy failure, or temporary server
     // error must not disable a checkout that may be perfectly healthy. Only a
     // successful, explicit { configured: false } response may block the CTA;

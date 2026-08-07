@@ -7,7 +7,10 @@ function grad(w: number, h: number): Uint8ClampedArray {
     for (let x = 0; x < w; x++) {
       const i = (y * w + x) * 4;
       const v = Math.round(((x + y) / (w + h - 2)) * 255);
-      buf[i] = v; buf[i + 1] = v; buf[i + 2] = v; buf[i + 3] = 255;
+      buf[i] = v;
+      buf[i + 1] = v;
+      buf[i + 2] = v;
+      buf[i + 3] = 255;
     }
   return buf;
 }

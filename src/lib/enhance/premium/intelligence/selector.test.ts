@@ -3,9 +3,16 @@ import type { ImageProfile, SelectorEnv } from "./plan";
 import { selectPlan } from "./selector";
 
 const baseProfile: ImageProfile = {
-  width: 2000, height: 1500, megapixels: 3,
-  jpegBlockiness: 0, noiseSigma: 1, lowlightRatio: 0.02,
-  colorCastLab: 0, chromaMean: 0.25, edgeDensity: 0.10, gamutClipPct: 0,
+  width: 2000,
+  height: 1500,
+  megapixels: 3,
+  jpegBlockiness: 0,
+  noiseSigma: 1,
+  lowlightRatio: 0.02,
+  colorCastLab: 0,
+  chromaMean: 0.25,
+  edgeDensity: 0.1,
+  gamutClipPct: 0,
 };
 
 const env: SelectorEnv = { memoryGB: 8, backends: ["webgpu", "wasm", "js"] };

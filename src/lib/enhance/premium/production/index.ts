@@ -29,7 +29,7 @@ export async function initProductionLayer(): Promise<void> {
   initialized = true;
   freezeRegistry();
   if (typeof window === "undefined" || import.meta.env?.SSR) return;
-  if (!(import.meta.env?.DEV)) return;
+  if (!import.meta.env?.DEV) return;
   installDevHook();
   await detectFeatures();
 }

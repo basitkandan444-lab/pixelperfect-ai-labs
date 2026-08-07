@@ -4,7 +4,11 @@
 //
 // Pure functions — take file lists and byte counts, return pass/fail. No I/O.
 
-export interface ChunkInfo { name: string; bytes: number; gzipBytes?: number; }
+export interface ChunkInfo {
+  name: string;
+  bytes: number;
+  gzipBytes?: number;
+}
 export interface BundleReport {
   ok: boolean;
   violations: string[];
@@ -19,10 +23,7 @@ export const FORBIDDEN_IN_FREE = [
   "premium/capabilities",
 ] as const;
 
-export function checkFreeChunk(
-  freeChunkSource: string,
-  chunkName = "index",
-): BundleReport {
+export function checkFreeChunk(freeChunkSource: string, chunkName = "index"): BundleReport {
   const violations: string[] = [];
   for (const marker of FORBIDDEN_IN_FREE) {
     if (freeChunkSource.includes(marker)) {
@@ -39,9 +40,7 @@ export function checkPremiumBudget(
 ): BundleReport {
   const violations: string[] = [];
   if (premiumBytesGz > budgetBytesGz) {
-    violations.push(
-      `${chunkName} chunk ${premiumBytesGz}B gz exceeds budget ${budgetBytesGz}B gz`,
-    );
+    violations.push(`${chunkName} chunk ${premiumBytesGz}B gz exceeds budget ${budgetBytesGz}B gz`);
   }
   return {
     ok: violations.length === 0,

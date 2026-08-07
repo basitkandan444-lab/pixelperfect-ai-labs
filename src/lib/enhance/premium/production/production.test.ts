@@ -17,7 +17,12 @@ import "../capabilities/builtins";
 
 function solidRGBA(w: number, h: number, r = 128, g = 128, b = 128): Uint8ClampedArray {
   const a = new Uint8ClampedArray(w * h * 4);
-  for (let i = 0; i < a.length; i += 4) { a[i] = r; a[i + 1] = g; a[i + 2] = b; a[i + 3] = 255; }
+  for (let i = 0; i < a.length; i += 4) {
+    a[i] = r;
+    a[i + 1] = g;
+    a[i + 2] = b;
+    a[i + 3] = 255;
+  }
   return a;
 }
 
@@ -67,13 +72,17 @@ describe("predictor + profiler + advisor", () => {
   it("profiler times sync work", () => {
     const p = new Profiler();
     p.start();
-    p.time("s", () => { for (let i = 0; i < 1000; i++); });
+    p.time("s", () => {
+      for (let i = 0; i < 1000; i++);
+    });
     expect(p.snapshot()).toHaveLength(1);
   });
   it("advisor respects budget", () => {
     const plan: PremiumPlan = {
       stages: ["deblock", "bilateral", "clahe"],
-      params: {}, backend: "js", modelIds: [],
+      params: {},
+      backend: "js",
+      modelIds: [],
       weights: { deblock: 0.3, bilateral: 0.4, clahe: 0.3 },
       reasons: [],
     };
@@ -91,8 +100,13 @@ describe("benchmark runner", () => {
   it("flags too-slow runs", () => {
     const a = solidRGBA(64, 64);
     const r = benchmarkCapability({
-      id: "deblock", backend: "js", before: a, after: a,
-      width: 64, height: 64, ms: 10_000,
+      id: "deblock",
+      backend: "js",
+      before: a,
+      after: a,
+      width: 64,
+      height: 64,
+      ms: 10_000,
     });
     expect(r.ok).toBe(false);
     expect(r.reasons.join(",")).toMatch(/ms\/MP/);
@@ -126,7 +140,9 @@ describe("compat policy", () => {
   it("drops stages missing required features", () => {
     const plan: PremiumPlan = {
       stages: ["deblock", "faceRestore"],
-      params: {}, backend: "js", modelIds: [],
+      params: {},
+      backend: "js",
+      modelIds: [],
       weights: { deblock: 0.5, faceRestore: 0.5 },
       reasons: [],
     };

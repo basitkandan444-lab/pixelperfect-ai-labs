@@ -46,29 +46,30 @@ The workflow already exists: `.github/workflows/deploy-cloudflare.yml`
 ### One-time setup (must be done by the repo owner)
 
 1. **GitHub → Settings → Secrets and variables → Actions → New repository secret**
-   | Secret | Where to get it |
-   | --- | --- |
-   | `CLOUDFLARE_API_TOKEN` | Cloudflare dashboard → My Profile → API Tokens → Create Token → template **Edit Cloudflare Workers** |
-   | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard → Workers & Pages → right sidebar **Account ID** |
 
-2. **Worker runtime secrets.** The Worker does *not* inherit Lovable Cloud env
+   | Secret                  | Where to get it                                                                                      |
+   | ----------------------- | ---------------------------------------------------------------------------------------------------- |
+   | `CLOUDFLARE_API_TOKEN`  | Cloudflare dashboard → My Profile → API Tokens → Create Token → template **Edit Cloudflare Workers** |
+   | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard → Workers & Pages → right sidebar **Account ID**                                |
+
+2. **Worker runtime secrets.** The Worker does _not_ inherit Lovable Cloud env
    vars. After the first successful deploy, set them on the Worker
-   (Cloudflare dashboard → Workers & Pages → *your worker* → Settings →
+   (Cloudflare dashboard → Workers & Pages → _your worker_ → Settings →
    Variables and Secrets), or via `wrangler secret put`:
 
-   | Secret | Required for |
-   | --- | --- |
-   | `STRIPE_SECRET_KEY` | Checkout — **without it every upgrade fails** |
-   | `STRIPE_WEBHOOK_SECRET` | Webhook reconciliation |
-   | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Premium activation writes |
-   | `PUBLIC_APP_ORIGIN` | `https://imageenhancer.online` |
-   | `INTERNAL_CRON_SECRET` | Telemetry cron hooks |
+   | Secret                                      | Required for                                  |
+   | ------------------------------------------- | --------------------------------------------- |
+   | `STRIPE_SECRET_KEY`                         | Checkout — **without it every upgrade fails** |
+   | `STRIPE_WEBHOOK_SECRET`                     | Webhook reconciliation                        |
+   | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Premium activation writes                     |
+   | `PUBLIC_APP_ORIGIN`                         | `https://imageenhancer.online`                |
+   | `INTERNAL_CRON_SECRET`                      | Telemetry cron hooks                          |
 
    `VITE_*` values are baked at build time, so they belong in GitHub Actions
    env/secrets, not Worker secrets.
 
 3. **Bind the domain to the Worker.** Cloudflare dashboard → Workers & Pages →
-   *your worker* → Settings → **Domains & Routes → Add → Custom domain** →
+   _your worker_ → Settings → **Domains & Routes → Add → Custom domain** →
    `imageenhancer.online`. Cloudflare provisions DNS + certificate itself.
 
    Do not point the apex at both Lovable and the Worker at the same time.
@@ -82,6 +83,42 @@ The workflow already exists: `.github/workflows/deploy-cloudflare.yml`
 ### Verify Path B
 
 Same three `curl` checks as Path A, against whichever hostname the Worker owns.
+
+---
+
+## Google sign-in (Supabase OAuth) setup
+
+Sign-in uses **Supabase-native Google OAuth** (`supabase.auth.signInWithOAuth`)
+with a PKCE callback handled by the in-app route `/auth/callback`. It does not
+depend on Lovable's hosted broker (`/~oauth/initiate`), which does **not** exist
+on the Cloudflare Worker — that missing path is what caused the post-login 404.
+
+Configure once in the **Supabase dashboard** for project `ttxagtspdzfjdcwmgzhj`
+(`supabase-blue-book`):
+
+1. **Authentication → URL Configuration**
+   - Site URL: `https://imageenhancer.online`
+   - Redirect URLs: add `https://imageenhancer.online/auth/callback`
+     (and `http://localhost:5173/auth/callback` for local dev).
+2. **Authentication → Providers → Google**: enable, and set your Google OAuth
+   Client ID/Secret.
+3. **Google Cloud Console → Credentials** for that OAuth client: add
+   `https://ttxagtspdzfjdcwmgzhj.supabase.co/auth/v1/callback` as an
+   **Authorized redirect URI**.
+
+The app redirects the user to `https://imageenhancer.online/auth/callback?next=...`
+after Google approves the login. Supabase appends the PKCE `code`/`state`, the
+callback route exchanges the code, stores the session in `localStorage`, and
+navigates to `next`. Existing sessions are unaffected — they are re-read from
+the same `localStorage` storage key.
+
+Verify the round-trip:
+
+```sh
+curl -fsS -o /dev/null -w "%{http_code}\n" https://imageenhancer.online/auth/callback
+# 200 — route is deployed. Then click "Continue with Google" on /auth and
+# confirm you land back on /auth/callback (briefly) and are signed in.
+```
 
 ---
 

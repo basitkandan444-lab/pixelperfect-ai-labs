@@ -21,7 +21,9 @@ export type StageRunner = (
 
 export type StageMap = Partial<Record<Capability, StageRunner>>;
 
-function abortError() { return new DOMException("Enhancement cancelled.", "AbortError"); }
+function abortError() {
+  return new DOMException("Enhancement cancelled.", "AbortError");
+}
 
 const STAGE_LABEL: Record<Capability, string> = {
   deblock: "Reducing JPEG artifacts…",
@@ -55,7 +57,10 @@ export async function runPlan(
     opts.onProgress?.(cursor, STAGE_LABEL[stage]);
     const started = cursor;
     const next = await runner(current, {
-      width, height, plan, signal: opts.signal,
+      width,
+      height,
+      plan,
+      signal: opts.signal,
       onStageProgress: (frac, message) => {
         opts.onProgress?.(started + weight * Math.max(0, Math.min(1, frac)), message);
       },

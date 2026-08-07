@@ -18,14 +18,19 @@ export function qualityRule(inputs: EvolutionInputs, now: string): Recommendatio
       subject: `stage:${r.id}`,
       title: `Tune stage "${r.id}" — quality regressions detected`,
       rationale: `${(r.warnRate * 100).toFixed(0)}% of runs verified as regressions for "${r.id}" (n=${r.sample}).`,
-      evidence: [{
-        metric: "warn_rate",
-        value: Number(r.warnRate.toFixed(3)),
-        threshold: WARN,
-        window: inputs.window,
-        sample: r.sample,
-      }],
-      action: { kind: "plan-required", note: "Draft plan to revisit thresholds or algorithm parameters." },
+      evidence: [
+        {
+          metric: "warn_rate",
+          value: Number(r.warnRate.toFixed(3)),
+          threshold: WARN,
+          window: inputs.window,
+          sample: r.sample,
+        },
+      ],
+      action: {
+        kind: "plan-required",
+        note: "Draft plan to revisit thresholds or algorithm parameters.",
+      },
       createdAt: now,
     });
   }

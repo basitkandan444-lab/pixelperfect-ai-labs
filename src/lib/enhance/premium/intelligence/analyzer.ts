@@ -54,15 +54,21 @@ export function analyzeImage(
   const h = ds.height;
   const n = w * h;
 
-  let sumR = 0, sumG = 0, sumB = 0;
+  let sumR = 0,
+    sumG = 0,
+    sumB = 0;
   let lowlight = 0;
   let clip = 0;
   let chromaSum = 0;
 
   // First pass: channel means, luma stats, gamut clipping, chroma proxy.
   for (let i = 0; i < buf.length; i += 4) {
-    const r = buf[i], g = buf[i + 1], b = buf[i + 2];
-    sumR += r; sumG += g; sumB += b;
+    const r = buf[i],
+      g = buf[i + 1],
+      b = buf[i + 2];
+    sumR += r;
+    sumG += g;
+    sumB += b;
     const y = luma(r, g, b);
     if (y < 51) lowlight++;
     if (r === 0 || g === 0 || b === 0 || r === 255 || g === 255 || b === 255) clip++;
@@ -70,15 +76,14 @@ export function analyzeImage(
     const mn = Math.min(r, g, b);
     chromaSum += mx === 0 ? 0 : (mx - mn) / mx;
   }
-  const mr = sumR / n, mg = sumG / n, mb = sumB / n;
+  const mr = sumR / n,
+    mg = sumG / n,
+    mb = sumB / n;
   const meanY = (mr + mg + mb) / 3;
 
   // Approximate color cast as max channel-mean deviation from grey (0..~40).
-  const colorCastLab = Math.max(
-    Math.abs(mr - meanY),
-    Math.abs(mg - meanY),
-    Math.abs(mb - meanY),
-  ) / 3;
+  const colorCastLab =
+    Math.max(Math.abs(mr - meanY), Math.abs(mg - meanY), Math.abs(mb - meanY)) / 3;
 
   // Noise proxy: MAD of Laplacian on the luma plane (small window). We reuse
   // the same buffer, no extra allocation of a Y-plane needed.
@@ -103,26 +108,33 @@ export function analyzeImage(
   }
   // Scale MAD to a stddev-ish figure. Lap magnitude ~ 4 * sigma for gaussian
   // noise on a flat plane; ÷4 gets us back to an approximate sigma.
-  const noiseSigma = lapCount > 0 ? (lapSum / lapCount) / 4 : 0;
+  const noiseSigma = lapCount > 0 ? lapSum / lapCount / 4 : 0;
 
   // JPEG-blockiness: compare mean |dy| across 8-pixel boundaries vs elsewhere.
-  let boundaryDiff = 0, boundaryCount = 0;
-  let interiorDiff = 0, interiorCount = 0;
+  let boundaryDiff = 0,
+    boundaryCount = 0;
+  let interiorDiff = 0,
+    interiorCount = 0;
   for (let y = 1; y < h; y++) {
     for (let x = 0; x < w; x++) {
       const i = (y * w + x) * 4;
       const j = ((y - 1) * w + x) * 4;
-      const d = Math.abs(luma(buf[i], buf[i + 1], buf[i + 2]) -
-                        luma(buf[j], buf[j + 1], buf[j + 2]));
-      if (y % 8 === 0) { boundaryDiff += d; boundaryCount++; }
-      else { interiorDiff += d; interiorCount++; }
+      const d = Math.abs(
+        luma(buf[i], buf[i + 1], buf[i + 2]) - luma(buf[j], buf[j + 1], buf[j + 2]),
+      );
+      if (y % 8 === 0) {
+        boundaryDiff += d;
+        boundaryCount++;
+      } else {
+        interiorDiff += d;
+        interiorCount++;
+      }
     }
   }
   const bMean = boundaryCount ? boundaryDiff / boundaryCount : 0;
   const iMean = interiorCount ? interiorDiff / interiorCount : 0;
-  const jpegBlockiness = iMean > 0.001
-    ? Math.max(0, Math.min(1, (bMean - iMean) / (iMean + 4)))
-    : 0;
+  const jpegBlockiness =
+    iMean > 0.001 ? Math.max(0, Math.min(1, (bMean - iMean) / (iMean + 4))) : 0;
 
   return {
     width,

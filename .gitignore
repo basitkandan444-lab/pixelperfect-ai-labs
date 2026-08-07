@@ -43,3 +43,6 @@ playwright-report
 blob-report
 test-results
 .env
+.env
+# Supabase CLI temporary files
+supabase/.temp/

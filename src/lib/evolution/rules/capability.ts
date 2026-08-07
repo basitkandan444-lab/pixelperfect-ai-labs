@@ -21,14 +21,19 @@ export function capabilityRule(inputs: EvolutionInputs, now: string): Recommenda
         subject: `capability:${r.id}`,
         title: `Prioritize and expand capability "${r.id}"`,
         rationale: `${(attr * 100).toFixed(0)}% of "${r.id}" runs are attributed to upgrades (n=${r.runs}).`,
-        evidence: [{
-          metric: "upgrade_attribution",
-          value: Number(attr.toFixed(3)),
-          threshold: EXPAND_ATTR,
-          window: inputs.window,
-          sample: r.runs,
-        }],
-        action: { kind: "plan-required", note: "Draft plan to widen this capability's coverage or expose variants." },
+        evidence: [
+          {
+            metric: "upgrade_attribution",
+            value: Number(attr.toFixed(3)),
+            threshold: EXPAND_ATTR,
+            window: inputs.window,
+            sample: r.runs,
+          },
+        ],
+        action: {
+          kind: "plan-required",
+          note: "Draft plan to widen this capability's coverage or expose variants.",
+        },
         createdAt: now,
       });
     }
@@ -40,14 +45,19 @@ export function capabilityRule(inputs: EvolutionInputs, now: string): Recommenda
         subject: `capability:${r.id}`,
         title: `Review low-use capability "${r.id}"`,
         rationale: `Only ${(share * 100).toFixed(1)}% of runs use "${r.id}" (n=${r.runs}/${totalRuns}).`,
-        evidence: [{
-          metric: "usage_share",
-          value: Number(share.toFixed(4)),
-          threshold: RETIRE_SHARE,
-          window: inputs.window,
-          sample: totalRuns,
-        }],
-        action: { kind: "plan-required", note: "Consider deprecating or gating behind explicit intent." },
+        evidence: [
+          {
+            metric: "usage_share",
+            value: Number(share.toFixed(4)),
+            threshold: RETIRE_SHARE,
+            window: inputs.window,
+            sample: totalRuns,
+          },
+        ],
+        action: {
+          kind: "plan-required",
+          note: "Consider deprecating or gating behind explicit intent.",
+        },
         createdAt: now,
       });
     }

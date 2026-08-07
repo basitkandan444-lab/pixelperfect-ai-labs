@@ -16,15 +16,14 @@ export interface RevenueAggregate {
 const DEFAULT_PRICE_USD = 9;
 const AVG_LIFETIME_MONTHS = 6; // conservative bounded default
 
-export async function aggregateRevenue(
-  admin: SupabaseClient<Database>,
-): Promise<RevenueAggregate> {
+export async function aggregateRevenue(admin: SupabaseClient<Database>): Promise<RevenueAggregate> {
   const { data } = await admin
     .from("subscriptions")
     .select("status, current_period_end")
     .limit(50_000);
   const rows = data ?? [];
-  let active = 0, cancelled = 0;
+  let active = 0,
+    cancelled = 0;
   const nowMs = Date.now();
   for (const r of rows) {
     const status = String(r.status ?? "");

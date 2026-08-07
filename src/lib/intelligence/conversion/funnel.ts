@@ -19,14 +19,15 @@ export async function aggregateConversion(
   admin: SupabaseClient<Database>,
   sinceIso: string,
 ): Promise<ConversionAggregate> {
-  const { data } = await admin
-    .from("events")
-    .select("name, ok")
-    .gte("ts", sinceIso)
-    .limit(100_000);
+  const { data } = await admin.from("events").select("name, ok").gte("ts", sinceIso).limit(100_000);
   const rows = data ?? [];
-  let uploads = 0, enhancements = 0, downloads = 0, wallHits = 0;
-  let wallAbandons = 0, checkoutStarted = 0, checkoutCompleted = 0;
+  let uploads = 0,
+    enhancements = 0,
+    downloads = 0,
+    wallHits = 0;
+  let wallAbandons = 0,
+    checkoutStarted = 0,
+    checkoutCompleted = 0;
   for (const r of rows) {
     const n = String(r.name);
     if (n === "upload_completed") uploads++;
@@ -37,5 +38,13 @@ export async function aggregateConversion(
     else if (n === "checkout_started") checkoutStarted++;
     else if (n === "checkout_completed") checkoutCompleted++;
   }
-  return { uploads, enhancements, downloads, wallHits, wallAbandons, checkoutStarted, checkoutCompleted };
+  return {
+    uploads,
+    enhancements,
+    downloads,
+    wallHits,
+    wallAbandons,
+    checkoutStarted,
+    checkoutCompleted,
+  };
 }

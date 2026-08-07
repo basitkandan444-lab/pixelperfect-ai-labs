@@ -32,7 +32,8 @@ describe("oklab", () => {
   });
 
   it("planar rgba round-trip is visually lossless (<=1 byte per channel)", () => {
-    const w = 4, h = 4;
+    const w = 4,
+      h = 4;
     const rgba = new Uint8ClampedArray(w * h * 4);
     for (let i = 0; i < rgba.length; i += 4) {
       rgba[i] = (i * 7) & 0xff;

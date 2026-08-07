@@ -13,7 +13,9 @@ export class Profiler {
   private spans: StageSpan[] = [];
   private t0 = 0;
 
-  start(): void { this.t0 = now(); }
+  start(): void {
+    this.t0 = now();
+  }
   record(id: string, ms: number, bytesIn?: number, bytesOut?: number): void {
     this.spans.push({ id, ms, startedAt: this.t0, bytesIn, bytesOut });
   }
@@ -29,8 +31,12 @@ export class Profiler {
     this.record(id, now() - s, bytesIn);
     return r;
   }
-  snapshot(): StageSpan[] { return this.spans.slice(); }
-  totalMs(): number { return this.spans.reduce((s, x) => s + x.ms, 0); }
+  snapshot(): StageSpan[] {
+    return this.spans.slice();
+  }
+  totalMs(): number {
+    return this.spans.reduce((s, x) => s + x.ms, 0);
+  }
 }
 
 function now(): number {

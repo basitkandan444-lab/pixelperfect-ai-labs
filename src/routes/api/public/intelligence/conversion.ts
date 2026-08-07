@@ -7,7 +7,10 @@ import { aggregateCapabilityValue } from "@/lib/intelligence/conversion/capabili
 
 function windowFrom(req: Request) {
   const url = new URL(req.url);
-  const hours = Math.max(1, Math.min(720, Math.floor(Number(url.searchParams.get("hours") ?? "168"))));
+  const hours = Math.max(
+    1,
+    Math.min(720, Math.floor(Number(url.searchParams.get("hours") ?? "168"))),
+  );
   return { hours, sinceIso: new Date(Date.now() - hours * 3600_000).toISOString() };
 }
 
@@ -25,7 +28,10 @@ export const Route = createFileRoute("/api/public/intelligence/conversion")({
             aggregateConversion(supabaseAdmin, sinceIso),
             aggregateCapabilityValue(supabaseAdmin, sinceIso),
           ]);
-          return jsonOk({ window_hours: hours, since: sinceIso, conversion, capabilities }, { requestId });
+          return jsonOk(
+            { window_hours: hours, since: sinceIso, conversion, capabilities },
+            { requestId },
+          );
         } catch {
           return jsonFail("internal_error", "Unexpected error.", { status: 500, requestId });
         }

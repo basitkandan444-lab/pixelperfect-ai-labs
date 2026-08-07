@@ -24,9 +24,8 @@ export const Route = createFileRoute("/api/public/stripe/webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const { getStripe, getWebhookSecret, BillingConfigError } = await import(
-          "@/lib/stripe.server"
-        );
+        const { getStripe, getWebhookSecret, BillingConfigError } =
+          await import("@/lib/stripe.server");
 
         let secret: string;
         let stripe: ReturnType<typeof getStripe>;

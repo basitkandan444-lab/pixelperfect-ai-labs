@@ -22,13 +22,7 @@ import type { Capability, PremiumPlan, SelectorEnv } from "./intelligence/plan";
 import { selectPlan } from "./intelligence/selector";
 import { runPlan, type StageMap } from "./optimize/scheduler";
 import { bilateralDenoise } from "./bilateral";
-import {
-  claheOnPlane,
-  grayWorldWhiteBalance,
-  microContrastL,
-  sCurveL,
-  vibrance,
-} from "./color";
+import { claheOnPlane, grayWorldWhiteBalance, microContrastL, sCurveL, vibrance } from "./color";
 import { oklabPlanesToRgba, rgbaToOklabPlanes } from "./oklab";
 
 export interface PremiumPostOptions {
@@ -57,9 +51,12 @@ function stageWhiteBalance(strength: number): (b: Uint8ClampedArray) => Uint8Cla
 }
 
 function stageBilateral(
-  radius: number, sigmaSpatial: number, sigmaRange: number,
+  radius: number,
+  sigmaSpatial: number,
+  sigmaRange: number,
 ): (b: Uint8ClampedArray, ctx: { width: number; height: number }) => Uint8ClampedArray {
-  return (b, ctx) => bilateralDenoise(b, ctx.width, ctx.height, { radius, sigmaSpatial, sigmaRange });
+  return (b, ctx) =>
+    bilateralDenoise(b, ctx.width, ctx.height, { radius, sigmaSpatial, sigmaRange });
 }
 
 function stageDeblock(strength: number) {
@@ -68,7 +65,9 @@ function stageDeblock(strength: number) {
   // is real, and downstream bilateral is disabled or tuned accordingly.
   return (b: Uint8ClampedArray, ctx: { width: number; height: number }) =>
     bilateralDenoise(b, ctx.width, ctx.height, {
-      radius: 1, sigmaSpatial: 1.2, sigmaRange: 8 + strength * 20,
+      radius: 1,
+      sigmaSpatial: 1.2,
+      sigmaRange: 8 + strength * 20,
     });
 }
 
@@ -118,13 +117,20 @@ function buildStageMap(plan: PremiumPlan, strength: number, denoiseEnabled: bool
   const has = (c: Capability) => plan.stages.includes(c);
   if (has("deblock") && p.deblock) map.deblock = stageDeblock(p.deblock.strength * strength);
   if (has("bilateral") && p.bilateral && denoiseEnabled)
-    map.bilateral = stageBilateral(p.bilateral.radius, p.bilateral.sigmaSpatial, p.bilateral.sigmaRange);
+    map.bilateral = stageBilateral(
+      p.bilateral.radius,
+      p.bilateral.sigmaSpatial,
+      p.bilateral.sigmaRange,
+    );
   if (has("whiteBalance") && p.whiteBalance)
     map.whiteBalance = stageWhiteBalance(p.whiteBalance.strength * strength);
   if (has("clahe") && p.clahe)
     map.clahe = stageClahe(p.clahe.tiles, p.clahe.clip, p.clahe.blend * strength);
   if (has("microContrast") && p.microContrast)
-    map.microContrast = stageMicroContrast(p.microContrast.amount * strength, p.microContrast.radius);
+    map.microContrast = stageMicroContrast(
+      p.microContrast.amount * strength,
+      p.microContrast.radius,
+    );
   if (has("sCurve") && p.sCurve) map.sCurve = stageSCurve(p.sCurve.strength * strength);
   if (has("vibrance") && p.vibrance) map.vibrance = stageVibrance(p.vibrance.amount * strength);
   if (has("faceRestore")) map.faceRestore = stageFaceRestore();
@@ -136,7 +142,10 @@ function buildStageMap(plan: PremiumPlan, strength: number, denoiseEnabled: bool
 /** Analyse and plan without executing. Exposed so callers (and tests) can
  * inspect what the selector will do for a given image. */
 export function planForImage(
-  rgba: Uint8ClampedArray, width: number, height: number, env?: Partial<SelectorEnv>,
+  rgba: Uint8ClampedArray,
+  width: number,
+  height: number,
+  env?: Partial<SelectorEnv>,
 ): PremiumPlan {
   const profile = analyzeImage(rgba, width, height);
   const merged: SelectorEnv = {
@@ -197,6 +206,7 @@ export async function applyPremiumPostAsync(
   opts.onPlan?.(plan);
   const stages = buildStageMap(plan, s, opts.denoise ?? true);
   return runPlan(rgba, width, height, plan, stages, {
-    signal: opts.signal, onProgress: opts.onProgress,
+    signal: opts.signal,
+    onProgress: opts.onProgress,
   });
 }

@@ -1,12 +1,7 @@
 // Evolution engine types. Pure, server-safe, no runtime deps.
 
 export type Category =
-  | "conversion"
-  | "performance"
-  | "capability"
-  | "bundle"
-  | "quality"
-  | "memory";
+  "conversion" | "performance" | "capability" | "bundle" | "quality" | "memory";
 
 export type Severity = "info" | "warn" | "critical";
 

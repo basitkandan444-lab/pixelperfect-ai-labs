@@ -37,5 +37,13 @@ export function benchmarkCapability(input: CapabilityBenchInput): CapabilityBenc
   if (t?.minSSIM !== undefined && s < t.minSSIM) reasons.push(`ssim<${t.minSSIM}`);
   const maxTime = t?.maxMsPerMP?.[input.backend];
   if (maxTime !== undefined && perMP > maxTime) reasons.push(`ms/MP>${maxTime}`);
-  return { id: input.id, backend: input.backend, psnr: p, ssim: s, msPerMP: perMP, ok: reasons.length === 0, reasons };
+  return {
+    id: input.id,
+    backend: input.backend,
+    psnr: p,
+    ssim: s,
+    msPerMP: perMP,
+    ok: reasons.length === 0,
+    reasons,
+  };
 }

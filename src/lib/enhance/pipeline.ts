@@ -332,19 +332,19 @@ export async function enhanceImageInBrowser(
       onProgress?.({ stage: "finishing", value: 0.92, message: "Applying premium finish…" });
       const { applyPremiumPost } = await import("./premium/pipeline");
       const bm = await createImageBitmap(blob!);
-      const w = bm.width, h = bm.height;
+      const w = bm.width,
+        h = bm.height;
       let canvasLike: OffscreenCanvas | HTMLCanvasElement;
       if (typeof OffscreenCanvas !== "undefined") {
         canvasLike = new OffscreenCanvas(w, h);
       } else {
         const c = document.createElement("canvas");
-        c.width = w; c.height = h;
+        c.width = w;
+        c.height = h;
         canvasLike = c;
       }
       const ctx = (canvasLike as OffscreenCanvas).getContext("2d") as
-        | OffscreenCanvasRenderingContext2D
-        | CanvasRenderingContext2D
-        | null;
+        OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D | null;
       if (ctx) {
         ctx.drawImage(bm as unknown as CanvasImageSource, 0, 0);
         bm.close();

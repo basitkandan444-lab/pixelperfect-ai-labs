@@ -29,7 +29,10 @@ export function performanceRule(inputs: EvolutionInputs, now: string): Recommend
           sample: r.sample,
         },
       ],
-      action: { kind: "plan-required", note: "Draft plan to tune backend selection or WASM fallback." },
+      action: {
+        kind: "plan-required",
+        note: "Draft plan to tune backend selection or WASM fallback.",
+      },
       createdAt: now,
     });
   }

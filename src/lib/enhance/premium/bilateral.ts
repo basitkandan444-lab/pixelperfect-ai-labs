@@ -32,9 +32,12 @@ function bilateralAxis(
       const i = (y * width + x) * 4;
       const centerL = lumaAt(src, i);
       let wSum = 0;
-      let rSum = 0, gSum = 0, bSum = 0;
+      let rSum = 0,
+        gSum = 0,
+        bSum = 0;
       for (let k = -radius; k <= radius; k++) {
-        let nx = x, ny = y;
+        let nx = x,
+          ny = y;
         if (axis === "x") nx = Math.min(width - 1, Math.max(0, x + k));
         else ny = Math.min(height - 1, Math.max(0, y + k));
         const ni = (ny * width + nx) * 4;

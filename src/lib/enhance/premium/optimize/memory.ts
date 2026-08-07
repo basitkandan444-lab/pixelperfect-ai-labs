@@ -30,10 +30,18 @@ function release<T extends Pooled>(pool: Pool<T>, buf: T): void {
   else pool.buckets.set(buf.length, [buf]);
 }
 
-export function acquireF32(n: number): Float32Array { return acquire(f32, n); }
-export function releaseF32(buf: Float32Array): void { release(f32, buf); }
-export function acquireU8C(n: number): Uint8ClampedArray { return acquire(u8c, n); }
-export function releaseU8C(buf: Uint8ClampedArray): void { release(u8c, buf); }
+export function acquireF32(n: number): Float32Array {
+  return acquire(f32, n);
+}
+export function releaseF32(buf: Float32Array): void {
+  release(f32, buf);
+}
+export function acquireU8C(n: number): Uint8ClampedArray {
+  return acquire(u8c, n);
+}
+export function releaseU8C(buf: Uint8ClampedArray): void {
+  release(u8c, buf);
+}
 
 /** Drop pooled buffers (e.g. on route change). */
 export function clearPools() {

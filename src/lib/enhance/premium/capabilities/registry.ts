@@ -22,7 +22,9 @@ export function registerCapability(desc: CapabilityDescriptor): void {
   REGISTRY.set(desc.id, Object.freeze({ ...desc, requires: [...desc.requires] }));
 }
 
-export function freezeRegistry(): void { frozen = true; }
+export function freezeRegistry(): void {
+  frozen = true;
+}
 
 export function getCapability(id: string): CapabilityDescriptor | undefined {
   return REGISTRY.get(id);

@@ -20,13 +20,17 @@ export function grayWorldWhiteBalance(
   maxGain = 0.14,
 ): Uint8ClampedArray {
   const n = rgba.length / 4;
-  let sr = 0, sg = 0, sb = 0;
+  let sr = 0,
+    sg = 0,
+    sb = 0;
   for (let i = 0; i < rgba.length; i += 4) {
     sr += rgba[i];
     sg += rgba[i + 1];
     sb += rgba[i + 2];
   }
-  const mr = sr / n, mg = sg / n, mb = sb / n;
+  const mr = sr / n,
+    mg = sg / n,
+    mb = sb / n;
   const mean = (mr + mg + mb) / 3;
   if (mean < 1) return rgba.slice(); // black frame
   const clamp = (g: number) => {
@@ -159,7 +163,7 @@ export function vibrance(a: Float32Array, b: Float32Array, amount = 0.18): void 
     const db = b[i] - skinB;
     const distSkin = Math.sqrt(da * da + db * db);
     // 1 at the skin locus, decaying to 0 far from it.
-    const nearSkin = Math.exp(-distSkin * distSkin / 0.006);
+    const nearSkin = Math.exp((-distSkin * distSkin) / 0.006);
     const gain = 1 + amount * (1 - 0.7 * nearSkin);
     a[i] *= gain;
     b[i] *= gain;
@@ -204,12 +208,7 @@ export function microContrastL(
   return out;
 }
 
-function boxBlur1(
-  src: Float32Array,
-  width: number,
-  height: number,
-  radius: number,
-): Float32Array {
+function boxBlur1(src: Float32Array, width: number, height: number, radius: number): Float32Array {
   const win = radius * 2 + 1;
   const tmp = new Float32Array(src.length);
   const out = new Float32Array(src.length);

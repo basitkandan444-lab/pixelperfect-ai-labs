@@ -68,7 +68,10 @@ export function UpgradeWall({
           Free limit reached
         </div>
 
-        <h2 id="upgrade-wall-title" className="mt-4 font-display text-3xl leading-tight md:text-4xl">
+        <h2
+          id="upgrade-wall-title"
+          className="mt-4 font-display text-3xl leading-tight md:text-4xl"
+        >
           You&rsquo;ve used all {cap} free enhancements.
         </h2>
         <p className="mt-3 text-sm text-white/65">
@@ -112,7 +115,7 @@ export function UpgradeWall({
               : pending
                 ? "Opening checkout…"
                 : isSignedIn
-                  ? "Upgrade — $4.99 / year"
+                  ? "Upgrade to Premium"
                   : "Sign in to upgrade"}
           </button>
           <Link
@@ -124,7 +127,7 @@ export function UpgradeWall({
         </div>
 
         <p className="mt-5 text-center text-[11px] text-white/40">
-          {used} / {cap} free enhancements used · Secure checkout via Stripe
+          {used} / {cap} free enhancements used · Secure checkout via Paddle
         </p>
       </div>
     </div>

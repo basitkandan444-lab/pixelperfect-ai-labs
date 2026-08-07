@@ -15,18 +15,18 @@ import type {
 
 const DEFAULT_WEIGHTS: Record<Capability, number> = {
   deblock: 0.06,
-  bilateral: 0.20,
+  bilateral: 0.2,
   whiteBalance: 0.05,
   clahe: 0.22,
   microContrast: 0.18,
   sCurve: 0.03,
   vibrance: 0.06,
-  faceRestore: 0.20,
+  faceRestore: 0.2,
 };
 
 function chooseBackend(env: SelectorEnv, profile: ImageProfile): PremiumBackend {
   const tight = (env.memoryGB ?? 8) <= 4 && profile.megapixels >= 12;
-  const preferred = tight ? "wasm" : env.backends[0] ?? "js";
+  const preferred = tight ? "wasm" : (env.backends[0] ?? "js");
   return env.backends.includes(preferred) ? preferred : (env.backends[0] ?? "js");
 }
 
@@ -60,8 +60,8 @@ export function selectPlan(profile: ImageProfile, env: SelectorEnv): PremiumPlan
   }
 
   // CLAHE unless the image is already high-contrast + bright.
-  if (profile.lowlightRatio >= 0.05 || profile.edgeDensity < 0.20) {
-    const clip = profile.lowlightRatio >= 0.30 ? 2.6 : 2.2;
+  if (profile.lowlightRatio >= 0.05 || profile.edgeDensity < 0.2) {
+    const clip = profile.lowlightRatio >= 0.3 ? 2.6 : 2.2;
     const blend = Math.min(0.7, 0.35 + profile.lowlightRatio * 0.9);
     stages.push("clahe");
     params.clahe = { tiles: 8, clip, blend };
@@ -71,7 +71,7 @@ export function selectPlan(profile: ImageProfile, env: SelectorEnv): PremiumPlan
   // Micro-contrast — only on images with real detail; flat images would just
   // amplify residual noise.
   if (profile.edgeDensity >= 0.04) {
-    const amount = Math.min(0.42, 0.20 + profile.edgeDensity * 0.9);
+    const amount = Math.min(0.42, 0.2 + profile.edgeDensity * 0.9);
     stages.push("microContrast");
     params.microContrast = { amount, radius: 1 };
     reasons.push(`microContrast: edges=${profile.edgeDensity.toFixed(2)}`);
@@ -79,14 +79,14 @@ export function selectPlan(profile: ImageProfile, env: SelectorEnv): PremiumPlan
 
   // Vibrance for muted colours, protecting skin (handled inside `vibrance()`).
   if (profile.chromaMean <= 0.18) {
-    const amount = Math.min(0.24, 0.10 + (0.18 - profile.chromaMean) * 0.8);
+    const amount = Math.min(0.24, 0.1 + (0.18 - profile.chromaMean) * 0.8);
     stages.push("vibrance");
     params.vibrance = { amount };
     reasons.push(`vibrance: chroma=${profile.chromaMean.toFixed(2)}`);
   }
 
   // Global S-curve when the image needs pop (low chroma OR shadow-heavy).
-  if (profile.lowlightRatio >= 0.20 || profile.chromaMean <= 0.10) {
+  if (profile.lowlightRatio >= 0.2 || profile.chromaMean <= 0.1) {
     const strength = 0.08 + Math.min(0.08, profile.lowlightRatio * 0.15);
     stages.push("sCurve");
     params.sCurve = { strength };

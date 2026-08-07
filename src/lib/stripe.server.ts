@@ -19,27 +19,29 @@ function readEnv(name: string): string | undefined {
 }
 
 /**
- * The premium plan catalog. Prices are resolved (and self-provisioned) in the
- * connected Stripe account by `lookup_key`, so checkout never depends on an
- * operator pasting the right `STRIPE_PRICE_ID` — the #1 historical cause of
- * "Premium checkout is temporarily unavailable".
+ * The premium plan catalog. Only yearly ($37.73) and lifetime ($99.89) plans are supported via Stripe.
+ * Monthly ($3.99) plan is handled by Paddle.
+ * Yearly Paddle price ID: pri_01kzc3m5305adhjcnmf8prrazy
+ * Lifetime Paddle price ID: pri_01kzc3rk1rfaw8qwc15cdbhnbn
  */
 export const PREMIUM_PLANS = {
   yearly: {
-    lookupKey: "pixel_perfect_premium_yearly_499_v1",
-    unitAmount: 499,
+    lookupKey: "pixel_perfect_premium_yearly_3773_v1",
+    unitAmount: 3773,
     interval: "year" as const,
     mode: "subscription" as const,
     productName: "Pixel Perfect Pro Premium (Yearly)",
     envOverride: "STRIPE_PRICE_ID_YEARLY",
+    paddlePriceId: "pri_01kzc3m5305adhjcnmf8prrazy",
   },
   lifetime: {
-    lookupKey: "pixel_perfect_premium_lifetime_1968_v1",
-    unitAmount: 1968,
+    lookupKey: "pixel_perfect_premium_lifetime_9989_v1",
+    unitAmount: 9989,
     interval: null,
     mode: "payment" as const,
     productName: "Pixel Perfect Pro Premium (Lifetime)",
     envOverride: "STRIPE_PRICE_ID_LIFETIME",
+    paddlePriceId: "pri_01kzc3rk1rfaw8qwc15cdbhnbn",
   },
 } as const;
 
@@ -54,13 +56,15 @@ export function isPremiumPlan(value: unknown): value is PremiumPlan {
  * deployment. Safe to call from public (unauthenticated) endpoints — it never
  * touches the Stripe API or leaks secret values, just confirms presence/shape.
  *
- * Only the secret key is required: prices are provisioned on demand and the
- * webhook secret only affects background reconciliation (checkout is finalized
- * synchronously on return), so neither may block the upgrade button.
+ * Both Stripe secrets are required: the secret key for checkout operations
+ * (creating sessions, retrieving customer data) and the webhook secret for
+ * secure webhook signature verification. Missing either prevents successful
+ * payment processing and webhook reconciliation.
  */
 export function getBillingConfigStatus(): { configured: boolean; missing: string[] } {
   const missing: string[] = [];
   if (!readEnv("STRIPE_SECRET_KEY")) missing.push("STRIPE_SECRET_KEY");
+  if (!readEnv("STRIPE_WEBHOOK_SECRET")) missing.push("STRIPE_WEBHOOK_SECRET");
   return { configured: missing.length === 0, missing };
 }
 
@@ -79,8 +83,8 @@ export function getStripe(): Stripe {
   cached = new Stripe(key, {
     httpClient: Stripe.createFetchHttpClient(),
     // Pin an explicit API version so a Stripe-side upgrade can never silently
-    // change response shapes (e.g. `current_period_end` placement) under us.
-    apiVersion: "2026-06-24.dahlia",
+    // change response shapes (e.g. current_period_end placement) under us.
+    apiVersion: "2026-07-29.dahlia",
     maxNetworkRetries: 2,
   });
   return cached;

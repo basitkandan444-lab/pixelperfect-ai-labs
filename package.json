@@ -22,7 +22,6 @@
     "check": "bun run typecheck && bun run lint && bun run format:check && bun run test"
   },
   "dependencies": {
-    "@lovable.dev/cloud-auth-js": "^1.1.2",
     "@lovable.dev/mcp-js": "^0.21.0",
     "@radix-ui/react-slot": "^1.2.4",
     "@supabase/supabase-js": "^2.110.2",
@@ -38,7 +37,6 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "sonner": "^2.0.7",
-    "stripe": "^22.3.2",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.1",
     "tw-animate-css": "^1.3.4",
@@ -74,6 +72,7 @@
     "typescript": "5.9.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^8.0.16",
-    "vitest": "^2"
+    "vitest": "^2",
+    "wrangler": "^4.119.0"
   }
 }

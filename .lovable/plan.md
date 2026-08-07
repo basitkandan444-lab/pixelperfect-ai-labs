@@ -1,6 +1,7 @@
 # Tasks 9 + 10 — Production/Conversion Intelligence & Elite Evolution Engine
 
 ## Objective
+
 Close the Pixel Perfect Pro architecture with two additive layers that turn existing signals (telemetry, capability registry, Stripe subscriptions, first-party events) into **evidence-driven recommendations** — without touching the free path, the browser-first engine, or any public API.
 
 - **Task 9** — Production & Conversion Intelligence: unify what already exists (events, subscriptions, capabilities, vitals, reliability) into a single query surface answering "who did what, why, and what did it cost / earn".
@@ -46,6 +47,7 @@ src/routes/api/public/
 No new tables. No new secrets. No new client bundles. All reads go through `requireSupabaseAuth` + `has_role(_, 'admin')`; non-admins get 403.
 
 ## Data sources (already in production)
+
 - `events` — funnel, capability usage, wall hits, abandonments, error_code, metrics blob
 - `subscriptions` — active / cancelled / current_period_end → retention, MRR, LTV bands
 - `telemetry_snapshots` — perf/vitals aggregates by browser/device
@@ -56,19 +58,26 @@ No new tables. No new secrets. No new client bundles. All reads go through `requ
 ## Recommendation contract
 
 ```ts
-export type Category = "conversion" | "performance" | "capability" | "bundle" | "quality" | "memory";
+export type Category =
+  "conversion" | "performance" | "capability" | "bundle" | "quality" | "memory";
 export type Severity = "info" | "warn" | "critical";
 
-export interface Evidence { metric: string; value: number; threshold: number; window: string; sample: number; }
+export interface Evidence {
+  metric: string;
+  value: number;
+  threshold: number;
+  window: string;
+  sample: number;
+}
 export interface Recommendation {
-  id: string;              // stable hash of {category, subject, window}
+  id: string; // stable hash of {category, subject, window}
   category: Category;
   severity: Severity;
-  subject: string;         // e.g. "capability:faceRestore", "browser:safari"
-  title: string;           // one-line action
-  rationale: string;       // human, evidence-linked
+  subject: string; // e.g. "capability:faceRestore", "browser:safari"
+  title: string; // one-line action
+  rationale: string; // human, evidence-linked
   evidence: Evidence[];
-  action: { kind: "plan-required"; note: string };  // never auto-apply
+  action: { kind: "plan-required"; note: string }; // never auto-apply
   createdAt: string;
 }
 ```
@@ -76,6 +85,7 @@ export interface Recommendation {
 Engine is pure: `engine(inputs) → Recommendation[]`. No I/O, fully unit-testable.
 
 ## Verification loops
+
 1. Unit: each rule with fixture inputs → expected recommendations (sorted, deduped, stable ids).
 2. Aggregation: SQL fns tested against seeded rows; bounded row counts; no PII in output.
 3. RBAC: non-admin GET → 403; admin GET → 200 with typed payload.
@@ -85,6 +95,7 @@ Engine is pure: `engine(inputs) → Recommendation[]`. No I/O, fully unit-testab
 7. Determinism: engine output stable for a fixed input snapshot (golden test).
 
 ## Non-negotiables preserved
+
 - Free path, worker, models, routes, UI: untouched.
 - Browser-first: no hosted inference, no cloud GPU, no new network calls from client.
 - Stripe/entitlement: read-only consumers of `subscriptions` / `has_premium`.
@@ -93,25 +104,29 @@ Engine is pure: `engine(inputs) → Recommendation[]`. No I/O, fully unit-testab
 - Recommendations are advisory; they gate on human APPROVE — nothing self-applies.
 
 ## Trade-offs
+
 - Aggregations run on-demand per admin request; if load grows, add a nightly materialized snapshot (out of scope now).
 - Rule thresholds start conservative and are versioned in `evolution/rules/*` — tuning is a normal PR.
 - LTV is a bounded estimate (avg months × price), not per-user — deliberately no PII.
 
 ## Risks & mitigations
-| Risk | Mitigation |
-|---|---|
-| Query cost on `events` | Time-window filter + indexed columns already in place; cap row scan per call |
-| PII leakage in aggregates | Aggregates only; no user_id / email in responses; typed response contracts |
-| Recommendation noise | Severity thresholds + dedup by stable id + min sample size per rule |
-| Free bundle regression | Everything server-only under `src/lib/intelligence` / `src/lib/evolution`; bundle guard asserts 0-byte delta |
-| Rule drift | Golden fixture test per rule; engine determinism test |
+
+| Risk                      | Mitigation                                                                                                   |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Query cost on `events`    | Time-window filter + indexed columns already in place; cap row scan per call                                 |
+| PII leakage in aggregates | Aggregates only; no user_id / email in responses; typed response contracts                                   |
+| Recommendation noise      | Severity thresholds + dedup by stable id + min sample size per rule                                          |
+| Free bundle regression    | Everything server-only under `src/lib/intelligence` / `src/lib/evolution`; bundle guard asserts 0-byte delta |
+| Rule drift                | Golden fixture test per rule; engine determinism test                                                        |
 
 ## Files
+
 **New:** `src/lib/intelligence/**`, `src/lib/evolution/**`, `src/routes/api/public/intelligence/*.ts`, `src/routes/api/public/evolution/recommendations.ts`, matching `*.test.ts`.
 **Modified:** none in free path. `scripts/check-bundle-size.mjs` reads unchanged; assertion tightened if needed.
 **Untouched:** enhance engine, premium pipeline, capability registry semantics, routes/UI, Stripe, worker, models.
 
 ## Rollout order
+
 1. `evolution/types.ts` + `engine.ts` + tests (pure, no deps).
 2. Rules one at a time with fixtures: bundle → capability → performance → conversion → quality → memory.
 3. `intelligence/*` aggregators, each with a SQL-level test.
@@ -121,6 +136,7 @@ Engine is pure: `engine(inputs) → Recommendation[]`. No I/O, fully unit-testab
 7. Report deltas: LOC, bundle bytes (free = 0), test count.
 
 ## Out of scope
+
 - Any UI surface (no admin dashboard reintroduced — memory forbids it).
 - Any new capability, model, or pipeline change.
 - Auto-applying recommendations, background jobs, or cron.

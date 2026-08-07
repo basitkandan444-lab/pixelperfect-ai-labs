@@ -19,13 +19,20 @@ export function record(ev: Omit<TelemetryEvent, "ts">): void {
   if (BUFFER.length > MAX) BUFFER.splice(0, BUFFER.length - MAX);
 }
 
-export function snapshot(): TelemetryEvent[] { return BUFFER.slice(); }
-export function clear(): void { BUFFER.length = 0; }
+export function snapshot(): TelemetryEvent[] {
+  return BUFFER.slice();
+}
+export function clear(): void {
+  BUFFER.length = 0;
+}
 
 /** Enable a global window hook for devtools inspection. Dev-only. */
 export function installDevHook(): void {
   if (typeof window === "undefined") return;
-  if (!(import.meta.env?.DEV)) return;
-  (window as unknown as { __PPP_TELEMETRY__?: { snapshot: () => TelemetryEvent[]; clear: () => void } })
-    .__PPP_TELEMETRY__ = { snapshot, clear };
+  if (!import.meta.env?.DEV) return;
+  (
+    window as unknown as {
+      __PPP_TELEMETRY__?: { snapshot: () => TelemetryEvent[]; clear: () => void };
+    }
+  ).__PPP_TELEMETRY__ = { snapshot, clear };
 }

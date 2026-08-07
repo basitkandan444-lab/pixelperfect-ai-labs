@@ -23,10 +23,7 @@ const STATS = [
  */
 export function HomeTopSections() {
   return (
-    <section
-      aria-labelledby="bento-heading"
-      className="relative mx-auto mt-10 max-w-6xl px-4"
-    >
+    <section aria-labelledby="bento-heading" className="relative mx-auto mt-10 max-w-6xl px-4">
       <h2 id="bento-heading" className="sr-only">
         Why Pixel Perfect Pro
       </h2>

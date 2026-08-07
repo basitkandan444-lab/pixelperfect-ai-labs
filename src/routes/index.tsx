@@ -21,11 +21,8 @@ import { originLoader } from "@/lib/origin.functions";
 import { detectCapabilities } from "@/lib/enhance/capabilities";
 import { useSession } from "@/hooks/use-session";
 import { useBillingStatus } from "@/hooks/use-billing-status";
-import {
-  consumeEnhancement,
-  createCheckoutSession,
-  getMyEntitlement,
-} from "@/lib/subscription.functions";
+import { consumeEnhancement, getMyEntitlement } from "@/lib/subscription.functions";
+import { createPaddleCheckoutSession } from "@/lib/paddle.server";
 import { FREE_CAP, getLocalUsed, incrementLocalUsed } from "@/lib/entitlement";
 
 import {
@@ -141,7 +138,7 @@ function Index() {
   const navigate = useNavigate();
   const entitlementFn = useServerFn(getMyEntitlement);
   const consumeFn = useServerFn(consumeEnhancement);
-  const checkoutFn = useServerFn(createCheckoutSession);
+  const checkoutFn = useServerFn(createPaddleCheckoutSession);
   const [wallOpen, setWallOpen] = useState(false);
   const [wallPending, setWallPending] = useState(false);
   const [localUsed, setLocalUsed] = useState(0);
@@ -192,7 +189,6 @@ function Index() {
       setWallPending(false);
     }
   }, [isSignedIn, navigate, checkoutFn, billingAvailable]);
-
 
   // Signal that React has hydrated and the upload handler is attached. The
   // server-rendered <input> exists before hydration, so a file set in that
@@ -521,7 +517,19 @@ function Index() {
       stopCountdown();
       if (abortRef.current === controller) abortRef.current = null;
     }
-  }, [clearResultUrl, original, scale, engine, fileInfo, stopCountdown, isPremium, isSignedIn, consumeFn, entitlementQuery, openUpgradeWall]);
+  }, [
+    clearResultUrl,
+    original,
+    scale,
+    engine,
+    fileInfo,
+    stopCountdown,
+    isPremium,
+    isSignedIn,
+    consumeFn,
+    entitlementQuery,
+    openUpgradeWall,
+  ]);
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
@@ -669,7 +677,10 @@ function Index() {
               </span>
               On-device AI · v2
             </div>
-            <h1 className="animate-hero-in mx-auto max-w-4xl font-display text-[2.75rem] font-extrabold leading-[1.02] tracking-[-0.04em] text-foreground sm:text-6xl md:text-7xl" style={{ animationDelay: "0.15s" }}>
+            <h1
+              className="animate-hero-in mx-auto max-w-4xl font-display text-[2.75rem] font-extrabold leading-[1.02] tracking-[-0.04em] text-foreground sm:text-6xl md:text-7xl"
+              style={{ animationDelay: "0.15s" }}
+            >
               Image enhancement,
               <br />
               <span className="text-shimmer">perfected on-device.</span>
@@ -679,8 +690,7 @@ function Index() {
               style={{ animationDelay: "0.35s" }}
             >
               Zero uploads. Zero watermarks. Start free.
-              <br className="hidden sm:block" />
-              A browser-first engine that respects your privacy.
+              <br className="hidden sm:block" />A browser-first engine that respects your privacy.
             </p>
             <div
               className="animate-hero-in mt-10 flex flex-col items-center gap-4"
@@ -732,7 +742,6 @@ function Index() {
 
           <HomeTopSections />
 
-
           {/* Workspace */}
           <section
             id="workspace"
@@ -759,7 +768,9 @@ function Index() {
                     if (f) loadFile(f);
                   }}
                   className={`relative flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed bg-[oklch(0.04_0_0)] px-6 py-20 text-center transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-ring sm:py-28 ${
-                    dragOver ? "border-primary bg-primary/5" : "border-white/10 hover:border-primary/50"
+                    dragOver
+                      ? "border-primary bg-primary/5"
+                      : "border-white/10 hover:border-primary/50"
                   }`}
                 >
                   <input
@@ -787,10 +798,8 @@ function Index() {
               </div>
             )}
 
-
             {stage !== "idle" && original && (
               <div className="mx-auto flex max-w-4xl flex-col gap-6 rounded-3xl border border-white/10 bg-[oklch(0.04_0_0)] p-4 shadow-cinema sm:p-6">
-
                 <div className="relative">
                   {stage === "done" && result ? (
                     <div className="space-y-3">

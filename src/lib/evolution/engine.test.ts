@@ -15,7 +15,17 @@ describe("evolution engine", () => {
 
   it("flags upgrade-wall abandonment above threshold", () => {
     const recs = runEvolution(
-      base({ conversion: { uploads: 100, enhancements: 100, downloads: 80, wallHits: 100, wallAbandons: 80, checkoutStarted: 5, checkoutCompleted: 3 } }),
+      base({
+        conversion: {
+          uploads: 100,
+          enhancements: 100,
+          downloads: 80,
+          wallHits: 100,
+          wallAbandons: 80,
+          checkoutStarted: 5,
+          checkoutCompleted: 3,
+        },
+      }),
     );
     expect(recs).toHaveLength(1);
     expect(recs[0].category).toBe("conversion");
@@ -24,21 +34,37 @@ describe("evolution engine", () => {
 
   it("flags free-chunk leak with critical severity", () => {
     const recs = runEvolution(
-      base({ bundle: { freeChunkDeltaBytes: 128, premiumChunkBytes: 100, premiumChunkBudgetBytes: 200 } }),
+      base({
+        bundle: { freeChunkDeltaBytes: 128, premiumChunkBytes: 100, premiumChunkBudgetBytes: 200 },
+      }),
     );
     expect(recs.some((r) => r.subject === "bundle:free" && r.severity === "critical")).toBe(true);
   });
 
   it("recommends expanding a high-attribution capability", () => {
     const recs = runEvolution(
-      base({ capabilityUsage: [{ id: "faceRestore", runs: 100, upgradeAttributions: 60, completionRate: 0.9 }] }),
+      base({
+        capabilityUsage: [
+          { id: "faceRestore", runs: 100, upgradeAttributions: 60, completionRate: 0.9 },
+        ],
+      }),
     );
-    expect(recs.some((r) => r.subject === "capability:faceRestore" && r.title.includes("expand"))).toBe(true);
+    expect(
+      recs.some((r) => r.subject === "capability:faceRestore" && r.title.includes("expand")),
+    ).toBe(true);
   });
 
   it("is deterministic and dedupes by stable id", () => {
     const inputs = base({
-      conversion: { uploads: 100, enhancements: 100, downloads: 20, wallHits: 100, wallAbandons: 80, checkoutStarted: 5, checkoutCompleted: 3 },
+      conversion: {
+        uploads: 100,
+        enhancements: 100,
+        downloads: 20,
+        wallHits: 100,
+        wallAbandons: 80,
+        checkoutStarted: 5,
+        checkoutCompleted: 3,
+      },
       bundle: { freeChunkDeltaBytes: 10, premiumChunkBytes: 0, premiumChunkBudgetBytes: 0 },
     });
     const a = runEvolution(inputs);
@@ -52,7 +78,15 @@ describe("evolution engine", () => {
   it("sorts by severity then id", () => {
     const recs = runEvolution(
       base({
-        conversion: { uploads: 100, enhancements: 100, downloads: 20, wallHits: 100, wallAbandons: 60, checkoutStarted: 5, checkoutCompleted: 3 }, // warn
+        conversion: {
+          uploads: 100,
+          enhancements: 100,
+          downloads: 20,
+          wallHits: 100,
+          wallAbandons: 60,
+          checkoutStarted: 5,
+          checkoutCompleted: 3,
+        }, // warn
         bundle: { freeChunkDeltaBytes: 100, premiumChunkBytes: 0, premiumChunkBudgetBytes: 0 }, // critical
       }),
     );

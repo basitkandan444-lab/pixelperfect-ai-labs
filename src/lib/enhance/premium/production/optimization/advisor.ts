@@ -27,8 +27,14 @@ export function adviseWithinBudget(
   });
 
   const priority: Record<Capability, number> = {
-    deblock: 9, whiteBalance: 8, clahe: 7, bilateral: 6,
-    microContrast: 5, sCurve: 4, vibrance: 3, faceRestore: 2,
+    deblock: 9,
+    whiteBalance: 8,
+    clahe: 7,
+    bilateral: 6,
+    microContrast: 5,
+    sCurve: 4,
+    vibrance: 3,
+    faceRestore: 2,
   };
   const sorted = [...costs].sort(
     (a, b) => (priority[b.id as Capability] ?? 0) - (priority[a.id as Capability] ?? 0),

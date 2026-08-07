@@ -13,14 +13,19 @@ export function bundleRule(inputs: EvolutionInputs, now: string): Recommendation
       subject: "bundle:free",
       title: "Free bundle grew — premium code likely leaked",
       rationale: `Free chunk grew by ${b.freeChunkDeltaBytes} bytes; premium modules must never enter the free path.`,
-      evidence: [{
-        metric: "free_chunk_delta_bytes",
-        value: b.freeChunkDeltaBytes,
-        threshold: 0,
-        window: inputs.window,
-        sample: 1,
-      }],
-      action: { kind: "plan-required", note: "Draft plan to isolate leaking import and add lint/guard." },
+      evidence: [
+        {
+          metric: "free_chunk_delta_bytes",
+          value: b.freeChunkDeltaBytes,
+          threshold: 0,
+          window: inputs.window,
+          sample: 1,
+        },
+      ],
+      action: {
+        kind: "plan-required",
+        note: "Draft plan to isolate leaking import and add lint/guard.",
+      },
       createdAt: now,
     });
   }
@@ -32,13 +37,15 @@ export function bundleRule(inputs: EvolutionInputs, now: string): Recommendation
       subject: "bundle:premium",
       title: "Premium chunk over budget — consider splitting",
       rationale: `Premium chunk is ${b.premiumChunkBytes}B vs budget ${b.premiumChunkBudgetBytes}B.`,
-      evidence: [{
-        metric: "premium_chunk_bytes",
-        value: b.premiumChunkBytes,
-        threshold: b.premiumChunkBudgetBytes,
-        window: inputs.window,
-        sample: 1,
-      }],
+      evidence: [
+        {
+          metric: "premium_chunk_bytes",
+          value: b.premiumChunkBytes,
+          threshold: b.premiumChunkBudgetBytes,
+          window: inputs.window,
+          sample: 1,
+        },
+      ],
       action: { kind: "plan-required", note: "Split premium modules along capability boundaries." },
       createdAt: now,
     });

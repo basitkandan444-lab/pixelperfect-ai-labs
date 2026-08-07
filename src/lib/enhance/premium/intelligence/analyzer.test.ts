@@ -4,7 +4,10 @@ import { analyzeImage, downsampleForAnalysis } from "./analyzer";
 function solid(w: number, h: number, r: number, g: number, b: number): Uint8ClampedArray {
   const buf = new Uint8ClampedArray(w * h * 4);
   for (let i = 0; i < buf.length; i += 4) {
-    buf[i] = r; buf[i + 1] = g; buf[i + 2] = b; buf[i + 3] = 255;
+    buf[i] = r;
+    buf[i + 1] = g;
+    buf[i + 2] = b;
+    buf[i + 3] = 255;
   }
   return buf;
 }
@@ -15,7 +18,10 @@ function stepEdge(w: number, h: number): Uint8ClampedArray {
     for (let x = 0; x < w; x++) {
       const i = (y * w + x) * 4;
       const v = x < w / 2 ? 40 : 210;
-      buf[i] = v; buf[i + 1] = v; buf[i + 2] = v; buf[i + 3] = 255;
+      buf[i] = v;
+      buf[i + 1] = v;
+      buf[i + 2] = v;
+      buf[i + 3] = 255;
     }
   return buf;
 }

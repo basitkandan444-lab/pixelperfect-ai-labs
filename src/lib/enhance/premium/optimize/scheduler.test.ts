@@ -16,11 +16,27 @@ describe("runPlan", () => {
     const seen: number[] = [];
     const order: string[] = [];
     const buf = new Uint8ClampedArray(16);
-    await runPlan(buf, 2, 2, plan, {
-      whiteBalance: (b) => { order.push("wb"); return b; },
-      clahe: (b) => { order.push("cl"); return b; },
-      vibrance: (b) => { order.push("vb"); return b; },
-    }, { onProgress: (v) => seen.push(v) });
+    await runPlan(
+      buf,
+      2,
+      2,
+      plan,
+      {
+        whiteBalance: (b) => {
+          order.push("wb");
+          return b;
+        },
+        clahe: (b) => {
+          order.push("cl");
+          return b;
+        },
+        vibrance: (b) => {
+          order.push("vb");
+          return b;
+        },
+      },
+      { onProgress: (v) => seen.push(v) },
+    );
     expect(order).toEqual(["wb", "cl", "vb"]);
     for (let i = 1; i < seen.length; i++) expect(seen[i]).toBeGreaterThanOrEqual(seen[i - 1]);
     expect(seen.at(-1)).toBe(1);

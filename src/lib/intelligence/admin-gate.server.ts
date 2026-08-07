@@ -9,8 +9,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
 export type AdminGateResult =
-  | { ok: true; userId: string }
-  | { ok: false; status: 401 | 403; code: string; message: string };
+  { ok: true; userId: string } | { ok: false; status: 401 | 403; code: string; message: string };
 
 function makeClient(bearer?: string) {
   const url = process.env.SUPABASE_URL!;
@@ -22,7 +21,8 @@ function makeClient(bearer?: string) {
       headers: bearer ? { Authorization: `Bearer ${bearer}` } : undefined,
       fetch: (input, init) => {
         const headers = new Headers(init?.headers);
-        if (isNew && headers.get("Authorization") === `Bearer ${key}`) headers.delete("Authorization");
+        if (isNew && headers.get("Authorization") === `Bearer ${key}`)
+          headers.delete("Authorization");
         headers.set("apikey", key);
         return fetch(input, { ...init, headers });
       },
