@@ -147,7 +147,7 @@ export const finalizePaddleCheckoutSession = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: sub } = await supabase
       .from("subscriptions")
-      .select("plan, status, current_period_end, stripe_subscription_id")
+      .select("plan, status, current_period_end, paddle_subscription_id")
       .eq("user_id", userId)
       .maybeSingle();
 
@@ -160,7 +160,7 @@ export const finalizePaddleCheckoutSession = createServerFn({ method: "POST" })
       (!sub.current_period_end || new Date(sub.current_period_end).getTime() > Date.now());
 
     if (isActive) {
-      return { activated: true, plan: sub.plan, subscriptionId: sub.stripe_subscription_id };
+      return { activated: true, plan: sub.plan, subscriptionId: sub.paddle_subscription_id };
     }
 
     return { activated: false };

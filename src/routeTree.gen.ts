@@ -56,8 +56,6 @@ import { Route as ApiPublicIntelligencePerformanceRouteImport } from './routes/a
 import { Route as ApiPublicIntelligenceRevenueRouteImport } from './routes/api/public/intelligence/revenue'
 import { Route as ApiPublicPaddleStatusRouteImport } from './routes/api/public/paddle/status'
 import { Route as ApiPublicPaddleWebhookRouteImport } from './routes/api/public/paddle/webhook'
-import { Route as ApiPublicStripeStatusRouteImport } from './routes/api/public/stripe/status'
-import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe/webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -303,16 +301,6 @@ const ApiPublicPaddleWebhookRoute = ApiPublicPaddleWebhookRouteImport.update({
   path: '/api/public/paddle/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicStripeStatusRoute = ApiPublicStripeStatusRouteImport.update({
-  id: '/api/public/stripe/status',
-  path: '/api/public/stripe/status',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
-  id: '/api/public/stripe/webhook',
-  path: '/api/public/stripe/webhook',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -362,8 +350,6 @@ export interface FileRoutesByFullPath {
   '/api/public/intelligence/revenue': typeof ApiPublicIntelligenceRevenueRoute
   '/api/public/paddle/status': typeof ApiPublicPaddleStatusRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
-  '/api/public/stripe/status': typeof ApiPublicStripeStatusRoute
-  '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -413,8 +399,6 @@ export interface FileRoutesByTo {
   '/api/public/intelligence/revenue': typeof ApiPublicIntelligenceRevenueRoute
   '/api/public/paddle/status': typeof ApiPublicPaddleStatusRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
-  '/api/public/stripe/status': typeof ApiPublicStripeStatusRoute
-  '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -465,8 +449,6 @@ export interface FileRoutesById {
   '/api/public/intelligence/revenue': typeof ApiPublicIntelligenceRevenueRoute
   '/api/public/paddle/status': typeof ApiPublicPaddleStatusRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
-  '/api/public/stripe/status': typeof ApiPublicStripeStatusRoute
-  '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -518,8 +500,6 @@ export interface FileRouteTypes {
     | '/api/public/intelligence/revenue'
     | '/api/public/paddle/status'
     | '/api/public/paddle/webhook'
-    | '/api/public/stripe/status'
-    | '/api/public/stripe/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -569,8 +549,6 @@ export interface FileRouteTypes {
     | '/api/public/intelligence/revenue'
     | '/api/public/paddle/status'
     | '/api/public/paddle/webhook'
-    | '/api/public/stripe/status'
-    | '/api/public/stripe/webhook'
   id:
     | '__root__'
     | '/'
@@ -620,8 +598,6 @@ export interface FileRouteTypes {
     | '/api/public/intelligence/revenue'
     | '/api/public/paddle/status'
     | '/api/public/paddle/webhook'
-    | '/api/public/stripe/status'
-    | '/api/public/stripe/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -667,8 +643,6 @@ export interface RootRouteChildren {
   ApiPublicHooksTelemetrySnapshotRoute: typeof ApiPublicHooksTelemetrySnapshotRoute
   ApiPublicPaddleStatusRoute: typeof ApiPublicPaddleStatusRoute
   ApiPublicPaddleWebhookRoute: typeof ApiPublicPaddleWebhookRoute
-  ApiPublicStripeStatusRoute: typeof ApiPublicStripeStatusRoute
-  ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1002,20 +976,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaddleWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/stripe/status': {
-      id: '/api/public/stripe/status'
-      path: '/api/public/stripe/status'
-      fullPath: '/api/public/stripe/status'
-      preLoaderRoute: typeof ApiPublicStripeStatusRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/stripe/webhook': {
-      id: '/api/public/stripe/webhook'
-      path: '/api/public/stripe/webhook'
-      fullPath: '/api/public/stripe/webhook'
-      preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -1101,8 +1061,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksTelemetrySnapshotRoute: ApiPublicHooksTelemetrySnapshotRoute,
   ApiPublicPaddleStatusRoute: ApiPublicPaddleStatusRoute,
   ApiPublicPaddleWebhookRoute: ApiPublicPaddleWebhookRoute,
-  ApiPublicStripeStatusRoute: ApiPublicStripeStatusRoute,
-  ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

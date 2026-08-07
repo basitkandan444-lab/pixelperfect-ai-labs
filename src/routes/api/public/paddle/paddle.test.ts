@@ -82,7 +82,9 @@ describe("Paddle Billing Integration Test Suite", () => {
     });
 
     it("verifies GET status route handler outputs correct JSON", async () => {
-      const response = await (StatusRoute.options as any).server.handlers.GET();
+      const response = await (
+        StatusRoute.options as unknown as { server: { handlers: { GET: () => Promise<Response> } } }
+      ).server.handlers.GET();
       const body = await response.json();
       expect(response.status).toBe(200);
       expect(body.success).toBe(true);
@@ -135,7 +137,11 @@ describe("Paddle Billing Integration Test Suite", () => {
         body: rawBody,
       });
 
-      return await (WebhookRoute.options as any).server.handlers.POST({ request });
+      return await (
+        WebhookRoute.options as unknown as {
+          server: { handlers: { POST: (args: { request: Request }) => Promise<Response> } };
+        }
+      ).server.handlers.POST({ request });
     }
 
     it("processes transaction.completed successfully for a monthly plan", async () => {
@@ -361,7 +367,11 @@ describe("Paddle Billing Integration Test Suite", () => {
         body: rawBody,
       });
 
-      const res = await (WebhookRoute.options as any).server.handlers.POST({ request });
+      const res = await (
+        WebhookRoute.options as unknown as {
+          server: { handlers: { POST: (args: { request: Request }) => Promise<Response> } };
+        }
+      ).server.handlers.POST({ request });
       expect(res.status).toBe(400);
       expect(await res.text()).toBe("missing paddle-signature");
     });
@@ -377,7 +387,11 @@ describe("Paddle Billing Integration Test Suite", () => {
         body: rawBody,
       });
 
-      const res = await (WebhookRoute.options as any).server.handlers.POST({ request });
+      const res = await (
+        WebhookRoute.options as unknown as {
+          server: { handlers: { POST: (args: { request: Request }) => Promise<Response> } };
+        }
+      ).server.handlers.POST({ request });
       expect(res.status).toBe(400);
       expect(await res.text()).toBe("invalid signature");
     });
