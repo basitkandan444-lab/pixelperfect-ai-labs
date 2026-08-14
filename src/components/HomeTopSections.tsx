@@ -42,11 +42,11 @@ export function HomeTopSections() {
             <h3 className="mt-6 font-display text-4xl leading-[1.05] sm:text-5xl">
               100 ultra quality images
               <br />
-              for <span className="text-shimmer">$37.73 a year</span>
+              for <span className="text-shimmer">$3.99 a month</span>
             </h3>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
-              Just $3.14 a month, billed once — or pay $99.89 once and keep it for life. Every
-              pixel processed on your own device: no uploads, no watermark, no queue.
+              Every pixel processed on your own device: no uploads, no watermark, no queue. 
+              Pure on-device AI for professional precision.
             </p>
 
             <ul className="mt-7 grid gap-2.5 sm:grid-cols-2">
