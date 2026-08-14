@@ -705,13 +705,9 @@ function Index() {
                 <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
                   →
                 </span>
-              </a>
-            </div>
-
-            <HeroVisual />
-
               <a
                 href="#how-heading"
+
                 className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
               >
                 See how it works
@@ -745,9 +741,8 @@ function Index() {
             </div>
           </section>
 
-          <HeroVisual />
-
           <HomeTopSections />
+
 
           {/* Workspace */}
           <section
