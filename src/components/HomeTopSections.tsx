@@ -30,7 +30,7 @@ export function HomeTopSections() {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-6 lg:gap-8">
         {/* Module 1: Pricing Architecture — World-Class Spotlight */}
-        <article className="group relative flex flex-col overflow-hidden rounded-[2rem] border border-white/[0.08] bg-white/[0.02] p-8 transition-all duration-500 hover:border-primary/30 hover:bg-white/[0.04] md:col-span-4 lg:p-12 shadow-elegant">
+        <article className="group relative flex flex-col overflow-hidden rounded-[2.5rem] border border-white/[0.08] bg-white/[0.02] p-8 transition-all duration-500 hover:border-primary/40 hover:bg-white/[0.04] md:col-span-4 lg:p-12 shadow-cinema">
           {/* Subtle Precision Background Pattern */}
           <div className="pointer-events-none absolute inset-0 opacity-20 [mask-image:radial-gradient(circle_at_top_right,white,transparent)]">
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:24px_24px]" />
@@ -38,18 +38,19 @@ export function HomeTopSections() {
 
           <div className="relative z-10 flex h-full flex-col">
             <div className="flex items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold tracking-wider text-primary uppercase">
-                <Sparkles className="h-3 w-3" /> System Upgrade
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold tracking-[0.22em] text-primary uppercase">
+                <Sparkles className="h-3 w-3" /> Core Access
               </span>
             </div>
 
             <div className="mt-8">
-              <h3 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-                Precision for everyone.
-                <span className="block mt-2 text-primary/90 opacity-90 transition-opacity group-hover:opacity-100">
-                  Unlimited Potential.
+              <h3 className="font-display text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-7xl">
+                Obsidian
+                <span className="block mt-2 text-shimmer transition-opacity group-hover:opacity-100">
+                  Precision.
                 </span>
               </h3>
+
               
               <div className="mt-6 flex items-baseline gap-2">
                 <span className="text-4xl font-bold text-white">$3.99</span>
