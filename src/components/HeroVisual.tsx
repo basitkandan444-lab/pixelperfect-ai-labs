@@ -85,7 +85,7 @@ export function HeroVisual() {
                   <div className="flex items-center gap-4">
                     <div className="flex -space-x-2">
                       {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-8 w-8 rounded-full border-2 border-[oklch(0.06_0_0)] bg-white/10" />
+                        <div key={i} className="h-8 w-8 rounded-full border-2 border-[oklch(0.1_0.01_250)] bg-white/10" />
                       ))}
                     </div>
                     <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
