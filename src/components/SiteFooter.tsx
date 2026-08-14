@@ -18,8 +18,9 @@ export function SiteFooter() {
       <div className="mx-auto flex max-w-5xl flex-col gap-6 px-5 py-10 sm:px-8">
         <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
           <Link to="/" className="flex items-center gap-2" aria-label={`${SITE.name} home`}>
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary shadow-glow">
               <Sparkles className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
+
             </span>
             <span className="font-display text-base font-bold tracking-tight">{SITE.name}</span>
           </Link>
