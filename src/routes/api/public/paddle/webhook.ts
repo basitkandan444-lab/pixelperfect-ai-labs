@@ -96,6 +96,7 @@ export const Route = createFileRoute("/api/public/paddle/webhook")({
                 const { data: existing } = await supabaseAdmin
                   .from("subscriptions")
                   .select("user_id")
+                  // @ts-ignore
                   .eq("paddle_customer_id", customerId)
                   .maybeSingle();
                 resolvedUserId = existing?.user_id ?? null;
@@ -151,6 +152,7 @@ async function upsertSubscription(
     current_period_end: string | null;
   },
 ) {
+  // @ts-ignore
   const { error } = await admin.from("subscriptions").upsert(row, { onConflict: "user_id" });
   if (error) throw error;
 }

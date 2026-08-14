@@ -232,6 +232,8 @@ export type Database = {
           created_at: string
           current_period_end: string | null
           id: string
+          paddle_customer_id: string | null
+          paddle_subscription_id: string | null
           plan: string
           status: string
           stripe_customer_id: string | null
@@ -243,6 +245,8 @@ export type Database = {
           created_at?: string
           current_period_end?: string | null
           id?: string
+          paddle_customer_id?: string | null
+          paddle_subscription_id?: string | null
           plan?: string
           status?: string
           stripe_customer_id?: string | null
@@ -254,6 +258,8 @@ export type Database = {
           created_at?: string
           current_period_end?: string | null
           id?: string
+          paddle_customer_id?: string | null
+          paddle_subscription_id?: string | null
           plan?: string
           status?: string
           stripe_customer_id?: string | null

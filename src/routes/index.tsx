@@ -678,19 +678,18 @@ function Index() {
               On-device AI · v2
             </div>
             <h1
-              className="animate-hero-in mx-auto max-w-4xl font-display text-[2.75rem] font-extrabold leading-[1.02] tracking-[-0.04em] text-foreground sm:text-6xl md:text-7xl"
+              className="animate-hero-in mx-auto max-w-4xl font-display text-[3.25rem] font-extrabold leading-[0.98] tracking-[-0.05em] text-foreground sm:text-7xl md:text-8xl"
               style={{ animationDelay: "0.15s" }}
             >
-              Image enhancement,
+              Precision
               <br />
-              <span className="text-shimmer">perfected on-device.</span>
+              <span className="text-shimmer italic">Enhancement.</span>
             </h1>
             <p
-              className="animate-hero-in mx-auto mt-8 max-w-xl text-base font-light leading-relaxed text-muted-foreground sm:text-lg"
+              className="animate-hero-in mx-auto mt-8 max-w-2xl text-lg font-light leading-relaxed text-muted-foreground sm:text-xl"
               style={{ animationDelay: "0.35s" }}
             >
-              Zero uploads. Zero watermarks. Start free.
-              <br className="hidden sm:block" />A browser-first engine that respects your privacy.
+              The world's most advanced browser-first AI upscaler. 8K precision, zero uploads, absolute privacy.
             </p>
             <div
               className="animate-hero-in mt-10 flex flex-col items-center gap-4"
