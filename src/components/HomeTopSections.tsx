@@ -55,6 +55,7 @@ export function HomeTopSections() {
                 <span className="text-4xl font-bold text-white">$3.99</span>
                 <span className="text-lg text-muted-foreground">/ month</span>
               </div>
+
             </div>
 
             <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted-foreground/90">

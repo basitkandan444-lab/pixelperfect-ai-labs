@@ -705,11 +705,12 @@ function Index() {
                 <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
                   →
                 </span>
+              </a>
               <a
                 href="#how-heading"
-
                 className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
               >
+
                 See how it works
                 <svg
                   className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-y-0.5"
@@ -727,7 +728,11 @@ function Index() {
                 </svg>
               </a>
             </div>
+
+            <HeroVisual />
+
             <div
+
               className="animate-hero-in mx-auto mt-14 flex max-w-2xl flex-wrap items-center justify-center gap-x-8 gap-y-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70"
               style={{ animationDelay: "0.7s" }}
             >
