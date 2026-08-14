@@ -679,7 +679,7 @@ function Index() {
                 Neural Core v2.4 Loaded
               </div>
               <h1
-                className="mx-auto max-w-5xl font-display text-[4rem] font-bold leading-[0.9] tracking-[-0.04em] text-white sm:text-7xl md:text-[8.5rem]"
+                className="mx-auto max-w-5xl font-display text-[4rem] font-bold leading-[0.9] tracking-[-0.04em] text-white sm:text-7xl md:text-[8rem]"
               >
                 Precision
                 <br />
@@ -691,6 +691,7 @@ function Index() {
                 The world's most advanced browser-first AI upscaler. <br className="hidden lg:block" />
                 8K precision, zero latency, absolute privacy.
               </p>
+
             </div>
             <div
               className="animate-hero-in mt-10 flex flex-col items-center gap-4"
