@@ -83,7 +83,7 @@ function stageClahe(tiles: number, clip: number, blend: number) {
 function stageMicroContrast(amount: number, radius: number) {
   return (b: Uint8ClampedArray, ctx: { width: number; height: number }) => {
     const { L, a, b: bp, alpha } = rgbaToOklabPlanes(b, ctx.width, ctx.height);
-    const mc = microContrastL(L, ctx.width, ctx.height, amount, radius);
+    const mc = microContrastL(L, ctx.width, ctx.height, amount * 1.5, radius);
     return oklabPlanesToRgba(mc, a, bp, alpha, ctx.width, ctx.height);
   };
 }
@@ -210,11 +210,11 @@ export function applyPremiumPost(
     const { L, a, b: bp, alpha } = rgbaToOklabPlanes(out, width, height);
     
     // Final texture snap
-    const mc = microContrastL(L, width, height, 0.4, 2);
+    const mc = microContrastL(L, width, height, 0.8, 3);
     // Final gamut push
-    vibrance(a, bp, 0.2);
+    vibrance(a, bp, 0.45);
     // Final tone stretch
-    sCurveL(mc, 0.1);
+    sCurveL(mc, 0.25);
     
     out = oklabPlanesToRgba(mc, a, bp, alpha, width, height);
   }
