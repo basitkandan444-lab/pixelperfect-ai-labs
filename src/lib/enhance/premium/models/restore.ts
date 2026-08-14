@@ -3,7 +3,9 @@
 // Wraps GFPGANv1.4 inference in a memory-bounded, tiled approach (if needed, though
 // face crops are usually small) entirely on-device via onnxruntime-web.
 
+import { loadModel } from "./loader";
 import type { OrtModule, OrtSession, OrtTensor } from "../../neural";
+
 
 interface RestoreOptions {
   signal?: AbortSignal;
