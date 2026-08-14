@@ -104,12 +104,22 @@ function stageVibrance(amount: number) {
   };
 }
 
-// Face restore is intentionally a no-op here: the model must be downloaded
-// with explicit user consent before the selector adds it. When that lands,
-// the stage runner will pull ORT + the model bytes lazily.
-function stageFaceRestore() {
-  return (b: Uint8ClampedArray) => b;
+// Face restore stage runner. Pulls the model and ORT session lazily.
+function stageFaceRestore(modelId: string) {
+  return async (b: Uint8ClampedArray, ctx: { width: number; height: number; signal?: AbortSignal; onStageProgress?: (f: number, m: string) => void }) => {
+    try {
+      const { restoreFaces } = await import("./models/restore");
+      return await restoreFaces(b, ctx.width, ctx.height, modelId, {
+        signal: ctx.signal,
+        onProgress: ctx.onStageProgress
+      });
+    } catch (err) {
+      console.warn("Face restoration failed, skipping stage:", err);
+      return b;
+    }
+  };
 }
+
 
 function buildStageMap(plan: PremiumPlan, strength: number, denoiseEnabled: boolean): StageMap {
   const p = plan.params;
@@ -133,7 +143,7 @@ function buildStageMap(plan: PremiumPlan, strength: number, denoiseEnabled: bool
     );
   if (has("sCurve") && p.sCurve) map.sCurve = stageSCurve(p.sCurve.strength * strength);
   if (has("vibrance") && p.vibrance) map.vibrance = stageVibrance(p.vibrance.amount * strength);
-  if (has("faceRestore")) map.faceRestore = stageFaceRestore();
+  if (has("faceRestore") && p.faceRestore) map.faceRestore = stageFaceRestore(p.faceRestore.modelId);
   return map;
 }
 
