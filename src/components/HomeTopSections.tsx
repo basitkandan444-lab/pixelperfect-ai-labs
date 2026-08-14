@@ -46,7 +46,7 @@ export function HomeTopSections() {
             <div className="mt-8">
               <h3 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
                 Precision for everyone.
-                <span className="block mt-2 text-primary/90 opacity-90 transition-opacity group-hover:opacity-100">
+                <span className="block mt-2 text-primary/90">
                   Unlimited Potential.
                 </span>
               </h3>
@@ -56,6 +56,7 @@ export function HomeTopSections() {
                 <span className="text-lg text-muted-foreground">/ month</span>
               </div>
             </div>
+
 
             <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted-foreground/90">
               Professional-grade enhancement powered by on-device WebGPU. 
