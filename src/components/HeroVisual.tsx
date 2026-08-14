@@ -86,11 +86,13 @@ export function HeroVisual() {
                 ))}
               </div>
 
-              {/* Interaction Callout */}
-              <div className="absolute top-8 right-8 z-30 pointer-events-none">
-                <div className="glass px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest text-white/80 flex items-center gap-2">
-                  <MousePointer2 className="h-3 w-3 text-primary animate-pulse" />
-                  Elite Multi-Stage Preview
+              {/* Interaction Hint */}
+              <div className="absolute inset-0 z-20 pointer-events-none group-hover/hero:opacity-100 transition-opacity duration-700 opacity-60">
+                <div className="absolute bottom-8 right-8">
+                  <div className="glass px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest text-white/80 flex items-center gap-2 shadow-glow">
+                    <MousePointer2 className="h-3 w-3 text-primary animate-pulse" />
+                    Elite Multi-Stage Preview
+                  </div>
                 </div>
               </div>
             </div>
