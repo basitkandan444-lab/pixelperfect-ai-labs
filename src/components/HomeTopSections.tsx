@@ -23,7 +23,7 @@ const STATS = [
  */
 export function HomeTopSections() {
   return (
-    <section aria-labelledby="bento-heading" className="relative mx-auto mt-20 max-w-6xl px-4 pb-24">
+    <section aria-labelledby="bento-heading" className="relative mx-auto mt-12 max-w-6xl px-4 pb-24">
       <h2 id="bento-heading" className="sr-only">
         Precision Engineering Infrastructure
       </h2>
