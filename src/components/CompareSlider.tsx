@@ -131,7 +131,7 @@ export function CompareSlider({
   return (
     <div
       ref={containerRef}
-      className={`group relative w-full select-none overflow-hidden rounded-[2rem] border border-white/10 shadow-cinema ${className ?? ""}`}
+      className={`group relative w-full select-none overflow-hidden rounded-[2rem] border border-white/10 shadow-cinema transition-transform duration-700 ease-spring hover:scale-[1.01] ${className ?? ""}`}
       onMouseMove={(e) => dragging.current && updateFromClientX(e.clientX)}
       onMouseUp={() => (dragging.current = false)}
       onMouseLeave={() => (dragging.current = false)}
@@ -140,7 +140,7 @@ export function CompareSlider({
       <Picture
         img={afterImg}
         alt={afterAlt ?? "Enhanced high-resolution result"}
-        className="block h-auto w-full"
+        className="block h-auto w-full transition-transform duration-1000 group-hover:scale-[1.03]"
         draggable={false}
         loading={loading}
         fetchPriority={fetchPriority}
@@ -150,7 +150,7 @@ export function CompareSlider({
         <Picture
           img={beforeImg}
           alt={beforeAlt ?? "Original low-quality image"}
-          className="absolute inset-0 h-full max-w-none object-cover"
+          className="absolute inset-0 h-full max-w-none object-cover transition-transform duration-1000 group-hover:scale-[1.03]"
           style={{ width: width || "100%" }}
           draggable={false}
           loading={loading}
