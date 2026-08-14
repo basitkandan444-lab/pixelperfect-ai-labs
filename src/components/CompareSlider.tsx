@@ -131,7 +131,7 @@ export function CompareSlider({
   return (
     <div
       ref={containerRef}
-      className={`group relative w-full select-none overflow-hidden rounded-2xl border border-border ${className ?? ""}`}
+      className={`group relative w-full select-none overflow-hidden rounded-[2rem] border border-white/10 shadow-cinema ${className ?? ""}`}
       onMouseMove={(e) => dragging.current && updateFromClientX(e.clientX)}
       onMouseUp={() => (dragging.current = false)}
       onMouseLeave={() => (dragging.current = false)}
@@ -158,10 +158,10 @@ export function CompareSlider({
         />
       </div>
 
-      <span className="pointer-events-none absolute left-3 top-3 rounded-full bg-background/70 px-2.5 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
+      <span className="pointer-events-none absolute left-4 top-4 rounded-full bg-black/60 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-white/70 backdrop-blur-xl ring-1 ring-white/10">
         Before
       </span>
-      <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-gradient-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground">
+      <span className="pointer-events-none absolute right-4 top-4 rounded-full bg-primary/90 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground backdrop-blur-sm shadow-glow">
         After
       </span>
 
@@ -183,7 +183,7 @@ export function CompareSlider({
             dragging.current = true;
           }}
           onTouchStart={() => (dragging.current = true)}
-          className="absolute top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize touch-none items-center justify-center rounded-full bg-gradient-primary text-primary-foreground shadow-glow transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="absolute top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize touch-none items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow transition-all duration-300 hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-4 ring-black/40"
         >
           <svg
             width="20"
