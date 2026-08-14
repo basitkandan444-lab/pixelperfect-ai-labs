@@ -83,7 +83,7 @@ function stageClahe(tiles: number, clip: number, blend: number) {
 function stageMicroContrast(amount: number, radius: number) {
   return (b: Uint8ClampedArray, ctx: { width: number; height: number }) => {
     const { L, a, b: bp, alpha } = rgbaToOklabPlanes(b, ctx.width, ctx.height);
-    const mc = microContrastL(L, ctx.width, ctx.height, amount, radius);
+    const mc = microContrastL(L, ctx.width, ctx.height, amount * 2.5, radius);
     return oklabPlanesToRgba(mc, a, bp, alpha, ctx.width, ctx.height);
   };
 }
@@ -200,6 +200,23 @@ export function applyPremiumPost(
       out = runner(out, { width, height, plan, signal: opts.signal }) as Uint8ClampedArray;
     }
     cursor += w;
+  }
+
+  // SYSTEM 10: Recursive Boost Pass
+  // If overall strength is 1.0 (IMAX request), we perform a second selective boost
+  // on texture and color to guarantee human-visible improvement.
+  if (s >= 1.0) {
+    opts.onProgress?.(0.98, "premium:imax-boost");
+    const { L, a, b: bp, alpha } = rgbaToOklabPlanes(out, width, height);
+    
+    // Final texture snap
+    const mc = microContrastL(L, width, height, 0.8, 3);
+    // Final gamut push
+    vibrance(a, bp, 0.45);
+    // Final tone stretch
+    sCurveL(mc, 0.25);
+    
+    out = oklabPlanesToRgba(mc, a, bp, alpha, width, height);
   }
   
   opts.onProgress?.(1, "IMAX enhancement cycle complete.");

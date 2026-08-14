@@ -83,12 +83,12 @@ function throwIfAborted(signal?: AbortSignal) {
 // is imperceptible on a 4×/8× upscale). Higher tiers push sharpening harder.
 function filterFor(caps: EnhanceCapabilities, factor: number): EnhancePixelOptions {
   // IMAX-Grade Classical Filter: matched radius + extreme details
-  const amount = caps.tier === "high" ? 3.8 : caps.tier === "medium" ? 3.4 : 3.0;
-  const radius = Math.max(3, Math.min(24, Math.round(factor * 1.5)));
+  const amount = caps.tier === "high" ? 7.5 : caps.tier === "medium" ? 6.5 : 5.5;
+  const radius = Math.max(4, Math.min(32, Math.round(factor * 2.5)));
   return {
     amount,
     radius,
-    denoise: caps.tier === "low" ? 0.35 : 0.25,
+    denoise: caps.tier === "low" ? 0.25 : 0.15,
   };
 }
 
@@ -97,7 +97,7 @@ function filterFor(caps: EnhanceCapabilities, factor: number): EnhancePixelOptio
 // crisply. Heavy sharpening here would re-introduce ringing on top of the
 // synthesised detail.
 function neuralFilter(): EnhancePixelOptions {
-  return { amount: 0.55, radius: 2, denoise: 0 };
+  return { amount: 2.8, radius: 4, denoise: 0 };
 }
 
 async function loadBitmap(dataUrl: string): Promise<ImageBitmap> {

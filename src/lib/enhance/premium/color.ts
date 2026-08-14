@@ -177,7 +177,7 @@ export function sCurveL(L: Float32Array, strength = 0.12): void {
     const v = L[i];
     // sigmoid-like curve centered at 0.5
     const t = v - 0.5;
-    L[i] = Math.max(0, Math.min(1, 0.5 + t + strength * t * (1 - 4 * t * t)));
+    L[i] = Math.max(0, Math.min(1, 0.5 + t + strength * 1.5 * t * (1 - 4 * t * t)));
   }
 }
 

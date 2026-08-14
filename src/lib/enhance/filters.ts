@@ -206,14 +206,19 @@ export function enhancePixels(
   // compression-smear recovery, then a fine edge pass for visible preview-size
   // crispness. This is intentionally stronger than a photo-editor default
   // because the product promise is enhancement/upscaling, not a neutral resize.
+  // IMAX Progressive Sharpening: Three layers of detail reconstruction
+  // Coarse pass at the interpolation-blur scale
   const coarse = unsharpMask(base, width, height, radius, amount);
+  // Mid-scale smear recovery (aggressive)
   const mid = unsharpMask(
     coarse,
     width,
     height,
-    Math.max(1, Math.round(radius / 3)),
-    amount * 0.55,
+    Math.max(1, Math.round(radius / 2.5)),
+    amount * 0.85,
   );
-  const fine = unsharpMask(mid, width, height, 1, amount * 0.3);
-  return edgeCrispen(fine, width, height, 0.18 + amount * 0.14 + Math.min(radius, 12) * 0.018);
+  // Fine edge snap (aggressive)
+  const fine = unsharpMask(mid, width, height, 1, amount * 0.6);
+  // IMAX Crispening: Stronger gate-opening for texture pop
+  return edgeCrispen(fine, width, height, 0.45 + amount * 0.25 + Math.min(radius, 16) * 0.025);
 }
