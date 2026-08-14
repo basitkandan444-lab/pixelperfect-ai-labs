@@ -152,6 +152,15 @@
   --gradient-hero: 
     radial-gradient(at 50% 0%, oklch(0.2 0.05 260 / 0.4) 0%, transparent 70%),
     oklch(0.08 0 0);
+
+  --gradient-shimmer: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 75%,
+    transparent 100%
+  );
 }
 
 .dark {
@@ -372,6 +381,29 @@
 .animate-aurora-drift {
   animation: aurora-drift 18s ease-in-out infinite;
   will-change: transform;
+}
+
+@keyframes scan-line {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10% { opacity: 0.5; }
+  90% { opacity: 0.5; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+.animate-scan {
+  animation: scan-line 3s linear infinite;
+}
+
+@keyframes perspective-tilt {
+  0% { transform: perspective(1000px) rotateX(0deg) rotateY(0deg); }
+  25% { transform: perspective(1000px) rotateX(2deg) rotateY(-2deg); }
+  50% { transform: perspective(1000px) rotateX(0deg) rotateY(0deg); }
+  75% { transform: perspective(1000px) rotateX(-2deg) rotateY(2deg); }
+  100% { transform: perspective(1000px) rotateX(0deg) rotateY(0deg); }
+}
+
+.animate-tilt {
+  animation: perspective-tilt 12s ease-in-out infinite;
 }
 
 .text-shimmer {

@@ -11,6 +11,7 @@ import { CompareSlider } from "@/components/CompareSlider";
 import { SiteFooter } from "@/components/SiteFooter";
 import { HomeContent } from "@/components/HomeContent";
 import { HomeTopSections } from "@/components/HomeTopSections";
+import { HeroVisual } from "@/components/HeroVisual";
 import { BeforeAfterGallery } from "@/components/BeforeAfterGallery";
 import { AnalysisCard } from "@/components/AnalysisCard";
 import { ProcessingOverlay } from "@/components/ProcessingOverlay";
@@ -738,6 +739,8 @@ function Index() {
               <span>4K &amp; 8K output</span>
             </div>
           </section>
+
+          <HeroVisual />
 
           <HomeTopSections />
 
