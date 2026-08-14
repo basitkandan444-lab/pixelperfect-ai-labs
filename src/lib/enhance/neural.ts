@@ -429,9 +429,9 @@ export async function enhanceNeural(
   if (!outCanvas) throw lastErr ?? new Error("Tiled inference failed.");
 
   onProgress?.(0.86, "Upscaling to target resolution…");
-  // Finish to the requested 4K/8K target with the high-quality resampler and a
-  // GENTLE detail pass (the model already recovered real detail, so heavy
-  // sharpening here would only add ringing on top of the synthesised texture).
+  // Finish to the requested 4K/8K target with the high-quality resampler and 
+  // IMAX detail passing (High strength for world-class clarity).
+
   const finalCanvas = renderEnhanced(
     outCanvas as unknown as CanvasImageSource,
     outCanvas.width,

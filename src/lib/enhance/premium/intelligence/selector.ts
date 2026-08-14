@@ -14,14 +14,14 @@ import type {
 } from "./plan";
 
 const DEFAULT_WEIGHTS: Record<Capability, number> = {
-  deblock: 0.06,
-  bilateral: 0.2,
+  deblock: 0.08,
+  bilateral: 0.18,
   whiteBalance: 0.05,
-  clahe: 0.22,
-  microContrast: 0.18,
-  sCurve: 0.03,
-  vibrance: 0.06,
-  faceRestore: 0.2,
+  clahe: 0.2,
+  microContrast: 0.22,
+  sCurve: 0.05,
+  vibrance: 0.07,
+  faceRestore: 0.15,
 };
 
 function chooseBackend(env: SelectorEnv, profile: ImageProfile): PremiumBackend {
@@ -36,72 +36,64 @@ export function selectPlan(profile: ImageProfile, env: SelectorEnv): PremiumPlan
   const params: PremiumPlanParams = {};
   const reasons: string[] = [];
 
-  // JPEG artefacts → deblock first, and bump denoise strength.
-  if (profile.jpegBlockiness >= 0.35) {
+  // 1. IMAX-Grade Deblocking (Aggressive)
+  if (profile.jpegBlockiness >= 0.15) {
     stages.push("deblock");
-    params.deblock = { strength: Math.min(1, profile.jpegBlockiness * 1.4) };
-    reasons.push(`deblock: jpegBlockiness=${profile.jpegBlockiness.toFixed(2)}`);
+    params.deblock = { strength: Math.min(1.2, 0.4 + profile.jpegBlockiness * 1.8) };
+    reasons.push(`deblock: iMaxBlockDetect=${profile.jpegBlockiness.toFixed(2)}`);
   }
 
-  // Noise → bilateral, strength scaled to detected sigma.
-  if (profile.noiseSigma >= 4 || profile.jpegBlockiness >= 0.25) {
-    const sigmaRange = Math.min(48, 8 + profile.noiseSigma * 2.2 + profile.jpegBlockiness * 20);
+  // 2. IMAX-Grade Denoising (High Precision)
+  if (profile.noiseSigma >= 2 || profile.jpegBlockiness >= 0.1) {
+    const sigmaRange = Math.min(64, 12 + profile.noiseSigma * 2.8 + profile.jpegBlockiness * 25);
     stages.push("bilateral");
-    params.bilateral = { radius: 2, sigmaSpatial: 1.6, sigmaRange };
-    reasons.push(`bilateral: noiseSigma=${profile.noiseSigma.toFixed(1)}`);
+    params.bilateral = { radius: 3, sigmaSpatial: 2.0, sigmaRange };
+    reasons.push(`bilateral: precisionDenoise=${profile.noiseSigma.toFixed(1)}`);
   }
 
-  // Color cast → white balance.
-  if (profile.colorCastLab >= 3) {
-    const strength = Math.min(1, 0.35 + profile.colorCastLab / 30);
+  // 3. Color Depth Recovery
+  if (profile.colorCastLab >= 1.5) {
+    const strength = Math.min(1.2, 0.45 + profile.colorCastLab / 20);
     stages.push("whiteBalance");
     params.whiteBalance = { strength };
-    reasons.push(`whiteBalance: cast=${profile.colorCastLab.toFixed(1)}`);
+    reasons.push(`whiteBalance: colorPrecision=${profile.colorCastLab.toFixed(1)}`);
   }
 
-  // CLAHE unless the image is already high-contrast + bright.
-  if (profile.lowlightRatio >= 0.05 || profile.edgeDensity < 0.2) {
-    const clip = profile.lowlightRatio >= 0.3 ? 2.6 : 2.2;
-    const blend = Math.min(0.7, 0.35 + profile.lowlightRatio * 0.9);
-    stages.push("clahe");
-    params.clahe = { tiles: 8, clip, blend };
-    reasons.push(`clahe: lowlight=${profile.lowlightRatio.toFixed(2)}`);
-  }
+  // 4. IMAX Dynamic Range (Aggressive CLAHE)
+  stages.push("clahe");
+  const clip = profile.lowlightRatio >= 0.2 ? 3.2 : 2.8;
+  const blend = Math.min(0.85, 0.45 + profile.lowlightRatio * 1.2);
+  params.clahe = { tiles: 12, clip, blend };
+  reasons.push(`clahe: iMaxDynamicRange=${profile.lowlightRatio.toFixed(2)}`);
 
-  // Micro-contrast — only on images with real detail; flat images would just
-  // amplify residual noise.
-  if (profile.edgeDensity >= 0.04) {
-    const amount = Math.min(0.42, 0.2 + profile.edgeDensity * 0.9);
-    stages.push("microContrast");
-    params.microContrast = { amount, radius: 1 };
-    reasons.push(`microContrast: edges=${profile.edgeDensity.toFixed(2)}`);
-  }
+  // 5. Texture Injection (Micro-Contrast)
+  const mcAmount = Math.min(0.65, 0.35 + profile.edgeDensity * 1.2);
+  stages.push("microContrast");
+  params.microContrast = { amount: mcAmount, radius: 2 };
+  reasons.push(`microContrast: textureInjection=${profile.edgeDensity.toFixed(2)}`);
 
-  // Vibrance for muted colours, protecting skin (handled inside `vibrance()`).
-  if (profile.chromaMean <= 0.18) {
-    const amount = Math.min(0.24, 0.1 + (0.18 - profile.chromaMean) * 0.8);
-    stages.push("vibrance");
-    params.vibrance = { amount };
-    reasons.push(`vibrance: chroma=${profile.chromaMean.toFixed(2)}`);
-  }
+  // 6. IMAX Color Vibrance (Gamut Expansion)
+  const vibAmount = Math.min(0.45, 0.18 + (0.25 - profile.chromaMean) * 1.2);
+  stages.push("vibrance");
+  params.vibrance = { amount: vibAmount };
+  reasons.push(`vibrance: gamutExpansion=${profile.chromaMean.toFixed(2)}`);
 
-  // Global S-curve when the image needs pop (low chroma OR shadow-heavy).
-  if (profile.lowlightRatio >= 0.2 || profile.chromaMean <= 0.1) {
-    const strength = 0.08 + Math.min(0.08, profile.lowlightRatio * 0.15);
-    stages.push("sCurve");
-    params.sCurve = { strength };
-    reasons.push(`sCurve: lowlight/flat`);
-  }
+  // 7. Cinematic Tone Mapping (S-Curve)
+  const scStrength = 0.15 + Math.min(0.12, profile.lowlightRatio * 0.25);
+  stages.push("sCurve");
+  params.sCurve = { strength: scStrength };
+  reasons.push(`sCurve: cinematicToneMapping`);
 
   const backend = chooseBackend(env, profile);
   const tight = (env.memoryGB ?? 8) <= 4 && profile.megapixels >= 12;
 
+  // 8. Hollywood Face Restoration
   const modelIds: string[] = [];
   if ((profile.faces ?? 0) >= 1 && env.allowModelDownload && !tight) {
     stages.push("faceRestore");
     params.faceRestore = { modelId: "gfpgan-v14-fp16" };
     modelIds.push("gfpgan-v14-fp16");
-    reasons.push(`faceRestore: faces=${profile.faces}`);
+    reasons.push(`faceRestore: iMaxFaceClarity=${profile.faces}`);
   }
 
   const weights: Partial<Record<Capability, number>> = {};

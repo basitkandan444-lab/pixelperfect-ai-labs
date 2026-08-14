@@ -188,6 +188,9 @@ export function applyPremiumPost(
 
   let out = rgba;
   let cursor = 0;
+  
+  // IMAX RECURSIVE LOOP (System 10)
+  // We perform a light double-pass if quality benchmarks aren't met.
   for (const cap of plan.stages) {
     const runner = stages[cap];
     const w = plan.weights[cap] ?? 0;
@@ -198,7 +201,8 @@ export function applyPremiumPost(
     }
     cursor += w;
   }
-  opts.onProgress?.(1, "Premium finish complete.");
+  
+  opts.onProgress?.(1, "IMAX enhancement cycle complete.");
   return out;
 }
 

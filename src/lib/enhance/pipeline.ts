@@ -82,12 +82,13 @@ function throwIfAborted(signal?: AbortSignal) {
 // soft edges interpolation produces (a fixed 1px radius is below that scale and
 // is imperceptible on a 4×/8× upscale). Higher tiers push sharpening harder.
 function filterFor(caps: EnhanceCapabilities, factor: number): EnhancePixelOptions {
-  const amount = caps.tier === "high" ? 2.7 : caps.tier === "medium" ? 2.55 : 2.35;
-  const radius = Math.max(2, Math.min(18, Math.round(factor)));
+  // IMAX-Grade Classical Filter: matched radius + extreme details
+  const amount = caps.tier === "high" ? 3.8 : caps.tier === "medium" ? 3.4 : 3.0;
+  const radius = Math.max(3, Math.min(24, Math.round(factor * 1.5)));
   return {
     amount,
     radius,
-    denoise: caps.tier === "low" ? 0.18 : 0.1,
+    denoise: caps.tier === "low" ? 0.35 : 0.25,
   };
 }
 

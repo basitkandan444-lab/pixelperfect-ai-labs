@@ -155,7 +155,7 @@ export function blendPlanes(a: Float32Array, b: Float32Array, t: number): Float3
 
 /** Skin-safe vibrance: boost chroma (a,b in Oklab) by `amount`, but taper the
  * boost near the skin-tone hue axis (Oklab a≈0.06, b≈0.06 roughly). */
-export function vibrance(a: Float32Array, b: Float32Array, amount = 0.18): void {
+export function vibrance(a: Float32Array, b: Float32Array, amount = 0.35): void {
   const skinA = 0.06;
   const skinB = 0.06;
   for (let i = 0; i < a.length; i++) {
@@ -164,7 +164,8 @@ export function vibrance(a: Float32Array, b: Float32Array, amount = 0.18): void 
     const distSkin = Math.sqrt(da * da + db * db);
     // 1 at the skin locus, decaying to 0 far from it.
     const nearSkin = Math.exp((-distSkin * distSkin) / 0.006);
-    const gain = 1 + amount * (1 - 0.7 * nearSkin);
+    // IMAX Gain: increased saturation floor for cinematic pop.
+    const gain = 1 + amount * (1 - 0.6 * nearSkin);
     a[i] *= gain;
     b[i] *= gain;
   }
@@ -186,8 +187,8 @@ export function microContrastL(
   L: Float32Array,
   width: number,
   height: number,
-  amount = 0.35,
-  radius = 1,
+  amount = 0.65,
+  radius = 2,
 ): Float32Array {
   const blur = boxBlur1(L, width, height, radius);
   const out = new Float32Array(L.length);
@@ -200,7 +201,7 @@ export function microContrastL(
       const xp = Math.min(width - 1, x + 1);
       const gx = Math.abs(L[y * width + xp] - L[y * width + xm]);
       const gy = Math.abs(L[yp * width + x] - L[ym * width + x]);
-      const gate = Math.min(1, (gx + gy) * 6);
+      const gate = Math.min(1.2, (gx + gy) * 8);
       const detail = L[i] - blur[i];
       out[i] = Math.max(0, Math.min(1, L[i] + amount * gate * detail));
     }
