@@ -377,18 +377,17 @@
 .text-shimmer {
   background: linear-gradient(
     100deg,
-    oklch(0.96 0.01 90) 0%,
-    oklch(0.82 0.1 88) 30%,
-    oklch(0.92 0.09 92) 45%,
-    oklch(0.72 0.11 82) 60%,
-    oklch(0.96 0.01 90) 100%
+    oklch(0.98 0 0) 0%,
+    var(--primary) 30%,
+    oklch(0.9 0.02 260) 45%,
+    var(--primary) 60%,
+    oklch(0.98 0 0) 100%
   );
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   animation: text-shimmer 8s linear infinite;
-  opacity: 0.9;
 }
 
 .reveal {
