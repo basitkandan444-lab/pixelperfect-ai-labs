@@ -14,14 +14,14 @@ import type {
 } from "./plan";
 
 const DEFAULT_WEIGHTS: Record<Capability, number> = {
-  deblock: 0.06,
-  bilateral: 0.2,
+  deblock: 0.08,
+  bilateral: 0.18,
   whiteBalance: 0.05,
-  clahe: 0.22,
-  microContrast: 0.18,
-  sCurve: 0.03,
-  vibrance: 0.06,
-  faceRestore: 0.2,
+  clahe: 0.2,
+  microContrast: 0.22,
+  sCurve: 0.05,
+  vibrance: 0.07,
+  faceRestore: 0.15,
 };
 
 function chooseBackend(env: SelectorEnv, profile: ImageProfile): PremiumBackend {
