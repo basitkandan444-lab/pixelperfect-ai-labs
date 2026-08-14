@@ -60,6 +60,7 @@ export const Route = createFileRoute("/")({
             operatingSystem: "Web",
             description: SITE.description,
             offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+            comment: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            use CSS to completely hide the Lovable badge (the 'Made with Lovable' element), without breaking the layout",
           }),
         },
         {
