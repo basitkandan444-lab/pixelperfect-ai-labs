@@ -22,8 +22,8 @@ import { originLoader } from "@/lib/origin.functions";
 import { detectCapabilities } from "@/lib/enhance/capabilities";
 import { useSession } from "@/hooks/use-session";
 import { useBillingStatus } from "@/hooks/use-billing-status";
-import { consumeEnhancement, getMyEntitlement } from "@/lib/subscription.functions";
-import { createPaddleCheckoutSession } from "@/lib/paddle.server";
+import { consumeEnhancement, createCheckoutSession, getMyEntitlement } from "@/lib/subscription.functions";
+
 import { FREE_CAP, getLocalUsed, incrementLocalUsed } from "@/lib/entitlement";
 
 import {
@@ -139,7 +139,7 @@ function Index() {
   const navigate = useNavigate();
   const entitlementFn = useServerFn(getMyEntitlement);
   const consumeFn = useServerFn(consumeEnhancement);
-  const checkoutFn = useServerFn(createPaddleCheckoutSession);
+  const checkoutFn = useServerFn(createCheckoutSession);
   const [wallOpen, setWallOpen] = useState(false);
   const [wallPending, setWallPending] = useState(false);
   const [localUsed, setLocalUsed] = useState(0);
@@ -679,7 +679,7 @@ function Index() {
                 Neural Core v2.4 Loaded
               </div>
               <h1
-                className="mx-auto max-w-5xl font-display text-[4rem] font-bold leading-[0.9] tracking-[-0.04em] text-white sm:text-7xl md:text-[8.5rem]"
+                className="mx-auto max-w-5xl font-display text-[4rem] font-bold leading-[0.9] tracking-[-0.04em] text-white sm:text-7xl md:text-[8rem]"
               >
                 Precision
                 <br />
@@ -691,6 +691,7 @@ function Index() {
                 The world's most advanced browser-first AI upscaler. <br className="hidden lg:block" />
                 8K precision, zero latency, absolute privacy.
               </p>
+
             </div>
             <div
               className="animate-hero-in mt-10 flex flex-col items-center gap-4"
@@ -705,6 +706,10 @@ function Index() {
                   →
                 </span>
               </a>
+            </div>
+
+            <HeroVisual />
+
               <a
                 href="#how-heading"
                 className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"

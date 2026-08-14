@@ -88,8 +88,9 @@ export function HeroVisual() {
                       ))}
                     </div>
                     <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                      14,000+ images processed
+                      3k+ images processed
                     </span>
+
                   </div>
                 </div>
               </div>
