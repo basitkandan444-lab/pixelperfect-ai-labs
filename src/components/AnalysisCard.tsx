@@ -132,34 +132,35 @@ export function AnalysisCard({
         />
         <Stat
           icon={<Cpu className="h-3.5 w-3.5" aria-hidden="true" />}
-          label="Processing mode"
+          label="Engine"
           value={mode}
           hint={accelLabel}
         />
         <Stat
           icon={<Gauge className="h-3.5 w-3.5" aria-hidden="true" />}
-          label="Device tier"
+          label="Hardware"
           value={TIER_LABEL[tier]}
         />
         <Stat
           icon={<BrainCircuit className="h-3.5 w-3.5" aria-hidden="true" />}
-          label="Neural engine"
+          label="Neural core"
           value={neuralStatus}
           accent={isNeural && neuralWarm}
         />
         <Stat
           icon={<Clock className="h-3.5 w-3.5" aria-hidden="true" />}
-          label="Estimated time"
+          label="Wait time"
           value={formatEta(prediction.estimateMs).replace("about ", "~")}
           accent
         />
         <Stat
           icon={<Target className="h-3.5 w-3.5" aria-hidden="true" />}
-          label="Confidence"
+          label="Precision"
           value={`${accuracy}%`}
-          hint={prediction.tiles > 0 || !isNeural ? "self-calibrating" : undefined}
+          hint={prediction.tiles > 0 || !isNeural ? "calibrated" : undefined}
         />
       </div>
+
     </div>
   );
 }
