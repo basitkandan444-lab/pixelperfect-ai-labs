@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { FREE_CAP } from "@/lib/entitlement";
+import { z } from "zod";
+
 
 /**
  * Return the caller's plan status, usage, and premium flag.
