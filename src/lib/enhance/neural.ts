@@ -54,16 +54,16 @@ const TILE_OVERLAP = DEFAULT_OVERLAP;
 
 // Minimal structural types over the bits of the onnxruntime-web API we touch, so
 // a version bump can't break the typecheck.
-interface OrtTensor {
+export interface OrtTensor {
   data: Float32Array;
   dims: readonly number[];
 }
-interface OrtSession {
+export interface OrtSession {
   inputNames: string[];
   outputNames: string[];
   run(feeds: Record<string, OrtTensor>): Promise<Record<string, OrtTensor>>;
 }
-interface OrtModule {
+export interface OrtModule {
   env: {
     wasm: { wasmPaths: string; numThreads: number; simd?: boolean; proxy?: boolean };
     logLevel?: string;
@@ -73,6 +73,7 @@ interface OrtModule {
     create(model: ArrayBuffer, opts: { executionProviders: string[] }): Promise<OrtSession>;
   };
 }
+
 
 let sessionPromise: Promise<{ ort: OrtModule; session: OrtSession }> | null = null;
 
