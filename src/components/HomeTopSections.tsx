@@ -45,9 +45,9 @@ export function HomeTopSections() {
 
             <div className="mt-8">
               <h3 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-                100 images per month
+                Precision for everyone.
                 <span className="block mt-2 text-primary/90 opacity-90 transition-opacity group-hover:opacity-100">
-                  Precision unlocked.
+                  Unlimited Potential.
                 </span>
               </h3>
               
