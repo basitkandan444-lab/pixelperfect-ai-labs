@@ -27,10 +27,11 @@ export async function restoreFaces(
   opts.onProgress?.(0.05, "Loading face restoration model…");
   const bytes = await loadModel(modelId, { 
     signal: opts.signal,
-    onProgress: (loaded, total) => {
+    onProgress: (loaded: number, total: number) => {
       opts.onProgress?.(0.05 + (loaded / total) * 0.2, `Downloading model (${Math.round(loaded/1024/1024)}MB)…`);
     }
   });
+
   
   // 2. Initialize ORT
   opts.onProgress?.(0.3, "Initializing neural engine…");
