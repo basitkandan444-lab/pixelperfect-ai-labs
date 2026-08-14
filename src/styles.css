@@ -388,6 +388,7 @@
   background-clip: text;
   color: transparent;
   animation: text-shimmer 8s linear infinite;
+  opacity: 0.9;
 }
 
 .reveal {
