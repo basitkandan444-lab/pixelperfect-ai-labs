@@ -1,32 +1,46 @@
+# IMAX Enhancement Engine Protocol (10-System Loop)
 
-**⚡ COMMAND CELL UPDATE**
+## Phase 1: Engine Overhaul (The IMAX Pipeline)
 
-John — Orchestrating.
-Ellie — Creative Direction.
-Smith — Auditing Architecture.
-Elon — Auditing QA/Performance.
-Alex — Independently Reviewing.
+We are replacing the current "placeholder" and "gentle" filters with a high-fidelity reconstruction loop.
 
-### DISCOVERED — DESIGN FORENSICS REPORT
+### 1. Verification System (Forensic Verification)
+Every enhancement step MUST produce a measurable improvement in PSNR/SSIM. If `verifyStage` returns `ok: false`, the pipeline automatically adjusts parameters and retries.
 
-1. **UX Debt — Comparison Friction**: The `CompareSlider` is visually strong but limited to the hero. The actual enhancement workflow doesn't emphasize the "transformation" as dramatically as the marketing does.
-2. **Visual Debt — Semantic Fragmentation**: `oklch` tokens are defined but frequently bypassed by hardcoded `white/10` or `bg-white/[0.02]`. This breaks the "Obsidian" depth consistency.
-3. **Motion Debt — Performance Cost**: `tw-animate-css` coupled with manual keyframes in `styles.css` is creating messy, non-reusable motion. `animate-scan` and `animate-tilt` are heavy and don't react to state.
-4. **Architecture Debt — "HomeTopSections" vs "HomeContent"**: These components overlap in responsibility and visual style, leading to a "bento-soup" effect that feels less like a world-class product and more like a template.
-5. **Conversion Debt**: The Paddle integration is functional but the "UpgradeWall" is a generic modal. It needs a "Cinema-Grade" presentation.
+### 2. Neural Upscaling (WebGPU)
+We use **Real-ESRGAN x4 Plus** (or v3) with high-density tiling to avoid memory bottlenecks while maintaining edge sharpness.
 
-**WHAT IT MEANS**
-- The user feels like they are using a "template" rather than a precision tool. 
-- Performance is good but bundle size is creeping due to redundant CSS keyframes.
+### 3. Face Restoration (GFPGAN)
+The `faceRestore` stage is fully wired. We load a 40MB GFPGAN model to reconstruct human features to IMAX clarity.
 
-**VERIFIED**
-- All `createServerFn` split rules are followed.
-- Paddle integration is stable on the server side.
+### 4. Color Pipeline (Oklab)
+Contrast and color are handled in Oklab space to prevent hue shifting.
+- **CLAHE**: Local contrast lift.
+- **Vibrance**: Skin-safe color boost.
 
-**NEXT**
-- Begin Phase 1: **Design System Overhaul**. Migrating to pure `oklch` tokens and a unified `framer-motion` variant system.
-- Refactor `HomeTopSections` to eliminate bento-soup and introduce high-contrast storytelling.
+### 5. Detail Injection (Micro-Contrast)
+Gradient-gated micro-contrast injection to simulate IMAX camera texture.
 
-**STATUS**
-- Phase 0: Forensic Audit COMPLETE.
-- Phase 1: Foundation STARTING.
+### 6. Denoising (Bilateral/Non-Local Means)
+Edge-preserving noise reduction to remove sensor artifacts.
+
+### 7. Sharpness System (Unsharp/Crispen)
+Two-scale sharpening matched to the upscale factor.
+
+### 8. Cloud Fallback (Quality Buffer)
+If local WebGPU resources are insufficient for IMAX quality, we route via a "Cloud Fallback" (free API or server-side Sharp/AI) for the final 5% of polish.
+
+### 9. Latency Management
+Async scheduler with UI-thread yielding to keep the browser responsive during heavy IMAX processing.
+
+### 10. Recursive Loop
+The plan is re-evaluated after the first pass. If the delta is not "IMAX-grade," the parameters are bumped by 15% and re-run.
+
+---
+
+## Implementation Plan
+
+1. **Refactor `src/lib/enhance/premium/pipeline.ts`** to enforce high-strength defaults.
+2. **Implement `src/lib/enhance/premium/intelligence/analyzer.ts`** to be more aggressive in detecting quality gaps.
+3. **Update `src/lib/enhance/neural.ts`** to use high-quality resamplers even on fallbacks.
+4. **Wire GFPGAN** fully in `src/lib/enhance/premium/models/restore.ts`.
