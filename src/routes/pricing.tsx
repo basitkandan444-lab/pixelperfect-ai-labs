@@ -8,12 +8,12 @@ import { z } from "zod";
 import { useSession } from "@/hooks/use-session";
 import { useBillingStatus } from "@/hooks/use-billing-status";
 import { Button } from "@/components/ui/button";
+import { getMyEntitlement } from "@/lib/subscription.functions";
 import {
-  createBillingPortalSession,
-  createCheckoutSession,
-  finalizeCheckoutSession,
-  getMyEntitlement,
-} from "@/lib/subscription.functions";
+  createPaddleCheckoutSession,
+  createPaddleBillingPortalSession,
+  finalizePaddleCheckoutSession,
+} from "@/lib/paddle.server";
 
 export const Route = createFileRoute("/pricing")({
   ssr: false,
@@ -27,16 +27,17 @@ export const Route = createFileRoute("/pricing")({
   component: PricingPage,
   head: () => ({
     meta: [
-      { title: "Pricing — Pixel Perfect Pro" },
+      { title: "Premium Plans — Pixel Perfect Pro" },
       {
         name: "description",
         content:
-          "Start free with 5 on-device enhancements. Upgrade to Premium for $0.99/month — 100 ultra quality images per month, priority pipeline, 8K exports.",
+          "Pixel Perfect Pro Premium: $3.99/month, $37.73/year, $99.89 lifetime. 100 ultra-quality image enhancements, AI-powered enhancement, 8K exports, privacy-first processing.",
       },
-      { property: "og:title", content: "Pricing — Pixel Perfect Pro" },
+      { property: "og:title", content: "Premium Plans — Pixel Perfect Pro" },
       {
         property: "og:description",
-        content: "Premium for $0.99/month. 100 ultra quality on-device AI enhancements every month.",
+        content:
+          "Premium image enhancement: $3.99/month, $37.73/year, $99.89 lifetime. AI-powered, on-device processing with 8K exports.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -48,11 +49,11 @@ function PricingPage() {
   const { upgrade, session_id: sessionId } = Route.useSearch();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [pending, setPending] = useState<"checkout" | "portal" | null>(null);
-  const checkout = useServerFn(createCheckoutSession);
-  const portal = useServerFn(createBillingPortalSession);
+  const [pending, setPending] = useState<"monthly" | "yearly" | "lifetime" | "portal" | null>(null);
+  const checkout = useServerFn(createPaddleCheckoutSession);
+  const portal = useServerFn(createPaddleBillingPortalSession);
   const entitlementFn = useServerFn(getMyEntitlement);
-  const finalizeCheckout = useServerFn(finalizeCheckoutSession);
+  const finalizeCheckout = useServerFn(finalizePaddleCheckoutSession);
 
   const sessionQuery = useSession();
   const isSignedIn = !!sessionQuery.data;
@@ -105,27 +106,6 @@ function PricingPage() {
     if (!win) toast.error("Popup blocked — allow popups, or open the app in a new tab to pay.");
   }
 
-  async function onUpgrade() {
-    if (!billingAvailable) {
-      toast.error("Premium checkout is temporarily unavailable. Please try again shortly.");
-      return;
-    }
-    if (!isSignedIn) {
-      navigate({ to: "/auth", search: { next: "/pricing" } });
-      return;
-    }
-    try {
-      setPending("checkout");
-      const { url } = await checkout({});
-      if (url) openExternal(url);
-      else toast.error("Checkout URL missing");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Checkout failed");
-    } finally {
-      setPending(null);
-    }
-  }
-
   async function onManage() {
     try {
       setPending("portal");
@@ -133,6 +113,25 @@ function PricingPage() {
       if (url) openExternal(url);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Portal failed");
+    } finally {
+      setPending(null);
+    }
+  }
+
+  async function onUpgrade(plan: "monthly" | "yearly" | "lifetime") {
+    if (!isSignedIn) {
+      navigate({ to: "/auth", search: { next: "/pricing" } });
+      return;
+    }
+
+    try {
+      setPending(plan);
+      const checkoutResult = await checkout({ data: { plan } });
+
+      if (checkoutResult?.url) openExternal(checkoutResult.url);
+      else toast.error("Checkout URL missing");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Checkout failed");
     } finally {
       setPending(null);
     }
@@ -162,12 +161,12 @@ function PricingPage() {
 
       <section className="relative z-10 mx-auto max-w-5xl px-6 pb-24 pt-8 md:pt-16">
         <header className="text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/50">Pricing</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-white/50">Premium plans</p>
           <h1 className="mt-4 font-serif text-5xl leading-[1.05] md:text-7xl">
-            Beautifully simple.
+            Unlock the full potential.
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-base text-white/60 md:text-lg">
-            Enhance on your device. No credits. No queues. Upgrade when you need more.
+            Choose the plan that powers your creativity without boundaries.
           </p>
         </header>
 
@@ -211,46 +210,26 @@ function PricingPage() {
           </div>
         )}
 
-        <div className="mt-14 grid gap-6 md:grid-cols-2">
+        <div className="mt-14 grid gap-6 md:grid-cols-3">
           <Plan
-            name="Free"
-            price="$0"
-            cadence="forever"
-            highlight={!isPremium}
-            features={[
-              `${cap} on-device enhancements`,
-              "Fast classical engine",
-              "100% private — nothing leaves the browser",
-              "Watermark-free downloads",
-            ]}
-            cta={
-              <Link
-                to="/"
-                className="block w-full rounded-full border border-white/15 bg-white/5 py-3 text-center text-sm text-white/85 transition hover:bg-white/10"
-              >
-                Start free
-              </Link>
-            }
-            footnote={isSignedIn ? `${used} / ${cap} used` : "No signup to try"}
-          />
-
-          <Plan
-            name="Premium"
-            price="$0.99"
+            name="Premium Monthly"
+            price="$3.99"
             cadence="per month"
-            accent
-            highlight={isPremium}
+            highlight={isPremium && entitlement.data?.plan === "monthly"}
             features={[
-              "100 ultra quality images / month",
-              "Balanced neural engine (Real-ESRGAN, on-device)",
-              "Priority pipeline",
-              "8K exports",
+              "100 ultra-quality image enhancements per month",
+              "AI-powered image enhancement",
+              "Privacy-first browser processing",
+              "High-quality exports",
+              "8K export support",
+              "Priority processing pipeline",
+              "Access to latest enhancement improvements",
               "Cancel anytime",
             ]}
             cta={
               isPremium ? (
                 <button
-                  onClick={onManage}
+                  onClick={() => void onManage()}
                   disabled={pending === "portal"}
                   className="block w-full rounded-full border border-white/15 bg-white/10 py-3 text-center text-sm font-medium text-white transition hover:bg-white/15 disabled:opacity-60"
                 >
@@ -258,27 +237,112 @@ function PricingPage() {
                 </button>
               ) : (
                 <button
-                  onClick={onUpgrade}
-                  disabled={pending === "checkout" || !billingAvailable}
-                  className="block w-full rounded-full bg-white py-3 text-center text-sm font-semibold text-black shadow-[0_0_40px_-8px_rgba(10,132,255,0.6)] transition hover:bg-white/90 disabled:opacity-60"
+                  onClick={() => void onUpgrade("monthly")}
+                  disabled={pending !== null}
+                  className="block w-full rounded-full bg-white py-3 text-center text-sm font-semibold text-black transition hover:bg-white/90 disabled:opacity-60"
                 >
-                  {!billingAvailable
-                    ? "Checkout unavailable"
-                    : pending === "checkout"
-                      ? "Opening checkout…"
-                      : isSignedIn
-                        ? "Upgrade — $0.99/mo"
-                        : "Sign in to upgrade"}
+                  {pending === "monthly"
+                    ? "Opening checkout…"
+                    : isSignedIn
+                      ? "Subscribe — $3.99/month"
+                      : "Sign in to subscribe"}
                 </button>
               )
             }
-            footnote={isPremium ? "Active — thank you 🖤" : billingAvailable ? "Secure checkout via Stripe" : "Checkout temporarily unavailable"}
+            footnote={
+              isPremium ? "Active — thank you 🖤" : "Powered by Paddle (Monthly plan not in Stripe)"
+            }
+          />
+
+          <Plan
+            name="Premium Yearly"
+            price="$37.73"
+            cadence="per year"
+            badge="BEST VALUE"
+            accent
+            highlight={isPremium && entitlement.data?.plan === "yearly"}
+            features={[
+              "Everything in Premium Monthly",
+              "100 ultra-quality image enhancements per month",
+              "Full yearly access",
+              "All premium AI enhancement engines",
+              "Faster processing priority",
+              "8K exports",
+              "Future feature updates included",
+              "Best savings compared with monthly",
+            ]}
+            cta={
+              isPremium ? (
+                <button
+                  onClick={() => void onManage()}
+                  disabled={pending === "portal"}
+                  className="block w-full rounded-full border border-white/15 bg-white/10 py-3 text-center text-sm font-medium text-white transition hover:bg-white/15 disabled:opacity-60"
+                >
+                  {pending === "portal" ? "Opening…" : "Manage subscription"}
+                </button>
+              ) : (
+                <button
+                  onClick={() => void onUpgrade("yearly")}
+                  disabled={pending !== null}
+                  className="block w-full rounded-full bg-white py-3 text-center text-sm font-semibold text-black transition hover:bg-white/90 disabled:opacity-60"
+                >
+                  {pending === "yearly"
+                    ? "Opening checkout…"
+                    : isSignedIn
+                      ? "Subscribe — $37.73/yr"
+                      : "Sign in to subscribe"}
+                </button>
+              )
+            }
+            footnote={isPremium ? "Active — thank you 🖤" : "Powered by Paddle"}
+          />
+
+          <Plan
+            name="Lifetime Founder Access"
+            price="$99.89"
+            cadence="one-time payment"
+            badge="LIFETIME"
+            highlight={entitlement.data?.plan === "lifetime"}
+            features={[
+              "Lifetime access to Pixel Perfect Pro",
+              "All future software updates included",
+              "All future enhancement improvements included",
+              "Premium AI tools",
+              "8K exports",
+              "Priority pipeline",
+              "50 ultra-quality image enhancements per month",
+              "No recurring payments",
+              "Founder access benefits",
+            ]}
+            cta={
+              isPremium ? (
+                <div className="block w-full rounded-full border border-white/10 bg-white/5 py-3 text-center text-sm text-white/60">
+                  {entitlement.data?.plan === "lifetime"
+                    ? "You own this"
+                    : "Premium already active"}
+                </div>
+              ) : (
+                <button
+                  onClick={() => void onUpgrade("lifetime")}
+                  disabled={pending !== null}
+                  className="block w-full rounded-full border border-white/25 bg-white/10 py-3 text-center text-sm font-semibold text-white transition hover:bg-white/20 disabled:opacity-60"
+                >
+                  {pending === "lifetime"
+                    ? "Opening checkout…"
+                    : isSignedIn
+                      ? "Buy lifetime — $99.89"
+                      : "Sign in to buy"}
+                </button>
+              )
+            }
+            footnote="Lifetime access with founder benefits"
           />
         </div>
 
         <p className="mt-10 text-center text-xs text-white/40">
-          Prices in USD. Sales tax may apply. Payments processed by Stripe. Cancel anytime — access
-          continues to the end of the paid period.
+          Prices in USD. Sales tax may apply. Payments processed by Paddle. Yearly plans can be
+          cancelled anytime — access continues to the end of the paid year. Lifetime is a single
+          one-time payment.
         </p>
       </section>
     </main>
@@ -294,6 +358,7 @@ function Plan({
   footnote,
   accent,
   highlight,
+  badge,
 }: {
   name: string;
   price: string;
@@ -303,6 +368,7 @@ function Plan({
   footnote?: string;
   accent?: boolean;
   highlight?: boolean;
+  badge?: string;
 }) {
   return (
     <div
@@ -312,8 +378,13 @@ function Plan({
           : "border-white/10 bg-white/[0.03]"
       }`}
     >
-      {accent && (
+      {badge && (
         <span className="absolute -top-3 right-6 rounded-full bg-white/95 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-black">
+          {badge}
+        </span>
+      )}
+      {accent && (
+        <span className="absolute -top-3 left-6 rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-white/90 backdrop-blur">
           Recommended
         </span>
       )}
