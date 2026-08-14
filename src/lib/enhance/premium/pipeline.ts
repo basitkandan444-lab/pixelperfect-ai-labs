@@ -83,7 +83,7 @@ function stageClahe(tiles: number, clip: number, blend: number) {
 function stageMicroContrast(amount: number, radius: number) {
   return (b: Uint8ClampedArray, ctx: { width: number; height: number }) => {
     const { L, a, b: bp, alpha } = rgbaToOklabPlanes(b, ctx.width, ctx.height);
-    const mc = microContrastL(L, ctx.width, ctx.height, amount * 1.5, radius);
+    const mc = microContrastL(L, ctx.width, ctx.height, amount * 2.5, radius);
     return oklabPlanesToRgba(mc, a, bp, alpha, ctx.width, ctx.height);
   };
 }
