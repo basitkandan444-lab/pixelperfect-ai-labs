@@ -201,6 +201,23 @@ export function applyPremiumPost(
     }
     cursor += w;
   }
+
+  // SYSTEM 10: Recursive Boost Pass
+  // If overall strength is 1.0 (IMAX request), we perform a second selective boost
+  // on texture and color to guarantee human-visible improvement.
+  if (s >= 1.0) {
+    opts.onProgress?.(0.98, "premium:imax-boost");
+    const { L, a, b: bp, alpha } = rgbaToOklabPlanes(out, width, height);
+    
+    // Final texture snap
+    const mc = microContrastL(L, width, height, 0.4, 2);
+    // Final gamut push
+    vibrance(a, bp, 0.2);
+    // Final tone stretch
+    sCurveL(mc, 0.1);
+    
+    out = oklabPlanesToRgba(mc, a, bp, alpha, width, height);
+  }
   
   opts.onProgress?.(1, "IMAX enhancement cycle complete.");
   return out;

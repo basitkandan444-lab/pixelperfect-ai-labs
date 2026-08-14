@@ -37,49 +37,47 @@ export function selectPlan(profile: ImageProfile, env: SelectorEnv): PremiumPlan
   const reasons: string[] = [];
 
   // 1. IMAX-Grade Deblocking (Aggressive)
-  if (profile.jpegBlockiness >= 0.15) {
-    stages.push("deblock");
-    params.deblock = { strength: Math.min(1.2, 0.4 + profile.jpegBlockiness * 1.8) };
-    reasons.push(`deblock: iMaxBlockDetect=${profile.jpegBlockiness.toFixed(2)}`);
-  }
+  // We force deblock on for all images to ensure maximum smoothness on artifacts.
+  stages.push("deblock");
+  params.deblock = { strength: Math.max(1.5, 0.6 + profile.jpegBlockiness * 2.5) };
+  reasons.push(`deblock: iMaxBlockSmooth=${profile.jpegBlockiness.toFixed(2)}`);
 
   // 2. IMAX-Grade Denoising (High Precision)
-  if (profile.noiseSigma >= 2 || profile.jpegBlockiness >= 0.1) {
-    const sigmaRange = Math.min(64, 12 + profile.noiseSigma * 2.8 + profile.jpegBlockiness * 25);
-    stages.push("bilateral");
-    params.bilateral = { radius: 3, sigmaSpatial: 2.0, sigmaRange };
-    reasons.push(`bilateral: precisionDenoise=${profile.noiseSigma.toFixed(1)}`);
-  }
+  // Always active for IMAX depth.
+  stages.push("bilateral");
+  const sigmaRange = Math.min(80, 20 + profile.noiseSigma * 4.0 + profile.jpegBlockiness * 40);
+  params.bilateral = { radius: 4, sigmaSpatial: 2.5, sigmaRange };
+  reasons.push(`bilateral: precisionDenoise=${profile.noiseSigma.toFixed(1)}`);
 
   // 3. Color Depth Recovery
-  if (profile.colorCastLab >= 1.5) {
-    const strength = Math.min(1.2, 0.45 + profile.colorCastLab / 20);
-    stages.push("whiteBalance");
-    params.whiteBalance = { strength };
-    reasons.push(`whiteBalance: colorPrecision=${profile.colorCastLab.toFixed(1)}`);
-  }
+  stages.push("whiteBalance");
+  const wbStrength = Math.min(1.5, 0.8 + profile.colorCastLab / 10);
+  params.whiteBalance = { strength: wbStrength };
+  reasons.push(`whiteBalance: colorPrecision=${profile.colorCastLab.toFixed(1)}`);
 
   // 4. IMAX Dynamic Range (Aggressive CLAHE)
   stages.push("clahe");
-  const clip = profile.lowlightRatio >= 0.2 ? 3.2 : 2.8;
-  const blend = Math.min(0.85, 0.45 + profile.lowlightRatio * 1.2);
-  params.clahe = { tiles: 12, clip, blend };
+  const clip = profile.lowlightRatio >= 0.2 ? 4.5 : 3.8;
+  const blend = Math.min(0.95, 0.65 + profile.lowlightRatio * 1.5);
+  params.clahe = { tiles: 16, clip, blend };
   reasons.push(`clahe: iMaxDynamicRange=${profile.lowlightRatio.toFixed(2)}`);
 
   // 5. Texture Injection (Micro-Contrast)
-  const mcAmount = Math.min(0.65, 0.35 + profile.edgeDensity * 1.2);
+  // Heavy bump to ensure IMAX-grade detail is visible.
+  const mcAmount = Math.min(1.2, 0.75 + profile.edgeDensity * 2.0);
   stages.push("microContrast");
-  params.microContrast = { amount: mcAmount, radius: 2 };
+  params.microContrast = { amount: mcAmount, radius: 3 };
   reasons.push(`microContrast: textureInjection=${profile.edgeDensity.toFixed(2)}`);
 
   // 6. IMAX Color Vibrance (Gamut Expansion)
-  const vibAmount = Math.min(0.45, 0.18 + (0.25 - profile.chromaMean) * 1.2);
+  const vibAmount = Math.min(0.85, 0.35 + (0.3 - profile.chromaMean) * 1.8);
   stages.push("vibrance");
   params.vibrance = { amount: vibAmount };
   reasons.push(`vibrance: gamutExpansion=${profile.chromaMean.toFixed(2)}`);
 
   // 7. Cinematic Tone Mapping (S-Curve)
-  const scStrength = 0.15 + Math.min(0.12, profile.lowlightRatio * 0.25);
+  // Stronger S-curve for that IMAX contrast.
+  const scStrength = 0.35 + Math.min(0.25, profile.lowlightRatio * 0.5);
   stages.push("sCurve");
   params.sCurve = { strength: scStrength };
   reasons.push(`sCurve: cinematicToneMapping`);
