@@ -2,6 +2,13 @@
 @source "../src";
 @import "tw-animate-css";
 
+#lovable-badge {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /* Self-hosted fonts — removes render-blocking external Google Fonts request. */
