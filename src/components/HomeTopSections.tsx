@@ -30,7 +30,7 @@ export function HomeTopSections() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
         {/* Pricing spotlight — hero tile */}
-        <article className="lift relative overflow-hidden rounded-[2rem] border border-white/10 bg-card/60 p-8 backdrop-blur-xl sm:p-10 md:col-span-4">
+        <article className="lift relative overflow-hidden rounded-[2.5rem] border border-white/5 bg-surface-low/60 p-8 backdrop-blur-2xl sm:p-10 md:col-span-4 shadow-elegant">
           <div
             aria-hidden="true"
             className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/15 blur-[110px]"
@@ -96,7 +96,7 @@ export function HomeTopSections() {
           ].map(({ icon: Icon, title, body }) => (
             <article
               key={title}
-              className="lift rounded-[1.5rem] border border-white/10 bg-card/50 p-6 backdrop-blur-xl"
+              className="lift rounded-[2rem] border border-white/5 bg-surface-low/40 p-6 backdrop-blur-xl shadow-elegant"
             >
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
                 <Icon className="h-4.5 w-4.5" aria-hidden />
@@ -108,7 +108,7 @@ export function HomeTopSections() {
         </div>
 
         {/* Full-width capability rail */}
-        <article className="grid gap-6 rounded-[2rem] border border-white/10 bg-card/40 p-8 backdrop-blur-xl sm:grid-cols-4 md:col-span-6">
+        <article className="grid gap-6 rounded-[2.5rem] border border-white/5 bg-surface-low/30 p-8 backdrop-blur-xl sm:grid-cols-4 md:col-span-6 shadow-elegant">
           {STATS.map(({ icon: Icon, value, label }) => (
             <div key={label} className="text-center">
               <Icon className="mx-auto h-4 w-4 text-primary" aria-hidden />

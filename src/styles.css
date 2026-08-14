@@ -242,19 +242,21 @@
 }
 
 @utility glass {
-  background-color: color-mix(in oklab, var(--card) 55%, transparent);
+  background-color: color-mix(in oklab, var(--surface-low) 55%, transparent);
   backdrop-filter: blur(16px) saturate(140%);
-  border: 1px solid var(--border-hairline);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 0 0 1px var(--glass-shine) inset;
 }
 
 @utility glass-strong {
-  background-color: color-mix(in oklab, var(--card) 72%, transparent);
+  background-color: color-mix(in oklab, var(--surface-mid) 72%, transparent);
   backdrop-filter: blur(24px) saturate(160%);
-  border: 1px solid var(--border-hairline-strong);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 1px 0 0 var(--glass-shine) inset;
 }
 
 @utility hairline {
-  border: 1px solid var(--border-hairline);
+  border: 1px solid var(--glass-border);
 }
 
 @utility grid-noise {
