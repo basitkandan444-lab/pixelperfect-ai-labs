@@ -53,3 +53,16 @@ export const consumeEnhancement = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { allowed: !!data, cap: FREE_CAP };
   });
+
+/**
+ * Create a checkout session via Paddle.
+ * Replaces the old createCheckoutSession which used Stripe.
+ */
+export const createCheckoutSession = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((data) => z.object({ plan: z.enum(["monthly", "yearly", "lifetime"]).default("monthly") }).parse(data ?? {}))
+  .handler(async ({ context, data }) => {
+    // We import the Paddle-specific server function and call it.
+    const { createPaddleCheckoutSession } = await import("@/lib/paddle.server");
+    return createPaddleCheckoutSession({ context, data });
+  });
