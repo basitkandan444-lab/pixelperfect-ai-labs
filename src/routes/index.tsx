@@ -686,10 +686,10 @@ function Index() {
               Enhancement.
             </h1>
             <p
-              className="animate-hero-in mx-auto mt-8 max-w-2xl text-lg font-light leading-relaxed text-muted-foreground sm:text-xl"
+              className="animate-hero-in mx-auto mt-8 max-w-2xl text-lg font-medium leading-relaxed text-muted-foreground/80 sm:text-xl lg:text-2xl"
               style={{ animationDelay: "0.35s" }}
             >
-              The world's most advanced browser-first AI upscaler. 8K precision, zero uploads, absolute privacy.
+              The world's most advanced browser-first AI upscaler. 8K precision, zero latency, absolute privacy.
             </p>
             <div
               className="animate-hero-in mt-10 flex flex-col items-center gap-4"
