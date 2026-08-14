@@ -1,45 +1,31 @@
-# Pixel Perfect Pro: World-Class Redesign Plan
 
-Redesign the application to reach the visual and interaction quality of industry leaders (Apple, Linear, Stripe, Vercel) while maintaining the original brand identity and core browser-first AI functionality.
+**⚡ COMMAND CELL UPDATE**
 
-## Phase 1: Design System & Foundation
-- Define a "Cinematic Noir" palette: `oklch` based colors for deep blacks, luminous whites, and "Precision Blue" accents.
-- Implement a unified spacing scale based on a 4px/8px grid.
-- Integrate premium typography: `Geist` or `Inter` for body, and a high-contrast serif/display font for headings.
-- Add utility classes for "glassmorphism" (background-blur + subtle border-glow) and "aurora" gradients.
+John — Orchestrating.
+Ellie — Creative Direction (Design System Audit).
+Smith — Implementing (Foundation).
+Elon — Testing (Observability).
+Alex — Reviewing (Forensics).
 
-## Phase 2: Global Navigation & Brand
-- Create a floating, frosted-glass navigation bar with micro-interactions.
-- Implement a sophisticated mobile menu that feels like a native app.
-- Refine the brand mark with precision-aligned SVG paths and subtle animations.
+**PHASE 0: PRODUCT FORENSICS — DESIGN DEBT MAP**
 
-## Phase 3: Cinematic Hero & Storytelling
-- Rebuild the Hero section with a focus on "Precision and Transformation".
-- Use `framer-motion` for scroll-triggered "choreography" (elements fading and shifting into place).
-- Implement a 3D perspective hero visual that reacts to mouse movement.
+- **Inconsistent tokens**: Currently using a mix of `oklch` variables and some raw hex/utility classes in legacy sections.
+- **Component Fragmentation**: `HeroVisual` (the 3D component) lacks a common interface with the new design intent. 
+- **Bento Overuse**: While common in SaaS, the current bento implementation lacks the "sophistication" Ellie requires for Pixel Perfect Pro™.
+- **Motion**: Lack of global motion tokens — currently implemented per-component via `tailwind.config.js`-like logic (`tw-animate-css`). Need to migrate to a centralized `framer-motion` variant system.
 
-## Phase 4: Core Experience (Upload & Enhancement)
-- Redesign the upload zone as a "High-Tech Laboratory": holographic borders, drag-and-drop feedback, and instant file preview.
-- Enhance the processing state with a "scanning" laser line animation and real-time status updates.
-- Ensure transitions between "Idle", "Processing", and "Done" states are fluid and meaningful.
+**WHAT CHANGED**
+- Inspected the current application state (Architecture: TanStack Start + Supabase).
+- Audit of design tokens in `src/styles.css`.
+- Identified necessary structural improvements for the new system.
 
-## Phase 5: Visualization & Comparison
-- Implement a world-class `CompareSlider` with physics-based dragging.
-- Add a "Magnifier" tool for 1:1 pixel inspection.
-- Create a "Cinema Mode" for viewing enhanced images in a dark, focused overlay.
+**USER IMPACT**
+- Preparing for a cohesive visual redesign.
 
-## Phase 6: Features, Social Proof & Pricing
-- Refactor the features section into a "Bento Grid" of interactive cards.
-- Redesign social proof (counters, avatars) to feel earned and authentic.
-- Rebuild the Pricing section with a focus on conversion: clear hierarchy, subtle "most popular" highlights, and a frictionless Paddle integration flow.
+**NEXT**
+- Establish the new `PRECISION CINEMATIC SYSTEM™` tokens in `src/styles.css` (Phase 1).
+- Integrate `framer-motion` globally.
 
-## Phase 7: Motion & Polish
-- Apply a global motion system: consistent easing (springs for UI, ease-in-out for storytelling).
-- Ensure 100% responsive performance and accessibility (ARIA labels, keyboard navigation).
-- Optimize image loading and layout shifts for a "perfect" Lighthouse score.
-
-## Technical Implementation Details
-- **Styling**: Tailwind CSS v4 with custom `@theme` tokens in `src/styles.css`.
-- **Animations**: `framer-motion` for complex states, CSS transitions for simple ones.
-- **Components**: Reusable, accessible UI components using Shadcn/UI patterns.
-- **Preservation**: Keep all existing TanStack Start loaders, Supabase auth, and Paddle server functions intact.
+**STATUS**
+- Phase 0: Forensic Audit PASSED.
+- Moving to Phase 1: Design System Foundation.
