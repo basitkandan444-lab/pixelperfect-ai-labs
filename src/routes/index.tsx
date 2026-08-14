@@ -11,6 +11,7 @@ import { CompareSlider } from "@/components/CompareSlider";
 import { SiteFooter } from "@/components/SiteFooter";
 import { HomeContent } from "@/components/HomeContent";
 import { HomeTopSections } from "@/components/HomeTopSections";
+import { HeroVisual } from "@/components/HeroVisual";
 import { BeforeAfterGallery } from "@/components/BeforeAfterGallery";
 import { AnalysisCard } from "@/components/AnalysisCard";
 import { ProcessingOverlay } from "@/components/ProcessingOverlay";
@@ -21,11 +22,8 @@ import { originLoader } from "@/lib/origin.functions";
 import { detectCapabilities } from "@/lib/enhance/capabilities";
 import { useSession } from "@/hooks/use-session";
 import { useBillingStatus } from "@/hooks/use-billing-status";
-import {
-  consumeEnhancement,
-  createCheckoutSession,
-  getMyEntitlement,
-} from "@/lib/subscription.functions";
+import { consumeEnhancement, createCheckoutSession, getMyEntitlement } from "@/lib/subscription.functions";
+
 import { FREE_CAP, getLocalUsed, incrementLocalUsed } from "@/lib/entitlement";
 
 import {
@@ -192,7 +190,6 @@ function Index() {
       setWallPending(false);
     }
   }, [isSignedIn, navigate, checkoutFn, billingAvailable]);
-
 
   // Signal that React has hydrated and the upload handler is attached. The
   // server-rendered <input> exists before hydration, so a file set in that
@@ -521,7 +518,19 @@ function Index() {
       stopCountdown();
       if (abortRef.current === controller) abortRef.current = null;
     }
-  }, [clearResultUrl, original, scale, engine, fileInfo, stopCountdown, isPremium, isSignedIn, consumeFn, entitlementQuery, openUpgradeWall]);
+  }, [
+    clearResultUrl,
+    original,
+    scale,
+    engine,
+    fileInfo,
+    stopCountdown,
+    isPremium,
+    isSignedIn,
+    consumeFn,
+    entitlementQuery,
+    openUpgradeWall,
+  ]);
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
@@ -659,29 +668,31 @@ function Index() {
         <main>
           {/* Hero — cinematic serif with staggered blur-in entrance */}
           <section className="relative pt-40 pb-20 text-center sm:pt-48">
-            <div
-              className="animate-hero-in mx-auto mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground backdrop-blur"
-              style={{ animationDelay: "0.05s" }}
-            >
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
-              </span>
-              On-device AI · v2
+            <div className="stagger-in">
+              <div
+                className="mx-auto mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground backdrop-blur"
+              >
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+                </span>
+                Neural Core v2.4 Loaded
+              </div>
+              <h1
+                className="mx-auto max-w-5xl font-display text-[4rem] font-bold leading-[0.9] tracking-[-0.04em] text-white sm:text-7xl md:text-[8rem]"
+              >
+                Precision
+                <br />
+                <span className="text-shimmer italic">Enhancement</span>
+              </h1>
+              <p
+                className="mx-auto mt-10 max-w-2xl text-lg font-medium leading-relaxed text-muted-foreground/80 sm:text-xl lg:text-2xl"
+              >
+                The world's most advanced browser-first AI upscaler. <br className="hidden lg:block" />
+                8K precision, zero latency, absolute privacy.
+              </p>
+
             </div>
-            <h1 className="animate-hero-in mx-auto max-w-4xl font-display text-[2.75rem] font-extrabold leading-[1.02] tracking-[-0.04em] text-foreground sm:text-6xl md:text-7xl" style={{ animationDelay: "0.15s" }}>
-              Image enhancement,
-              <br />
-              <span className="text-shimmer">perfected on-device.</span>
-            </h1>
-            <p
-              className="animate-hero-in mx-auto mt-8 max-w-xl text-base font-light leading-relaxed text-muted-foreground sm:text-lg"
-              style={{ animationDelay: "0.35s" }}
-            >
-              Zero uploads. Zero watermarks. Start free.
-              <br className="hidden sm:block" />
-              A browser-first engine that respects your privacy.
-            </p>
             <div
               className="animate-hero-in mt-10 flex flex-col items-center gap-4"
               style={{ animationDelay: "0.5s" }}
@@ -699,6 +710,7 @@ function Index() {
                 href="#how-heading"
                 className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
               >
+
                 See how it works
                 <svg
                   className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-y-0.5"
@@ -716,7 +728,11 @@ function Index() {
                 </svg>
               </a>
             </div>
+
+            <HeroVisual />
+
             <div
+
               className="animate-hero-in mx-auto mt-14 flex max-w-2xl flex-wrap items-center justify-center gap-x-8 gap-y-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70"
               style={{ animationDelay: "0.7s" }}
             >
@@ -759,7 +775,9 @@ function Index() {
                     if (f) loadFile(f);
                   }}
                   className={`relative flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed bg-[oklch(0.04_0_0)] px-6 py-20 text-center transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-ring sm:py-28 ${
-                    dragOver ? "border-primary bg-primary/5" : "border-white/10 hover:border-primary/50"
+                    dragOver
+                      ? "border-primary bg-primary/5"
+                      : "border-white/10 hover:border-primary/50"
                   }`}
                 >
                   <input
@@ -787,10 +805,8 @@ function Index() {
               </div>
             )}
 
-
             {stage !== "idle" && original && (
               <div className="mx-auto flex max-w-4xl flex-col gap-6 rounded-3xl border border-white/10 bg-[oklch(0.04_0_0)] p-4 shadow-cinema sm:p-6">
-
                 <div className="relative">
                   {stage === "done" && result ? (
                     <div className="space-y-3">
