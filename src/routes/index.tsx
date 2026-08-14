@@ -678,12 +678,12 @@ function Index() {
               On-device AI · v2
             </div>
             <h1
-              className="animate-hero-in mx-auto max-w-4xl font-display text-[3.25rem] font-extrabold leading-[0.98] tracking-[-0.05em] text-foreground sm:text-7xl md:text-8xl"
+              className="animate-hero-in mx-auto max-w-4xl font-display text-[3.5rem] font-bold leading-[0.95] tracking-tight text-white sm:text-7xl md:text-[8rem]"
               style={{ animationDelay: "0.15s" }}
             >
               Precision
               <br />
-              <span className="text-shimmer italic">Enhancement.</span>
+              Enhancement.
             </h1>
             <p
               className="animate-hero-in mx-auto mt-8 max-w-2xl text-lg font-light leading-relaxed text-muted-foreground sm:text-xl"
