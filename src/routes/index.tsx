@@ -668,30 +668,30 @@ function Index() {
         <main>
           {/* Hero — cinematic serif with staggered blur-in entrance */}
           <section className="relative pt-40 pb-20 text-center sm:pt-48">
-            <div
-              className="animate-hero-in mx-auto mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground backdrop-blur"
-              style={{ animationDelay: "0.05s" }}
-            >
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
-              </span>
-              On-device AI · v2
+            <div className="stagger-in">
+              <div
+                className="mx-auto mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground backdrop-blur"
+              >
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+                </span>
+                Neural Core v2.4 Loaded
+              </div>
+              <h1
+                className="mx-auto max-w-5xl font-display text-[4rem] font-bold leading-[0.9] tracking-[-0.04em] text-white sm:text-7xl md:text-[8.5rem]"
+              >
+                Precision
+                <br />
+                <span className="text-shimmer italic">Enhancement</span>
+              </h1>
+              <p
+                className="mx-auto mt-10 max-w-2xl text-lg font-medium leading-relaxed text-muted-foreground/80 sm:text-xl lg:text-2xl"
+              >
+                The world's most advanced browser-first AI upscaler. <br className="hidden lg:block" />
+                8K precision, zero latency, absolute privacy.
+              </p>
             </div>
-            <h1
-              className="animate-hero-in mx-auto max-w-4xl font-display text-[3.5rem] font-bold leading-[0.95] tracking-tight text-white sm:text-7xl md:text-[8rem]"
-              style={{ animationDelay: "0.15s" }}
-            >
-              Precision
-              <br />
-              Enhancement.
-            </h1>
-            <p
-              className="animate-hero-in mx-auto mt-8 max-w-2xl text-lg font-medium leading-relaxed text-muted-foreground/80 sm:text-xl lg:text-2xl"
-              style={{ animationDelay: "0.35s" }}
-            >
-              The world's most advanced browser-first AI upscaler. 8K precision, zero latency, absolute privacy.
-            </p>
             <div
               className="animate-hero-in mt-10 flex flex-col items-center gap-4"
               style={{ animationDelay: "0.5s" }}
