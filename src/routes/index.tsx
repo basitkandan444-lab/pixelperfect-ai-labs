@@ -679,11 +679,11 @@ function Index() {
                 Neural Core v2.4 Loaded
               </div>
               <h1
-                className="mx-auto max-w-5xl font-display text-[4rem] font-bold leading-[0.9] tracking-[-0.04em] text-white sm:text-7xl md:text-[8rem]"
+                className="mx-auto max-w-5xl font-display text-[4rem] font-bold leading-[0.9] tracking-[-0.04em] text-white sm:text-7xl md:text-[8.5rem]"
               >
-                Precision
+                Obsidian
                 <br />
-                <span className="text-shimmer italic">Enhancement</span>
+                <span className="text-shimmer italic">Precision</span>
               </h1>
               <p
                 className="mx-auto mt-10 max-w-2xl text-lg font-medium leading-relaxed text-muted-foreground/80 sm:text-xl lg:text-2xl"
@@ -691,6 +691,7 @@ function Index() {
                 The world's most advanced browser-first AI upscaler. <br className="hidden lg:block" />
                 8K precision, zero latency, absolute privacy.
               </p>
+
 
             </div>
             <div

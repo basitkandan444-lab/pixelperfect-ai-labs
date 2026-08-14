@@ -242,17 +242,18 @@ export function HomeContent() {
           {/* Privacy — wide */}
           <div className="card-premium group relative overflow-hidden rounded-[2.5rem] border border-white/5 bg-surface-low/60 p-8 sm:p-10 md:col-span-8 shadow-cinema">
             <div className="relative z-10 max-w-md">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
+              <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                 Privacy by design
               </span>
-              <h3 className="mt-4 font-display text-4xl tracking-tight text-foreground sm:text-5xl">
+              <h3 className="mt-4 font-display text-4xl tracking-tighter text-foreground sm:text-6xl">
                 100% on-device.
               </h3>
-              <p className="mt-4 text-sm font-light leading-relaxed text-muted-foreground">
+              <p className="mt-4 text-base font-medium leading-relaxed text-muted-foreground/80">
                 Your photos never leave your machine. Every pixel is processed locally in the
                 browser using WebGPU — no server, no upload, no API call.
               </p>
             </div>
+
             <div
               aria-hidden="true"
               className="pointer-events-none absolute -right-16 -bottom-16 h-72 w-72 rounded-full bg-primary/15 blur-3xl transition-all duration-700 group-hover:scale-125 group-hover:bg-primary/25"
@@ -341,16 +342,18 @@ export function HomeContent() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow ring-1 ring-inset ring-white/20">
                   <s.icon className="h-5 w-5 text-primary-foreground" aria-hidden="true" />
                 </div>
-                <span className="font-display text-3xl font-bold text-muted-foreground/25">
+                <span className="font-display text-4xl font-bold text-muted-foreground/10">
                   0{i + 1}
                 </span>
+
               </div>
-              <h3 className="relative mt-6 font-display text-base font-semibold tracking-tight">
+              <h3 className="relative mt-6 font-display text-lg font-bold tracking-tight">
                 {s.title}
               </h3>
-              <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground">
+              <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground/80">
                 {s.desc}
               </p>
+
             </li>
           ))}
         </ol>

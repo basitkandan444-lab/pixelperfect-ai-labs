@@ -11,9 +11,10 @@ export function HeroVisual() {
         <div className="absolute -inset-10 bg-primary/10 blur-[80px] opacity-40 group-hover/hero:opacity-60 transition-opacity" />
         
         {/* Main Frame */}
-        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[oklch(0.06_0_0)] shadow-cinema backdrop-blur-3xl">
+        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[oklch(0.1_0.01_250)] shadow-cinema backdrop-blur-3xl">
           {/* Subtle Scan Line */}
-          <div className="absolute inset-x-0 h-40 bg-gradient-to-b from-transparent via-primary/5 to-transparent animate-scan pointer-events-none z-20" />
+          <div className="absolute inset-x-0 h-40 bg-gradient-to-b from-transparent via-primary/10 to-transparent animate-scan pointer-events-none z-20" />
+
           
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
             {/* Left: The Visual Comparison */}
@@ -50,7 +51,7 @@ export function HeroVisual() {
               <div className="space-y-6">
                 <div className="flex items-center gap-2 text-primary">
                   <Sparkles className="h-5 w-5" />
-                  <span className="text-xs font-bold uppercase tracking-[0.2em]">Neural Engine v2</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.25em]">Neural Engine v2.4</span>
                 </div>
                 
                 <h3 className="font-display text-3xl font-bold tracking-tight text-white">
@@ -84,7 +85,7 @@ export function HeroVisual() {
                   <div className="flex items-center gap-4">
                     <div className="flex -space-x-2">
                       {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-8 w-8 rounded-full border-2 border-[oklch(0.06_0_0)] bg-white/10" />
+                        <div key={i} className="h-8 w-8 rounded-full border-2 border-[oklch(0.1_0.01_250)] bg-white/10" />
                       ))}
                     </div>
                     <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">

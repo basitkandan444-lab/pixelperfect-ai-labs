@@ -158,12 +158,13 @@ export function CompareSlider({
         />
       </div>
 
-      <span className="pointer-events-none absolute left-4 top-4 rounded-full bg-black/60 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-white/70 backdrop-blur-xl ring-1 ring-white/10">
-        Before
+      <span className="pointer-events-none absolute left-4 top-4 rounded-full bg-black/60 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/70 backdrop-blur-xl ring-1 ring-white/10 transition-transform duration-500 group-hover:translate-x-1">
+        Original
       </span>
-      <span className="pointer-events-none absolute right-4 top-4 rounded-full bg-primary/90 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground backdrop-blur-sm shadow-glow">
-        After
+      <span className="pointer-events-none absolute right-4 top-4 rounded-full bg-primary/90 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-primary-foreground backdrop-blur-sm shadow-glow transition-transform duration-500 group-hover:-translate-x-1">
+        Enhanced
       </span>
+
 
       <div
         className="absolute inset-y-0 z-10 w-0.5 bg-gradient-primary"
