@@ -679,7 +679,7 @@ function Index() {
                 Neural Core v2.4 Loaded
               </div>
               <h1
-                className="mx-auto max-w-5xl font-display text-[4rem] font-bold leading-[0.9] tracking-[-0.04em] text-white sm:text-7xl md:text-[8rem]"
+                className="mx-auto max-w-5xl font-display text-[4rem] font-bold leading-[0.9] tracking-[-0.04em] text-white sm:text-7xl md:text-[8.5rem]"
               >
                 Precision
                 <br />
@@ -691,7 +691,6 @@ function Index() {
                 The world's most advanced browser-first AI upscaler. <br className="hidden lg:block" />
                 8K precision, zero latency, absolute privacy.
               </p>
-
             </div>
             <div
               className="animate-hero-in mt-10 flex flex-col items-center gap-4"
@@ -706,15 +705,13 @@ function Index() {
                   →
                 </span>
               </a>
-            </div>
-
-            <HeroVisual />
-
-            <div
-              className="animate-hero-in mt-16 flex items-center justify-center gap-12 border-t border-white/5 pt-12"
-              style={{ animationDelay: "0.8s" }}
-            >
-
+              <a
+                href="#how-heading"
+                className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              >
+                See how it works
+                <svg
+                  className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-y-0.5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
