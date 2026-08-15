@@ -12,11 +12,13 @@ import { SITE } from "@/lib/site";
 export function PageHeader() {
   return (
     <header className="flex items-center justify-between">
-      <Link to="/" className="flex items-center gap-2" aria-label={`${SITE.name} home`}>
-        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-foreground shadow-elevated">
-          <Sparkles className="h-5 w-5 text-background" aria-hidden="true" />
+      <Link to="/" className="flex items-center gap-2 group" aria-label={`${SITE.name} home`}>
+        <span className="relative flex h-6 w-6 items-center justify-center rounded-md bg-foreground transition-transform duration-standard group-hover:rotate-[8deg] group-hover:scale-110">
+          <Sparkles className="h-3.5 w-3.5 text-background" aria-hidden="true" />
         </span>
-        <span className="text-display !text-lg">Pixel Perfect <span className="text-muted-foreground font-medium">Pro</span></span>
+        <span className="text-display !text-lg">
+          Pixel Perfect <span className="text-muted-foreground font-medium">Pro</span>
+        </span>
       </Link>
       <Link
         to="/"
