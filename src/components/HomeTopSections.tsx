@@ -30,7 +30,7 @@ export function HomeTopSections() {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-6 lg:gap-8">
         {/* Spotlight Card */}
-        <article className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-surface-low p-8 transition-all duration-standard ease-precision hover:border-primary/40 md:col-span-6 lg:col-span-4 lg:p-12 shadow-elevated order-1">
+        <article className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-surface-low p-6 sm:p-8 transition-all duration-standard ease-precision hover:border-primary/40 md:col-span-6 lg:col-span-4 lg:p-12 shadow-elevated order-1">
           {/* Background Grid */}
           <div className="pointer-events-none absolute inset-0 opacity-[0.03] [mask-image:radial-gradient(circle_at_top_right,white,transparent)]">
             <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--foreground)_1px,transparent_1px),linear-gradient(to_bottom,var(--foreground)_1px,transparent_1px)] bg-[size:32px_32px]" />
@@ -92,7 +92,7 @@ export function HomeTopSections() {
         </article>
 
         {/* Feature Cards Stack */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:col-span-6 lg:grid-cols-1 lg:col-span-2 order-2">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 md:col-span-6 lg:grid-cols-1 lg:col-span-2 order-2">
           {[
             {
               icon: Lock,
