@@ -8,10 +8,10 @@ export function HeroVisual() {
       {/* 3D Perspective Container */}
       <div className="relative animate-tilt transition-all duration-1000 group-hover/hero:animate-none group-hover/hero:scale-[1.01]">
         {/* Glow Layer */}
-        <div className="absolute -inset-10 bg-primary/10 blur-[80px] opacity-40 group-hover/hero:opacity-60 transition-opacity" />
+        <div className="absolute -inset-10 bg-primary/5 blur-[100px] opacity-30 group-hover/hero:opacity-50 transition-opacity" />
         
         {/* Main Frame */}
-        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[oklch(0.1_0.01_250)] shadow-cinema backdrop-blur-3xl">
+        <div className="relative overflow-hidden rounded-xl border border-border bg-surface-low shadow-modal backdrop-blur-3xl">
           {/* Subtle Scan Line */}
           <div className="absolute inset-x-0 h-40 bg-gradient-to-b from-transparent via-primary/10 to-transparent animate-scan pointer-events-none z-20" />
 
@@ -38,8 +38,8 @@ export function HeroVisual() {
               />
               
               {/* Interaction Hint */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none opacity-0 group-hover/hero:opacity-100 transition-opacity duration-500">
-                <div className="px-4 py-2 rounded-full bg-black/60 border border-white/10 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest text-white flex items-center gap-2">
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none opacity-0 group-hover/hero:opacity-100 transition-opacity duration-standard">
+                <div className="px-3 py-1.5 rounded-md bg-background/60 border border-border backdrop-blur-md text-[9px] font-bold uppercase tracking-widest text-foreground flex items-center gap-2">
                   <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
                   Drag to compare results
                 </div>
@@ -47,14 +47,14 @@ export function HeroVisual() {
             </div>
 
             {/* Right: The CTA / Entry Point */}
-            <div className="lg:col-span-4 p-8 lg:p-10 flex flex-col justify-center border-t lg:border-t-0 lg:border-l border-white/10 bg-white/[0.02]">
+            <div className="lg:col-span-4 p-8 lg:p-10 flex flex-col justify-center border-t lg:border-t-0 lg:border-l border-border bg-surface-mid/50">
               <div className="space-y-6">
-                <div className="flex items-center gap-2 text-primary">
-                  <Sparkles className="h-5 w-5" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.25em]">Neural Engine v2.4</span>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <span className="eyebrow !text-[9px]">Neural Engine v2.4</span>
                 </div>
                 
-                <h3 className="font-display text-3xl font-bold tracking-tight text-white">
+                <h3 className="text-display !text-3xl">
                   Ready to transform your images?
                 </h3>
                 
@@ -65,7 +65,7 @@ export function HeroVisual() {
                 <div className="pt-4 flex flex-col gap-3">
                   <a 
                     href="#workspace" 
-                    className="sheen relative flex items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-4 text-sm font-bold text-primary-foreground shadow-glow transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    className="relative flex items-center justify-center gap-2 rounded-md bg-foreground px-6 py-4 text-sm font-bold text-background shadow-elevated transition-all duration-standard hover:scale-[1.02] active:scale-[0.98]"
                   >
                     <UploadCloud className="h-4 w-4" />
                     Start Enhancing
@@ -73,7 +73,7 @@ export function HeroVisual() {
                   
                   <Link 
                     to="/pricing"
-                    className="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.05] px-6 py-4 text-sm font-semibold text-white transition-all hover:bg-white/[0.1] hover:border-white/20"
+                    className="flex items-center justify-center gap-2 rounded-md border border-border bg-surface-low px-6 py-4 text-sm font-semibold text-foreground transition-all duration-standard hover:bg-surface-mid hover:border-foreground/20"
                   >
                     <Gauge className="h-4 w-4 opacity-70" />
                     Go Premium
@@ -81,14 +81,14 @@ export function HeroVisual() {
                   </Link>
                 </div>
 
-                <div className="pt-8 border-t border-white/5">
+                <div className="pt-8 border-t border-border">
                   <div className="flex items-center gap-4">
                     <div className="flex -space-x-2">
                       {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-8 w-8 rounded-full border-2 border-[oklch(0.1_0.01_250)] bg-white/10" />
+                        <div key={i} className="h-8 w-8 rounded-full border-2 border-surface-low bg-surface-mid" />
                       ))}
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                    <span className="eyebrow !text-[9px]">
                       3k+ images processed
                     </span>
 
