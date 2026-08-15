@@ -59,15 +59,15 @@ interface StatProps {
 function Stat({ icon, label, value, hint, accent }: StatProps) {
   return (
     <div
-      className={`flex flex-col gap-1 rounded-2xl border p-3.5 transition-colors ${
-        accent ? "border-primary/40 bg-primary/5" : "border-border bg-background/40"
+      className={`flex flex-col gap-1 rounded-lg border p-3.5 transition-colors ${
+        accent ? "border-primary/40 bg-primary/5" : "border-border bg-surface-mid/50"
       }`}
     >
       <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
         <span className="text-primary">{icon}</span>
         {label}
       </span>
-      <span className="font-display text-base font-bold leading-tight tabular-nums">{value}</span>
+      <span className="text-display !text-base !leading-tight tabular-nums">{value}</span>
       {hint && <span className="text-[11px] text-muted-foreground">{hint}</span>}
     </div>
   );
@@ -92,17 +92,17 @@ export function AnalysisCard({
 
   return (
     <div
-      className="animate-fade-up rounded-2xl border border-border glass p-4 sm:p-5"
+      className="animate-fade-up rounded-xl border border-border glass p-4 sm:p-5"
       aria-label="AI analysis of your image"
     >
       <div className="mb-3.5 flex items-center justify-between gap-3">
         <span className="flex items-center gap-2 font-display text-sm font-bold">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
-            <BrainCircuit className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
+          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground shadow-elevated">
+            <BrainCircuit className="h-4 w-4 text-background" aria-hidden="true" />
           </span>
           AI Analysis
         </span>
-        <span className="flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/5 px-2.5 py-1 text-xs font-semibold text-primary">
+        <span className="flex items-center gap-1.5 rounded-md border border-primary/40 bg-primary/5 px-2.5 py-1 text-xs font-semibold text-primary">
           <Target className="h-3.5 w-3.5" aria-hidden="true" />
           {accuracy}% prediction accuracy
         </span>

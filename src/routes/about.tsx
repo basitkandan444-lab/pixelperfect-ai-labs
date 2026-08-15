@@ -81,8 +81,7 @@ function AboutPage() {
           Upload a JPG, PNG or WEBP file up to 15MB, choose your target resolution, and the AI
           processes the image and returns a high-resolution PNG you can download instantly.
           Everything happens on demand — there are no queues to sign up for and no files left
-          sitting on a server. If you want a step-by-step walkthrough and real before-and-after
-          examples, the homepage explains the full workflow in detail.
+          sitting on a server.
         </p>
       </Section>
       <Section heading="Privacy first">

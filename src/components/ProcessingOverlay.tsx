@@ -34,17 +34,17 @@ export function ProcessingOverlay({
 
   return (
     <div
-      className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background/80 px-6 backdrop-blur-md"
+      className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-surface-low/95 px-6 backdrop-blur-md"
       role="status"
       aria-live="polite"
     >
       <div className="shimmer absolute inset-0 h-full w-full" aria-hidden="true" />
 
-      <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow">
-        <Wand2 className="h-7 w-7 animate-pulse text-primary-foreground" aria-hidden="true" />
+      <div className="relative flex h-14 w-14 items-center justify-center rounded-lg bg-foreground shadow-elevated">
+        <Wand2 className="h-7 w-7 animate-pulse text-background" aria-hidden="true" />
       </div>
 
-      <p className="relative font-display text-lg font-semibold">
+      <p className="relative text-display !text-lg">
         Enhancing to {scale.toUpperCase()}
       </p>
 
@@ -54,15 +54,15 @@ export function ProcessingOverlay({
         data-testid="eta-countdown"
         aria-live="polite"
       >
-        <span className="font-display text-4xl font-bold tabular-nums text-gradient">
+        <span className="text-display !text-4xl tabular-nums">
           {formatRemaining(etaRemainingMs)}
         </span>
-        <span className="text-xs text-muted-foreground">Predicted with {accuracy}% accuracy</span>
+        <span className="eyebrow !text-[10px]">Predicted with {accuracy}% accuracy</span>
       </div>
 
       {/* Smooth progress bar */}
       <div
-        className="relative h-2 w-full max-w-sm overflow-hidden rounded-full bg-muted"
+        className="relative h-1.5 w-full max-w-sm overflow-hidden rounded-full bg-surface-mid"
         role="progressbar"
         aria-valuenow={pct}
         aria-valuemin={0}
@@ -70,7 +70,7 @@ export function ProcessingOverlay({
         aria-label="Enhancement progress"
       >
         <div
-          className="h-full rounded-full bg-gradient-primary transition-[width] duration-500 ease-out"
+          className="h-full rounded-full bg-foreground transition-[width] duration-500 ease-precision"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -83,12 +83,12 @@ export function ProcessingOverlay({
           return (
             <li key={s.id} className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
               <span
-                className={`flex h-6 w-6 items-center justify-center rounded-full border text-[11px] transition-colors ${
+                className={`flex h-6 w-6 items-center justify-center rounded-md border text-[11px] transition-colors ${
                   done
                     ? "border-primary bg-primary text-primary-foreground"
                     : active
                       ? "border-primary bg-primary/15 text-primary"
-                      : "border-border bg-background/60 text-muted-foreground"
+                      : "border-border bg-surface-mid text-muted-foreground"
                 }`}
               >
                 {done ? (
@@ -116,7 +116,7 @@ export function ProcessingOverlay({
       <button
         type="button"
         onClick={onCancel}
-        className="relative mt-1 rounded-full px-3 py-1 text-xs text-muted-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="relative mt-2 rounded-md px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-all hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         Cancel
       </button>

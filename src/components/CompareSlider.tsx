@@ -131,7 +131,7 @@ export function CompareSlider({
   return (
     <div
       ref={containerRef}
-      className={`group relative w-full select-none overflow-hidden rounded-[2rem] border border-white/10 shadow-cinema transition-transform duration-700 ease-spring hover:scale-[1.01] ${className ?? ""}`}
+      className={`group relative w-full select-none overflow-hidden rounded-lg border border-border bg-surface-low shadow-elevated transition-transform duration-slow ease-precision hover:scale-[1.005] ${className ?? ""}`}
       onMouseMove={(e) => dragging.current && updateFromClientX(e.clientX)}
       onMouseUp={() => (dragging.current = false)}
       onMouseLeave={() => (dragging.current = false)}
@@ -158,16 +158,16 @@ export function CompareSlider({
         />
       </div>
 
-      <span className="pointer-events-none absolute left-4 top-4 rounded-full bg-black/60 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/70 backdrop-blur-xl ring-1 ring-white/10 transition-transform duration-500 group-hover:translate-x-1">
+      <span className="pointer-events-none absolute left-4 top-4 rounded-md border border-border bg-background/60 px-2 py-1 text-[9px] font-bold uppercase tracking-widest text-muted-foreground backdrop-blur-xl transition-transform duration-standard group-hover:translate-x-0.5">
         Original
       </span>
-      <span className="pointer-events-none absolute right-4 top-4 rounded-full bg-primary/90 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-primary-foreground backdrop-blur-sm shadow-glow transition-transform duration-500 group-hover:-translate-x-1">
+      <span className="pointer-events-none absolute right-4 top-4 rounded-md bg-primary px-2 py-1 text-[9px] font-bold uppercase tracking-widest text-primary-foreground backdrop-blur-sm shadow-subtle transition-transform duration-standard group-hover:-translate-x-0.5">
         Enhanced
       </span>
 
 
       <div
-        className="absolute inset-y-0 z-10 w-0.5 bg-gradient-primary"
+        className="absolute inset-y-0 z-10 w-px bg-primary"
         style={{ left: `${pos}%` }}
       >
         <button
@@ -184,7 +184,7 @@ export function CompareSlider({
             dragging.current = true;
           }}
           onTouchStart={() => (dragging.current = true)}
-          className="absolute top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize touch-none items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow transition-all duration-300 hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-4 ring-black/40"
+          className="absolute top-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize touch-none items-center justify-center rounded-full bg-foreground text-background shadow-elevated transition-all duration-standard hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border border-border"
         >
           <svg
             width="20"

@@ -621,44 +621,43 @@ function Index() {
       <div className="relative mx-auto flex max-w-6xl flex-col px-5 pt-6 sm:px-8">
         {/* Floating brand pill — Apple Noir */}
         <header className="animate-fade-up fixed left-1/2 top-6 z-50 w-[calc(100%-2.5rem)] max-w-2xl -translate-x-1/2">
-          <div className="flex items-center justify-between rounded-full border border-white/10 bg-[oklch(0.09_0_0/0.72)] px-5 py-2.5 shadow-cinema backdrop-blur-xl transition-shadow duration-500 hover:shadow-glow">
+          <div className="flex items-center justify-between rounded-lg border border-border bg-surface-low/80 px-5 py-2.5 shadow-modal backdrop-blur-xl transition-all duration-standard hover:border-foreground/20">
             <Link to="/" className="flex items-center gap-2 group" aria-label={`${SITE.name} home`}>
-              <span className="relative flex h-6 w-6 items-center justify-center rounded-md bg-primary transition-transform duration-500 group-hover:rotate-[8deg] group-hover:scale-110">
-                <Sparkles className="h-3.5 w-3.5 text-primary-foreground" aria-hidden="true" />
-                <span className="absolute inset-0 rounded-md bg-primary opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-70" />
+              <span className="relative flex h-6 w-6 items-center justify-center rounded-md bg-foreground transition-transform duration-standard group-hover:rotate-[8deg] group-hover:scale-110">
+                <Sparkles className="h-3.5 w-3.5 text-background" aria-hidden="true" />
               </span>
               <span className="font-display text-lg tracking-tight text-foreground">
-                {SITE.name}
+                Pixel Perfect <span className="text-muted-foreground font-medium">Pro</span>
               </span>
             </Link>
             <nav className="flex items-center gap-1 sm:gap-2">
               <a
                 href="#workspace"
-                className="hidden rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+                className="hidden rounded-md px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
               >
                 Enhance
               </a>
               <a
                 href="#how-heading"
-                className="hidden rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+                className="hidden rounded-md px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
               >
                 How it works
               </a>
               <Link
                 to="/pricing"
-                className="hidden rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+                className="hidden rounded-md px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
               >
                 Pricing
               </Link>
               <Link
                 to="/contact"
-                className="hidden rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+                className="hidden rounded-md px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
               >
                 Contact
               </Link>
               <a
                 href="#workspace"
-                className="sheen inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground transition-all duration-300 hover:brightness-110 hover:shadow-[0_0_20px_-2px_color-mix(in_oklab,var(--primary)_70%,transparent)]"
+                className="inline-flex items-center gap-1.5 rounded-md bg-foreground px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-background transition-all duration-standard hover:scale-[1.02] active:scale-[0.98]"
               >
                 Launch App
               </a>
@@ -671,7 +670,7 @@ function Index() {
           <section className="relative pt-40 pb-20 text-center sm:pt-48">
             <div className="stagger-in">
               <div
-                className="mx-auto mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground backdrop-blur"
+                className="mx-auto mb-8 inline-flex items-center gap-2 rounded-md border border-border bg-surface-low px-3.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.22em] text-muted-foreground backdrop-blur"
               >
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
@@ -680,7 +679,7 @@ function Index() {
                 Neural Core v2.4 Loaded
               </div>
               <h1
-                className="mx-auto max-w-5xl font-display text-[4rem] font-bold leading-[0.9] tracking-[-0.04em] text-white sm:text-7xl md:text-[8.5rem]"
+                className="mx-auto max-w-5xl text-display !text-[4rem] sm:!text-7xl md:!text-[8.5rem]"
               >
                 Obsidian
                 <br />
@@ -701,7 +700,7 @@ function Index() {
             >
               <a
                 href="#workspace"
-                className="sheen group relative inline-flex items-center justify-center gap-2 rounded-full bg-primary px-9 py-4 text-base font-semibold text-primary-foreground shadow-[0_0_40px_-8px_color-mix(in_oklab,var(--primary)_55%,transparent)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_60px_-8px_color-mix(in_oklab,var(--primary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="relative inline-flex items-center justify-center gap-2 rounded-lg bg-foreground px-9 py-4 text-base font-bold text-background shadow-elevated transition-all duration-standard hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 Start enhancing free
                 <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
@@ -735,7 +734,7 @@ function Index() {
 
             <div
 
-              className="animate-hero-in mx-auto mt-14 flex max-w-2xl flex-wrap items-center justify-center gap-x-8 gap-y-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70"
+              className="animate-hero-in mx-auto mt-14 flex max-w-2xl flex-wrap items-center justify-center gap-x-8 gap-y-2 text-[9px] font-bold uppercase tracking-[0.22em] text-muted-foreground/70"
               style={{ animationDelay: "0.7s" }}
             >
               <span>100% on-device</span>
@@ -762,7 +761,7 @@ function Index() {
               <div className="relative mx-auto max-w-4xl">
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute -inset-1 rounded-[2rem] bg-gradient-to-r from-primary/20 via-transparent to-primary/10 opacity-30 blur-xl"
+                  className="pointer-events-none absolute -inset-1 rounded-xl bg-gradient-to-r from-primary/10 via-transparent to-primary/5 opacity-30 blur-xl"
                 />
                 <label
                   onDragOver={(e) => {
@@ -776,10 +775,10 @@ function Index() {
                     const f = e.dataTransfer.files?.[0];
                     if (f) loadFile(f);
                   }}
-                  className={`relative flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed bg-[oklch(0.04_0_0)] px-6 py-20 text-center transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-ring sm:py-28 ${
+                  className={`relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-surface-low px-6 py-20 text-center transition-all duration-standard focus-within:border-primary focus-within:ring-2 focus-within:ring-ring sm:py-28 ${
                     dragOver
                       ? "border-primary bg-primary/5"
-                      : "border-white/10 hover:border-primary/50"
+                      : "border-border hover:border-foreground/30"
                   }`}
                 >
                   <input
@@ -794,10 +793,10 @@ function Index() {
                       if (f) loadFile(f);
                     }}
                   />
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-[oklch(0.09_0_0)]">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-border bg-surface-mid">
                     <UploadCloud className="h-7 w-7 text-primary" aria-hidden="true" />
                   </div>
-                  <h3 className="mt-6 font-display text-3xl text-foreground sm:text-4xl">
+                  <h3 className="mt-6 text-display !text-3xl sm:!text-4xl">
                     Drop your image here
                   </h3>
                   <p className="mt-2 text-sm font-light text-muted-foreground">
@@ -808,12 +807,22 @@ function Index() {
             )}
 
             {stage !== "idle" && original && (
-              <div className="mx-auto flex max-w-4xl flex-col gap-6 rounded-3xl border border-white/10 bg-[oklch(0.04_0_0)] p-4 shadow-cinema sm:p-6">
+              <div className="mx-auto flex max-w-4xl flex-col gap-6 rounded-xl border border-border bg-surface-low p-4 shadow-modal sm:p-6">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <h2 className="text-display !text-3xl sm:!text-4xl">
+                      Precision <span className="text-muted-foreground">Workspace</span>
+                    </h2>
+                    <p className="mt-2 eyebrow !text-[9px]">
+                      {dims ? `${dims.w} × ${dims.h} Original` : "Ready for enhancement"}
+                    </p>
+                  </div>
+                </div>
                 <div className="relative">
                   {stage === "done" && result ? (
                     <div className="space-y-3">
                       {zoom ? (
-                        <div className="relative max-h-[70vh] overflow-auto rounded-2xl border border-border bg-muted/20">
+                        <div className="relative max-h-[70vh] overflow-auto rounded-lg border border-border bg-surface-mid">
                           <img
                             src={result}
                             alt={`Enhanced ${scale.toUpperCase()} result at actual pixels`}
@@ -824,7 +833,7 @@ function Index() {
                             draggable={false}
                             decoding="async"
                           />
-                          <span className="pointer-events-none sticky left-3 top-3 float-left rounded-full bg-background/80 px-2.5 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
+                          <span className="pointer-events-none sticky left-3 top-3 float-left rounded-md bg-background/80 px-2.5 py-1 text-[10px] font-bold tracking-widest text-muted-foreground backdrop-blur uppercase">
                             Actual pixels · scroll to explore
                           </span>
                         </div>
@@ -839,7 +848,7 @@ function Index() {
                         <button
                           type="button"
                           onClick={() => setZoom((z) => !z)}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface-mid px-3 py-1.5 text-[9px] font-bold tracking-widest text-muted-foreground transition-all duration-standard hover:text-foreground hover:bg-surface-high focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring uppercase"
                           aria-pressed={zoom}
                         >
                           {zoom ? "Fit to screen" : "View actual pixels (100%)"}
@@ -857,7 +866,7 @@ function Index() {
                       )}
                     </div>
                   ) : (
-                    <div className="relative flex min-h-[240px] items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted/20">
+                    <div className="relative flex min-h-[240px] items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-mid">
                       <img
                         src={original}
                         alt="Your uploaded image preview"
@@ -893,13 +902,13 @@ function Index() {
                           type="button"
                           aria-pressed={scale === s}
                           onClick={() => setScale(s)}
-                          className={`flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${
+                          className={`flex flex-col items-start gap-1 rounded-lg border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${
                             scale === s
-                              ? "border-primary bg-primary/10 shadow-glow"
-                              : "border-border hover:border-primary/50"
+                              ? "border-primary bg-primary/5 shadow-subtle"
+                              : "border-border bg-surface-mid hover:border-primary/50"
                           }`}
                         >
-                          <span className="flex items-center gap-2 font-display font-bold">
+                          <span className="flex items-center gap-2 text-display !text-sm">
                             <Gauge className="h-4 w-4 text-primary" aria-hidden="true" />
                             {s.toUpperCase()} Quality
                           </span>
@@ -912,10 +921,12 @@ function Index() {
                   )}
 
                   {stage !== "done" && (
-                    <fieldset
-                      className="grid grid-cols-1 gap-3 border-0 p-0 sm:grid-cols-2"
-                      disabled={stage === "loading"}
-                    >
+                    <div>
+                      <h3 className="eyebrow !text-[9px] mb-4">Pipeline Selection</h3>
+                      <fieldset
+                        className="grid grid-cols-1 gap-3 border-0 p-0 sm:grid-cols-2"
+                        disabled={stage === "loading"}
+                      >
                       <legend className="sr-only">Choose enhancement engine</legend>
                       {(
                         [
@@ -942,13 +953,13 @@ function Index() {
                             type="button"
                             aria-pressed={engine === e.id}
                             onClick={() => setEngine(e.id)}
-                            className={`flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${
+                            className={`flex flex-col items-start gap-1 rounded-lg border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${
                               engine === e.id
-                                ? "border-primary bg-primary/10 shadow-glow"
-                                : "border-border hover:border-primary/50"
+                                ? "border-primary bg-primary/5 shadow-subtle"
+                                : "border-border bg-surface-mid hover:border-primary/50"
                             }`}
                           >
-                            <span className="flex items-center gap-2 font-display font-bold">
+                            <span className="flex items-center gap-2 text-display !text-sm">
                               {e.icon === "spark" ? (
                                 <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
                               ) : (
@@ -959,7 +970,8 @@ function Index() {
                             <span className="text-xs text-muted-foreground">{e.desc}</span>
                           </button>
                         ))}
-                    </fieldset>
+                      </fieldset>
+                    </div>
                   )}
 
                   {stage === "ready" && dims && prediction && (
@@ -980,7 +992,7 @@ function Index() {
                   <div className="flex flex-col gap-3 sm:flex-row">
                     {stage !== "done" ? (
                       <Button
-                        variant="hero"
+                        variant="obsidian"
                         size="xl"
                         className="flex-1"
                         disabled={stage === "loading"}
@@ -990,7 +1002,7 @@ function Index() {
                         {stage === "loading" ? "Enhancing…" : `Enhance to ${scale.toUpperCase()}`}
                       </Button>
                     ) : (
-                      <Button variant="hero" size="xl" className="flex-1" onClick={download}>
+                      <Button variant="obsidian" size="xl" className="flex-1" onClick={download}>
                         <Download className="h-5 w-5" aria-hidden="true" />
                         Download {scale.toUpperCase()} Image
                       </Button>
