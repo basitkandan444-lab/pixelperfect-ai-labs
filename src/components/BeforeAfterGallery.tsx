@@ -63,65 +63,67 @@ const ITEMS: GalleryItem[] = [
 
 export function BeforeAfterGallery() {
   return (
-    <section aria-labelledby="gallery-heading" className="mt-20">
+    <section aria-labelledby="gallery-heading" className="mt-32">
       <div className="text-center">
-        <span className="inline-flex items-center gap-2 rounded-full border border-border glass px-4 py-1.5 text-xs font-medium text-muted-foreground">
-          Real results
+        <span className="eyebrow">
+          Real-world Output
         </span>
         <h2
           id="gallery-heading"
-          className="mx-auto mt-5 max-w-2xl font-display text-3xl font-bold tracking-tight sm:text-4xl"
+          className="mx-auto mt-6 max-w-2xl text-display !text-[clamp(2.5rem,6vw,4.5rem)]"
         >
-          Before &amp; after gallery
+          Visual Case Studies
         </h2>
-        <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground">
+        <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
           Drag the slider on each example to see how our AI image enhancer sharpens detail, reduces
           noise and restores clarity across different types of photos.
         </p>
       </div>
 
-      <ul className="mt-10 grid list-none grid-cols-1 gap-6 p-0 lg:grid-cols-2">
+      <ul className="mt-16 grid list-none grid-cols-1 gap-8 p-0 lg:grid-cols-2">
         {ITEMS.map((item, i) => (
-          <li key={item.slug} className="rounded-3xl glass p-4 shadow-elegant sm:p-5">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <h3 className="font-display text-lg font-semibold">{item.title}</h3>
-              <span className="shrink-0 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
+          <li key={item.slug} className="rounded-xl border border-border bg-surface-low p-6 shadow-subtle sm:p-8">
+            <div className="mb-6 flex items-center justify-between gap-3">
+              <h3 className="font-display text-xl font-bold tracking-tight">{item.title}</h3>
+              <span className="shrink-0 rounded-md border border-border bg-surface-mid px-3 py-1 text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
                 {item.category}
               </span>
             </div>
 
-            <CompareSlider
-              before={{
-                src: `/gallery/${item.slug}-before.jpg`,
-                base: `/gallery/${item.slug}-before`,
-                widths: [300, 600, 900],
-                width: 900,
-                height: 675,
-              }}
-              after={{
-                src: `/gallery/${item.slug}-after.jpg`,
-                base: `/gallery/${item.slug}-after`,
-                widths: [300, 600, 900],
-                width: 900,
-                height: 675,
-              }}
-              beforeAlt={`${item.title} — original low-quality version`}
-              afterAlt={`${item.title} — AI enhanced high-resolution version`}
-              loading={i === 0 ? "eager" : "lazy"}
-              fetchPriority={i === 0 ? "high" : undefined}
-            />
+            <div className="overflow-hidden rounded-lg border border-border shadow-elevated">
+              <CompareSlider
+                before={{
+                  src: `/gallery/${item.slug}-before.jpg`,
+                  base: `/gallery/${item.slug}-before`,
+                  widths: [300, 600, 900],
+                  width: 900,
+                  height: 675,
+                }}
+                after={{
+                  src: `/gallery/${item.slug}-after.jpg`,
+                  base: `/gallery/${item.slug}-after`,
+                  widths: [300, 600, 900],
+                  width: 900,
+                  height: 675,
+                }}
+                beforeAlt={`${item.title} — original low-quality version`}
+                afterAlt={`${item.title} — AI enhanced high-resolution version`}
+                loading={i === 0 ? "eager" : "lazy"}
+                fetchPriority={i === 0 ? "high" : undefined}
+              />
+            </div>
 
-            <dl className="mt-4 space-y-2 text-sm">
-              <div className="flex gap-2">
-                <dt className="shrink-0 font-medium text-foreground">Problem:</dt>
+            <dl className="mt-8 space-y-4 text-sm leading-relaxed">
+              <div className="flex gap-3">
+                <dt className="shrink-0 font-bold text-foreground">Problem</dt>
                 <dd className="text-muted-foreground">{item.problem}</dd>
               </div>
-              <div className="flex gap-2">
-                <dt className="shrink-0 font-medium text-foreground">Enhancement:</dt>
+              <div className="flex gap-3">
+                <dt className="shrink-0 font-bold text-foreground">Process</dt>
                 <dd className="text-muted-foreground">{item.enhancement}</dd>
               </div>
-              <div className="flex gap-2">
-                <dt className="shrink-0 font-medium text-foreground">Result:</dt>
+              <div className="flex gap-3">
+                <dt className="shrink-0 font-bold text-foreground">Outcome</dt>
                 <dd className="text-muted-foreground">{item.result}</dd>
               </div>
             </dl>
@@ -129,9 +131,8 @@ export function BeforeAfterGallery() {
         ))}
       </ul>
 
-      <p className="mt-8 text-center text-xs text-muted-foreground">
-        Examples are illustrative. Actual results depend on the quality and content of your original
-        image.
+      <p className="mt-12 text-center text-[10px] font-bold tracking-widest text-muted-foreground/60 uppercase">
+        * Results vary based on source quality.
       </p>
     </section>
   );
