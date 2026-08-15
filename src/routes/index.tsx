@@ -1028,10 +1028,9 @@ function Index() {
                       New Image
                     </Button>
                   </div>
-                )}
+                </div>
               </div>
             )}
-          </section>
           </section>
           <HomeContent />
           <BeforeAfterGallery />
