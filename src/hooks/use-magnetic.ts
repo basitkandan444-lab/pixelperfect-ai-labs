@@ -48,7 +48,9 @@ export function useMagnetic({
       // Update position immediately on move to trigger style change for Playwright
       // The update() loop still handles smoothing
       if (distance < activeDistance) {
-         setPosition(prev => ({ ...prev }));
+        setPosition({ x: dx * strength, y: dy * strength });
+      } else {
+        setPosition({ x: 0, y: 0 });
       }
     };
 
