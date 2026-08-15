@@ -14,6 +14,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SharpenImageRouteImport } from './routes/sharpen-image'
 import { Route as RestoreOldPhotoRouteImport } from './routes/restore-old-photo'
 import { Route as RemoveImageNoiseRouteImport } from './routes/remove-image-noise'
+import { Route as ProtocolIntelligenceRouteImport } from './routes/protocol-intelligence'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as OpsRouteImport } from './routes/ops'
@@ -80,6 +81,11 @@ const RestoreOldPhotoRoute = RestoreOldPhotoRouteImport.update({
 const RemoveImageNoiseRoute = RemoveImageNoiseRouteImport.update({
   id: '/remove-image-noise',
   path: '/remove-image-noise',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProtocolIntelligenceRoute = ProtocolIntelligenceRouteImport.update({
+  id: '/protocol-intelligence',
+  path: '/protocol-intelligence',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -317,6 +323,7 @@ export interface FileRoutesByFullPath {
   '/ops': typeof OpsRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/protocol-intelligence': typeof ProtocolIntelligenceRoute
   '/remove-image-noise': typeof RemoveImageNoiseRoute
   '/restore-old-photo': typeof RestoreOldPhotoRoute
   '/sharpen-image': typeof SharpenImageRoute
@@ -366,6 +373,7 @@ export interface FileRoutesByTo {
   '/ops': typeof OpsRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/protocol-intelligence': typeof ProtocolIntelligenceRoute
   '/remove-image-noise': typeof RemoveImageNoiseRoute
   '/restore-old-photo': typeof RestoreOldPhotoRoute
   '/sharpen-image': typeof SharpenImageRoute
@@ -416,6 +424,7 @@ export interface FileRoutesById {
   '/ops': typeof OpsRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/protocol-intelligence': typeof ProtocolIntelligenceRoute
   '/remove-image-noise': typeof RemoveImageNoiseRoute
   '/restore-old-photo': typeof RestoreOldPhotoRoute
   '/sharpen-image': typeof SharpenImageRoute
@@ -467,6 +476,7 @@ export interface FileRouteTypes {
     | '/ops'
     | '/pricing'
     | '/privacy'
+    | '/protocol-intelligence'
     | '/remove-image-noise'
     | '/restore-old-photo'
     | '/sharpen-image'
@@ -516,6 +526,7 @@ export interface FileRouteTypes {
     | '/ops'
     | '/pricing'
     | '/privacy'
+    | '/protocol-intelligence'
     | '/remove-image-noise'
     | '/restore-old-photo'
     | '/sharpen-image'
@@ -565,6 +576,7 @@ export interface FileRouteTypes {
     | '/ops'
     | '/pricing'
     | '/privacy'
+    | '/protocol-intelligence'
     | '/remove-image-noise'
     | '/restore-old-photo'
     | '/sharpen-image'
@@ -615,6 +627,7 @@ export interface RootRouteChildren {
   OpsRoute: typeof OpsRouteWithChildren
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
+  ProtocolIntelligenceRoute: typeof ProtocolIntelligenceRoute
   RemoveImageNoiseRoute: typeof RemoveImageNoiseRoute
   RestoreOldPhotoRoute: typeof RestoreOldPhotoRoute
   SharpenImageRoute: typeof SharpenImageRoute
@@ -680,6 +693,13 @@ declare module '@tanstack/react-router' {
       path: '/remove-image-noise'
       fullPath: '/remove-image-noise'
       preLoaderRoute: typeof RemoveImageNoiseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/protocol-intelligence': {
+      id: '/protocol-intelligence'
+      path: '/protocol-intelligence'
+      fullPath: '/protocol-intelligence'
+      preLoaderRoute: typeof ProtocolIntelligenceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -1031,6 +1051,7 @@ const rootRouteChildren: RootRouteChildren = {
   OpsRoute: OpsRouteWithChildren,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
+  ProtocolIntelligenceRoute: ProtocolIntelligenceRoute,
   RemoveImageNoiseRoute: RemoveImageNoiseRoute,
   RestoreOldPhotoRoute: RestoreOldPhotoRoute,
   SharpenImageRoute: SharpenImageRoute,
