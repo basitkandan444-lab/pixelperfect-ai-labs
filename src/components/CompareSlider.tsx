@@ -90,9 +90,25 @@ export function CompareSlider({
   const afterImg = toImg(after);
 
   const [pos, setPos] = useState(50);
+  const [springPos, setSpringPos] = useState(50);
   const [width, setWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
+
+  // Inertia / Spring effect for the handle
+  useEffect(() => {
+    let frame: number;
+    const tick = () => {
+      setSpringPos(prev => {
+        const diff = pos - prev;
+        if (Math.abs(diff) < 0.01) return pos;
+        return prev + diff * 0.15; // Simple spring damping
+      });
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [pos]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -146,7 +162,7 @@ export function CompareSlider({
         fetchPriority={fetchPriority}
         sizes={sizes}
       />
-      <div className="absolute inset-0 overflow-hidden" style={{ width: `${pos}%` }}>
+      <div className="absolute inset-0 overflow-hidden" style={{ width: `${springPos}%` }}>
         <Picture
           img={beforeImg}
           alt={beforeAlt ?? "Original low-quality image"}
@@ -168,7 +184,7 @@ export function CompareSlider({
 
       <div
         className="absolute inset-y-0 z-10 w-px bg-primary"
-        style={{ left: `${pos}%` }}
+        style={{ left: `${springPos}%` }}
       >
         <button
           type="button"
