@@ -797,7 +797,7 @@ function Index() {
                   <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-[oklch(0.09_0_0)]">
                     <UploadCloud className="h-7 w-7 text-primary" aria-hidden="true" />
                   </div>
-                  <h3 className="mt-6 font-display text-3xl text-foreground sm:text-4xl">
+                  <h3 className="mt-6 text-display !text-3xl sm:!text-4xl">
                     Drop your image here
                   </h3>
                   <p className="mt-2 text-sm font-light text-muted-foreground">
@@ -899,7 +899,7 @@ function Index() {
                               : "border-border bg-surface-mid hover:border-primary/50"
                           }`}
                         >
-                          <span className="flex items-center gap-2 font-display font-bold">
+                          <span className="flex items-center gap-2 text-display !text-sm">
                             <Gauge className="h-4 w-4 text-primary" aria-hidden="true" />
                             {s.toUpperCase()} Quality
                           </span>
@@ -948,7 +948,7 @@ function Index() {
                                 : "border-border bg-surface-mid hover:border-primary/50"
                             }`}
                           >
-                            <span className="flex items-center gap-2 font-display font-bold">
+                            <span className="flex items-center gap-2 text-display !text-sm">
                               {e.icon === "spark" ? (
                                 <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
                               ) : (
