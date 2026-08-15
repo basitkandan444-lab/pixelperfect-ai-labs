@@ -1,96 +1,65 @@
-# Obsidian Precision Design State Report
+# PIXEL PERFECT PRO™ DESIGN STATE REPORT
+## Obsidian Precision™ — Foundation Audit
 
-## Routes
-- `/`: Primary landing page and workspace.
-- `/pricing`: Subscription plans and features.
-- `/auth`: Sign-in/Sign-up flow.
-- `/investigations`: (Module 4) Ops/performance data (admin only).
-- `/api/public/*`: Public endpoints.
+### 1. ROUTES
+- `/`: Primary landing page + workspace. Heavily fragmented styles.
+- `/auth`: Basic auth flow (presumed).
+- `/pricing`: Detailed pricing tiers (presumed).
 
-## Major Components
-- `Index`: Root route container.
-- `HomeTopSections`: Hero, bento features, core value prop.
-- `HeroVisual`: 3D-tilted image comparison preview.
-- `CompareSlider`: Interactive before/after widget.
-- `ProcessingOverlay`: Modal UI for active enhancement.
-- `AnalysisCard`: Detailed visual metrics for processed images.
-- `SiteFooter`: Global navigation and legal.
+### 2. MAJOR COMPONENTS
+- `HeroVisual.tsx`: 3D perspective container with `CompareSlider`. Mixes `oklch` with raw hex/color-mix.
+- `HomeTopSections.tsx`: Bento grid with pricing spotlight. Uses `shadow-cinema` and custom shimmer.
+- `CompareSlider.tsx`: Core interaction component.
+- `ProcessingOverlay.tsx`: Enhancement state UI.
+- `UpgradeWall.tsx`: Gating UI.
 
-## Design System
-- **Current DNA**: "Noir & Gold" / "Cinematic Noir" with Electric Blue (`oklch(0.65 0.2 250)`) accents.
-- **Surface Strategy**: Glassmorphism (`backdrop-filter: blur(16px)`), subtle borders (`white/10`), and deep noir backgrounds (`oklch(0.12 0.02 250)`).
-- **Shadows**: Custom `shadow-cinema` and `shadow-glow` for depth.
+### 3. DESIGN SYSTEM (CURRENT DEBT)
+- **Colors**: Mixing `oklch(0.12 0.02 250)` background with `oklch(0.1 0.01 250)` and `bg-white/[0.02]`. Primary is `oklch(0.65 0.2 250)` (Electric Blue).
+- **Typography**: Sora (Display) and Manrope (Sans). Sizes are often hardcoded (e.g., `text-[10px]`, `text-7xl`).
+- **Spacing**: Fragmented. `mt-12`, `mt-16`, `px-4`, `p-8`. No centralized spacing scale being strictly followed.
+- **Radii**: `rounded-[2.5rem]`, `rounded-[2rem]`, `rounded-[1.5rem]`, `rounded-full`. Inconsistent hierarchy.
+- **Elevation**: `shadow-cinema`, `shadow-elegant`, `shadow-glow`. Custom definitions in `styles.css`.
 
-## Typography
-- **Display**: Sora (700 weight, -0.03em tracking).
-- **Sans/Body**: Manrope.
-- **Status**: Inter/Space Grotesk (utility usage).
-- **Scale**: Large hero display (8rem/9vw), medium headings (3xl/4xl), small body (text-sm/text-base).
+### 4. FORENSIC DEBT MAP
 
-## Colors (oklch)
-- **Background**: `oklch(0.12 0.02 250)` (Deep Noir).
-- **Foreground**: `oklch(0.98 0.01 250)` (Off-white).
-- **Primary**: `oklch(0.65 0.2 250)` (Electric Blue).
-- **Accent**: `oklch(0.75 0.15 190)` (Electric Cyan).
-- **Borders**: `oklch(0.22 0.02 250)` / `white/10`.
+| LOCATION | CURRENT STATE | USER IMPACT | PRIORITY | RECOMMENDED DIRECTION |
+| :--- | :--- | :--- | :--- | :--- |
+| `styles.css` | Multiple `@keyframes` and `@utility` blocks scattered. | Maintenance burden, potential performance lag on lower-end devices. | Medium | Consolidate into semantic animation system. |
+| `HomeTopSections.tsx` | Hardcoded `rounded-[2.5rem]` and `bg-white/[0.02]`. | Visual inconsistency with other cards. | High | Use semantic surface and radius tokens. |
+| `HeroVisual.tsx` | Mix of perspective transforms and grid layouts. | Fragile responsive behavior. | High | Standardize perspective container primitive. |
+| `src/routes/index.tsx` | 1000+ lines. Component logic mixed with UI layout. | Slow iteration speed. | Medium | Extract sub-sections into dedicated components. |
+| Global | Inconsistent use of "Gold" remnants vs new "Electric Blue". | Brand confusion. | High | Purge all legacy "Gold" references. |
 
-## Spacing
-- Current: Uses Tailwind defaults with custom `stagger-in` delays. Large hero margins (`mt-24/32`).
-- Need: Coherent elite spacing scale (Precision).
+### 5. TECHNICAL CONSTRAINTS
+- **SSR Safety**: Must guard ML and browser-only APIs (`navigator.gpu`, `onnxruntime`).
+- **Performance**: High-density gradients and backdrop-filters can impact mobile FPS.
+- **Accessibility**: Current contrast on `muted-foreground` in dark mode needs verification. Focus states are default or missing in some custom triggers.
 
-## Navigation
-- Floating frosted pill (refactored previously).
-- Fixed footer.
+---
 
-## Hero
-- 3D perspective frame with interactive comparison.
-- Multi-scenario switching (landscape, face, portrait).
-- "Noir & Gold" typography.
+## IMPLEMENTATION PLAN — SECTION 1
 
-## Upload Experience
-- Large dropzone/workspace area.
-- Progressive file validation.
-- Background engine warming.
+### PHASE 1.1: SEMANTIC PRIMITIVES (Smith + Ellie)
+- Refine `src/styles.css` with a strict semantic scale for:
+  - **Surfaces**: `surface-base`, `surface-elevated`, `surface-modal`.
+  - **Borders**: `border-subtle`, `border-muted`, `border-strong`.
+  - **Typography**: Responsive `text-display`, `text-h1`, etc.
+  - **Motion**: `ease-precision` (cubic-bezier), `duration-fast`, `duration-standard`.
 
-## Enhancement UI
-- Local processing focus.
-- Predictive progress bars.
-- Real-time stage updates.
+### PHASE 1.2: COMPONENT MIGRATION (Smith)
+- Update `Button.tsx` to include an `obsidian` variant.
+- Create a `Card` primitive in `src/components/ui/card.tsx` that handles the `card-premium` logic.
+- Standardize `HeroVisual` and `HomeTopSections` to use these new primitives.
 
-## Comparison UI
-- Custom `CompareSlider` with keyboard support.
-- Group-hover zoom effects.
+### PHASE 1.3: TYPOGRAPHY & SPACING UNIFICATION (Ellie)
+- Replace all hardcoded `text-[10px]` with semantic `text-caption` or `text-eyebrow`.
+- Apply a consistent `8-12-16-24-32-48-64` spacing scale.
 
-## Pricing
-- Focused on $3.99/mo plan.
-- Bento-style layout.
+### PHASE 1.4: VERIFICATION & QA (Elon + Alex)
+- Build check.
+- Visual regression check (manually via preview).
+- Accessibility audit (Keyboard + Screen Reader).
+- Mobile responsive stress test.
 
-## Dialogs / Modals
-- `UpgradeWall`: Subscription conversion point.
-- `ProcessingOverlay`: Full-screen context during AI work.
-
-## Mobile Experience
-- Responsive grid adjustments (stacking `HeroVisual`).
-- Touch support for sliders.
-
-## Animations
-- `animate-tilt`: Slow perspective rotation.
-- `animate-scan`: Vertical scanline effect.
-- `animate-hero-in`: Fade-blur entry.
-- `gravity-float`: Hero element drift.
-
-## Technical Constraints
-- **SSR Safety**: Must guard ML/onnxruntime imports.
-- **Bundle Size**: 680KB target.
-- **Privacy**: Local-first processing (browser-only).
-
-## Visual Inconsistencies
-- Mix of `white/10` and `oklch` borders.
-- Variable border-radii (`rounded-2xl` vs `rounded-[2.5rem]`).
-- Hover states differ between primary buttons and card-links.
-
-## Acceptance Criteria for Phase 1
-- One coherent source of truth for design tokens.
-- Transition from "Noir & Gold" to "Obsidian Precision" (Elite Grey/Steel/Blue).
-- Centralized motion tokens.
-- Hardcoded color cleanup.
+---
+**DECISION: READY TO INITIALIZE SECTION 1 MIGRATION.**
