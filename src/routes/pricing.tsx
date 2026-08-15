@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -9,6 +9,7 @@ import { z } from "zod";
 import { useSession } from "@/hooks/use-session";
 import { useBillingStatus } from "@/hooks/use-billing-status";
 import { Button } from "@/components/ui/button";
+import { SITE } from "@/lib/site";
 import { getMyEntitlement } from "@/lib/subscription.functions";
 import {
   createPaddleCheckoutSession,
