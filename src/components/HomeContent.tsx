@@ -408,19 +408,19 @@ export function HomeContent() {
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {USE_CASES.map((u) => (
             <div key={u.title} className="group lift flex flex-col rounded-3xl glass p-6">
-              <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/15 ring-1 ring-inset ring-primary/30 transition-transform duration-300 group-hover:scale-110">
-                <u.icon className="h-5 w-5 text-primary" aria-hidden="true" />
+              <div className="relative flex h-11 w-11 items-center justify-center rounded-lg bg-surface-mid ring-1 ring-inset ring-border transition-transform duration-standard group-hover:scale-110">
+                <u.icon className="h-5 w-5 text-foreground" aria-hidden="true" />
               </div>
-              <h3 className="mt-5 font-display text-base font-semibold tracking-tight">
+              <h3 className="mt-5 text-display !text-base">
                 {u.title}
               </h3>
               <dl className="mt-2 space-y-1.5 text-sm leading-relaxed text-muted-foreground">
                 <div>
-                  <dt className="inline font-medium text-foreground/80">Problem: </dt>
+                  <dt className="inline eyebrow !text-[8px] !text-foreground/80">Problem: </dt>
                   <dd className="inline">{u.problem}</dd>
                 </div>
                 <div>
-                  <dt className="inline font-medium text-foreground/80">Result: </dt>
+                  <dt className="inline eyebrow !text-[8px] !text-foreground/80">Result: </dt>
                   <dd className="inline">{u.result}</dd>
                 </div>
               </dl>
@@ -442,8 +442,8 @@ export function HomeContent() {
         />
         <div className="mx-auto mt-12 grid max-w-4xl gap-4 sm:grid-cols-2">
           {SEARCH_INTENT.map((item) => (
-            <article key={item.q} className="lift rounded-3xl glass p-6">
-              <h3 className="font-display text-base font-semibold tracking-tight">{item.q}</h3>
+            <article key={item.q} className="rounded-xl border border-border bg-surface-low/40 p-6 shadow-modal transition-all duration-standard hover:border-foreground/20 hover:scale-[1.01]">
+              <h3 className="text-display !text-base">{item.q}</h3>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.a}</p>
             </article>
           ))}
@@ -460,8 +460,8 @@ export function HomeContent() {
         />
         <div className="mx-auto mt-12 grid max-w-3xl gap-4 sm:grid-cols-3">
           {FORMATS.map((f) => (
-            <div key={f.name} className="group lift rounded-3xl glass p-6 text-center">
-              <p className="font-display text-2xl font-bold text-aurora">{f.name}</p>
+            <div key={f.name} className="rounded-xl border border-border bg-surface-low/40 p-6 text-center shadow-modal transition-all duration-standard hover:border-foreground/20 hover:scale-[1.02]">
+              <p className="text-display !text-2xl text-primary">{f.name}</p>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
             </div>
           ))}
@@ -470,12 +470,12 @@ export function HomeContent() {
 
       {/* Trust */}
       <section className="mt-24" aria-labelledby="trust-heading">
-        <div className="mx-auto max-w-4xl rounded-3xl glass p-6 sm:p-10">
+        <div className="mx-auto max-w-4xl rounded-xl border border-border bg-surface-low/40 p-6 sm:p-10 shadow-modal">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15">
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-surface-mid ring-1 ring-inset ring-border">
               <ShieldCheck className="h-5 w-5 text-primary" aria-hidden="true" />
             </div>
-            <h2 id="trust-heading" className="font-display text-2xl font-bold sm:text-3xl">
+            <h2 id="trust-heading" className="text-display !text-2xl sm:!text-3xl">
               Privacy, ownership &amp; what to expect
             </h2>
           </div>
@@ -487,9 +487,9 @@ export function HomeContent() {
             {TRUST.map((t) => (
               <div
                 key={t.title}
-                className="rounded-2xl border border-border/60 bg-background/30 p-4"
+                className="rounded-lg border border-border bg-surface-mid/50 p-4 transition-all duration-standard hover:border-foreground/20"
               >
-                <h3 className="font-display text-sm font-semibold">{t.title}</h3>
+                <h3 className="text-display !text-sm">{t.title}</h3>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{t.desc}</p>
               </div>
             ))}
@@ -498,14 +498,14 @@ export function HomeContent() {
             For the full detail, read our{" "}
             <Link
               to="/privacy"
-              className="text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="text-foreground font-bold underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Privacy Policy
             </Link>{" "}
             and{" "}
             <Link
               to="/terms"
-              className="text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="text-foreground font-bold underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Terms of Service
             </Link>
@@ -516,7 +516,7 @@ export function HomeContent() {
 
       {/* FAQ */}
       <section className="mt-24" aria-labelledby="faq-heading">
-        <h2 id="faq-heading" className="text-center font-display text-2xl font-bold sm:text-3xl">
+        <h2 id="faq-heading" className="text-center text-display !text-2xl sm:!text-3xl">
           Frequently asked questions
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-muted-foreground sm:text-base">
@@ -525,11 +525,11 @@ export function HomeContent() {
         </p>
         <div className="mx-auto mt-8 flex max-w-3xl flex-col gap-3">
           {FAQS.map((f) => (
-            <details key={f.q} className="group rounded-2xl glass p-5 [&_summary]:cursor-pointer">
-              <summary className="flex items-center justify-between gap-4 font-display text-base font-semibold marker:content-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <details key={f.q} className="group rounded-xl border border-border bg-surface-low/40 p-5 shadow-modal transition-all duration-standard hover:border-foreground/20 [&_summary]:cursor-pointer">
+              <summary className="flex items-center justify-between gap-4 text-display !text-base marker:content-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 {f.q}
                 <span
-                  className="text-primary transition-transform group-open:rotate-45"
+                  className="text-primary font-display text-2xl transition-transform group-open:rotate-45"
                   aria-hidden="true"
                 >
                   +
@@ -544,7 +544,7 @@ export function HomeContent() {
       {/* Popular tools / internal linking to search-intent landing pages */}
       <section className="mt-24" aria-labelledby="tools-heading">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 id="tools-heading" className="font-display text-2xl font-bold sm:text-3xl">
+          <h2 id="tools-heading" className="text-display !text-2xl sm:!text-3xl">
             Popular image tools
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
@@ -564,7 +564,7 @@ export function HomeContent() {
               <Link
                 key={l.to}
                 to={l.to}
-                className="rounded-full border border-border glass px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="rounded-md border border-border bg-surface-low px-4 py-2 eyebrow !text-[9px] !text-muted-foreground transition-all duration-standard hover:border-foreground/30 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {l.label}
               </Link>
@@ -576,7 +576,7 @@ export function HomeContent() {
       {/* Explore / internal linking */}
       <section className="mt-24" aria-labelledby="explore-heading">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 id="explore-heading" className="font-display text-2xl font-bold sm:text-3xl">
+          <h2 id="explore-heading" className="text-display !text-2xl sm:!text-3xl">
             Explore Pixel Perfect Pro
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
@@ -593,7 +593,7 @@ export function HomeContent() {
               <Link
                 key={l.to}
                 to={l.to}
-                className="rounded-full border border-border glass px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="rounded-md border border-border bg-surface-low px-4 py-2 eyebrow !text-[9px] !text-muted-foreground transition-all duration-standard hover:border-foreground/30 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {l.label}
               </Link>
