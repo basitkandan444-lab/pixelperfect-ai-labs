@@ -9,8 +9,8 @@ export function HeroVisual() {
   
   // Only apply magnetic tilt if within range (e.g. 600px)
   const isNear = distance < 600;
-  const tiltX = isNear ? (y / 600) * -10 : 0;
-  const tiltY = isNear ? (x / 600) * 10 : 0;
+  const tiltX = isNear ? (y / 600) * -4 : 0; // Reduced intensity for restraint
+  const tiltY = isNear ? (x / 600) * 4 : 0;
 
   return (
     <div 
@@ -19,17 +19,17 @@ export function HeroVisual() {
     >
       {/* 3D Perspective Container - subtle on mobile, interactive on desktop */}
       <div 
-        className="relative transition-all duration-standard ease-precision group-hover/hero:scale-[1.01] touch-none sm:touch-auto"
+        className="relative transition-transform duration-slow ease-expo-out group-hover/hero:scale-[1.005] touch-none sm:touch-auto"
         style={{
-          transform: `perspective(1200px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`,
+          transform: `perspective(2000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`,
           willChange: "transform"
         }}
       >
         {/* Glow Layer */}
         <div 
-          className="absolute -inset-10 bg-primary/5 blur-[100px] opacity-30 group-hover/hero:opacity-50 transition-opacity" 
+          className="absolute -inset-20 bg-primary/10 blur-[120px] opacity-20 group-hover/hero:opacity-40 transition-opacity duration-slow pointer-events-none" 
           style={{
-            transform: `translate3d(${tiltY * 2}px, ${tiltX * 2}px, 0)`,
+            transform: `translate3d(${tiltY * 4}px, ${tiltX * 4}px, 0)`,
           }}
         />
         

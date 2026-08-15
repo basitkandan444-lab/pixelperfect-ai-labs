@@ -34,7 +34,7 @@ export function ProcessingOverlay({
 
   return (
     <div
-      className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-surface-low/95 px-6 backdrop-blur-md"
+      className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-surface-low/98 px-6 backdrop-blur-xl animate-hero-in"
       role="status"
       aria-live="polite"
     >
@@ -70,7 +70,7 @@ export function ProcessingOverlay({
         aria-label="Enhancement progress"
       >
         <div
-          className="h-full rounded-full bg-primary shadow-[0_0_12px_oklch(0.65_0.2_250_/_0.4)] transition-[width] duration-500 ease-spring"
+          className="h-full rounded-full bg-primary shadow-[0_0_12px_oklch(0.65_0.2_250_/_0.4)] transition-[width] duration-700 ease-expo-out"
           style={{ width: `${pct}%` }}
         />
       </div>
