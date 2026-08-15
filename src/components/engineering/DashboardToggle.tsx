@@ -35,6 +35,7 @@ export function DashboardToggle() {
         }
 
         const { data } = await supabase.rpc("has_role", {
+          _user_id: session.user.id,
           _role: "admin"
         });
         setIsAdmin(!!data);
