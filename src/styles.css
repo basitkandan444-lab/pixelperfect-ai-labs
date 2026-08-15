@@ -394,16 +394,16 @@
   background: linear-gradient(
     100deg,
     oklch(0.98 0 0) 0%,
-    var(--primary) 30%,
-    oklch(0.9 0.02 260) 45%,
-    var(--primary) 60%,
+    var(--primary) 35%,
+    oklch(0.9 0.02 260) 50%,
+    var(--primary) 65%,
     oklch(0.98 0 0) 100%
   );
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: text-shimmer 8s linear infinite;
+  animation: text-shimmer 12s linear infinite;
 }
 
 .reveal {
