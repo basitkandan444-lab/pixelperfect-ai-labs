@@ -149,12 +149,17 @@ function PricingPage() {
         }}
       />
       <nav className="relative z-10 flex items-center justify-between px-6 py-6 md:px-10">
-        <Link to="/" className="font-display text-xl font-bold tracking-tight">
-          Pixel Perfect Pro
+        <Link to="/" className="flex items-center gap-2 group" aria-label={`${SITE.name} home`}>
+          <span className="relative flex h-6 w-6 items-center justify-center rounded-md bg-foreground transition-transform duration-standard group-hover:rotate-[8deg] group-hover:scale-110">
+            <Sparkles className="h-3.5 w-3.5 text-background" aria-hidden="true" />
+          </span>
+          <span className="text-display !text-lg">
+            Pixel Perfect <span className="text-muted-foreground font-medium">Pro</span>
+          </span>
         </Link>
         <Link
           to="/"
-          className="rounded-md border border-border bg-surface-low px-4 py-1.5 text-sm font-medium text-foreground transition hover:bg-surface-mid"
+          className="rounded-md border border-border bg-surface-low px-4 py-1.5 eyebrow !text-[9px] !text-muted-foreground transition hover:text-foreground hover:bg-surface-mid"
         >
           ← Back
         </Link>
@@ -162,11 +167,11 @@ function PricingPage() {
 
       <section className="relative z-10 mx-auto max-w-6xl px-6 pb-24 pt-8 md:pt-16">
         <header className="text-center">
-          <span className="eyebrow">Premium plans</span>
+          <span className="eyebrow !text-primary">Premium plans</span>
           <h1 className="mt-6 text-display !text-[clamp(2.5rem,7vw,5rem)]">
             Unlock the full potential.
           </h1>
-          <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
+          <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground leading-relaxed">
             Choose the plan that powers your creativity without boundaries.
           </p>
         </header>
@@ -364,13 +369,13 @@ function Plan({
         </span>
       )}
       <div className="flex items-baseline justify-between">
-        <h3 className="font-display text-2xl font-bold tracking-tight">{name}</h3>
+        <h3 className="text-display !text-2xl">{name}</h3>
       </div>
       <div className="mt-8 flex items-baseline gap-2">
-        <span className="font-display text-5xl font-bold tracking-tight">{price}</span>
-        <span className="text-sm text-muted-foreground">{cadence}</span>
+        <span className="text-display !text-5xl">{price}</span>
+        <span className="eyebrow !text-[9px] !text-muted-foreground">{cadence}</span>
       </div>
-      <ul className="mt-10 space-y-4 text-sm leading-relaxed text-muted-foreground">
+      <ul className="mt-10 space-y-4 text-sm leading-relaxed text-muted-foreground/80">
         {features.map((f) => (
           <li key={f} className="flex items-start gap-3">
             <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
