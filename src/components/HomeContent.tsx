@@ -213,13 +213,13 @@ function SectionHead({
 }) {
   return (
     <div className="text-center">
-      <span className="eyebrow">
-        <span className="h-px w-6 bg-gradient-primary" aria-hidden="true" />
+      <span className="eyebrow flex items-center justify-center gap-2">
+        <span className="h-px w-6 bg-primary" aria-hidden="true" />
         {eyebrow}
       </span>
       <h2
         id={id}
-        className="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl"
+        className="mt-3 text-display !text-3xl sm:!text-4xl md:!text-5xl"
       >
         {title}
       </h2>
@@ -240,12 +240,12 @@ export function HomeContent() {
         </h2>
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-3 md:grid-cols-12 md:gap-4">
           {/* Privacy — wide */}
-          <div className="card-premium group relative overflow-hidden rounded-[2.5rem] border border-white/5 bg-surface-low/60 p-8 sm:p-10 md:col-span-8 shadow-cinema">
+          <div className="card-premium group relative overflow-hidden rounded-xl border border-border bg-surface-low/60 p-8 sm:p-10 md:col-span-8 shadow-modal transition-all duration-standard hover:border-foreground/20">
             <div className="relative z-10 max-w-md">
-              <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+              <span className="eyebrow !text-primary !text-[9px]">
                 Privacy by design
               </span>
-              <h3 className="mt-4 font-display text-4xl tracking-tighter text-foreground sm:text-6xl">
+              <h3 className="mt-4 text-display !text-4xl sm:!text-6xl">
                 100% on-device.
               </h3>
               <p className="mt-4 text-base font-medium leading-relaxed text-muted-foreground/80">
@@ -261,28 +261,28 @@ export function HomeContent() {
           </div>
 
           {/* Speed */}
-          <div className="card-premium rounded-[2.5rem] border border-white/5 bg-surface-low/40 p-8 text-center sm:p-10 md:col-span-4 shadow-elegant">
+          <div className="card-premium rounded-xl border border-border bg-surface-low/40 p-8 text-center sm:p-10 md:col-span-4 shadow-modal transition-all duration-standard hover:border-foreground/20">
             <div className="flex h-full flex-col items-center justify-center gap-2">
-              <div className="font-display text-6xl text-primary">0.4s</div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+              <div className="text-display !text-6xl text-primary">0.4s</div>
+              <div className="eyebrow !text-[9px]">
                 Avg. processing time
               </div>
             </div>
           </div>
 
           {/* Formats */}
-          <div className="card-premium rounded-[2.5rem] border border-white/5 bg-surface-low/30 p-8 md:col-span-4 shadow-elegant">
+          <div className="card-premium rounded-xl border border-border bg-surface-low/30 p-8 md:col-span-4 shadow-modal transition-all duration-standard hover:border-foreground/20">
             <div className="flex flex-wrap gap-1.5">
               {["JPG", "PNG", "WEBP"].map((f) => (
                 <span
                   key={f}
-                  className="rounded-md border border-white/10 bg-black/40 px-2 py-1 text-[10px] font-semibold tracking-wider text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+                  className="rounded-md border border-border bg-surface-mid px-2 py-1 eyebrow !text-[9px] !text-muted-foreground transition-all duration-standard hover:border-primary/40 hover:text-foreground"
                 >
                   {f}
                 </span>
               ))}
             </div>
-            <h4 className="mt-8 font-display text-3xl tracking-tight text-foreground">
+            <h4 className="mt-8 text-display !text-3xl">
               All formats.
             </h4>
             <p className="mt-2 text-sm font-light text-muted-foreground">
@@ -291,13 +291,13 @@ export function HomeContent() {
           </div>
 
           {/* 8K */}
-          <div className="card-premium group rounded-[2.5rem] border border-white/5 bg-surface-low/30 p-8 md:col-span-4 shadow-elegant">
+          <div className="card-premium group rounded-xl border border-border bg-surface-low/30 p-8 md:col-span-4 shadow-modal transition-all duration-standard hover:border-foreground/20">
             <div className="flex items-baseline gap-1">
               <div className="h-6 w-1 bg-primary transition-all duration-500 group-hover:h-8" />
               <div className="h-6 w-1 bg-primary transition-all delay-75 duration-500 group-hover:h-10" />
               <div className="h-6 w-1 bg-primary/30 transition-all delay-150 duration-500 group-hover:h-7 group-hover:bg-primary/70" />
             </div>
-            <h4 className="mt-8 font-display text-3xl tracking-tight text-foreground">
+            <h4 className="mt-8 text-display !text-3xl">
               8K upscaling.
             </h4>
             <p className="mt-2 text-sm font-light text-muted-foreground">
@@ -306,12 +306,12 @@ export function HomeContent() {
           </div>
 
           {/* Start free — accent tile */}
-          <div className="sheen group flex flex-col items-center justify-center rounded-[2.5rem] bg-primary p-8 text-center text-primary-foreground transition-transform duration-500 hover:-translate-y-1 md:col-span-4 shadow-glow">
-            <h4 className="font-display text-3xl leading-none">Start free.</h4>
-            <span className="mt-3 text-xs font-medium opacity-80">
+          <a href="#workspace" className="group flex flex-col items-center justify-center rounded-xl bg-foreground p-8 text-center text-background transition-all duration-standard hover:scale-[1.02] active:scale-[0.98] md:col-span-4 shadow-elevated">
+            <h4 className="text-display !text-3xl !leading-none text-background">Start free.</h4>
+            <span className="mt-3 eyebrow !text-[9px] !text-background/80">
               5 enhancements on us. Upgrade any time.
             </span>
-          </div>
+          </a>
         </div>
       </section>
 
@@ -328,7 +328,7 @@ export function HomeContent() {
           {STEPS.map((s, i) => (
             <li
               key={s.title}
-              className="group lift relative overflow-hidden rounded-3xl glass p-6 md:p-7"
+              className="group relative overflow-hidden rounded-xl border border-border bg-surface-low/40 p-6 md:p-7 shadow-modal transition-all duration-standard hover:border-foreground/20 hover:scale-[1.02]"
             >
               <span
                 className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
@@ -339,15 +339,15 @@ export function HomeContent() {
                 aria-hidden="true"
               />
               <div className="relative flex items-center justify-between">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow ring-1 ring-inset ring-white/20">
-                  <s.icon className="h-5 w-5 text-primary-foreground" aria-hidden="true" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-foreground shadow-elevated transition-transform duration-standard group-hover:scale-110">
+                  <s.icon className="h-5 w-5 text-background" aria-hidden="true" />
                 </div>
-                <span className="font-display text-4xl font-bold text-muted-foreground/10">
+                <span className="text-display !text-4xl text-muted-foreground/10">
                   0{i + 1}
                 </span>
 
               </div>
-              <h3 className="relative mt-6 font-display text-lg font-bold tracking-tight">
+              <h3 className="relative mt-6 text-display !text-lg">
                 {s.title}
               </h3>
               <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground/80">
@@ -371,22 +371,22 @@ export function HomeContent() {
           {BENEFITS.map((b) => (
             <div
               key={b.title}
-              className="group lift relative overflow-hidden rounded-3xl glass p-6 md:p-7"
+              className="group relative overflow-hidden rounded-xl border border-border bg-surface-low/40 p-6 md:p-7 shadow-modal transition-all duration-standard hover:border-foreground/20 hover:scale-[1.02]"
             >
               <span
                 aria-hidden="true"
                 className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
               />
-              <h3 className="font-display text-base font-semibold tracking-tight">{b.title}</h3>
+              <h3 className="text-display !text-base">{b.title}</h3>
               <div className="mt-4 flex flex-col gap-3 text-sm leading-relaxed">
                 <p className="text-muted-foreground">
-                  <span className="mr-1.5 inline-block rounded-md bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-destructive">
+                  <span className="mr-1.5 inline-block rounded-md bg-destructive/10 px-1.5 py-0.5 eyebrow !text-[8px] !text-destructive">
                     Problem
                   </span>
                   {b.problem}
                 </p>
                 <p className="text-foreground/90">
-                  <span className="mr-1.5 inline-block rounded-md bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                  <span className="mr-1.5 inline-block rounded-md bg-primary/15 px-1.5 py-0.5 eyebrow !text-[8px] !text-primary">
                     Outcome
                   </span>
                   {b.outcome}
