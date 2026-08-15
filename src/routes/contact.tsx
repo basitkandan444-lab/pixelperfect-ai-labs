@@ -67,7 +67,7 @@ function ContactPage() {
   };
 
   const field =
-    "w-full rounded-lg border border-border bg-surface-mid/50 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-all duration-standard focus-visible:bg-surface-mid focus-visible:border-foreground/30";
+    "w-full rounded-lg border border-border bg-surface-mid/50 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-all duration-standard focus-visible:bg-surface-mid focus-visible:border-foreground/30";
 
   return (
     <ContentPage
