@@ -645,19 +645,19 @@ function Index() {
               </a>
               <Link
                 to="/pricing"
-                className="hidden rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+                className="hidden rounded-md px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
               >
                 Pricing
               </Link>
               <Link
                 to="/contact"
-                className="hidden rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+                className="hidden rounded-md px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
               >
                 Contact
               </Link>
               <a
                 href="#workspace"
-                className="sheen inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground transition-all duration-300 hover:brightness-110 hover:shadow-[0_0_20px_-2px_color-mix(in_oklab,var(--primary)_70%,transparent)]"
+                className="inline-flex items-center gap-1.5 rounded-md bg-foreground px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-background transition-all duration-standard hover:scale-[1.02] active:scale-[0.98]"
               >
                 Launch App
               </a>
