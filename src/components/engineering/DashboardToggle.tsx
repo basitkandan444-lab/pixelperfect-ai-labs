@@ -10,27 +10,36 @@ export function DashboardToggle() {
   const [isDev, setIsDev] = useState(false);
 
   useEffect(() => {
-    setIsDev(
-      typeof window !== "undefined" &&
-        (window.location.hostname === "localhost" ||
-          window.location.hostname.includes("lovable.app"))
-    );
+    // Immediate check for visibility in the dev/preview environment
+    const checkVisibility = () => {
+      const isLocal = window.location.hostname === "localhost" || 
+                     window.location.hostname === "127.0.0.1" ||
+                     window.location.hostname.includes(".lovable.app");
+      setIsDev(isLocal);
+    };
+
+    checkVisibility();
 
     async function checkAdmin() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) return;
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (!session) return;
 
-      const { data } = await supabase.rpc("has_role", {
-        _user_id: session.user.id,
-        _role: "admin",
-      });
-      setIsAdmin(!!data);
+        const { data } = await supabase.rpc("has_role", {
+          _user_id: session.user.id,
+          _role: "admin",
+        });
+        setIsAdmin(!!data);
+      } catch (e) {
+        console.error("Admin check failed:", e);
+      }
     }
     checkAdmin();
   }, []);
 
+  // Ensure visibility for the user in their current environment
   if (!isDev && !isAdmin) return null;
 
   return (
