@@ -116,7 +116,7 @@ function ContactPage() {
 
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">
-          <label htmlFor="name" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          <label htmlFor="name" className="eyebrow !text-[9px]">
             Name
           </label>
           <input
@@ -139,7 +139,7 @@ function ContactPage() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <label htmlFor="email" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          <label htmlFor="email" className="eyebrow !text-[9px]">
             Email
           </label>
           <input
@@ -162,7 +162,7 @@ function ContactPage() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <label htmlFor="message" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          <label htmlFor="message" className="eyebrow !text-[9px]">
             Message
           </label>
           <textarea
