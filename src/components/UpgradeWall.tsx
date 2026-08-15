@@ -51,36 +51,35 @@ export function UpgradeWall({
       <button
         aria-label="Close upgrade dialog"
         onClick={onClose}
-        className="absolute inset-0 bg-black/70 backdrop-blur-md"
+        className="absolute inset-0 bg-background/60 backdrop-blur-md"
       />
 
-      <div className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-white/15 bg-[oklch(0.09_0_0/0.92)] p-8 text-white shadow-[0_30px_120px_-30px_rgba(10,132,255,0.55)]">
+      <div className="relative w-full max-w-lg overflow-hidden rounded-xl border border-border bg-surface-low/95 p-8 text-foreground shadow-modal backdrop-blur-3xl">
         <button
           onClick={onClose}
           aria-label="Close"
-          className="absolute right-4 top-4 rounded-full border border-white/10 bg-white/5 p-1.5 text-white/60 transition hover:bg-white/10 hover:text-white"
+          className="absolute right-4 top-4 rounded-md border border-border bg-surface-mid p-1.5 text-muted-foreground transition hover:bg-surface-high hover:text-foreground"
         >
           <X className="h-4 w-4" />
         </button>
 
-        <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-white/50">
+        <div className="flex items-center gap-2">
           <Sparkles className="h-3.5 w-3.5 text-primary" />
-          Free limit reached
+          <span className="eyebrow !text-[9px]">Free limit reached</span>
         </div>
 
         <h2
           id="upgrade-wall-title"
-          className="mt-4 font-display text-3xl leading-tight md:text-4xl"
+          className="mt-4 text-display !text-3xl leading-tight md:!text-4xl"
         >
           You&rsquo;ve used all {cap} free enhancements.
         </h2>
-        <p className="mt-3 text-sm text-white/65">
+        <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
           Your image is safe — nothing was lost. Upgrade to Premium for 100 ultra quality images
-          every month at just <span className="font-semibold text-white">$4.99 a year</span> — or
-          pay <span className="font-semibold text-white">$19.68 once</span> for lifetime access.
+          every month at just <span className="font-bold text-foreground">$3.99 / month</span>.
         </p>
 
-        <ul className="mt-6 space-y-2.5 text-sm text-white/85">
+        <ul className="mt-6 space-y-2.5 text-sm text-foreground">
           {[
             "100 ultra quality images / month",
             "Priority processing pipeline",
@@ -108,7 +107,7 @@ export function UpgradeWall({
           <button
             onClick={onUpgrade}
             disabled={pending || !billingAvailable}
-            className="flex-1 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black shadow-[0_0_40px_-8px_rgba(10,132,255,0.6)] transition hover:bg-white/90 disabled:opacity-60"
+            className="flex-1 rounded-md bg-foreground px-5 py-3 text-sm font-bold text-background shadow-elevated transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
           >
             {!billingAvailable
               ? "Checkout unavailable"
@@ -120,13 +119,13 @@ export function UpgradeWall({
           </button>
           <Link
             to="/pricing"
-            className="flex-1 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-center text-sm font-medium text-white/85 transition hover:bg-white/10"
+            className="flex-1 rounded-md border border-border bg-surface-mid px-5 py-3 text-center text-sm font-bold text-foreground transition-all hover:bg-surface-high"
           >
             View pricing
           </Link>
         </div>
 
-        <p className="mt-5 text-center text-[11px] text-white/40">
+        <p className="mt-6 text-center eyebrow !text-[9px]">
           {used} / {cap} free enhancements used · Secure checkout via Paddle
         </p>
       </div>
