@@ -138,79 +138,50 @@ function PricingPage() {
   }
 
   return (
-    <main className="relative min-h-screen bg-black text-white">
+    <main className="relative min-h-screen bg-background text-foreground">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-40"
         style={{
           background:
-            "radial-gradient(60% 40% at 50% 0%, rgba(10,132,255,0.25) 0%, transparent 60%), radial-gradient(50% 40% at 80% 40%, rgba(155,90,255,0.15) 0%, transparent 60%)",
+            "radial-gradient(60% 40% at 50% 0%, oklch(0.65 0.2 250 / 0.15) 0%, transparent 60%)",
         }}
       />
       <nav className="relative z-10 flex items-center justify-between px-6 py-6 md:px-10">
-        <Link to="/" className="font-serif text-xl tracking-tight">
+        <Link to="/" className="font-display text-xl font-bold tracking-tight">
           Pixel Perfect Pro
         </Link>
         <Link
           to="/"
-          className="rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-sm text-white/80 backdrop-blur transition hover:bg-white/10"
+          className="rounded-md border border-border bg-surface-low px-4 py-1.5 text-sm font-medium text-foreground transition hover:bg-surface-mid"
         >
           ← Back
         </Link>
       </nav>
 
-      <section className="relative z-10 mx-auto max-w-5xl px-6 pb-24 pt-8 md:pt-16">
+      <section className="relative z-10 mx-auto max-w-6xl px-6 pb-24 pt-8 md:pt-16">
         <header className="text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/50">Premium plans</p>
-          <h1 className="mt-4 font-serif text-5xl leading-[1.05] md:text-7xl">
+          <span className="eyebrow">Premium plans</span>
+          <h1 className="mt-6 text-display !text-[clamp(2.5rem,7vw,5rem)]">
             Unlock the full potential.
           </h1>
-          <p className="mx-auto mt-5 max-w-xl text-base text-white/60 md:text-lg">
+          <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
             Choose the plan that powers your creativity without boundaries.
           </p>
         </header>
 
         {upgrade === "success" && finalization.isPending && (
-          <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-emerald-400/30 bg-emerald-400/10 p-4 text-center text-sm text-emerald-100">
+          <div className="mx-auto mt-8 max-w-xl rounded-lg border border-primary/30 bg-primary/5 p-4 text-center text-sm text-primary">
             Payment received. Securely activating Premium…
           </div>
         )}
         {upgrade === "success" && finalization.data?.activated && (
-          <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-emerald-400/30 bg-emerald-400/10 p-4 text-center text-sm text-emerald-100">
+          <div className="mx-auto mt-8 max-w-xl rounded-lg border border-primary/30 bg-primary/5 p-4 text-center text-sm text-primary">
             Premium is active. Thank you for upgrading.
           </div>
         )}
-        {upgrade === "success" && finalization.isError && (
-          <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-red-400/30 bg-red-400/10 p-4 text-center text-sm text-red-100">
-            <p>We couldn't verify this checkout yet. Your payment status remains safe.</p>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="mt-3"
-              disabled={finalization.isFetching}
-              onClick={() => void finalization.refetch()}
-            >
-              {finalization.isFetching ? "Checking…" : "Check payment again"}
-            </Button>
-          </div>
-        )}
-        {upgrade === "cancelled" && (
-          <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-white/10 bg-white/5 p-4 text-center text-sm text-white/70">
-            Checkout cancelled — no charge was made.
-          </div>
-        )}
-        {!billingAvailable && (
-          <div
-            role="status"
-            className="mx-auto mt-8 max-w-xl rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4 text-center text-sm text-amber-100"
-          >
-            Premium checkout is temporarily unavailable. The Free plan works as usual — please try
-            upgrading again shortly.
-          </div>
-        )}
-
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
+        
+        <div className="mt-16 grid gap-8 md:grid-cols-3">
           <Plan
             name="Premium Monthly"
             price="$3.99"
@@ -223,34 +194,35 @@ function PricingPage() {
               "High-quality exports",
               "8K export support",
               "Priority processing pipeline",
-              "Access to latest enhancement improvements",
               "Cancel anytime",
             ]}
             cta={
               isPremium ? (
-                <button
+                <Button
+                  variant="outline"
+                  className="w-full"
                   onClick={() => void onManage()}
                   disabled={pending === "portal"}
-                  className="block w-full rounded-full border border-white/15 bg-white/10 py-3 text-center text-sm font-medium text-white transition hover:bg-white/15 disabled:opacity-60"
                 >
                   {pending === "portal" ? "Opening…" : "Manage subscription"}
-                </button>
+                </Button>
               ) : (
-                <button
+                <Button
+                  variant="outline"
+                  className="w-full"
                   onClick={() => void onUpgrade("monthly")}
                   disabled={pending !== null}
-                  className="block w-full rounded-full bg-white py-3 text-center text-sm font-semibold text-black transition hover:bg-white/90 disabled:opacity-60"
                 >
                   {pending === "monthly"
                     ? "Opening checkout…"
                     : isSignedIn
                       ? "Subscribe — $3.99/month"
                       : "Sign in to subscribe"}
-                </button>
+                </Button>
               )
             }
             footnote={
-              isPremium ? "Active — thank you 🖤" : "Powered by Paddle (Monthly plan not in Stripe)"
+              isPremium ? "Active — thank you 🖤" : "Powered by Paddle"
             }
           />
 
@@ -268,30 +240,31 @@ function PricingPage() {
               "All premium AI enhancement engines",
               "Faster processing priority",
               "8K exports",
-              "Future feature updates included",
               "Best savings compared with monthly",
             ]}
             cta={
               isPremium ? (
-                <button
+                <Button
+                  variant="outline"
+                  className="w-full"
                   onClick={() => void onManage()}
                   disabled={pending === "portal"}
-                  className="block w-full rounded-full border border-white/15 bg-white/10 py-3 text-center text-sm font-medium text-white transition hover:bg-white/15 disabled:opacity-60"
                 >
                   {pending === "portal" ? "Opening…" : "Manage subscription"}
-                </button>
+                </Button>
               ) : (
-                <button
+                <Button
+                  variant="obsidian"
+                  className="w-full"
                   onClick={() => void onUpgrade("yearly")}
                   disabled={pending !== null}
-                  className="block w-full rounded-full bg-white py-3 text-center text-sm font-semibold text-black transition hover:bg-white/90 disabled:opacity-60"
                 >
                   {pending === "yearly"
                     ? "Opening checkout…"
                     : isSignedIn
                       ? "Subscribe — $37.73/yr"
                       : "Sign in to subscribe"}
-                </button>
+                </Button>
               )
             }
             footnote={isPremium ? "Active — thank you 🖤" : "Powered by Paddle"}
@@ -306,7 +279,6 @@ function PricingPage() {
             features={[
               "Lifetime access to Pixel Perfect Pro",
               "All future software updates included",
-              "All future enhancement improvements included",
               "Premium AI tools",
               "8K exports",
               "Priority pipeline",
@@ -316,36 +288,38 @@ function PricingPage() {
             ]}
             cta={
               isPremium ? (
-                <div className="block w-full rounded-full border border-white/10 bg-white/5 py-3 text-center text-sm text-white/60">
+                <div className="block w-full rounded-md border border-border bg-surface-mid py-3 text-center text-sm font-medium text-muted-foreground">
                   {entitlement.data?.plan === "lifetime"
                     ? "You own this"
                     : "Premium already active"}
                 </div>
               ) : (
-                <button
+                <Button
+                  variant="outline"
+                  className="w-full"
                   onClick={() => void onUpgrade("lifetime")}
                   disabled={pending !== null}
-                  className="block w-full rounded-full border border-white/25 bg-white/10 py-3 text-center text-sm font-semibold text-white transition hover:bg-white/20 disabled:opacity-60"
                 >
                   {pending === "lifetime"
                     ? "Opening checkout…"
                     : isSignedIn
                       ? "Buy lifetime — $99.89"
                       : "Sign in to buy"}
-                </button>
+                </Button>
               )
             }
             footnote="Lifetime access with founder benefits"
           />
         </div>
 
-        <p className="mt-10 text-center text-xs text-white/40">
+        <p className="mt-12 text-center text-xs text-muted-foreground/60">
           Prices in USD. Sales tax may apply. Payments processed by Paddle. Yearly plans can be
           cancelled anytime — access continues to the end of the paid year. Lifetime is a single
           one-time payment.
         </p>
       </section>
     </main>
+
   );
 }
 
