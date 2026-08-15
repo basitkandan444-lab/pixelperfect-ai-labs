@@ -67,7 +67,7 @@ function ContactPage() {
   };
 
   const field =
-    "w-full rounded-xl border border-input bg-background/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+    "w-full rounded-lg border border-border bg-surface-mid/50 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-all duration-standard focus-visible:bg-surface-mid focus-visible:border-foreground/30";
 
   return (
     <ContentPage
@@ -100,11 +100,11 @@ function ContactPage() {
         </ul>
       </Section>
       <Section heading="How to reach us">
-        <p className="rounded-2xl border border-border bg-background/40 p-4 text-sm text-muted-foreground">
+        <p className="rounded-xl border border-border bg-surface-mid/50 p-4 text-sm text-muted-foreground">
           Prefer email? Contact us directly at{" "}
           <a
             href={`mailto:${SITE.email}`}
-            className="font-medium text-primary underline-offset-4 hover:underline"
+            className="font-bold text-foreground underline-offset-4 hover:underline"
           >
             {SITE.email}
           </a>
@@ -116,7 +116,7 @@ function ContactPage() {
 
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">
-          <label htmlFor="name" className="text-sm font-medium text-foreground">
+          <label htmlFor="name" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Name
           </label>
           <input
@@ -139,7 +139,7 @@ function ContactPage() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <label htmlFor="email" className="text-sm font-medium text-foreground">
+          <label htmlFor="email" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Email
           </label>
           <input
@@ -162,7 +162,7 @@ function ContactPage() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <label htmlFor="message" className="text-sm font-medium text-foreground">
+          <label htmlFor="message" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Message
           </label>
           <textarea
@@ -189,11 +189,11 @@ function ContactPage() {
           </Button>
         </div>
 
-        <p className="text-xs text-muted-foreground">
+        <p className="eyebrow !text-[9px]">
           Or email us directly at{" "}
           <a
             href={`mailto:${SITE.email}`}
-            className="text-primary underline-offset-4 hover:underline"
+            className="text-foreground font-bold underline-offset-4 hover:underline"
           >
             {SITE.email}
           </a>
