@@ -808,12 +808,12 @@ function Index() {
             )}
 
             {stage !== "idle" && original && (
-              <div className="mx-auto flex max-w-4xl flex-col gap-6 rounded-3xl border border-white/10 bg-[oklch(0.04_0_0)] p-4 shadow-cinema sm:p-6">
+              <div className="mx-auto flex max-w-4xl flex-col gap-6 rounded-xl border border-border bg-surface-low p-4 shadow-elevated sm:p-6">
                 <div className="relative">
                   {stage === "done" && result ? (
                     <div className="space-y-3">
                       {zoom ? (
-                        <div className="relative max-h-[70vh] overflow-auto rounded-2xl border border-border bg-muted/20">
+                        <div className="relative max-h-[70vh] overflow-auto rounded-lg border border-border bg-surface-mid">
                           <img
                             src={result}
                             alt={`Enhanced ${scale.toUpperCase()} result at actual pixels`}
@@ -824,7 +824,7 @@ function Index() {
                             draggable={false}
                             decoding="async"
                           />
-                          <span className="pointer-events-none sticky left-3 top-3 float-left rounded-full bg-background/80 px-2.5 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
+                          <span className="pointer-events-none sticky left-3 top-3 float-left rounded-md bg-background/80 px-2.5 py-1 text-[10px] font-bold tracking-widest text-muted-foreground backdrop-blur uppercase">
                             Actual pixels · scroll to explore
                           </span>
                         </div>
@@ -839,7 +839,7 @@ function Index() {
                         <button
                           type="button"
                           onClick={() => setZoom((z) => !z)}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface-mid px-3 py-1.5 text-[10px] font-bold tracking-widest text-muted-foreground transition-all hover:text-foreground hover:bg-surface-high focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring uppercase"
                           aria-pressed={zoom}
                         >
                           {zoom ? "Fit to screen" : "View actual pixels (100%)"}
@@ -857,7 +857,7 @@ function Index() {
                       )}
                     </div>
                   ) : (
-                    <div className="relative flex min-h-[240px] items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted/20">
+                    <div className="relative flex min-h-[240px] items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-mid">
                       <img
                         src={original}
                         alt="Your uploaded image preview"
@@ -893,10 +893,10 @@ function Index() {
                           type="button"
                           aria-pressed={scale === s}
                           onClick={() => setScale(s)}
-                          className={`flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${
+                          className={`flex flex-col items-start gap-1 rounded-lg border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${
                             scale === s
-                              ? "border-primary bg-primary/10 shadow-glow"
-                              : "border-border hover:border-primary/50"
+                              ? "border-primary bg-primary/5 shadow-subtle"
+                              : "border-border bg-surface-mid hover:border-primary/50"
                           }`}
                         >
                           <span className="flex items-center gap-2 font-display font-bold">
