@@ -942,10 +942,10 @@ function Index() {
                             type="button"
                             aria-pressed={engine === e.id}
                             onClick={() => setEngine(e.id)}
-                            className={`flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${
+                            className={`flex flex-col items-start gap-1 rounded-lg border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${
                               engine === e.id
-                                ? "border-primary bg-primary/10 shadow-glow"
-                                : "border-border hover:border-primary/50"
+                                ? "border-primary bg-primary/5 shadow-subtle"
+                                : "border-border bg-surface-mid hover:border-primary/50"
                             }`}
                           >
                             <span className="flex items-center gap-2 font-display font-bold">
