@@ -132,10 +132,11 @@
 
   h1, .text-display {
     font-family: var(--font-display);
-    font-size: clamp(2.25rem, 10vw, 6rem);
+    font-size: clamp(2rem, 10vw, 6rem);
     font-weight: 800;
     line-height: 0.95;
     letter-spacing: -0.05em;
+    word-break: break-word;
   }
 
   h2 {
@@ -230,7 +231,7 @@
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--muted-foreground) 90%, white);
+  color: oklch(0.85 0 0);
 }
 
 @utility ease-spring {

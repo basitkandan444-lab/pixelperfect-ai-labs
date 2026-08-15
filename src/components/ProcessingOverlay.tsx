@@ -57,7 +57,7 @@ export function ProcessingOverlay({
         <span className="text-display !text-4xl tabular-nums">
           {formatRemaining(etaRemainingMs)}
         </span>
-        <span className="eyebrow !text-[10px]">Predicted with {accuracy}% accuracy</span>
+        <span className="eyebrow !text-[10px]">Processing Pipeline Active</span>
       </div>
 
       {/* Smooth progress bar */}

@@ -12,7 +12,7 @@ import { SITE } from "@/lib/site";
 export function PageHeader() {
   return (
     <header className="flex items-center justify-between">
-      <Link to="/" className="flex items-center gap-2 group p-2 -ml-2" aria-label={`${SITE.name} home`}>
+      <Link to="/" className="flex items-center gap-2 group p-3 -ml-3" aria-label={`${SITE.name} home`}>
         <span className="relative flex h-6 w-6 items-center justify-center rounded-md bg-foreground transition-transform duration-standard group-hover:rotate-[8deg] group-hover:scale-110">
           <Sparkles className="h-3.5 w-3.5 text-background" aria-hidden="true" />
         </span>

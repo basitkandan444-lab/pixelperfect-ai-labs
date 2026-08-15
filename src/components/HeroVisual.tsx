@@ -38,10 +38,10 @@ export function HeroVisual() {
               />
               
               {/* Interaction Hint */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none opacity-0 group-hover/hero:opacity-100 transition-opacity duration-standard">
-                <div className="px-3 py-1.5 rounded-md bg-background/60 border border-border backdrop-blur-md text-[9px] font-bold uppercase tracking-widest text-foreground flex items-center gap-2">
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none opacity-100 lg:opacity-0 group-hover/hero:opacity-100 transition-opacity duration-standard">
+                <div className="px-3 py-1.5 rounded-md bg-background/80 border border-primary/30 backdrop-blur-md text-[9px] font-bold uppercase tracking-widest text-foreground flex items-center gap-2 shadow-glow">
                   <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                  Drag to compare results
+                  Drag to compare
                 </div>
               </div>
             </div>
