@@ -4,7 +4,7 @@
 // Blending → Finalizing). The ETA is driven by the self-adjusting predictor so
 // it stays honest and never expires early.
 
-import { Wand2, Check, Loader2 } from "lucide-react";
+import { Wand2, Check, Loader2, X } from "lucide-react";
 
 import { formatRemaining } from "@/lib/enhance/estimate";
 import { PROCESSING_STAGES, stageIndex, type ProcessingStage } from "@/lib/enhance/predictor";
@@ -116,9 +116,10 @@ export function ProcessingOverlay({
       <button
         type="button"
         onClick={onCancel}
-        className="relative mt-2 rounded-md px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-all hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="relative mt-4 flex items-center gap-2 rounded-full border border-border bg-surface-mid/50 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-all hover:bg-surface-high hover:text-foreground active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        Cancel
+        <X className="h-3 w-3" />
+        Cancel Processing
       </button>
     </div>
   );

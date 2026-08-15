@@ -147,7 +147,7 @@ export function CompareSlider({
   return (
     <div
       ref={containerRef}
-      className={`group relative w-full select-none overflow-hidden rounded-lg border border-border bg-surface-low shadow-elevated transition-transform duration-slow ease-precision hover:scale-[1.005] ${className ?? ""}`}
+      className={`group relative w-full select-none overflow-hidden rounded-lg border border-border bg-surface-low shadow-elevated transition-all duration-slow ease-expo-out hover:scale-[1.002] hover:shadow-cinema ${className ?? ""}`}
       onMouseMove={(e) => dragging.current && updateFromClientX(e.clientX)}
       onMouseUp={() => (dragging.current = false)}
       onMouseLeave={() => (dragging.current = false)}
@@ -200,7 +200,7 @@ export function CompareSlider({
             dragging.current = true;
           }}
           onTouchStart={() => (dragging.current = true)}
-          className="absolute top-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize touch-none items-center justify-center rounded-full bg-foreground text-background shadow-elevated transition-all duration-standard hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border border-border"
+          className="absolute top-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize touch-none items-center justify-center rounded-full bg-foreground text-background shadow-elevated transition-all duration-standard hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border border-border z-20"
         >
           <svg
             width="20"

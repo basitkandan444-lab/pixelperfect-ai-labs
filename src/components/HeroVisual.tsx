@@ -34,7 +34,7 @@ export function HeroVisual() {
         />
         
         {/* Main Frame */}
-        <div className="relative overflow-hidden rounded-xl border border-border bg-surface-low shadow-modal backdrop-blur-3xl">
+        <div className="relative overflow-hidden rounded-xl border border-border bg-surface-low shadow-modal backdrop-blur-3xl transition-shadow duration-slow group-hover/hero:shadow-[0_32px_64px_-16px_oklch(0_0_0_/_0.8)]">
           {/* Subtle Scan Line */}
           <div className="absolute inset-x-0 h-40 bg-gradient-to-b from-transparent via-primary/10 to-transparent animate-scan pointer-events-none z-20" />
 
@@ -88,7 +88,7 @@ export function HeroVisual() {
                 <div className="pt-4 flex flex-col gap-3">
                   <a 
                     href="#workspace" 
-                    className="relative flex items-center justify-center gap-2 rounded-md bg-foreground px-6 py-4 text-sm font-bold text-background shadow-elevated transition-all duration-standard hover:scale-[1.02] active:scale-[0.98]"
+                    className="relative flex items-center justify-center gap-2 rounded-md bg-foreground px-6 py-4 text-sm font-bold text-background shadow-elevated transition-all duration-standard hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(var(--primary),0.3)] active:scale-[0.98] sheen"
                   >
                     <UploadCloud className="h-4 w-4" />
                     Start Enhancing
