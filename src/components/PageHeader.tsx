@@ -13,16 +13,16 @@ export function PageHeader() {
   return (
     <header className="flex items-center justify-between">
       <Link to="/" className="flex items-center gap-2" aria-label={`${SITE.name} home`}>
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-primary shadow-glow">
-          <Sparkles className="h-5 w-5 text-primary-foreground" aria-hidden="true" />
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-foreground shadow-elevated">
+          <Sparkles className="h-5 w-5 text-background" aria-hidden="true" />
         </span>
-        <span className="font-display text-lg font-bold tracking-tight">{SITE.name}</span>
+        <span className="text-display !text-lg">Pixel Perfect <span className="text-muted-foreground font-medium">Pro</span></span>
       </Link>
       <Link
         to="/"
-        className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 eyebrow !text-[9px] !text-muted-foreground transition-all duration-standard hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back to app
+        <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" /> Back to app
       </Link>
     </header>
   );
