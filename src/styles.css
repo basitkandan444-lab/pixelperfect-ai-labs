@@ -101,74 +101,33 @@
 }
 
 :root {
-  --radius: 0.75rem;
-  /* Cinematic Noir & Obsidian Precision System.
-   * A evolution of the current UI DNA for maximum clarity and technical trust.
+  /* Obsidian Precision™ Design Foundation
+   * Semantic oklch-based color architecture.
    */
-  --background: oklch(0.12 0.02 250);
-  --foreground: oklch(0.98 0.01 250);
-  
-  --card: oklch(0.14 0.02 250);
-  --card-foreground: oklch(0.98 0.01 250);
-  
-  --popover: oklch(0.14 0.02 250);
-  --popover-foreground: oklch(0.98 0.01 250);
-  
-  --primary: oklch(0.65 0.2 250); /* Electric Blue Precision */
-  --primary-foreground: oklch(0.98 0.01 250);
-  
-  --secondary: oklch(0.25 0.04 250);
-  --secondary-foreground: oklch(0.9 0.02 250);
-  
-  --muted: oklch(0.18 0.02 250);
-  --muted-foreground: oklch(0.7 0.02 250);
-  
-  --accent: oklch(0.75 0.15 190); /* Electric Cyan */
-  --accent-foreground: oklch(0.12 0.02 250);
-  
-  --destructive: oklch(0.55 0.22 25);
-  --destructive-foreground: oklch(0.98 0.01 250);
-  
-  --border: oklch(0.22 0.02 250);
-  --input: oklch(0.22 0.02 250);
+  --radius: 0.75rem;
+
+  /* Surfaces */
+  --background: oklch(0.08 0 0);
+  --foreground: oklch(0.98 0 0);
+  --surface-low: oklch(0.12 0 0);
+  --surface-mid: oklch(0.16 0 0);
+  --surface-high: oklch(0.2 0 0);
+
+  /* Semantic Roles */
+  --primary: oklch(0.65 0.2 250);
+  --primary-foreground: oklch(1 0 0);
+  --muted: oklch(0.2 0 0);
+  --muted-foreground: oklch(0.65 0 0);
+  --border: oklch(0.22 0 0);
   --ring: oklch(0.65 0.2 250 / 0.5);
-  
-  --primary-glow: oklch(0.65 0.2 250 / 0.2);
-  
-  /* Modern Surface Tokens */
-  --surface-low: oklch(0.14 0.02 250);
-  --surface-mid: oklch(0.18 0.03 250);
-  --surface-high: oklch(0.22 0.04 250);
-  
-  --glass-border: oklch(1 0 0 / 0.1);
-  --glass-shine: oklch(1 0 0 / 0.05);
 
-  /* Shadows: Stripe-like Depth & Precision */
-  --shadow-elegant: 
-    0 0 0 1px oklch(1 0 0 / 0.05),
-    0 1px 2px oklch(0 0 0 / 0.3),
-    0 4px 12px oklch(0 0 0 / 0.4);
-  
-  --shadow-cinema:
-    0 0 0 1px oklch(1 0 0 / 0.08),
-    0 12px 24px -8px oklch(0 0 0 / 0.5),
-    0 24px 48px -12px oklch(0 0 0 / 0.6);
+  /* Cinematic Shadows */
+  --shadow-subtle: 0 1px 2px oklch(0 0 0 / 0.3);
+  --shadow-elevated: 0 4px 12px -2px oklch(0 0 0 / 0.5);
+  --shadow-modal: 0 24px 48px -12px oklch(0 0 0 / 0.6);
 
-  --shadow-glow: 0 0 32px -8px oklch(0.65 0.2 250 / 0.3);
-
-  --gradient-hero: 
-    radial-gradient(at 50% 0%, oklch(0.65 0.2 250 / 0.15) 0%, transparent 70%),
-    oklch(0.12 0.02 250);
-
-  --gradient-shimmer: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.03) 25%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.03) 75%,
-    transparent 100%
-  );
-
+  /* Gradient Primitives */
+  --gradient-hero: radial-gradient(at 50% 0%, oklch(0.65 0.2 250 / 0.2) 0%, transparent 70%);
 }
 
 .dark {
