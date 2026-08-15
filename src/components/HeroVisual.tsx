@@ -2,13 +2,36 @@ import { CompareSlider } from "@/components/CompareSlider";
 import { Sparkles, UploadCloud, Gauge, ArrowRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
+import { useProximity } from "@/hooks/use-proximity";
+
 export function HeroVisual() {
+  const { ref, x, y, distance } = useProximity();
+  
+  // Only apply magnetic tilt if within range (e.g. 600px)
+  const isNear = distance < 600;
+  const tiltX = isNear ? (y / 600) * -10 : 0;
+  const tiltY = isNear ? (x / 600) * 10 : 0;
+
   return (
-    <div className="relative mx-auto max-w-5xl mt-12 sm:mt-16 group/hero px-4 sm:px-0">
+    <div 
+      ref={ref}
+      className="relative mx-auto max-w-5xl mt-12 sm:mt-16 group/hero px-4 sm:px-0"
+    >
       {/* 3D Perspective Container - subtle on mobile, interactive on desktop */}
-      <div className="relative animate-tilt transition-all duration-1000 group-hover/hero:animate-none group-hover/hero:scale-[1.01] touch-none sm:touch-auto">
+      <div 
+        className="relative transition-all duration-standard ease-precision group-hover/hero:scale-[1.01] touch-none sm:touch-auto"
+        style={{
+          transform: `perspective(1200px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`,
+          willChange: "transform"
+        }}
+      >
         {/* Glow Layer */}
-        <div className="absolute -inset-10 bg-primary/5 blur-[100px] opacity-30 group-hover/hero:opacity-50 transition-opacity" />
+        <div 
+          className="absolute -inset-10 bg-primary/5 blur-[100px] opacity-30 group-hover/hero:opacity-50 transition-opacity" 
+          style={{
+            transform: `translate3d(${tiltY * 2}px, ${tiltX * 2}px, 0)`,
+          }}
+        />
         
         {/* Main Frame */}
         <div className="relative overflow-hidden rounded-xl border border-border bg-surface-low shadow-modal backdrop-blur-3xl">

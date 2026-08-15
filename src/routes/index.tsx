@@ -99,6 +99,7 @@ function isAcceptedImage(file: File): boolean {
 
 function Index() {
   const [stage, setStage] = useState<Stage>("idle");
+  const [isRevealing, setIsRevealing] = useState(false);
   const [original, setOriginal] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [resultInfo, setResultInfo] = useState<{
@@ -333,6 +334,12 @@ function Index() {
     reader.readAsDataURL(file);
   }, []);
 
+  const stopEnhancing = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setStage("ready");
+  }, []);
+
   const enhance = useCallback(async () => {
     // Client-only: keep the enhancement engine (canvas/worker + optional neural
     // WASM) out of the SSR / Cloudflare Worker bundle. Guarding with the
@@ -462,12 +469,15 @@ function Index() {
         durationMs: res.durationMs,
         path: res.path,
       });
+      setIsRevealing(true);
       setStage("done");
       // Feed the real duration back into the per-device predictor so the next
       // estimate on this device is more accurate. Purely local (localStorage).
       recordOutcome({ engine, baseMs: runBaseMsRef.current, actualMs: res.durationMs });
       setCalibrationVersion((v) => v + 1);
       toast.success(`Enhanced to ${scale.toUpperCase()} quality!`);
+      // Reset reveal state after animation
+      setTimeout(() => setIsRevealing(false), 1200);
       trackEvent("enhance_complete", {
         scale,
         engine,
@@ -782,10 +792,10 @@ function Index() {
                     const f = e.dataTransfer.files?.[0];
                     if (f) loadFile(f);
                   }}
-                  className={`relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-surface-low px-6 py-20 text-center transition-all duration-standard focus-within:border-primary focus-within:ring-2 focus-within:ring-ring sm:py-28 ${
+                  className={`relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-surface-low px-6 py-20 text-center transition-all duration-standard ease-precision focus-within:border-primary focus-within:ring-2 focus-within:ring-ring sm:py-28 hover:scale-[1.01] active:scale-[0.99] ${
                     dragOver
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-foreground/30"
+                      ? "border-primary bg-primary/5 scale-[1.02]"
+                      : "border-border hover:border-foreground/30 shadow-subtle"
                   }`}
                 >
                   <input
@@ -800,7 +810,7 @@ function Index() {
                       if (f) loadFile(f);
                     }}
                   />
-                  <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-border bg-surface-mid">
+                  <div className={`flex h-16 w-16 items-center justify-center rounded-xl border border-border bg-surface-mid transition-transform duration-standard ${dragOver ? 'rotate-[-8deg] scale-110' : ''}`}>
                     <UploadCloud className="h-7 w-7 text-primary" aria-hidden="true" />
                   </div>
                   <h3 className="mt-6 text-display !text-3xl sm:!text-4xl">
@@ -1045,6 +1055,19 @@ function Index() {
         pending={wallPending}
         billingAvailable={billingAvailable}
       />
+      {stage === "loading" && (
+        <div className="fixed inset-0 z-[100] animate-in fade-in duration-300">
+          <ProcessingOverlay
+            scale={scale}
+            progress={progress}
+            statusMessage={statusMessage}
+            etaRemainingMs={etaRemainingMs}
+            stage={procStage}
+            accuracy={runAccuracy}
+            onCancel={stopEnhancing}
+          />
+        </div>
+      )}
       {!isPremium && stage !== "idle" && (
         <div className="pointer-events-none fixed bottom-4 left-1/2 z-40 -translate-x-1/2 rounded-full border border-white/10 bg-black/60 px-3 py-1.5 text-[11px] text-white/70 backdrop-blur">
           {remaining} of {FREE_CAP} free enhancements left ·{" "}
