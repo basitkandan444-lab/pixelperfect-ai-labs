@@ -95,7 +95,8 @@ export function HeroVisual() {
                     className="relative flex items-center justify-center gap-2 rounded-md bg-foreground px-6 py-4 text-sm font-bold text-background shadow-elevated transition-all duration-standard hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(var(--primary),0.3)] active:scale-[0.98] sheen"
                     style={{
                       transform: `translate3d(${magneticPos.x}px, ${magneticPos.y}px, 0)`,
-                      transition: magneticPos.x === 0 ? "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)" : "none"
+                      transition: "none",
+                      dataMagnetic: "true"
                     }}
                   >
                     <UploadCloud className="h-4 w-4" />
