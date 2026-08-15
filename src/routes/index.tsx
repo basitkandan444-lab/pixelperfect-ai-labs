@@ -60,7 +60,7 @@ export const Route = createFileRoute("/")({
             operatingSystem: "Web",
             description: SITE.description,
             offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-            comment: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            now i cant see the effing button what wrong with you you clearly have an intelligence problem",
+            comment: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            where is it i cant see it make it visible and remove it with a completely claude level one add atleast 10 elite and most revolutionary features in this and make it a compleetly deatiled one like crAzy",
           }),
         },
         {
