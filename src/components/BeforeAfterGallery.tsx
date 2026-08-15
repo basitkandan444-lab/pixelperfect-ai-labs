@@ -84,7 +84,7 @@ export function BeforeAfterGallery() {
         {ITEMS.map((item, i) => (
           <li key={item.slug} className="rounded-xl border border-border bg-surface-low p-6 shadow-subtle sm:p-8">
             <div className="mb-6 flex items-center justify-between gap-3">
-              <h3 className="font-display text-xl font-bold tracking-tight">{item.title}</h3>
+              <h3 className="text-display !text-xl">{item.title}</h3>
               <span className="shrink-0 rounded-md border border-border bg-surface-mid px-3 py-1 text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
                 {item.category}
               </span>
@@ -113,7 +113,7 @@ export function BeforeAfterGallery() {
               />
             </div>
 
-            <dl className="mt-8 space-y-4 text-sm leading-relaxed">
+            <dl className="mt-8 space-y-4 eyebrow !text-[9px] leading-relaxed">
               <div className="flex gap-3">
                 <dt className="shrink-0 font-bold text-foreground">Problem</dt>
                 <dd className="text-muted-foreground">{item.problem}</dd>
