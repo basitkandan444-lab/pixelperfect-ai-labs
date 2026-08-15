@@ -28,11 +28,7 @@ export function DashboardToggle() {
         
         // Always try to check admin status even if no session immediately present, 
         // to handle cases where the session might be hydrating or provided via middleware
-        if (!session) {
-          // In some preview environments, we might have an injected session that isn't yet in getSession
-          const tokenKey = Object.keys(localStorage).find(key => key.includes("-auth-token"));
-          if (!tokenKey) return;
-        }
+        if (!session) return;
 
         const { data } = await supabase.rpc("has_role", {
           _user_id: session.user.id,
