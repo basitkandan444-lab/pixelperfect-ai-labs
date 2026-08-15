@@ -334,6 +334,12 @@ function Index() {
     reader.readAsDataURL(file);
   }, []);
 
+  const stopEnhancing = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setStage("ready");
+  }, []);
+
   const enhance = useCallback(async () => {
     // Client-only: keep the enhancement engine (canvas/worker + optional neural
     // WASM) out of the SSR / Cloudflare Worker bundle. Guarding with the
