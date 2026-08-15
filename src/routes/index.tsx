@@ -808,6 +808,16 @@ function Index() {
 
             {stage !== "idle" && original && (
               <div className="mx-auto flex max-w-4xl flex-col gap-6 rounded-xl border border-border bg-surface-low p-4 shadow-modal sm:p-6">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <h2 className="text-display !text-3xl sm:!text-4xl">
+                      Precision <span className="text-muted-foreground">Workspace</span>
+                    </h2>
+                    <p className="mt-2 eyebrow !text-[9px]">
+                      {dims ? `${dims.w} × ${dims.h} Original` : "Ready for enhancement"}
+                    </p>
+                  </div>
+                </div>
                 <div className="relative">
                   {stage === "done" && result ? (
                     <div className="space-y-3">
@@ -911,10 +921,12 @@ function Index() {
                   )}
 
                   {stage !== "done" && (
-                    <fieldset
-                      className="grid grid-cols-1 gap-3 border-0 p-0 sm:grid-cols-2"
-                      disabled={stage === "loading"}
-                    >
+                    <div>
+                      <h3 className="eyebrow !text-[9px] mb-4">Pipeline Selection</h3>
+                      <fieldset
+                        className="grid grid-cols-1 gap-3 border-0 p-0 sm:grid-cols-2"
+                        disabled={stage === "loading"}
+                      >
                       <legend className="sr-only">Choose enhancement engine</legend>
                       {(
                         [
@@ -958,7 +970,8 @@ function Index() {
                             <span className="text-xs text-muted-foreground">{e.desc}</span>
                           </button>
                         ))}
-                    </fieldset>
+                      </fieldset>
+                    </div>
                   )}
 
                   {stage === "ready" && dims && prediction && (
