@@ -126,14 +126,27 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  .font-display {
+  h1, .text-display {
     font-family: var(--font-display);
+    font-size: clamp(2.5rem, 8vw, 6rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.5rem);
     font-weight: 700;
+    line-height: 1.1;
     letter-spacing: -0.03em;
+  }
+
+  h3 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
   }
 }
 
