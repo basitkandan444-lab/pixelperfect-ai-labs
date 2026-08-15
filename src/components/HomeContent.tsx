@@ -234,13 +234,13 @@ export function HomeContent() {
   return (
     <>
       {/* Bento feature grid — Apple Noir */}
-      <section className="mt-28 md:mt-32" aria-labelledby="bento-heading">
+      <section className="mt-28 md:mt-32 reveal" aria-labelledby="bento-heading">
         <h2 id="bento-heading" className="sr-only">
           Why Pixel Perfect Pro
         </h2>
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-3 md:grid-cols-12 md:gap-4">
           {/* Privacy — wide */}
-          <div className="card-premium group relative overflow-hidden rounded-xl border border-border bg-surface-low/60 p-6 sm:p-10 md:col-span-8 shadow-modal transition-all duration-standard hover:border-foreground/20">
+          <div className="card-premium group relative overflow-hidden rounded-xl border border-border bg-surface-low/60 p-6 sm:p-10 md:col-span-8 shadow-modal transition-all duration-standard hover:border-foreground/20 reveal">
             <div className="relative z-10 max-w-md">
               <span className="eyebrow !text-primary !text-[9px]">
                 Privacy by design
@@ -261,7 +261,7 @@ export function HomeContent() {
           </div>
 
           {/* Speed */}
-          <div className="card-premium rounded-xl border border-border bg-surface-low/40 p-6 text-center sm:p-10 md:col-span-4 shadow-modal transition-all duration-standard hover:border-foreground/20">
+          <div className="card-premium rounded-xl border border-border bg-surface-low/40 p-6 text-center sm:p-10 md:col-span-4 shadow-modal transition-all duration-standard hover:border-foreground/20 reveal">
             <div className="flex h-full flex-col items-center justify-center gap-2">
               <div className="text-display !text-4xl sm:!text-6xl text-primary">0.4s</div>
               <div className="eyebrow !text-[9px]">
@@ -316,7 +316,7 @@ export function HomeContent() {
       </section>
 
       {/* How it works */}
-      <section className="mt-28 md:mt-32" aria-labelledby="how-heading">
+      <section className="mt-28 md:mt-32 reveal" aria-labelledby="how-heading">
         <SectionHead
           eyebrow="How it works"
           id="how-heading"
@@ -328,7 +328,7 @@ export function HomeContent() {
           {STEPS.map((s, i) => (
             <li
               key={s.title}
-              className="group relative overflow-hidden rounded-xl border border-border bg-surface-low/40 p-6 md:p-7 shadow-modal transition-all duration-standard hover:border-foreground/20 hover:scale-[1.02]"
+              className="group relative overflow-hidden rounded-xl border border-border bg-surface-low/40 p-6 md:p-7 shadow-modal transition-all duration-standard hover:border-foreground/20 hover:scale-[1.02] reveal"
             >
               <span
                 className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
@@ -360,7 +360,7 @@ export function HomeContent() {
       </section>
 
       {/* Why use */}
-      <section className="mt-28 md:mt-32" aria-labelledby="why-heading">
+      <section className="mt-28 md:mt-32 reveal" aria-labelledby="why-heading">
         <SectionHead
           eyebrow="Why it matters"
           id="why-heading"

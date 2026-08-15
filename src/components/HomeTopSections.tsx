@@ -30,7 +30,7 @@ export function HomeTopSections() {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-6 lg:gap-8">
         {/* Spotlight Card */}
-        <article className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-surface-low p-6 sm:p-8 transition-all duration-standard ease-precision hover:border-primary/40 md:col-span-6 lg:col-span-4 lg:p-12 shadow-elevated order-1">
+        <article className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-surface-low p-6 sm:p-8 transition-all duration-standard ease-precision hover:border-primary/40 md:col-span-6 lg:col-span-4 lg:p-12 shadow-elevated order-1 reveal">
           {/* Background Grid */}
           <div className="pointer-events-none absolute inset-0 opacity-[0.03] [mask-image:radial-gradient(circle_at_top_right,white,transparent)]">
             <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--foreground)_1px,transparent_1px),linear-gradient(to_bottom,var(--foreground)_1px,transparent_1px)] bg-[size:32px_32px]" />
@@ -112,7 +112,7 @@ export function HomeTopSections() {
           ].map((item, i) => (
             <article 
               key={i} 
-              className="group relative overflow-hidden rounded-lg border border-border bg-surface-low p-6 transition-all duration-standard hover:bg-surface-mid shadow-subtle"
+              className="group relative overflow-hidden rounded-lg border border-border bg-surface-low p-6 transition-all duration-standard hover:bg-surface-mid shadow-subtle reveal"
             >
               <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-md bg-surface-mid text-primary border border-border">
                 <item.icon className="h-5 w-5" />
@@ -124,7 +124,7 @@ export function HomeTopSections() {
         </div>
 
         {/* Stats Matrix */}
-        <div className="grid grid-cols-2 gap-4 rounded-xl border border-border bg-surface-low p-4 md:col-span-6 md:grid-cols-4 lg:p-8 order-3">
+        <div className="grid grid-cols-2 gap-4 rounded-xl border border-border bg-surface-low p-4 md:col-span-6 md:grid-cols-4 lg:p-8 order-3 reveal">
           {STATS.map(({ icon: Icon, value, label }) => (
             <div key={label} className="relative flex flex-col items-center justify-center p-4 text-center">
               <div className="absolute inset-y-4 right-0 hidden w-px bg-border md:block last:hidden" />

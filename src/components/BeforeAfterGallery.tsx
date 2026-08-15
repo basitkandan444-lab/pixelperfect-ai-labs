@@ -82,7 +82,7 @@ export function BeforeAfterGallery() {
 
       <ul className="mt-16 grid list-none grid-cols-1 gap-8 p-0 lg:grid-cols-2">
         {ITEMS.map((item, i) => (
-          <li key={item.slug} className="rounded-xl border border-border bg-surface-low p-6 shadow-subtle sm:p-8">
+          <li key={item.slug} className="rounded-xl border border-border bg-surface-low p-6 shadow-subtle sm:p-8 reveal">
             <div className="mb-6 flex items-center justify-between gap-3">
               <h3 className="text-display !text-xl">{item.title}</h3>
               <span className="shrink-0 rounded-md border border-border bg-surface-mid px-3 py-1 text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
