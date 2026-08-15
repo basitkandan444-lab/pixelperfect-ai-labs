@@ -291,6 +291,13 @@ function Index() {
       setResultInfo(null);
       setStage("ready");
       setFileInfo({ bytes: file.size, type: file.type || "" });
+      
+      // Visual feedback: scroll to workspace
+      const workspace = document.getElementById("workspace");
+      if (workspace) {
+        workspace.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
       toast.success("Image ready. Choose a quality and enhance it.");
       trackEvent("upload", {
         ok: true,
