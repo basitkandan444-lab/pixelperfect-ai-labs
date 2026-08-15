@@ -293,7 +293,8 @@ function Index() {
       setStage("ready");
       setFileInfo({ bytes: file.size, type: file.type || "" });
       
-      // Visual feedback: scroll to workspace
+      // Visual feedback: scroll to workspace with reveal choreography
+      setIsRevealing(true);
       const workspace = document.getElementById("workspace");
       if (workspace) {
         workspace.scrollIntoView({ behavior: "smooth", block: "start" });

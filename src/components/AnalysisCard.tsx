@@ -92,7 +92,7 @@ export function AnalysisCard({
 
   return (
     <div
-      className="animate-fade-up rounded-xl border border-border glass p-4 sm:p-5"
+      className="animate-hero-in rounded-xl border border-border glass p-4 sm:p-5"
       aria-label="AI analysis of your image"
     >
       <div className="mb-3.5 flex items-center justify-between gap-3">
