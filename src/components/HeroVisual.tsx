@@ -3,18 +3,21 @@ import { Sparkles, UploadCloud, Gauge, ArrowRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 import { useProximity } from "@/hooks/use-proximity";
+import { useMagnetic } from "@/hooks/use-magnetic";
 
 export function HeroVisual() {
-  const { ref, x, y, distance } = useProximity();
+  const { ref: proximityRef, x, y, distance } = useProximity();
+  const { ref: magneticRef, position: magneticPos } = useMagnetic({ strength: 0.2, activeDistance: 150 });
   
   // Only apply magnetic tilt if within range (e.g. 600px)
   const isNear = distance < 600;
   const tiltX = isNear ? (y / 600) * -4 : 0; // Reduced intensity for restraint
   const tiltY = isNear ? (x / 600) * 4 : 0;
 
+
   return (
     <div 
-      ref={ref}
+      ref={proximityRef}
       className="relative mx-auto max-w-5xl mt-12 sm:mt-16 group/hero px-4 sm:px-0"
     >
       {/* 3D Perspective Container - subtle on mobile, interactive on desktop */}
@@ -87,8 +90,13 @@ export function HeroVisual() {
 
                 <div className="pt-4 flex flex-col gap-3">
                   <a 
+                    ref={magneticRef as any}
                     href="#workspace" 
                     className="relative flex items-center justify-center gap-2 rounded-md bg-foreground px-6 py-4 text-sm font-bold text-background shadow-elevated transition-all duration-standard hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(var(--primary),0.3)] active:scale-[0.98] sheen"
+                    style={{
+                      transform: `translate3d(${magneticPos.x}px, ${magneticPos.y}px, 0)`,
+                      transition: magneticPos.x === 0 ? "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)" : "none"
+                    }}
                   >
                     <UploadCloud className="h-4 w-4" />
                     Start Enhancing

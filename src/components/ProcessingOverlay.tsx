@@ -70,7 +70,7 @@ export function ProcessingOverlay({
         aria-label="Enhancement progress"
       >
         <div
-          className="h-full rounded-full bg-primary shadow-[0_0_12px_oklch(0.65_0.2_250_/_0.4)] transition-[width] duration-700 ease-expo-out"
+          className="h-full rounded-full bg-primary shadow-[0_0_12px_oklch(0.65_0.2_250_/_0.4)] transition-[width] duration-700 ease-smooth"
           style={{ width: `${pct}%` }}
         />
       </div>

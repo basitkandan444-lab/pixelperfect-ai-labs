@@ -91,6 +91,7 @@ export function CompareSlider({
 
   const [pos, setPos] = useState(50);
   const [springPos, setSpringPos] = useState(50);
+  const [handleScale, setHandleScale] = useState(1);
   const [width, setWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
@@ -149,8 +150,8 @@ export function CompareSlider({
       ref={containerRef}
       className={`group relative w-full select-none overflow-hidden rounded-lg border border-border bg-surface-low shadow-elevated transition-all duration-slow ease-expo-out hover:scale-[1.002] hover:shadow-cinema ${className ?? ""}`}
       onMouseMove={(e) => dragging.current && updateFromClientX(e.clientX)}
-      onMouseUp={() => (dragging.current = false)}
-      onMouseLeave={() => (dragging.current = false)}
+      onMouseUp={() => { dragging.current = false; setHandleScale(1); }}
+      onMouseLeave={() => { dragging.current = false; setHandleScale(1); }}
       onTouchMove={(e) => updateFromClientX(e.touches[0].clientX)}
     >
       <Picture
@@ -198,9 +199,16 @@ export function CompareSlider({
           onMouseDown={(e) => {
             e.preventDefault();
             dragging.current = true;
+            setHandleScale(0.95);
           }}
-          onTouchStart={() => (dragging.current = true)}
-          className="absolute top-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize touch-none items-center justify-center rounded-full bg-foreground text-background shadow-elevated transition-all duration-standard hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border border-border z-20"
+          onTouchStart={() => {
+            dragging.current = true;
+            setHandleScale(0.95);
+          }}
+          className="absolute top-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize touch-none items-center justify-center rounded-full bg-foreground text-background shadow-elevated transition-all duration-standard hover:scale-110 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border border-border z-20"
+          style={{ transform: `translate3d(-50%, -50%, 0) scale(${handleScale})` }}
+          onMouseEnter={() => setHandleScale(1.15)}
+          onMouseLeave={() => !dragging.current && setHandleScale(1)}
         >
           <svg
             width="20"
