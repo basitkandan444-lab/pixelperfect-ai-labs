@@ -101,7 +101,7 @@ function CookiePage() {
           Questions about our use of cookies? Email us at{" "}
           <a
             href={`mailto:${SITE.email}`}
-            className="text-primary underline-offset-4 hover:underline"
+            className="text-foreground font-bold underline-offset-4 hover:underline"
           >
             {SITE.email}
           </a>
