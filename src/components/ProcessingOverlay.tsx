@@ -4,7 +4,7 @@
 // Blending → Finalizing). The ETA is driven by the self-adjusting predictor so
 // it stays honest and never expires early.
 
-import { Wand2, Check, Loader2 } from "lucide-react";
+import { Wand2, Check, Loader2, X } from "lucide-react";
 
 import { formatRemaining } from "@/lib/enhance/estimate";
 import { PROCESSING_STAGES, stageIndex, type ProcessingStage } from "@/lib/enhance/predictor";
@@ -34,7 +34,7 @@ export function ProcessingOverlay({
 
   return (
     <div
-      className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-surface-low/95 px-6 backdrop-blur-md"
+      className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-surface-low/98 px-6 backdrop-blur-xl animate-hero-in"
       role="status"
       aria-live="polite"
     >
@@ -70,7 +70,7 @@ export function ProcessingOverlay({
         aria-label="Enhancement progress"
       >
         <div
-          className="h-full rounded-full bg-primary shadow-[0_0_12px_oklch(0.65_0.2_250_/_0.4)] transition-[width] duration-500 ease-spring"
+          className="h-full rounded-full bg-primary shadow-[0_0_12px_oklch(0.65_0.2_250_/_0.4)] transition-[width] duration-700 ease-expo-out"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -116,9 +116,10 @@ export function ProcessingOverlay({
       <button
         type="button"
         onClick={onCancel}
-        className="relative mt-2 rounded-md px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-all hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="relative mt-4 flex items-center gap-2 rounded-full border border-border bg-surface-mid/50 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-all hover:bg-surface-high hover:text-foreground active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        Cancel
+        <X className="h-3 w-3" />
+        Cancel Processing
       </button>
     </div>
   );

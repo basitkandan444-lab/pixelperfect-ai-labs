@@ -9,8 +9,8 @@ export function HeroVisual() {
   
   // Only apply magnetic tilt if within range (e.g. 600px)
   const isNear = distance < 600;
-  const tiltX = isNear ? (y / 600) * -10 : 0;
-  const tiltY = isNear ? (x / 600) * 10 : 0;
+  const tiltX = isNear ? (y / 600) * -4 : 0; // Reduced intensity for restraint
+  const tiltY = isNear ? (x / 600) * 4 : 0;
 
   return (
     <div 
@@ -19,22 +19,22 @@ export function HeroVisual() {
     >
       {/* 3D Perspective Container - subtle on mobile, interactive on desktop */}
       <div 
-        className="relative transition-all duration-standard ease-precision group-hover/hero:scale-[1.01] touch-none sm:touch-auto"
+        className="relative transition-transform duration-slow ease-expo-out group-hover/hero:scale-[1.005] touch-none sm:touch-auto"
         style={{
-          transform: `perspective(1200px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`,
+          transform: `perspective(2000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`,
           willChange: "transform"
         }}
       >
         {/* Glow Layer */}
         <div 
-          className="absolute -inset-10 bg-primary/5 blur-[100px] opacity-30 group-hover/hero:opacity-50 transition-opacity" 
+          className="absolute -inset-20 bg-primary/10 blur-[120px] opacity-20 group-hover/hero:opacity-40 transition-opacity duration-slow pointer-events-none" 
           style={{
-            transform: `translate3d(${tiltY * 2}px, ${tiltX * 2}px, 0)`,
+            transform: `translate3d(${tiltY * 4}px, ${tiltX * 4}px, 0)`,
           }}
         />
         
         {/* Main Frame */}
-        <div className="relative overflow-hidden rounded-xl border border-border bg-surface-low shadow-modal backdrop-blur-3xl">
+        <div className="relative overflow-hidden rounded-xl border border-border bg-surface-low shadow-modal backdrop-blur-3xl transition-shadow duration-slow group-hover/hero:shadow-[0_32px_64px_-16px_oklch(0_0_0_/_0.8)]">
           {/* Subtle Scan Line */}
           <div className="absolute inset-x-0 h-40 bg-gradient-to-b from-transparent via-primary/10 to-transparent animate-scan pointer-events-none z-20" />
 
@@ -88,7 +88,7 @@ export function HeroVisual() {
                 <div className="pt-4 flex flex-col gap-3">
                   <a 
                     href="#workspace" 
-                    className="relative flex items-center justify-center gap-2 rounded-md bg-foreground px-6 py-4 text-sm font-bold text-background shadow-elevated transition-all duration-standard hover:scale-[1.02] active:scale-[0.98]"
+                    className="relative flex items-center justify-center gap-2 rounded-md bg-foreground px-6 py-4 text-sm font-bold text-background shadow-elevated transition-all duration-standard hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(var(--primary),0.3)] active:scale-[0.98] sheen"
                   >
                     <UploadCloud className="h-4 w-4" />
                     Start Enhancing
