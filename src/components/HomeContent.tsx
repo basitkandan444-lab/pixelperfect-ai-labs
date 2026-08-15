@@ -240,12 +240,12 @@ export function HomeContent() {
         </h2>
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-3 md:grid-cols-12 md:gap-4">
           {/* Privacy — wide */}
-          <div className="card-premium group relative overflow-hidden rounded-xl border border-border bg-surface-low/60 p-8 sm:p-10 md:col-span-8 shadow-modal transition-all duration-standard hover:border-foreground/20">
+          <div className="card-premium group relative overflow-hidden rounded-xl border border-border bg-surface-low/60 p-6 sm:p-10 md:col-span-8 shadow-modal transition-all duration-standard hover:border-foreground/20">
             <div className="relative z-10 max-w-md">
               <span className="eyebrow !text-primary !text-[9px]">
                 Privacy by design
               </span>
-              <h3 className="mt-4 text-display !text-4xl sm:!text-6xl">
+              <h3 className="mt-4 text-display !text-3xl sm:!text-6xl">
                 100% on-device.
               </h3>
               <p className="mt-4 text-base font-medium leading-relaxed text-muted-foreground/80">
@@ -261,9 +261,9 @@ export function HomeContent() {
           </div>
 
           {/* Speed */}
-          <div className="card-premium rounded-xl border border-border bg-surface-low/40 p-8 text-center sm:p-10 md:col-span-4 shadow-modal transition-all duration-standard hover:border-foreground/20">
+          <div className="card-premium rounded-xl border border-border bg-surface-low/40 p-6 text-center sm:p-10 md:col-span-4 shadow-modal transition-all duration-standard hover:border-foreground/20">
             <div className="flex h-full flex-col items-center justify-center gap-2">
-              <div className="text-display !text-6xl text-primary">0.4s</div>
+              <div className="text-display !text-4xl sm:!text-6xl text-primary">0.4s</div>
               <div className="eyebrow !text-[9px]">
                 Avg. processing time
               </div>
@@ -271,7 +271,7 @@ export function HomeContent() {
           </div>
 
           {/* Formats */}
-          <div className="card-premium rounded-xl border border-border bg-surface-low/30 p-8 md:col-span-4 shadow-modal transition-all duration-standard hover:border-foreground/20">
+          <div className="card-premium rounded-xl border border-border bg-surface-low/30 p-6 sm:p-8 md:col-span-4 shadow-modal transition-all duration-standard hover:border-foreground/20">
             <div className="flex flex-wrap gap-1.5">
               {["JPG", "PNG", "WEBP"].map((f) => (
                 <span
@@ -291,7 +291,7 @@ export function HomeContent() {
           </div>
 
           {/* 8K */}
-          <div className="card-premium group rounded-xl border border-border bg-surface-low/30 p-8 md:col-span-4 shadow-modal transition-all duration-standard hover:border-foreground/20">
+          <div className="card-premium group rounded-xl border border-border bg-surface-low/30 p-6 sm:p-8 md:col-span-4 shadow-modal transition-all duration-standard hover:border-foreground/20">
             <div className="flex items-baseline gap-1">
               <div className="h-6 w-1 bg-primary transition-all duration-500 group-hover:h-8" />
               <div className="h-6 w-1 bg-primary transition-all delay-75 duration-500 group-hover:h-10" />
@@ -306,7 +306,7 @@ export function HomeContent() {
           </div>
 
           {/* Start free — accent tile */}
-          <a href="#workspace" className="group flex flex-col items-center justify-center rounded-xl bg-foreground p-8 text-center text-background transition-all duration-standard hover:scale-[1.02] active:scale-[0.98] md:col-span-4 shadow-elevated">
+          <a href="#workspace" className="group flex flex-col items-center justify-center rounded-xl bg-foreground p-6 sm:p-8 text-center text-background transition-all duration-standard hover:scale-[1.02] active:scale-[0.98] md:col-span-4 shadow-elevated">
             <h4 className="text-display !text-3xl !leading-none text-background">Start free.</h4>
             <span className="mt-3 eyebrow !text-[9px] !text-background/80">
               5 enhancements on us. Upgrade any time.
