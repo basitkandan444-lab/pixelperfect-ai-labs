@@ -980,7 +980,7 @@ function Index() {
                   <div className="flex flex-col gap-3 sm:flex-row">
                     {stage !== "done" ? (
                       <Button
-                        variant="hero"
+                        variant="obsidian"
                         size="xl"
                         className="flex-1"
                         disabled={stage === "loading"}
@@ -990,7 +990,7 @@ function Index() {
                         {stage === "loading" ? "Enhancing…" : `Enhance to ${scale.toUpperCase()}`}
                       </Button>
                     ) : (
-                      <Button variant="hero" size="xl" className="flex-1" onClick={download}>
+                      <Button variant="obsidian" size="xl" className="flex-1" onClick={download}>
                         <Download className="h-5 w-5" aria-hidden="true" />
                         Download {scale.toUpperCase()} Image
                       </Button>

@@ -184,7 +184,7 @@ function ContactPage() {
         </div>
 
         <div>
-          <Button type="submit" variant="hero" size="lg">
+          <Button type="submit" variant="obsidian" size="lg">
             Send message
           </Button>
         </div>
