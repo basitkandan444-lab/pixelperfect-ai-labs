@@ -346,42 +346,39 @@ function Plan({
 }) {
   return (
     <div
-      className={`relative rounded-3xl border p-8 backdrop-blur transition ${
+      className={`relative rounded-xl border p-8 transition-all duration-standard ease-precision ${
         highlight
-          ? "border-white/25 bg-white/[0.07] shadow-[0_0_60px_-12px_rgba(10,132,255,0.35)]"
-          : "border-white/10 bg-white/[0.03]"
+          ? "border-primary/50 bg-surface-mid shadow-elevated"
+          : "border-border bg-surface-low"
       }`}
     >
       {badge && (
-        <span className="absolute -top-3 right-6 rounded-full bg-white/95 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-black">
+        <span className="absolute -top-3 right-6 rounded-md bg-foreground px-3 py-1 text-[10px] font-bold tracking-widest text-background uppercase">
           {badge}
         </span>
       )}
       {accent && (
-        <span className="absolute -top-3 left-6 rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-white/90 backdrop-blur">
+        <span className="absolute -top-3 left-6 rounded-md border border-border bg-surface-mid px-3 py-1 text-[10px] font-bold tracking-widest text-foreground uppercase">
           Recommended
         </span>
       )}
       <div className="flex items-baseline justify-between">
-        <h3 className="font-serif text-2xl">{name}</h3>
-        {highlight && (
-          <span className="text-[10px] uppercase tracking-widest text-white/60">Current plan</span>
-        )}
+        <h3 className="font-display text-2xl font-bold tracking-tight">{name}</h3>
       </div>
-      <div className="mt-6 flex items-baseline gap-2">
-        <span className="font-serif text-5xl">{price}</span>
-        <span className="text-sm text-white/50">{cadence}</span>
+      <div className="mt-8 flex items-baseline gap-2">
+        <span className="font-display text-5xl font-bold tracking-tight">{price}</span>
+        <span className="text-sm text-muted-foreground">{cadence}</span>
       </div>
-      <ul className="mt-8 space-y-3 text-sm text-white/80">
+      <ul className="mt-10 space-y-4 text-sm leading-relaxed text-muted-foreground">
         {features.map((f) => (
           <li key={f} className="flex items-start gap-3">
-            <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-white/60" />
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
             <span>{f}</span>
           </li>
         ))}
       </ul>
-      <div className="mt-8">{cta}</div>
-      {footnote && <p className="mt-4 text-center text-xs text-white/45">{footnote}</p>}
+      <div className="mt-10">{cta}</div>
+      {footnote && <p className="mt-4 text-center text-[10px] font-bold tracking-widest text-muted-foreground/60 uppercase">{footnote}</p>}
     </div>
   );
 }
