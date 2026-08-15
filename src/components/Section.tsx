@@ -7,8 +7,8 @@ import type { ReactNode } from "react";
  */
 export function Section({ heading, children }: { heading: string; children: ReactNode }) {
   return (
-    <section className="flex flex-col gap-2">
-      <h2 className="font-display text-lg font-semibold text-foreground">{heading}</h2>
+    <section className="flex flex-col gap-3">
+      <h2 className="text-display !text-xl">{heading}</h2>
       {children}
     </section>
   );
