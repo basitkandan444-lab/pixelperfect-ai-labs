@@ -106,12 +106,16 @@
   --shadow-modal: 0 24px 48px -12px oklch(0 0 0 / 0.6);
 
   /* Gradient Primitives */
-  --gradient-hero: radial-gradient(at 50% 0%, oklch(0.65 0.2 250 / 0.2) 0%, transparent 70%);
+  --gradient-hero: radial-gradient(at 50% 0%, oklch(0.65 0.2 250 / 0.15) 0%, transparent 70%);
+  --glass-border: oklch(1 0 0 / 0.12);
+  --glass-shine: oklch(1 0 0 / 0.05);
 }
 
 .dark {
   --background: oklch(0.08 0 0);
   --foreground: oklch(0.98 0 0);
+  --glass-border: oklch(1 0 0 / 0.08);
+  --glass-shine: oklch(1 0 0 / 0.03);
 }
 
 @layer base {
@@ -128,7 +132,7 @@
 
   h1, .text-display {
     font-family: var(--font-display);
-    font-size: clamp(2.5rem, 8vw, 6rem);
+    font-size: clamp(2.25rem, 10vw, 6rem);
     font-weight: 800;
     line-height: 0.95;
     letter-spacing: -0.05em;
@@ -390,16 +394,16 @@
   background: linear-gradient(
     100deg,
     oklch(0.98 0 0) 0%,
-    var(--primary) 30%,
-    oklch(0.9 0.02 260) 45%,
-    var(--primary) 60%,
+    var(--primary) 35%,
+    oklch(0.9 0.02 260) 50%,
+    var(--primary) 65%,
     oklch(0.98 0 0) 100%
   );
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: text-shimmer 8s linear infinite;
+  animation: text-shimmer 12s linear infinite;
 }
 
 .reveal {

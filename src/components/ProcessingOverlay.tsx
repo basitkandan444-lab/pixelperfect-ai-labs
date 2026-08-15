@@ -40,11 +40,11 @@ export function ProcessingOverlay({
     >
       <div className="shimmer absolute inset-0 h-full w-full" aria-hidden="true" />
 
-      <div className="relative flex h-14 w-14 items-center justify-center rounded-lg bg-foreground shadow-elevated">
-        <Wand2 className="h-7 w-7 animate-pulse text-background" aria-hidden="true" />
+      <div className="relative flex h-14 w-14 items-center justify-center rounded-lg border border-border bg-surface-mid shadow-elevated">
+        <Wand2 className="h-7 w-7 animate-pulse text-primary" aria-hidden="true" />
       </div>
 
-      <p className="relative text-display !text-lg">
+      <p className="relative eyebrow !text-[11px] !text-muted-foreground mt-2">
         Enhancing to {scale.toUpperCase()}
       </p>
 
@@ -70,7 +70,7 @@ export function ProcessingOverlay({
         aria-label="Enhancement progress"
       >
         <div
-          className="h-full rounded-full bg-foreground transition-[width] duration-500 ease-precision"
+          className="h-full rounded-full bg-primary shadow-[0_0_12px_oklch(0.65_0.2_250_/_0.4)] transition-[width] duration-500 ease-precision"
           style={{ width: `${pct}%` }}
         />
       </div>

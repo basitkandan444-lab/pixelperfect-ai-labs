@@ -4,9 +4,9 @@ import { Link } from "@tanstack/react-router";
 
 export function HeroVisual() {
   return (
-    <div className="relative mx-auto max-w-5xl mt-12 sm:mt-16 group/hero">
-      {/* 3D Perspective Container */}
-      <div className="relative animate-tilt transition-all duration-1000 group-hover/hero:animate-none group-hover/hero:scale-[1.01]">
+    <div className="relative mx-auto max-w-5xl mt-12 sm:mt-16 group/hero px-4 sm:px-0">
+      {/* 3D Perspective Container - subtle on mobile, interactive on desktop */}
+      <div className="relative animate-tilt transition-all duration-1000 group-hover/hero:animate-none group-hover/hero:scale-[1.01] touch-none sm:touch-auto">
         {/* Glow Layer */}
         <div className="absolute -inset-10 bg-primary/5 blur-[100px] opacity-30 group-hover/hero:opacity-50 transition-opacity" />
         

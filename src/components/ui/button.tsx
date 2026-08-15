@@ -20,9 +20,9 @@ const buttonVariants = cva(
         ghost: "hover:bg-surface-low hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         obsidian:
-          "bg-foreground text-background shadow-elevated hover:bg-foreground/90 active:scale-[0.98]",
+          "bg-foreground text-background shadow-elevated hover:bg-foreground/90 active:scale-[0.98] border border-foreground/10",
         glass:
-          "glass border-border/50 text-foreground hover:bg-surface-mid/50 hover:border-border",
+          "glass border-border/50 text-foreground hover:bg-surface-mid/50 hover:border-border hover:shadow-subtle active:scale-[0.98]",
       },
       size: {
         default: "h-11 px-6 py-2 rounded-md",
