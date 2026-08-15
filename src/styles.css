@@ -413,8 +413,8 @@
   opacity: 0;
   transform: translateY(24px);
   transition:
-    opacity 900ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 900ms var(--ease-precision),
+    transform 900ms var(--ease-precision);
   will-change: opacity, transform;
 }
 .reveal-in {

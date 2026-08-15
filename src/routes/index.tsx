@@ -99,6 +99,7 @@ function isAcceptedImage(file: File): boolean {
 
 function Index() {
   const [stage, setStage] = useState<Stage>("idle");
+  const [isRevealing, setIsRevealing] = useState(false);
   const [original, setOriginal] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [resultInfo, setResultInfo] = useState<{
