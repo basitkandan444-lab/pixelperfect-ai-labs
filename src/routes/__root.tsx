@@ -15,6 +15,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@/components/Analytics";
 
 import { WebVitals } from "@/components/WebVitals";
+import { DashboardToggle } from "@/components/engineering/DashboardToggle";
 import { ANALYTICS } from "@/lib/analytics";
 import { SITE, KEYWORDS } from "@/lib/site";
 import { originLoader } from "@/lib/origin.functions";
@@ -187,6 +188,7 @@ function RootComponent() {
       <Analytics />
 
       <WebVitals />
+      <DashboardToggle />
     </QueryClientProvider>
   );
 }
