@@ -16,7 +16,10 @@ import { BeforeAfterGallery } from "@/components/BeforeAfterGallery";
 import { AnalysisCard } from "@/components/AnalysisCard";
 import { ProcessingOverlay } from "@/components/ProcessingOverlay";
 import { UpgradeWall } from "@/components/UpgradeWall";
+import { FloatingAtmosphere } from "@/components/FloatingAtmosphere";
+import { GravityAnimation } from "@/components/GravityAnimation";
 import { trackEvent } from "@/lib/analytics";
+
 import { SITE, FAQS, absoluteUrl } from "@/lib/site";
 import { originLoader } from "@/lib/origin.functions";
 import { detectCapabilities } from "@/lib/enhance/capabilities";
@@ -611,7 +614,9 @@ function Index() {
   }, [result, scale, engine, resultInfo]);
 
   return (
-    <div className="min-h-dvh bg-hero">
+    <div className="min-h-dvh bg-hero relative overflow-hidden">
+      <FloatingAtmosphere />
+
       <a
         href="#workspace"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
@@ -767,8 +772,10 @@ function Index() {
 
           <HomeTopSections />
 
+          <GravityAnimation />
 
           {/* Workspace */}
+
           <section
             id="workspace"
             aria-label="Image enhancer"
