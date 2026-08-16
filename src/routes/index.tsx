@@ -775,6 +775,9 @@ function Index() {
           <GravityAnimation />
 
 
+          <GravityAnimation />
+
+
 
           {/* Workspace */}
           <section
