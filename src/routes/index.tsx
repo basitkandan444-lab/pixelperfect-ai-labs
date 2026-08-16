@@ -614,7 +614,9 @@ function Index() {
   }, [result, scale, engine, resultInfo]);
 
   return (
-    <div className="min-h-dvh bg-hero">
+    <div className="min-h-dvh bg-hero relative overflow-hidden">
+      <FloatingAtmosphere />
+
       <a
         href="#workspace"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
@@ -769,6 +771,9 @@ function Index() {
           </section>
 
           <HomeTopSections />
+
+          <GravityAnimation />
+
 
 
           {/* Workspace */}
