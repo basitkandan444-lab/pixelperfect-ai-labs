@@ -16,7 +16,10 @@ import { BeforeAfterGallery } from "@/components/BeforeAfterGallery";
 import { AnalysisCard } from "@/components/AnalysisCard";
 import { ProcessingOverlay } from "@/components/ProcessingOverlay";
 import { UpgradeWall } from "@/components/UpgradeWall";
+import { FloatingAtmosphere } from "@/components/FloatingAtmosphere";
+import { GravityAnimation } from "@/components/GravityAnimation";
 import { trackEvent } from "@/lib/analytics";
+
 import { SITE, FAQS, absoluteUrl } from "@/lib/site";
 import { originLoader } from "@/lib/origin.functions";
 import { detectCapabilities } from "@/lib/enhance/capabilities";

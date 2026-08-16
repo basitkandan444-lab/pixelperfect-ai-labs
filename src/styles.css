@@ -385,6 +385,40 @@
   animation: gravity-drift 20s ease-in-out infinite;
 }
 
+@keyframes drift-slow {
+  0% { transform: translateX(0) translateY(0) rotate(0); }
+  50% { transform: translateX(50px) translateY(20px) rotate(2deg); }
+  100% { transform: translateX(0) translateY(0) rotate(0); }
+}
+
+@keyframes drift-mid {
+  0% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(-40px) translateY(-30px); }
+  100% { transform: translateX(0) translateY(0); }
+}
+
+@keyframes drift-fast {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(60px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-30px) rotate(1deg); }
+}
+
+.animate-drift-slow { animation: drift-slow 40s ease-in-out infinite; }
+.animate-drift-mid { animation: drift-mid 30s ease-in-out infinite; }
+.animate-drift-fast { animation: drift-fast 25s ease-in-out infinite; }
+.animate-float-delayed { animation: float-delayed 8s ease-in-out infinite; }
+
+.gravity-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.1s linear;
+}
+
+
 .stagger-in > * {
   opacity: 0;
   transform: translateY(20px);
