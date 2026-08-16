@@ -774,12 +774,8 @@ function Index() {
 
           <GravityAnimation />
 
-
-          <GravityAnimation />
-
-
-
           {/* Workspace */}
+
           <section
             id="workspace"
             aria-label="Image enhancer"
