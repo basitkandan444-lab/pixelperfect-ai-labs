@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Check, ShieldCheck, Cpu, Sparkles, Zap, Lock, Gauge } from "lucide-react";
+import { PADDLE_PLANS } from "@/lib/pricing-catalog";
 
 const PREMIUM_FEATURES = [
   "100 ultra quality images / month",
@@ -23,117 +24,104 @@ const STATS = [
  */
 export function HomeTopSections() {
   return (
-    <section aria-labelledby="bento-heading" className="relative mx-auto mt-24 max-w-7xl px-6 pb-24">
+    <section aria-labelledby="bento-heading" className="relative mx-auto mt-10 max-w-6xl px-4">
       <h2 id="bento-heading" className="sr-only">
-        Obsidian Precision Infrastructure
+        Why Pixel Perfect Pro
       </h2>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-6 lg:gap-8">
-        {/* Spotlight Card */}
-        <article className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-surface-low p-6 sm:p-8 transition-all duration-standard ease-precision hover:border-primary/40 md:col-span-6 lg:col-span-4 lg:p-12 shadow-elevated order-1 reveal">
-          {/* Background Grid */}
-          <div className="pointer-events-none absolute inset-0 opacity-[0.03] [mask-image:radial-gradient(circle_at_top_right,white,transparent)]">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--foreground)_1px,transparent_1px),linear-gradient(to_bottom,var(--foreground)_1px,transparent_1px)] bg-[size:32px_32px]" />
-          </div>
-
-          <div className="relative z-10 flex h-full flex-col">
-            <div>
-              <span className="eyebrow">
-                <Sparkles className="h-3 w-3" /> System Access
-              </span>
-            </div>
-
-            <div className="mt-8">
-              <h3 className="text-display">
-                Obsidian
-                <span className="block mt-2 text-primary">
-                  Precision.
-                </span>
-              </h3>
-              
-              <div className="mt-6 flex items-baseline gap-2">
-                <span className="text-4xl font-bold text-foreground">$3.99</span>
-                <span className="text-lg text-muted-foreground">/ month</span>
-              </div>
-            </div>
-
-            <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted-foreground">
-              Professional-grade enhancement powered by on-device WebGPU. 
-              Zero latency, absolute privacy, and total creative control.
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
+        {/* Pricing spotlight — hero tile */}
+        <article className="lift relative overflow-hidden rounded-[2rem] border border-white/10 bg-card/60 p-8 backdrop-blur-xl sm:p-10 md:col-span-4">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/15 blur-[110px]"
+          />
+          <div className="relative">
+            <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-primary">
+              <Sparkles className="h-3.5 w-3.5" aria-hidden /> Launch pricing
+            </span>
+            <h3 className="mt-6 font-display text-4xl leading-[1.05] sm:text-5xl">
+              100 ultra quality images
+              <br />
+              for <span className="text-shimmer">{PADDLE_PLANS.monthly.formattedPrice} a month</span>
+            </h3>
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
+              Billed at {PADDLE_PLANS.monthly.formattedPrice}/mo or {PADDLE_PLANS.yearly.formattedPrice}/yr — or pay {PADDLE_PLANS.lifetime.formattedPrice} once and keep it for life. Every
+              pixel processed on your own device: no uploads, no watermark, no queue.
             </p>
 
-            <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {PREMIUM_FEATURES.map((feature) => (
-                <div key={feature} className="flex items-center gap-3 text-sm text-foreground/80">
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/20 text-primary">
-                    <Check className="h-3 w-3 stroke-[3]" />
-                  </div>
-                  {feature}
-                </div>
+            <ul className="mt-7 grid gap-2.5 sm:grid-cols-2">
+              {PREMIUM_FEATURES.map((f) => (
+                <li key={f} className="flex items-start gap-2.5 text-sm text-foreground/85">
+                  <Check className="mt-0.5 h-4 w-4 flex-none text-primary" aria-hidden />
+                  <span>{f}</span>
+                </li>
               ))}
-            </div>
+            </ul>
 
-            <div className="mt-auto pt-12 flex flex-wrap items-center gap-4">
+            <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
                 to="/pricing"
-                className="group/btn relative inline-flex items-center justify-center overflow-hidden rounded-md bg-primary px-8 py-4 text-sm font-bold text-primary-foreground transition-all duration-standard hover:scale-[1.02] active:scale-[0.98] shadow-elevated"
+                className="sheen inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-[0_0_40px_-10px_color-mix(in_oklab,var(--primary)_65%,transparent)] transition-transform duration-300 hover:scale-[1.03]"
               >
-                <span className="relative z-10">Start Precision Enhancement</span>
-                <div className="absolute inset-0 -z-0 translate-x-[-100%] bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 group-hover/btn:translate-x-[100%]" />
+                Get Premium <span aria-hidden>→</span>
               </Link>
               <a
                 href="#workspace"
-                className="inline-flex items-center justify-center rounded-md border border-border bg-surface-mid px-8 py-4 text-sm font-semibold text-foreground transition-all hover:bg-surface-high hover:border-foreground/20"
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-7 py-3.5 text-sm font-medium text-foreground/85 transition hover:border-primary/40 hover:bg-white/10"
               >
-                Launch Workspace
+                Try 5 free
               </a>
             </div>
           </div>
         </article>
 
-        {/* Feature Cards Stack */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 md:col-span-6 lg:grid-cols-1 lg:col-span-2 order-2">
+        {/* Right column — stacked trust tiles */}
+        <div className="grid gap-4 md:col-span-2">
           {[
             {
               icon: Lock,
-              title: "Privacy First",
-              desc: "On-device processing ensures zero data transit.",
+              title: "Zero uploads",
+              body: "Nothing is sent to a server. Enhancement happens entirely in your browser.",
             },
             {
               icon: Cpu,
-              title: "GPU Native",
-              desc: "Harnesses raw hardware for instant neural scaling.",
+              title: "WebGPU accelerated",
+              body: "Real-ESRGAN runs on your GPU, with an automatic WASM fallback.",
             },
             {
               icon: ShieldCheck,
-              title: "Clean Export",
-              desc: "Watermark-free assets at full 8K resolution.",
-            }
-          ].map((item, i) => (
-            <article 
-              key={i} 
-              className="group relative overflow-hidden rounded-lg border border-border bg-surface-low p-6 transition-all duration-standard hover:bg-surface-mid shadow-subtle reveal"
+              title: "No watermarks",
+              body: "Full-resolution exports, clean output, no hidden processing fees.",
+            },
+          ].map(({ icon: Icon, title, body }) => (
+            <article
+              key={title}
+              className="lift rounded-[1.5rem] border border-white/10 bg-card/50 p-6 backdrop-blur-xl"
             >
-              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-md bg-surface-mid text-primary border border-border">
-                <item.icon className="h-5 w-5" />
-              </div>
-              <h4 className="text-base font-bold text-foreground">{item.title}</h4>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
+                <Icon className="h-4.5 w-4.5" aria-hidden />
+              </span>
+              <h3 className="mt-4 text-base font-semibold text-foreground">{title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{body}</p>
             </article>
           ))}
         </div>
 
-        {/* Stats Matrix */}
-        <div className="grid grid-cols-2 gap-4 rounded-xl border border-border bg-surface-low p-4 md:col-span-6 md:grid-cols-4 lg:p-8 order-3 reveal">
+        {/* Full-width capability rail */}
+        <article className="grid gap-6 rounded-[2rem] border border-white/10 bg-card/40 p-8 backdrop-blur-xl sm:grid-cols-4 md:col-span-6">
           {STATS.map(({ icon: Icon, value, label }) => (
-            <div key={label} className="relative flex flex-col items-center justify-center p-4 text-center">
-              <div className="absolute inset-y-4 right-0 hidden w-px bg-border md:block last:hidden" />
-              <Icon className="h-4 w-4 text-primary opacity-60" />
-              <span className="mt-3 text-3xl font-bold tracking-tight text-foreground lg:text-4xl">{value}</span>
-              <span className="eyebrow mt-1 !text-[9px]">{label}</span>
+            <div key={label} className="text-center">
+              <Icon className="mx-auto h-4 w-4 text-primary" aria-hidden />
+              <div className="mt-3 font-display text-4xl tracking-tight text-foreground">
+                {value}
+              </div>
+              <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                {label}
+              </div>
             </div>
           ))}
-        </div>
+        </article>
       </div>
     </section>
   );

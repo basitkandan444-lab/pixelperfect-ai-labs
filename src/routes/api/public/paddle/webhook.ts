@@ -38,7 +38,7 @@ export const Route = createFileRoute("/api/public/paddle/webhook")({
         const eventType = payload.event_type;
         const data = payload.data;
 
-        console.log(`[paddle-webhook] Received event: ${eventType}`, data);
+        console.log(`[paddle-webhook] Received event: ${eventType} (id: ${payload.event_id || "n/a"})`);
 
         try {
           switch (eventType) {
@@ -49,14 +49,24 @@ export const Route = createFileRoute("/api/public/paddle/webhook")({
               const customerId = data.customer_id;
               const subscriptionId = data.subscription_id || null;
 
-              if (!userId) {
-                console.warn("[paddle-webhook] transaction has no user_id in custom_data");
+              let resolvedUserId = userId;
+              if (!resolvedUserId && customerId) {
+                const { data: existing } = await supabaseAdmin
+                  .from("subscriptions")
+                  .select("user_id")
+                  .eq("paddle_customer_id", customerId)
+                  .maybeSingle();
+                resolvedUserId = existing?.user_id ?? null;
+              }
+
+              if (!resolvedUserId) {
+                console.warn("[PADDLE_WEBHOOK] Transaction has no resolvable user_id for customer", customerId);
                 break;
               }
 
               if (plan === "lifetime") {
                 await upsertSubscription(supabaseAdmin, {
-                  user_id: userId,
+                  user_id: resolvedUserId,
                   paddle_customer_id: customerId,
                   paddle_subscription_id: null,
                   stripe_customer_id: customerId,
@@ -68,7 +78,7 @@ export const Route = createFileRoute("/api/public/paddle/webhook")({
               } else if (subscriptionId) {
                 // Initial transaction activation
                 await upsertSubscription(supabaseAdmin, {
-                  user_id: userId,
+                  user_id: resolvedUserId,
                   paddle_customer_id: customerId,
                   paddle_subscription_id: subscriptionId,
                   stripe_customer_id: customerId,
@@ -83,29 +93,48 @@ export const Route = createFileRoute("/api/public/paddle/webhook")({
 
             case "subscription.created":
             case "subscription.updated":
+            case "subscription.activated":
+            case "subscription.resumed":
+            case "subscription.paused":
+            case "subscription.past_due":
             case "subscription.canceled": {
               const customerId = data.customer_id;
               const subscriptionId = data.id;
               const userId = data.custom_data?.user_id;
               const plan = data.custom_data?.plan;
-              const status = data.status; // active, trialing, paused, canceled
+              const status = data.status; // active, trialing, paused, past_due, canceled
               const endsAt = data.current_billing_period?.ends_at || null;
 
               let resolvedUserId = userId;
-              if (!resolvedUserId) {
+              if (!resolvedUserId && customerId) {
                 const { data: existing } = await supabaseAdmin
                   .from("subscriptions")
                   .select("user_id")
-                  // @ts-ignore
                   .eq("paddle_customer_id", customerId)
                   .maybeSingle();
                 resolvedUserId = existing?.user_id ?? null;
               }
 
+              if (!resolvedUserId && subscriptionId) {
+                const { data: existingSub } = await supabaseAdmin
+                  .from("subscriptions")
+                  .select("user_id")
+                  .eq("paddle_subscription_id", subscriptionId)
+                  .maybeSingle();
+                resolvedUserId = existingSub?.user_id ?? null;
+              }
+
               if (!resolvedUserId) {
-                console.warn("[paddle-webhook] no user_id for subscription", subscriptionId);
+                console.warn("[PADDLE_WEBHOOK] No user_id resolvable for subscription", subscriptionId);
                 break;
               }
+
+              const finalStatus =
+                eventType === "subscription.canceled"
+                  ? "canceled"
+                  : eventType === "subscription.past_due"
+                    ? "past_due"
+                    : status || "active";
 
               await upsertSubscription(supabaseAdmin, {
                 user_id: resolvedUserId,
@@ -114,18 +143,18 @@ export const Route = createFileRoute("/api/public/paddle/webhook")({
                 stripe_customer_id: customerId,
                 stripe_subscription_id: subscriptionId,
                 plan: plan || "premium",
-                status: eventType === "subscription.canceled" ? "canceled" : status,
+                status: finalStatus,
                 current_period_end: endsAt ? new Date(endsAt).toISOString() : null,
               });
               break;
             }
 
             default:
-              console.log(`[paddle-webhook] event type ${eventType} ignored`);
+              console.log(`[PADDLE_WEBHOOK] Event type ${eventType} ignored`);
               break;
           }
         } catch (err) {
-          console.error("[paddle-webhook] handler error", err);
+          console.error("[PADDLE_WEBHOOK] Handler error processing event:", err);
           return new Response("handler error", { status: 500 });
         }
 
@@ -152,7 +181,19 @@ async function upsertSubscription(
     current_period_end: string | null;
   },
 ) {
-  // @ts-ignore
-  const { error } = await admin.from("subscriptions").upsert(row, { onConflict: "user_id" });
+  let { error } = await admin.from("subscriptions").upsert(row, { onConflict: "user_id" });
+  if (error && (error.code === "PGRST204" || error.code === "42703")) {
+    // Fallback without paddle-specific columns
+    const fallbackRow = {
+      user_id: row.user_id,
+      stripe_customer_id: row.stripe_customer_id || row.paddle_customer_id,
+      stripe_subscription_id: row.stripe_subscription_id || row.paddle_subscription_id,
+      plan: row.plan,
+      status: row.status,
+      current_period_end: row.current_period_end,
+    };
+    const fallbackRes = await admin.from("subscriptions").upsert(fallbackRow, { onConflict: "user_id" });
+    error = fallbackRes.error;
+  }
   if (error) throw error;
 }

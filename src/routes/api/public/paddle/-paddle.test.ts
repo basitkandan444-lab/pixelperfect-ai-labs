@@ -357,6 +357,85 @@ describe("Paddle Billing Integration Test Suite", () => {
       );
     });
 
+    it("processes subscription.resumed and subscription.activated successfully", async () => {
+      const payload = {
+        event_type: "subscription.resumed",
+        data: {
+          id: "sub_01resumed",
+          customer_id: "ct_01resumed",
+          status: "active",
+          custom_data: { user_id: "user_resumed_123", plan: "monthly" },
+          current_billing_period: { ends_at: "2026-10-01T00:00:00Z" },
+        },
+      };
+
+      const res = await postWebhook(payload);
+      expect(res.status).toBe(200);
+
+      expect(mockUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          user_id: "user_resumed_123",
+          paddle_subscription_id: "sub_01resumed",
+          status: "active",
+        }),
+        { onConflict: "user_id" },
+      );
+    });
+
+    it("processes subscription.paused successfully", async () => {
+      const payload = {
+        event_type: "subscription.paused",
+        data: {
+          id: "sub_01paused",
+          customer_id: "ct_01paused",
+          status: "paused",
+          custom_data: { user_id: "user_paused_123", plan: "monthly" },
+          current_billing_period: { ends_at: "2026-10-01T00:00:00Z" },
+        },
+      };
+
+      const res = await postWebhook(payload);
+      expect(res.status).toBe(200);
+
+      expect(mockUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          user_id: "user_paused_123",
+          paddle_subscription_id: "sub_01paused",
+          status: "paused",
+        }),
+        { onConflict: "user_id" },
+      );
+    });
+
+    it("resolves user_id via paddle_subscription_id when customer_id lookup fails", async () => {
+      // First lookup by paddle_customer_id returns null, second lookup by paddle_subscription_id succeeds
+      mockMaybeSingle
+        .mockResolvedValueOnce({ data: null, error: null })
+        .mockResolvedValueOnce({ data: { user_id: "user_from_sub_id" }, error: null });
+
+      const payload = {
+        event_type: "subscription.updated",
+        data: {
+          id: "sub_fallback_999",
+          customer_id: "ct_unknown_999",
+          status: "active",
+          custom_data: {},
+          current_billing_period: { ends_at: "2026-11-01T00:00:00Z" },
+        },
+      };
+
+      const res = await postWebhook(payload);
+      expect(res.status).toBe(200);
+
+      expect(mockUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          user_id: "user_from_sub_id",
+          paddle_subscription_id: "sub_fallback_999",
+        }),
+        { onConflict: "user_id" },
+      );
+    });
+
     it("rejects request if signature header is missing", async () => {
       const rawBody = JSON.stringify({ event_type: "transaction.completed" });
       const request = new Request("http://localhost/api/public/paddle/webhook", {

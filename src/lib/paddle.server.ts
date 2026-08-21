@@ -5,39 +5,56 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { FREE_CAP } from "@/lib/entitlement";
 
-/**
- * The premium plan catalog for Paddle.
- * Monthly ($3.99), Yearly ($37.73), and Lifetime ($99.89) plans.
- */
-export const PADDLE_PLANS = {
-  monthly: {
-    priceId: "pri_01kzc5gzvfz02gfgh1pf4x6t92",
-    unitAmount: 399, // $3.99 in cents
-    interval: "month" as const,
-    mode: "subscription" as const,
-    productName: "Pixel Perfect Pro Premium (Monthly)",
-  },
-  yearly: {
-    priceId: "pri_01kzc3m5305adhjcnmf8prrazy",
-    unitAmount: 3773, // $37.73 in cents
-    interval: "year" as const,
-    mode: "subscription" as const,
-    productName: "Pixel Perfect Pro Premium (Yearly)",
-  },
-  lifetime: {
-    priceId: "pri_01kzc3rk1rfaw8qwc15cdbhnbn",
-    unitAmount: 9989, // $99.89 in cents
-    interval: null,
-    mode: "payment" as const,
-    productName: "Pixel Perfect Pro Premium (Lifetime)",
-  },
-} as const;
+import {
+  PADDLE_PLANS,
+  isPaddlePlan,
+  type PaddlePlanKey as PaddlePlan,
+} from "@/lib/pricing-catalog";
 
-export type PaddlePlan = keyof typeof PADDLE_PLANS;
+export { PADDLE_PLANS, isPaddlePlan, type PaddlePlan };
 
-export function isPaddlePlan(value: unknown): value is PaddlePlan {
-  return value === "monthly" || value === "yearly" || value === "lifetime";
+const isPaddleLive = () => process.env.PADDLE_ENV === "live";
+
+const getPaddleApiBaseUrl = () =>
+  isPaddleLive() ? "https://api.paddle.com" : "https://sandbox-api.paddle.com";
+
+const getPaddleApiKey = () => {
+  const key = isPaddleLive()
+    ? process.env.PADDLE_LIVE_API_KEY
+    : process.env.PADDLE_SANDBOX_API_KEY;
+
+  if (!key) {
+    throw new Error(
+      isPaddleLive()
+        ? "[CONFIGURATION] PADDLE_LIVE_API_KEY is not configured"
+        : "[CONFIGURATION] PADDLE_SANDBOX_API_KEY is not configured",
+    );
+  }
+
+  return key;
+};
+
+const getPaddleWebhookSecret = () => {
+  const secret = isPaddleLive()
+    ? process.env.PADDLE_WEBHOOK_SECRET
+    : process.env.PADDLE_SANDBOX_WEBHOOK_SECRET;
+
+  if (!secret) {
+    throw new Error(
+      isPaddleLive()
+        ? "[CONFIGURATION] PADDLE_WEBHOOK_SECRET is not configured"
+        : "[CONFIGURATION] PADDLE_SANDBOX_WEBHOOK_SECRET is not configured",
+    );
+  }
+
+  return secret;
+};
+
+function getPaddlePriceId(plan: PaddlePlan): string {
+  const spec = PADDLE_PLANS[plan];
+  return isPaddleLive() ? spec.priceId : spec.sandboxPriceId;
 }
+
 
 /**
  * Create a Paddle Checkout (Transaction) Session for a Premium plan.
@@ -55,59 +72,128 @@ export const createPaddleCheckoutSession = createServerFn({ method: "POST" })
     const plan = data.plan;
     const spec = PADDLE_PLANS[plan];
 
-    // Reuse an existing customer if we've already created one for this user.
-    const { data: existing } = await supabase
-      .from("subscriptions")
-      // @ts-ignore
-      .select("paddle_customer_id, status, current_period_end")
-      .eq("user_id", userId)
-      // @ts-ignore
-      .not("paddle_customer_id", "is", null)
-      .order("updated_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    if (!spec) {
+      throw new Error(`[CONFIGURATION] Invalid plan requested: ${plan}`);
+    }
+
+    // 1. Check existing subscription / customer ID
+    let existing: { customerId?: string; status?: string; currentPeriodEnd?: string | null } | null = null;
+    try {
+      // Try select with * to handle both legacy and migrated schema
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .eq("user_id", userId)
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!error && data) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const d = data as any;
+        const custId = d.paddle_customer_id || d.stripe_customer_id;
+        if (custId) {
+          existing = {
+            customerId: custId,
+            status: d.status,
+            currentPeriodEnd: d.current_period_end,
+          };
+        }
+      }
+    } catch (err) {
+      console.error("[SUPABASE_SCHEMA] Exception querying subscriptions table:", err);
+    }
 
     const existingIsActive =
       existing &&
       (existing.status === "active" || existing.status === "trialing") &&
-      (!existing.current_period_end ||
-        new Date(existing.current_period_end).getTime() > Date.now());
-    if (existingIsActive) throw new Error("Premium is already active for this account");
+      (!existing.currentPeriodEnd ||
+        new Date(existing.currentPeriodEnd).getTime() > Date.now());
+    if (existingIsActive) {
+      throw new Error("Premium is already active for this account");
+    }
 
-    // @ts-ignore
-    let customerId = existing?.paddle_customer_id ?? undefined;
+    // 2. Identify or create Paddle customer
+    let customerId = existing?.customerId ?? undefined;
     if (!customerId) {
-      const customer = await createCustomer({
-        email: claims.email as string | undefined,
-        custom_data: { user_id: userId },
-      });
-      customerId = customer.id;
+      try {
+        const customer = await createCustomer({
+          email: claims.email as string | undefined,
+          custom_data: { user_id: userId },
+        });
+        customerId = customer?.id;
+      } catch (err) {
+        console.error("[PADDLE_CUSTOMER_CREATE] Failed to create or find customer:", err);
+        throw new Error(
+          `[PADDLE_CUSTOMER_CREATE] ${err instanceof Error ? err.message : "Failed to establish customer profile"}`,
+        );
+      }
 
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { error: customerStoreError } = await supabaseAdmin.from("subscriptions").upsert(
-        {
+      if (!customerId) {
+        throw new Error("[PADDLE_CUSTOMER_CREATE] Customer ID could not be resolved");
+      }
+
+      // Persist customer ID in Supabase with adaptive schema resilience
+      try {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const fullRow = {
           user_id: userId,
-          // @ts-ignore
           paddle_customer_id: customerId,
+          stripe_customer_id: customerId,
           plan: "free",
           status: "free",
-        },
-        { onConflict: "user_id" },
+        };
+        let { error: customerStoreError } = await supabaseAdmin.from("subscriptions").upsert(
+          fullRow,
+          { onConflict: "user_id" },
+        );
+
+        if (customerStoreError && (customerStoreError.code === "PGRST204" || customerStoreError.code === "42703")) {
+          // Schema fallback without paddle_customer_id column
+          const fallbackRow = {
+            user_id: userId,
+            stripe_customer_id: customerId,
+            plan: "free",
+            status: "free",
+          };
+          const fallbackResult = await supabaseAdmin.from("subscriptions").upsert(
+            fallbackRow,
+            { onConflict: "user_id" },
+          );
+          customerStoreError = fallbackResult.error;
+        }
+
+        if (customerStoreError) {
+          console.error("[SUPABASE_WRITE] Failed to persist customer ID:", customerStoreError);
+          throw new Error(
+            `[SUPABASE_WRITE] Database persistence failed: ${customerStoreError.message}`,
+          );
+        }
+      } catch (err) {
+        console.error("[SUPABASE_WRITE] Error persisting customer record:", err);
+        throw err;
+      }
+    }
+
+    // 3. Create checkout transaction
+    let transaction;
+    try {
+      transaction = await createCheckoutSession({
+        customer_id: customerId,
+        items: [{ price_id: getPaddlePriceId(plan), quantity: 1 }],
+        custom_data: { user_id: userId, plan },
+      });
+    } catch (err) {
+      console.error("[PADDLE_TRANSACTION] Transaction creation failed:", err);
+      throw new Error(
+        `[PADDLE_TRANSACTION] ${err instanceof Error ? err.message : "Failed to create transaction"}`,
       );
-      if (customerStoreError) throw new Error("Could not initialize billing profile");
     }
 
-    if (!customerId) {
-      throw new Error("Could not find or create customer");
+    if (!transaction.url) {
+      throw new Error("[PADDLE_CHECKOUT] Paddle did not return a checkout URL");
     }
 
-    const transaction = await createCheckoutSession({
-      customer_id: customerId,
-      items: [{ price_id: spec.priceId, quantity: 1 }],
-      custom_data: { user_id: userId, plan },
-    });
-
-    if (!transaction.url) throw new Error("Paddle did not return a checkout URL");
     return { url: transaction.url, sessionId: transaction.id, plan };
   });
 
@@ -118,24 +204,37 @@ export const createPaddleBillingPortalSession = createServerFn({ method: "POST" 
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    const { data: sub } = await supabase
+    const { data: sub, error } = await supabase
       .from("subscriptions")
-      // @ts-ignore
-      .select("paddle_customer_id")
+      .select("*")
       .eq("user_id", userId)
-      // @ts-ignore
-      .not("paddle_customer_id", "is", null)
       .order("updated_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    // @ts-ignore
-    if (!sub?.paddle_customer_id) throw new Error("No Paddle customer on file");
 
-    const billingPortal = await createBillingPortalSession({
-      // @ts-ignore
-      customer_id: sub.paddle_customer_id,
-    });
-    return { url: billingPortal.urls.overview };
+    if (error) {
+      console.error("[SUPABASE_SCHEMA] Failed to query billing portal customer:", error);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const subData = sub as any;
+    const customerId = subData?.paddle_customer_id || subData?.stripe_customer_id;
+
+    if (!customerId) {
+      throw new Error("[AUTH] No active billing customer found for this account");
+    }
+
+    try {
+      const billingPortal = await createBillingPortalSession({
+        customer_id: customerId,
+      });
+      return { url: billingPortal.urls.overview };
+    } catch (err) {
+      console.error("[PADDLE_CHECKOUT] Failed to create billing portal session:", err);
+      throw new Error(
+        `[PADDLE_CHECKOUT] ${err instanceof Error ? err.message : "Billing portal access failed"}`,
+      );
+    }
   });
 
 /**
@@ -153,24 +252,29 @@ export const finalizePaddleCheckoutSession = createServerFn({ method: "POST" })
   )
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    const { data: sub } = await supabase
+    const { data: sub, error } = await supabase
       .from("subscriptions")
-      // @ts-ignore
-      .select("plan, status, current_period_end, paddle_subscription_id")
+      .select("*")
       .eq("user_id", userId)
       .maybeSingle();
 
+    if (error) {
+      console.error("[SUPABASE_SCHEMA] Finalize checkout query error:", error);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const subData = sub as any;
     const isActive =
-      sub &&
-      (sub.status === "active" ||
-        sub.status === "trialing" ||
-        sub.status === "completed" ||
-        sub.status === "paid") &&
-      (!sub.current_period_end || new Date(sub.current_period_end).getTime() > Date.now());
+      subData &&
+      (subData.status === "active" ||
+        subData.status === "trialing" ||
+        subData.status === "completed" ||
+        subData.status === "paid") &&
+      (!subData.current_period_end || new Date(subData.current_period_end).getTime() > Date.now());
 
     if (isActive) {
-      // @ts-ignore
-      return { activated: true, plan: sub.plan, subscriptionId: sub.paddle_subscription_id };
+      const subId = subData.paddle_subscription_id || subData.stripe_subscription_id;
+      return { activated: true, plan: subData.plan, subscriptionId: subId };
     }
 
     return { activated: false };
@@ -188,10 +292,36 @@ function getRequestOrigin(request: Request): string {
   const host = forwardedHost || url.host;
 
   if (protocol !== "https:" && url.hostname !== "localhost" && !url.hostname.startsWith("127.")) {
-    throw new Error("Checkout requires a secure origin");
+    throw new Error("[AUTH] Checkout requires a secure origin");
   }
 
   return `${protocol}//${host}`;
+}
+
+/**
+ * Find an existing Paddle customer by email.
+ */
+async function findCustomerByEmail(email: string) {
+  const apiKey = getPaddleApiKey();
+  if (!apiKey) throw new Error("[CONFIGURATION] PADDLE_SANDBOX_API_KEY is not configured");
+
+  const response = await fetch(
+    `${getPaddleApiBaseUrl()}/customers?email=${encodeURIComponent(email)}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`[PADDLE_CUSTOMER_LOOKUP] Paddle customer lookup failed: ${error}`);
+  }
+
+  const resJson = await response.json();
+  return resJson.data?.[0] ?? null;
 }
 
 /**
@@ -202,10 +332,15 @@ export async function createCustomer(data: {
   name?: string;
   custom_data?: Record<string, unknown>;
 }) {
-  const apiKey = process.env.PADDLE_SANDBOX_API_KEY;
-  if (!apiKey) throw new Error("PADDLE_SANDBOX_API_KEY is not configured");
+  const apiKey = getPaddleApiKey();
+  if (!apiKey) throw new Error("[CONFIGURATION] PADDLE_SANDBOX_API_KEY is not configured");
 
-  const response = await fetch("https://sandbox-api.paddle.com/customers", {
+  if (data.email) {
+    const existingCustomer = await findCustomerByEmail(data.email);
+    if (existingCustomer) return existingCustomer;
+  }
+
+  const response = await fetch(`${getPaddleApiBaseUrl()}/customers`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -215,8 +350,13 @@ export async function createCustomer(data: {
   });
 
   if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Paddle customer creation failed: ${error}`);
+    const errorText = await response.text();
+    // Fallback: If customer already exists, attempt lookup again
+    if (data.email && (errorText.includes("already_exists") || response.status === 409)) {
+      const retryExisting = await findCustomerByEmail(data.email);
+      if (retryExisting) return retryExisting;
+    }
+    throw new Error(`[PADDLE_CUSTOMER_CREATE] Paddle customer creation failed: ${errorText}`);
   }
 
   const resJson = await response.json();
@@ -231,10 +371,10 @@ export async function createCheckoutSession(data: {
   items: Array<{ price_id: string; quantity: number }>;
   custom_data?: Record<string, unknown>;
 }) {
-  const apiKey = process.env.PADDLE_SANDBOX_API_KEY;
-  if (!apiKey) throw new Error("PADDLE_SANDBOX_API_KEY is not configured");
+  const apiKey = getPaddleApiKey();
+  if (!apiKey) throw new Error("[CONFIGURATION] PADDLE_SANDBOX_API_KEY is not configured");
 
-  const response = await fetch("https://sandbox-api.paddle.com/transactions", {
+  const response = await fetch(`${getPaddleApiBaseUrl()}/transactions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -249,8 +389,17 @@ export async function createCheckoutSession(data: {
   });
 
   if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Paddle checkout session creation failed: ${error}`);
+    const errorText = await response.text();
+    let parsedDetail = errorText;
+    try {
+      const parsed = JSON.parse(errorText);
+      if (parsed.error?.detail) {
+        parsedDetail = `${parsed.error.code ? `[${parsed.error.code}] ` : ""}${parsed.error.detail}`;
+      }
+    } catch {
+      // use raw errorText
+    }
+    throw new Error(`[PADDLE_TRANSACTION] ${parsedDetail}`);
   }
 
   const resJson = await response.json();
@@ -264,7 +413,7 @@ export async function createCheckoutSession(data: {
  * Get the Webhook signature secret.
  */
 export function getWebhookSecret(): string {
-  const secret = process.env.PADDLE_SANDBOX_WEBHOOK_SECRET || process.env.PADDLE_WEBHOOK_SECRET;
+  const secret = getPaddleWebhookSecret();
   if (!secret) {
     throw new Error("PADDLE_SANDBOX_WEBHOOK_SECRET or PADDLE_WEBHOOK_SECRET is not configured");
   }
@@ -335,11 +484,11 @@ function hexToUint8Array(hex: string): Uint8Array {
  * Create a Paddle Billing Portal session.
  */
 export async function createBillingPortalSession(data: { customer_id: string }) {
-  const apiKey = process.env.PADDLE_SANDBOX_API_KEY;
+  const apiKey = getPaddleApiKey();
   if (!apiKey) throw new Error("PADDLE_SANDBOX_API_KEY is not configured");
 
   const response = await fetch(
-    `https://sandbox-api.paddle.com/customers/${data.customer_id}/portal-sessions`,
+    `${getPaddleApiBaseUrl()}/customers/${data.customer_id}/portal-sessions`,
     {
       method: "POST",
       headers: {
@@ -364,9 +513,10 @@ export async function createBillingPortalSession(data: { customer_id: string }) 
  */
 export function getBillingConfigStatus(): { configured: boolean; missing: string[] } {
   const missing: string[] = [];
-  const apiKey = process.env.PADDLE_SANDBOX_API_KEY || process.env.PADDLE_API_KEY;
-  const webhookSecret =
-    process.env.PADDLE_SANDBOX_WEBHOOK_SECRET || process.env.PADDLE_WEBHOOK_SECRET;
+  const apiKey = isPaddleLive() ? process.env.PADDLE_LIVE_API_KEY : process.env.PADDLE_SANDBOX_API_KEY;
+  const webhookSecret = isPaddleLive()
+    ? process.env.PADDLE_WEBHOOK_SECRET
+    : process.env.PADDLE_SANDBOX_WEBHOOK_SECRET;
 
   if (!apiKey || !apiKey.trim()) missing.push("PADDLE_API_KEY");
   if (!webhookSecret || !webhookSecret.trim()) missing.push("PADDLE_WEBHOOK_SECRET");

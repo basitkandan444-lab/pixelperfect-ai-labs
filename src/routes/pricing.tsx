@@ -11,6 +11,7 @@ import { useBillingStatus } from "@/hooks/use-billing-status";
 import { Button } from "@/components/ui/button";
 import { SITE } from "@/lib/site";
 import { getMyEntitlement } from "@/lib/subscription.functions";
+import { PADDLE_PLANS } from "@/lib/pricing-catalog";
 import {
   createPaddleCheckoutSession,
   createPaddleBillingPortalSession,

@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Sparkles, X, Check } from "lucide-react";
 import { useEffect } from "react";
+import { PADDLE_PLANS } from "@/lib/pricing-catalog";
 
 interface UpgradeWallProps {
   open: boolean;
@@ -10,7 +11,7 @@ interface UpgradeWallProps {
   isSignedIn: boolean;
   onUpgrade: () => void;
   pending?: boolean;
-  /** False when the deployment's Stripe env is not configured — disables the
+  /** False when the deployment billing is not configured — disables the
    * paid CTA instead of letting the user hit a confusing mid-checkout error. */
   billingAvailable?: boolean;
 }
@@ -27,16 +28,15 @@ export function UpgradeWall({
   cap,
   isSignedIn,
   onUpgrade,
-  pending,
+  pending = false,
   billingAvailable = true,
 }: UpgradeWallProps) {
   useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && open) onClose();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [open, onClose]);
 
   if (!open) return null;
@@ -46,40 +46,42 @@ export function UpgradeWall({
       role="dialog"
       aria-modal="true"
       aria-labelledby="upgrade-wall-title"
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
     >
-      <button
-        aria-label="Close upgrade dialog"
+      <div
+        aria-hidden="true"
         onClick={onClose}
-        className="absolute inset-0 bg-background/60 backdrop-blur-md"
+        className="absolute inset-0 bg-black/80 backdrop-blur-md animate-fade-in"
       />
 
-      <div className="relative w-full max-w-lg overflow-hidden rounded-xl border border-border bg-surface-low/95 p-8 text-foreground shadow-modal backdrop-blur-3xl">
+      <div className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-b from-card to-background p-8 shadow-2xl animate-scale-in">
         <button
           onClick={onClose}
           aria-label="Close"
-          className="absolute right-4 top-4 rounded-md border border-border bg-surface-mid p-1.5 text-muted-foreground transition hover:bg-surface-high hover:text-foreground"
+          className="absolute right-4 top-4 rounded-full border border-white/10 bg-white/5 p-1.5 text-white/60 transition hover:bg-white/10 hover:text-white"
         >
           <X className="h-4 w-4" />
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-white/50">
           <Sparkles className="h-3.5 w-3.5 text-primary" />
-          <span className="eyebrow !text-[9px]">Free limit reached</span>
+          Free limit reached
         </div>
 
         <h2
           id="upgrade-wall-title"
-          className="mt-4 text-display !text-3xl leading-tight md:!text-4xl"
+          className="mt-4 font-display text-3xl leading-tight md:text-4xl"
         >
           You&rsquo;ve used all {cap} free enhancements.
         </h2>
-        <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+        <p className="mt-3 text-sm text-white/65">
           Your image is safe — nothing was lost. Upgrade to Premium for 100 ultra quality images
-          every month at just <span className="font-bold text-foreground">$3.99 / month</span>.
+          every month at just <span className="font-semibold text-white">{PADDLE_PLANS.monthly.formattedPrice}/mo</span> or{" "}
+          <span className="font-semibold text-white">{PADDLE_PLANS.yearly.formattedPrice}/yr</span> — or
+          pay <span className="font-semibold text-white">{PADDLE_PLANS.lifetime.formattedPrice} once</span> for lifetime access.
         </p>
 
-        <ul className="mt-6 space-y-2.5 text-sm text-foreground">
+        <ul className="mt-6 space-y-2.5 text-sm text-white/85">
           {[
             "100 ultra quality images / month",
             "Priority processing pipeline",
@@ -107,7 +109,7 @@ export function UpgradeWall({
           <button
             onClick={onUpgrade}
             disabled={pending || !billingAvailable}
-            className="flex-1 rounded-md bg-foreground px-5 py-3 text-sm font-bold text-background shadow-elevated transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
+            className="flex-1 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black shadow-[0_0_40px_-8px_rgba(10,132,255,0.6)] transition hover:bg-white/90 disabled:opacity-60"
           >
             {!billingAvailable
               ? "Checkout unavailable"
@@ -119,13 +121,13 @@ export function UpgradeWall({
           </button>
           <Link
             to="/pricing"
-            className="flex-1 rounded-md border border-border bg-surface-mid px-5 py-3 text-center text-sm font-bold text-foreground transition-all hover:bg-surface-high"
+            className="flex-1 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-center text-sm font-medium text-white/85 transition hover:bg-white/10"
           >
             View pricing
           </Link>
         </div>
 
-        <p className="mt-6 text-center eyebrow !text-[9px]">
+        <p className="mt-5 text-center text-[11px] text-white/40">
           {used} / {cap} free enhancements used · Secure checkout via Paddle
         </p>
       </div>
