@@ -50,7 +50,7 @@ export function Analytics() {
       if ("requestIdleCallback" in window) {
         idleHandle = window.requestIdleCallback(loadThirdPartyAnalytics, { timeout: 8_000 });
       } else {
-        idleHandle = window.setTimeout(loadThirdPartyAnalytics, 4_000);
+        idleHandle = globalThis.setTimeout(loadThirdPartyAnalytics, 4_000);
       }
     };
 
@@ -95,7 +95,7 @@ export function Analytics() {
       window.removeEventListener("load", scheduleAnalytics);
       if (idleHandle !== undefined) {
         if ("cancelIdleCallback" in window) window.cancelIdleCallback(idleHandle);
-        else window.clearTimeout(idleHandle);
+        else globalThis.clearTimeout(idleHandle);
       }
       window.removeEventListener("error", onError);
       window.removeEventListener("unhandledrejection", onRejection);
