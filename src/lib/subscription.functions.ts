@@ -60,7 +60,17 @@ export const consumeEnhancement = createServerFn({ method: "POST" })
  */
 export const createCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((data) => z.object({ plan: z.enum(["monthly", "yearly", "lifetime"]).default("monthly") }).parse(data ?? {}))
+  // Hand-rolled validator: this module is imported by the landing page, so
+  // pulling Zod in here would ship the whole schema library in the initial
+  // client bundle for one three-value enum.
+  .validator((data: unknown) => {
+    const plan = (data as { plan?: unknown } | null | undefined)?.plan ?? "monthly";
+    if (plan !== "monthly" && plan !== "yearly" && plan !== "lifetime") {
+      throw new Error("Invalid plan");
+    }
+    return { plan };
+  })
+
   .handler(async ({ context, data }) => {
     // We import the Paddle-specific server function and call it.
     const { createPaddleCheckoutSession } = await import("@/lib/paddle.server");
