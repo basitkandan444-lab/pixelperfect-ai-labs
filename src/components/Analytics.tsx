@@ -14,32 +14,48 @@ export function Analytics() {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
 
   useEffect(() => {
-    const { ga4, clarity } = ANALYTICS;
+    let cancelled = false;
+    let idleHandle: number | undefined;
 
-    if (ga4 && !document.getElementById("ga4-src")) {
-      const s = document.createElement("script");
-      s.id = "ga4-src";
-      s.async = true;
-      s.src = `https://www.googletagmanager.com/gtag/js?id=${ga4}`;
-      document.head.appendChild(s);
+    const loadThirdPartyAnalytics = () => {
+      if (cancelled) return;
+      const { ga4, clarity } = ANALYTICS;
 
-      window.dataLayer = window.dataLayer || [];
-      window.gtag = function gtag() {
-        // eslint-disable-next-line prefer-rest-params
-        window.dataLayer!.push(arguments);
-      };
-      window.gtag("js", new Date());
-      window.gtag("config", ga4, { anonymize_ip: true });
-    }
+      if (ga4 && !document.getElementById("ga4-src")) {
+        const s = document.createElement("script");
+        s.id = "ga4-src";
+        s.async = true;
+        s.src = `https://www.googletagmanager.com/gtag/js?id=${ga4}`;
+        document.head.appendChild(s);
 
-    if (clarity && !document.getElementById("clarity-src")) {
-      const s = document.createElement("script");
-      s.id = "clarity-src";
-      s.type = "text/javascript";
-      s.async = true;
-      s.src = `https://www.clarity.ms/tag/${clarity}`;
-      document.head.appendChild(s);
-    }
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function gtag() {
+          // eslint-disable-next-line prefer-rest-params
+          window.dataLayer!.push(arguments);
+        };
+        window.gtag("js", new Date());
+        window.gtag("config", ga4, { anonymize_ip: true });
+      }
+
+      if (clarity && !document.getElementById("clarity-src")) {
+        const s = document.createElement("script");
+        s.id = "clarity-src";
+        s.async = true;
+        s.src = `https://www.clarity.ms/tag/${clarity}`;
+        document.head.appendChild(s);
+      }
+    };
+
+    const scheduleAnalytics = () => {
+      if ("requestIdleCallback" in window) {
+        idleHandle = window.requestIdleCallback(loadThirdPartyAnalytics, { timeout: 8_000 });
+      } else {
+        idleHandle = window.setTimeout(loadThirdPartyAnalytics, 4_000);
+      }
+    };
+
+    if (document.readyState === "complete") scheduleAnalytics();
+    else window.addEventListener("load", scheduleAnalytics, { once: true });
 
     initTracker();
     initBehavior();
@@ -75,6 +91,12 @@ export function Analytics() {
     window.addEventListener("error", onError);
     window.addEventListener("unhandledrejection", onRejection);
     return () => {
+      cancelled = true;
+      window.removeEventListener("load", scheduleAnalytics);
+      if (idleHandle !== undefined) {
+        if ("cancelIdleCallback" in window) window.cancelIdleCallback(idleHandle);
+        else window.clearTimeout(idleHandle);
+      }
       window.removeEventListener("error", onError);
       window.removeEventListener("unhandledrejection", onRejection);
     };

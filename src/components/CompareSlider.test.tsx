@@ -37,10 +37,10 @@ describe("CompareSlider — rendering", () => {
     expect(screen.getByAltText("Original low-quality image")).toBeInTheDocument();
   });
 
-  it("shows the Before and After labels", () => {
+  it("shows the Original and Enhanced labels", () => {
     renderSlider();
-    expect(screen.getByText("Before")).toBeInTheDocument();
-    expect(screen.getByText("After")).toBeInTheDocument();
+    expect(screen.getByText("Original")).toBeInTheDocument();
+    expect(screen.getByText("Enhanced")).toBeInTheDocument();
   });
 });
 
