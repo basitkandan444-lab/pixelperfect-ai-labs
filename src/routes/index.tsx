@@ -695,15 +695,6 @@ function Index() {
           {/* Hero — cinematic serif with staggered blur-in entrance */}
           <section className="relative pt-40 pb-20 text-center sm:pt-48">
             <div className="hero-copy">
-              <div
-                className="mx-auto mb-8 inline-flex items-center gap-2 rounded-md border border-border bg-surface-low px-3.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.22em] text-muted-foreground backdrop-blur"
-              >
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
-                </span>
-                Neural Core v2.4 Loaded
-              </div>
               <h1
                 className="mx-auto max-w-5xl text-display !text-[4rem] sm:!text-7xl md:!text-[8.5rem]"
               >
