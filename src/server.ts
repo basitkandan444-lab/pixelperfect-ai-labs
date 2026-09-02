@@ -47,8 +47,8 @@ function isH3SwallowedErrorBody(body: string): boolean {
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.clarity.ms",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src 'self' https://fonts.gstatic.com data:",
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self' https://cdn.gpteng.co data:",
   "img-src 'self' data: blob: https:",
   "connect-src 'self' https: wss:",
   "worker-src 'self' blob:",

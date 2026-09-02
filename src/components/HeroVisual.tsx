@@ -66,6 +66,7 @@ export function HeroVisual() {
                   height: 600,
                 }}
                 className="!rounded-none border-none shadow-none"
+                fetchPriority="high"
               />
               
               {/* Interaction Hint */}
@@ -85,9 +86,9 @@ export function HeroVisual() {
                   <span className="eyebrow !text-[9px]">Neural Engine v2.4</span>
                 </div>
                 
-                <h3 className="text-display !text-3xl">
+                <h2 className="text-display !text-3xl">
                   Ready to transform your images?
-                </h3>
+                </h2>
                 
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   Experience elite 8K upscaling. Every pixel is processed locally on your GPU for absolute privacy.

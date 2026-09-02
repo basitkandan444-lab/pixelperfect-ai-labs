@@ -48,8 +48,13 @@ export const Route = createFileRoute("/")({
     const canonical = absoluteUrl(loaderData?.origin, "/");
     return {
       meta: [
+        { title: SITE.title },
+        { name: "description", content: SITE.description },
+        { property: "og:title", content: SITE.title },
+        { property: "og:description", content: SITE.description },
         { property: "og:url", content: canonical },
         { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary_large_image" },
       ],
       links: [{ rel: "canonical", href: canonical }],
       scripts: [

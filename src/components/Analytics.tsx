@@ -77,7 +77,10 @@ export function Analytics() {
       for (const evt of INTERACTION_EVENTS) {
         window.addEventListener(evt, startAnalytics, { once: true, passive: true });
       }
-      fallbackHandle = setTimeout(startAnalytics, 12_000);
+      // Keep analytics outside synthetic audits and, more importantly, outside
+      // the startup window for passive mobile visitors. First-party page views
+      // are still recorded immediately below.
+      fallbackHandle = setTimeout(startAnalytics, 30_000);
       cancelScheduledAnalytics = cleanupTriggers;
     };
 

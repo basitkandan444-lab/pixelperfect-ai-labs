@@ -9,6 +9,15 @@ import type { Session } from "@supabase/supabase-js";
  */
 const loadSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
+function hasStoredSession(): boolean {
+  if (typeof window === "undefined") return false;
+  for (let index = 0; index < window.localStorage.length; index += 1) {
+    const key = window.localStorage.key(index);
+    if (key?.startsWith("sb-") && key.endsWith("-auth-token")) return true;
+  }
+  return false;
+}
+
 /**
  * Shared auth-session query.
  *
@@ -24,6 +33,9 @@ export function useSession() {
   const query = useQuery<Session | null>({
     queryKey: ["auth-session"],
     queryFn: async () => {
+      // Signed-out visitors do not need the auth SDK on the homepage. Avoiding
+      // that download removes a large parse/evaluation task from mobile startup.
+      if (!hasStoredSession()) return null;
       try {
         const supabase = await loadSupabase();
         return (await supabase.auth.getSession()).data.session;
@@ -40,6 +52,7 @@ export function useSession() {
   });
 
   useEffect(() => {
+    if (!hasStoredSession()) return;
     let unsubscribe: (() => void) | undefined;
     let cancelled = false;
 

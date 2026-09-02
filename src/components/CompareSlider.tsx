@@ -182,7 +182,7 @@ export function CompareSlider({
       <span className="pointer-events-none absolute left-4 top-4 rounded-md border border-border bg-background/80 px-2 py-1 text-[9px] font-bold uppercase tracking-widest text-muted-foreground backdrop-blur-xl transition-transform duration-standard group-hover:translate-x-0.5 shadow-subtle">
         Original
       </span>
-      <span className="pointer-events-none absolute right-4 top-4 rounded-md bg-primary px-2 py-1 text-[9px] font-bold uppercase tracking-widest text-primary-foreground backdrop-blur-sm shadow-glow transition-transform duration-standard group-hover:-translate-x-0.5">
+      <span className="pointer-events-none absolute right-4 top-4 rounded-md bg-primary px-2 py-1 text-[9px] font-bold uppercase tracking-widest text-background backdrop-blur-sm shadow-glow transition-transform duration-standard group-hover:-translate-x-0.5">
         Enhanced
       </span>
 
