@@ -175,6 +175,7 @@ export function CompareSlider({
           style={{ width: width || "100%" }}
           draggable={false}
           loading={loading}
+          fetchPriority="low"
           sizes={sizes}
         />
       </div>

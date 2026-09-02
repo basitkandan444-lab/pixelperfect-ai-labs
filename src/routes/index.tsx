@@ -56,7 +56,15 @@ export const Route = createFileRoute("/")({
         { property: "og:type", content: "website" },
         { name: "twitter:card", content: "summary_large_image" },
       ],
-      links: [{ rel: "canonical", href: canonical }],
+      links: [
+        { rel: "canonical", href: canonical },
+        {
+          rel: "preload",
+          as: "image",
+          href: "/gallery/landscape-after-900.avif",
+          fetchPriority: "high",
+        },
+      ],
       scripts: [
         {
           type: "application/ld+json",
@@ -631,7 +639,7 @@ function Index() {
       {/* Ambient — twin drifting electric-blue blooms behind the hero, forming
           a slow, cinematic aurora that reacts subtly to page life. */}
       <div
-        className="pointer-events-none fixed inset-x-0 top-0 h-[85vh] overflow-hidden"
+        className="pointer-events-none fixed inset-x-0 top-0 hidden h-[85vh] overflow-hidden md:block"
         aria-hidden="true"
       >
         <div className="animate-aurora-drift absolute left-1/2 top-[-18%] h-[46rem] w-[46rem] -translate-x-1/2 rounded-full bg-primary/20 blur-[150px]" />
@@ -648,7 +656,7 @@ function Index() {
       <div className="relative mx-auto flex max-w-6xl flex-col px-5 pt-6 sm:px-8">
         {/* Floating brand pill — Apple Noir */}
         <header className="animate-fade-up fixed left-1/2 top-6 z-50 w-[calc(100%-2.5rem)] max-w-2xl -translate-x-1/2">
-          <div className="flex items-center justify-between rounded-lg border border-border bg-surface-low/80 px-5 py-2.5 shadow-modal backdrop-blur-xl transition-all duration-standard hover:border-foreground/20">
+          <div className="flex items-center justify-between rounded-lg border border-border bg-surface-low px-5 py-2.5 shadow-modal transition-all duration-standard hover:border-foreground/20 md:bg-surface-low/80 md:backdrop-blur-xl">
             <Link to="/" className="flex items-center gap-2 group" aria-label={`${SITE.name} home`}>
               <span className="relative flex h-6 w-6 items-center justify-center rounded-md bg-foreground transition-transform duration-standard group-hover:rotate-[8deg] group-hover:scale-110">
                 <Sparkles className="h-3.5 w-3.5 text-background" aria-hidden="true" />
