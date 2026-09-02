@@ -15,7 +15,7 @@ export function Analytics() {
 
   useEffect(() => {
     let cancelled = false;
-    let idleHandle: ReturnType<typeof setTimeout> | undefined;
+    let cancelScheduledAnalytics: (() => void) | undefined;
 
     const loadThirdPartyAnalytics = () => {
       if (cancelled) return;
@@ -48,9 +48,11 @@ export function Analytics() {
 
     const scheduleAnalytics = () => {
       if ("requestIdleCallback" in window) {
-        idleHandle = window.requestIdleCallback(loadThirdPartyAnalytics, { timeout: 8_000 });
+        const handle = window.requestIdleCallback(loadThirdPartyAnalytics, { timeout: 8_000 });
+        cancelScheduledAnalytics = () => window.cancelIdleCallback(handle);
       } else {
-        idleHandle = globalThis.setTimeout(loadThirdPartyAnalytics, 4_000);
+        const handle = setTimeout(loadThirdPartyAnalytics, 4_000);
+        cancelScheduledAnalytics = () => clearTimeout(handle);
       }
     };
 
@@ -93,10 +95,7 @@ export function Analytics() {
     return () => {
       cancelled = true;
       window.removeEventListener("load", scheduleAnalytics);
-      if (idleHandle !== undefined) {
-        if ("cancelIdleCallback" in window) window.cancelIdleCallback(idleHandle);
-        else globalThis.clearTimeout(idleHandle);
-      }
+      cancelScheduledAnalytics?.();
       window.removeEventListener("error", onError);
       window.removeEventListener("unhandledrejection", onRejection);
     };
