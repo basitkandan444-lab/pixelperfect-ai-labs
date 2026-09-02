@@ -1,5 +1,7 @@
 import { CompareSlider } from "@/components/CompareSlider";
+import { CountUpStat } from "@/components/CountUpStat";
 import { Sparkles, UploadCloud, Gauge, ArrowRight } from "lucide-react";
+
 import { Link } from "@tanstack/react-router";
 
 import { useProximity } from "@/hooks/use-proximity";
@@ -113,18 +115,27 @@ export function HeroVisual() {
                 </div>
 
                 <div className="pt-8 border-t border-border">
-                  <div className="flex items-center gap-4">
+                  <div className="group/stat flex items-center gap-4 cursor-default">
                     <div className="flex -space-x-2">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-8 w-8 rounded-full border-2 border-surface-low bg-surface-mid" />
+                      {[0, 1, 2].map((i) => (
+                        <div
+                          key={i}
+                          className="h-8 w-8 rounded-full border-2 border-surface-low bg-surface-mid transition-transform duration-standard ease-back-out group-hover/stat:-translate-y-1"
+                          style={{ transitionDelay: `${i * 60}ms` }}
+                        />
                       ))}
                     </div>
-                    <span className="eyebrow !text-[9px]">
-                      3k+ images processed
+                    <span className="eyebrow !text-[9px] flex items-center gap-1.5">
+                      <CountUpStat
+                        value={4.4}
+                        suffix="k+"
+                        className="text-sm font-bold tracking-tight text-foreground transition-colors duration-standard group-hover/stat:text-primary"
+                      />
+                      <span className="translate-y-[1px]">images processed</span>
                     </span>
-
                   </div>
                 </div>
+
               </div>
             </div>
           </div>
