@@ -2,7 +2,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import type { Session } from "@supabase/supabase-js";
 
-import { supabase } from "@/integrations/supabase/client";
+/**
+ * The Supabase SDK is a large slice of the client payload and is not needed to
+ * paint or use the browser-first enhancement flow, so it is loaded lazily after
+ * hydration instead of being pulled into the initial entry chunk.
+ */
+const loadSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
 /**
  * Shared auth-session query.
@@ -20,6 +25,7 @@ export function useSession() {
     queryKey: ["auth-session"],
     queryFn: async () => {
       try {
+        const supabase = await loadSupabase();
         return (await supabase.auth.getSession()).data.session;
       } catch (error) {
         // Auth is optional for the browser-first enhancement flow. A missing or
@@ -34,17 +40,27 @@ export function useSession() {
   });
 
   useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
+    let cancelled = false;
+
     // Same rule as above: never let auth wiring take down the render tree.
-    try {
-      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-        queryClient.setQueryData(["auth-session"], session);
-        queryClient.invalidateQueries({ queryKey: ["entitlement"] });
+    loadSupabase()
+      .then((supabase) => {
+        if (cancelled) return;
+        const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+          queryClient.setQueryData(["auth-session"], session);
+          queryClient.invalidateQueries({ queryKey: ["entitlement"] });
+        });
+        unsubscribe = () => data.subscription.unsubscribe();
+      })
+      .catch((error) => {
+        console.warn("[auth] auth state listener unavailable:", error);
       });
-      return () => data.subscription.unsubscribe();
-    } catch (error) {
-      console.warn("[auth] auth state listener unavailable:", error);
-      return undefined;
-    }
+
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
   }, [queryClient]);
 
   return query;
