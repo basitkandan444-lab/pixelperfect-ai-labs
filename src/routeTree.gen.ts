@@ -29,6 +29,7 @@ import { Route as AiImageEnhancerRouteImport } from './routes/ai-image-enhancer'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OpsExperimentsRouteImport } from './routes/ops.experiments'
+import { Route as CheckoutSuccessRouteImport } from './routes/checkout/success'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -156,6 +157,11 @@ const OpsExperimentsRoute = OpsExperimentsRouteImport.update({
   id: '/experiments',
   path: '/experiments',
   getParentRoute: () => OpsRoute,
+} as any)
+const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
+  id: '/checkout/success',
+  path: '/checkout/success',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/callback',
@@ -325,6 +331,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
   '/ops/experiments': typeof OpsExperimentsRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -374,6 +381,7 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
   '/ops/experiments': typeof OpsExperimentsRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -424,6 +432,7 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
   '/ops/experiments': typeof OpsExperimentsRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -475,6 +484,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/auth/callback'
+    | '/checkout/success'
     | '/ops/experiments'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -524,6 +534,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/auth/callback'
+    | '/checkout/success'
     | '/ops/experiments'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -573,6 +584,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/auth/callback'
+    | '/checkout/success'
     | '/ops/experiments'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -622,6 +634,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicAlertsRoute: typeof ApiPublicAlertsRoute
@@ -786,6 +799,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/ops/experiments'
       preLoaderRoute: typeof OpsExperimentsRouteImport
       parentRoute: typeof OpsRoute
+    }
+    '/checkout/success': {
+      id: '/checkout/success'
+      path: '/checkout/success'
+      fullPath: '/checkout/success'
+      preLoaderRoute: typeof CheckoutSuccessRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/auth/callback': {
       id: '/auth/callback'
@@ -1039,6 +1059,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  CheckoutSuccessRoute: CheckoutSuccessRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicAlertsRoute: ApiPublicAlertsRoute,

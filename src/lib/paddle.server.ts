@@ -509,6 +509,61 @@ export async function createBillingPortalSession(data: { customer_id: string }) 
 }
 
 /**
+ * Fetch order details for a completed checkout, for the success page.
+ * Requires sign-in; verifies the transaction belongs to the caller via
+ * custom_data.user_id before returning anything.
+ */
+export const getCheckoutOrderDetails = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((raw) =>
+    z.object({ transactionId: z.string().trim().min(1).max(255) }).parse(raw),
+  )
+  .handler(async ({ context, data }) => {
+    const { userId } = context;
+    const apiKey = getPaddleApiKey();
+
+    const response = await fetch(
+      `${getPaddleApiBaseUrl()}/transactions/${encodeURIComponent(data.transactionId)}`,
+      { headers: { Authorization: `Bearer ${apiKey}` } },
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`[PADDLE_TRANSACTION] Order lookup failed: ${errorText}`);
+    }
+
+    const resJson = await response.json();
+    const txn = resJson.data;
+    if (!txn) throw new Error("[PADDLE_TRANSACTION] Transaction not found");
+
+    // Ownership check: only the user who started the checkout may view it.
+    if (txn.custom_data?.user_id !== userId) {
+      throw new Error("[AUTH] This order does not belong to your account");
+    }
+
+    const plan = isPaddlePlan(txn.custom_data?.plan) ? txn.custom_data.plan : null;
+    return {
+      transactionId: txn.id as string,
+      status: txn.status as string,
+      plan,
+      currency: txn.currency_code as string,
+      total: txn.details?.totals?.total as string | undefined,
+      subtotal: txn.details?.totals?.subtotal as string | undefined,
+      tax: txn.details?.totals?.tax as string | undefined,
+      billedAt: (txn.billed_at ?? txn.created_at ?? null) as string | null,
+      subscriptionId: (txn.subscription_id ?? null) as string | null,
+      customerEmail: (txn.customer?.email ?? null) as string | null,
+      items: Array.isArray(txn.items)
+        ? txn.items.map((item: { price?: { name?: string; description?: string }; quantity?: number }) => ({
+            name: item.price?.name ?? "Premium",
+            description: item.price?.description ?? null,
+            quantity: item.quantity ?? 1,
+          }))
+        : [],
+    };
+  });
+
+/**
  * Public config status check for Paddle.
  */
 export function getBillingConfigStatus(): { configured: boolean; missing: string[] } {
