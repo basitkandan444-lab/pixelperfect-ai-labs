@@ -100,7 +100,8 @@
 
   /* Semantic Roles */
   --primary: oklch(0.65 0.2 250);
-  --primary-foreground: oklch(1 0 0);
+  /* Near-black copy on electric blue clears WCAG AA even at compact sizes. */
+  --primary-foreground: oklch(0.08 0 0);
   --muted: oklch(0.2 0 0);
   --muted-foreground: oklch(0.65 0 0);
   --border: oklch(0.22 0 0);
