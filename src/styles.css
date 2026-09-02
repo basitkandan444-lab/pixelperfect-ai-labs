@@ -440,6 +440,7 @@
 .cloud-current-two { top: 64%; animation: cloud-current 11s linear infinite reverse; }
 
 .cloud-form {
+  --cloud-scale: 1;
   position: absolute;
   width: clamp(10rem, 23vw, 19rem);
   height: clamp(4rem, 9vw, 7.5rem);
@@ -447,7 +448,7 @@
     calc(var(--cloud-x) * var(--cloud-depth)),
     calc(var(--cloud-y) * var(--cloud-depth)),
     0
-  );
+  ) scale(var(--cloud-scale));
   transition: transform 700ms var(--ease-precision);
   will-change: transform;
 }
@@ -464,8 +465,8 @@
 .cloud-form span:nth-child(2) { width: 45%; height: 75%; left: 16%; bottom: 8%; }
 .cloud-form span:nth-child(3) { width: 38%; height: 64%; right: 12%; bottom: 7%; }
 .cloud-form-near { left: -3%; top: 52%; animation: cloud-sail 18s ease-in-out infinite; }
-.cloud-form-mid { right: 5%; top: 19%; transform: scale(0.8); animation: cloud-sail-reverse 23s ease-in-out infinite; }
-.cloud-form-far { left: 28%; top: 10%; transform: scale(0.48); opacity: 0.48; animation: cloud-sail 28s ease-in-out infinite reverse; }
+.cloud-form-mid { --cloud-scale: 0.8; right: 5%; top: 19%; animation: cloud-sail-reverse 23s ease-in-out infinite; }
+.cloud-form-far { --cloud-scale: 0.48; left: 28%; top: 10%; opacity: 0.48; animation: cloud-sail 28s ease-in-out infinite reverse; }
 
 .cloud-orbit {
   position: absolute;
@@ -508,10 +509,10 @@
   100% { transform: translateX(10%) scaleX(1); opacity: 0; }
 }
 @keyframes cloud-sail {
-  50% { margin-left: 4%; margin-top: -1.5%; }
+  50% { translate: 2.5rem -0.75rem; }
 }
 @keyframes cloud-sail-reverse {
-  50% { margin-right: 5%; margin-top: 2%; }
+  50% { translate: -3rem 1rem; }
 }
 @keyframes cloud-orbit {
   to { transform: rotateX(68deg) rotateZ(352deg); }

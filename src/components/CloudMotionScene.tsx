@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 
 const cloudLayers = [
   { className: "cloud-form cloud-form-near", depth: 1 },
@@ -68,7 +68,7 @@ export function CloudMotionScene() {
         <div
           key={layer.className}
           className={layer.className}
-          style={{ "--cloud-depth": layer.depth } as React.CSSProperties}
+          style={{ "--cloud-depth": layer.depth } as CSSProperties}
         >
           <span />
           <span />
