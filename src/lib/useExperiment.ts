@@ -10,7 +10,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { supabase } from "@/integrations/supabase/client";
 import { assignVariant, type Variant } from "@/lib/experiments";
 import { track } from "@/lib/track";
 
@@ -44,6 +43,7 @@ async function fetchActiveExperiments(): Promise<Map<string, RemoteExperiment>> 
   if (cache && Date.now() - cache.fetchedAt < CACHE_TTL_MS) return cache.data;
   if (inflight) return inflight;
   inflight = (async () => {
+    const { supabase } = await import("@/integrations/supabase/client");
     const { data, error } = await supabase
       .from("experiments")
       .select("id, key, variants, status")

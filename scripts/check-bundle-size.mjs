@@ -8,7 +8,7 @@
 // Budgets are the single source of truth in src/lib/ops.ts (BUNDLE_BUDGETS) so
 // the dashboard and the gate never drift.
 
-import { existsSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 // --- Load budgets from the shared source (transpile-free: parse the literals) -
@@ -84,6 +84,19 @@ console.log(
 );
 
 const failures = [];
+
+// Browser-only ML and auth SDKs must remain on-demand. Their runtime markers
+// appearing in the largest entry chunk means a static import has silently
+// moved heavy optional code back onto every visitor's startup path.
+if (largestChunk.file) {
+  const entrySource = readFileSync(largestChunk.file, "utf8");
+  const forbiddenMarkers = ["GoTrueClient", "PostgrestClient", "onnxruntime"];
+  for (const marker of forbiddenMarkers) {
+    if (entrySource.includes(marker)) {
+      failures.push(`largest chunk contains lazy-only runtime marker: ${marker}`);
+    }
+  }
+}
 if (largestChunk.size > BUDGETS.maxChunkBytes) {
   failures.push(
     `largest chunk ${humanBytes(largestChunk.size)} > budget ${humanBytes(BUDGETS.maxChunkBytes)}`,

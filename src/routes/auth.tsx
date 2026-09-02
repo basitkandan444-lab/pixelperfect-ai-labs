@@ -2,8 +2,6 @@ import { createFileRoute, Outlet, redirect, useMatches } from "@tanstack/react-r
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { supabase } from "@/integrations/supabase/client";
-
 function safeNext(v: unknown): string {
   if (typeof v !== "string") return "/";
   if (!v.startsWith("/") || v.startsWith("//")) return "/";
@@ -45,6 +43,7 @@ export const Route = createFileRoute("/auth")({
   beforeLoad: async ({ search, location }) => {
     // /auth/callback owns its own session handling; do not redirect it.
     if (location.pathname === "/auth/callback") return;
+    const { supabase } = await import("@/integrations/supabase/client");
     const { data } = await supabase.auth.getSession();
     if (data.session) throw redirect({ href: safeNext(search.next) });
   },
@@ -66,6 +65,7 @@ function AuthPage() {
   const google = async () => {
     setBusy(true);
     try {
+      const { supabase } = await import("@/integrations/supabase/client");
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
