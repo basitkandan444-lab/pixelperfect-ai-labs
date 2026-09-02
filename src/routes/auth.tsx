@@ -22,6 +22,23 @@ function buildRedirectUrl(target: string): string {
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Sign in | Pixel Perfect Pro" },
+      {
+        name: "description",
+        content: "Sign in securely to manage Pixel Perfect Pro premium access and analytics.",
+      },
+      { name: "robots", content: "noindex, nofollow" },
+      { property: "og:title", content: "Sign in | Pixel Perfect Pro" },
+      {
+        property: "og:description",
+        content: "Sign in securely to manage Pixel Perfect Pro premium access and analytics.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   validateSearch: (s: Record<string, unknown>) => ({
     next: typeof s.next === "string" ? s.next : undefined,
   }),
