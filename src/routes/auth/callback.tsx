@@ -1,8 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-import { supabase } from "@/integrations/supabase/client";
-
 function safeNext(v: unknown): string {
   if (typeof v !== "string") return "/";
   if (!v.startsWith("/") || v.startsWith("//")) return "/";
@@ -28,6 +26,7 @@ function AuthCallbackPage() {
 
     async function finish() {
       try {
+        const { supabase } = await import("@/integrations/supabase/client");
         // PKCE flow: Supabase redirects back with a `code` + `state` in the
         // URL. The client auto-detects and exchanges them on init, so read the
         // session first. Fall back to an explicit exchange if detection did not

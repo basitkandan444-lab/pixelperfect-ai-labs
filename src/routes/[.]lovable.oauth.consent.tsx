@@ -1,8 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { supabase } from "@/integrations/supabase/client";
-
 // Local typed shim for the beta supabase.auth.oauth namespace.
 type OAuthClient = { name?: string; redirect_uri?: string };
 type OAuthDetails = {
@@ -22,7 +20,8 @@ type OAuthNamespace = {
   approveAuthorization: (id: string) => Promise<OAuthResult>;
   denyAuthorization: (id: string) => Promise<OAuthResult>;
 };
-function oauth(): OAuthNamespace {
+async function oauth(): Promise<OAuthNamespace> {
+  const { supabase } = await import("@/integrations/supabase/client");
   return (supabase.auth as unknown as { oauth: OAuthNamespace }).oauth;
 }
 
@@ -37,6 +36,7 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
   }),
   beforeLoad: async ({ search, location }) => {
     if (!search.authorization_id) throw new Error("Missing authorization_id");
+    const { supabase } = await import("@/integrations/supabase/client");
     const { data } = await supabase.auth.getSession();
     if (!data.session) {
       const next = location.pathname + location.searchStr;
@@ -45,7 +45,8 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
   },
   loader: async ({ location }) => {
     const authorizationId = new URLSearchParams(location.search).get("authorization_id") ?? "";
-    const { data, error } = await oauth().getAuthorizationDetails(authorizationId);
+    const client = await oauth();
+    const { data, error } = await client.getAuthorizationDetails(authorizationId);
     if (error) throw new Error(error.message);
     const immediate = data?.redirect_url ?? data?.redirect_to;
     if (immediate && !data?.client) {
@@ -79,9 +80,10 @@ function Consent() {
   async function decide(approve: boolean) {
     setBusy(true);
     setError(null);
+    const client = await oauth();
     const { data, error } = approve
-      ? await oauth().approveAuthorization(authorization_id)
-      : await oauth().denyAuthorization(authorization_id);
+      ? await client.approveAuthorization(authorization_id)
+      : await client.denyAuthorization(authorization_id);
     if (error) {
       setBusy(false);
       setError(error.message);

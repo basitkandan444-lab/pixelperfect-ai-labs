@@ -1,9 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
 
 import { ANALYTICS } from "@/lib/analytics";
-import { initBehavior } from "@/lib/behavior";
-import { initTracker, track } from "@/lib/track";
 
 /**
  * Injects Google Analytics 4 and Microsoft Clarity on the client only when the
@@ -12,10 +10,17 @@ import { initTracker, track } from "@/lib/track";
  */
 export function Analytics() {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const trackRef = useRef<((input: { name: string; path?: string }) => void) | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     let cancelScheduledAnalytics: (() => void) | undefined;
+    let reportRuntimeError: ((input: {
+      name: string;
+      ok: boolean;
+      error_code: string;
+      metrics: Record<string, unknown>;
+    }) => void) | undefined;
 
     const loadThirdPartyAnalytics = () => {
       if (cancelled) return;
@@ -88,13 +93,30 @@ export function Analytics() {
     else window.addEventListener("load", scheduleAnalytics, { once: true });
 
 
-    initTracker();
-    initBehavior();
+    // Product analytics are non-critical. Load their comparatively large
+    // collectors after the first paint rather than evaluating them during
+    // hydration. Runtime listeners are installed once the module is ready.
+    const initializeFirstPartyAnalytics = async () => {
+      const [{ initBehavior }, tracker] = await Promise.all([
+        import("@/lib/behavior"),
+        import("@/lib/track"),
+      ]);
+      if (cancelled) return;
+      tracker.initTracker();
+      initBehavior();
+      reportRuntimeError = tracker.track;
+      trackRef.current = tracker.track;
+      tracker.track({ name: "page_view", path: window.location.pathname });
+    };
+
+    const firstPartyHandle = setTimeout(() => {
+      void initializeFirstPartyAnalytics();
+    }, 5_000);
 
     // Global failure intelligence — nothing may be invisible.
     // 1) Uncaught runtime errors → track('error') with taxonomy
     const onError = (e: ErrorEvent) => {
-      track({
+      reportRuntimeError?.({
         name: "error",
         ok: false,
         error_code: (e.error && (e.error as Error).name) || "uncaught_error",
@@ -110,7 +132,7 @@ export function Analytics() {
     const onRejection = (e: PromiseRejectionEvent) => {
       const reason = e.reason;
       const isError = reason instanceof Error;
-      track({
+      reportRuntimeError?.({
         name: "error",
         ok: false,
         error_code: isError ? reason.name : "unhandled_rejection",
@@ -123,6 +145,8 @@ export function Analytics() {
     window.addEventListener("unhandledrejection", onRejection);
     return () => {
       cancelled = true;
+      trackRef.current = null;
+      clearTimeout(firstPartyHandle);
       window.removeEventListener("load", scheduleAnalytics);
       cancelScheduledAnalytics?.();
       window.removeEventListener("error", onError);
@@ -133,7 +157,7 @@ export function Analytics() {
   // Fire a first-party page_view on every route change (SPA nav included).
   useEffect(() => {
     if (typeof window === "undefined") return;
-    track({ name: "page_view", path: pathname });
+    trackRef.current?.({ name: "page_view", path: pathname });
     window.gtag?.("event", "page_view", { page_path: pathname });
   }, [pathname]);
 

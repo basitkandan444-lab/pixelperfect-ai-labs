@@ -6,7 +6,6 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
 import {
   deleteExperiment,
   listExperiments,
@@ -20,6 +19,7 @@ export const Route = createFileRoute("/ops/experiments")({
     meta: [{ title: "Experiments — Ops" }, { name: "robots", content: "noindex, nofollow" }],
   }),
   beforeLoad: async () => {
+    const { supabase } = await import("@/integrations/supabase/client");
     const { data } = await supabase.auth.getSession();
     if (!data.session) {
       throw redirect({

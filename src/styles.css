@@ -535,6 +535,16 @@
 .stagger-in > *:nth-child(4) { animation-delay: 0.4s; }
 .stagger-in > *:nth-child(5) { animation-delay: 0.5s; }
 
+/* The headline is the mobile LCP candidate, so it must paint immediately.
+   Supporting copy can retain the restrained entrance without delaying LCP. */
+.hero-copy > :not(h1) {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.hero-copy > :first-child { animation-delay: 0.08s; }
+.hero-copy > :last-child { animation-delay: 0.16s; }
+
 .text-shimmer {
   background: linear-gradient(
     100deg,
