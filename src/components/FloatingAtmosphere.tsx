@@ -1,18 +1,17 @@
-import React from "react";
 import { Cloud } from "lucide-react";
 
 export function FloatingAtmosphere() {
   return (
-    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
       {/* Clouds - Large, slow, elegant */}
       <div className="absolute top-[10%] left-[-10%] opacity-20 animate-drift-slow">
-        <Cloud className="h-64 w-64 text-surface-mid blur-3xl" />
+        <Cloud className="h-64 w-64 text-surface-mid blur-xl" />
       </div>
       <div className="absolute top-[40%] right-[-5%] opacity-15 animate-drift-mid">
-        <Cloud className="h-80 w-80 text-surface-mid blur-[80px]" />
+        <Cloud className="h-80 w-80 text-surface-mid blur-2xl" />
       </div>
       <div className="absolute bottom-[15%] left-[5%] opacity-10 animate-drift-fast">
-        <Cloud className="h-48 w-48 text-primary/20 blur-[60px]" />
+        <Cloud className="h-48 w-48 text-primary/20 blur-xl" />
       </div>
 
       {/* Floating 4K images uploaded text - "Flying in the sky" */}

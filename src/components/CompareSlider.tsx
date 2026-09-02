@@ -100,12 +100,16 @@ export function CompareSlider({
   useEffect(() => {
     let frame: number;
     const tick = () => {
-      setSpringPos(prev => {
+      let settled = false;
+      setSpringPos((prev) => {
         const diff = pos - prev;
-        if (Math.abs(diff) < 0.001) return pos;
+        if (Math.abs(diff) < 0.01) {
+          settled = true;
+          return pos;
+        }
         return prev + diff * 0.12; // Adjusted for measured resistance
       });
-      frame = requestAnimationFrame(tick);
+      if (!settled) frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);

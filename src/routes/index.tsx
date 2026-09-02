@@ -17,7 +17,7 @@ import { AnalysisCard } from "@/components/AnalysisCard";
 import { ProcessingOverlay } from "@/components/ProcessingOverlay";
 import { UpgradeWall } from "@/components/UpgradeWall";
 import { FloatingAtmosphere } from "@/components/FloatingAtmosphere";
-import { GravityAnimation } from "@/components/GravityAnimation";
+import { CloudMotionScene } from "@/components/CloudMotionScene";
 import { trackEvent } from "@/lib/analytics";
 
 import { SITE, FAQS, absoluteUrl } from "@/lib/site";
@@ -63,7 +63,6 @@ export const Route = createFileRoute("/")({
             operatingSystem: "Web",
             description: SITE.description,
             offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-            comment: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            lets get back to section 2 wave B",
           }),
         },
         {
@@ -772,7 +771,7 @@ function Index() {
 
           <HomeTopSections />
 
-          <GravityAnimation />
+          <CloudMotionScene />
 
           {/* Workspace */}
 
