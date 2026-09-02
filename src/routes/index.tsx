@@ -219,28 +219,16 @@ function Index() {
     setAccelLabel(caps.accelLabel);
   }, []);
 
-  // Detect whether the neural (GPU) engine can run acceptably in this browser.
-  // Client-only: navigator.gpu is not present during SSR. When unavailable we
-  // never offer neural (the WASM fallback is too slow to be worth surfacing).
+  // Detect the lightweight browser capabilities directly. Importing the neural
+  // module here pulled its large runtime chunk into the mobile startup trace;
+  // the real engine remains lazy-loaded only after the user starts enhancement.
   useEffect(() => {
-    // Never trace the neural engine (and its heavy WASM/onnxruntime deps) into
-    // the SSR / Cloudflare Worker bundle: `import.meta.env.SSR` is a build-time
-    // constant, so Rollup dead-code-eliminates this dynamic import from the
-    // server build. workerd cannot initialise onnxruntime-web and would 500.
     if (import.meta.env.SSR) return;
-    let cancelled = false;
-    import("@/lib/enhance/neural")
-      .then(({ neuralSupported }) => {
-        if (cancelled) return;
-        const supported = neuralSupported();
-        setNeuralAvailable(supported);
-        // Neural (on-device AI) is the default when the device can run it.
-        if (supported) setEngine((e) => (e === "classical" ? "neural" : e));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
+    const supported =
+      typeof createImageBitmap === "function" &&
+      Boolean((navigator as Navigator & { gpu?: unknown }).gpu);
+    setNeuralAvailable(supported);
+    if (supported) setEngine((current) => (current === "classical" ? "neural" : current));
   }, []);
 
   // Abort any in-flight enhancement if the component unmounts.
