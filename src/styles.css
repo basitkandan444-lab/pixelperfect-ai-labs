@@ -672,3 +672,11 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Below-the-fold blocks: skip style, layout and paint until they scroll near
+   the viewport. The intrinsic size keeps the scrollbar honest so this costs no
+   layout stability. */
+@utility defer-paint {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1200px;
+}
