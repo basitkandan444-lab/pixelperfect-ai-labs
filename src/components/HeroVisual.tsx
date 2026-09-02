@@ -30,18 +30,21 @@ export function HeroVisual() {
           willChange: "transform"
         }}
       >
-        {/* Glow Layer */}
+        {/* Glow Layer — desktop only: a 120px blur is a very expensive paint on
+            mobile GPUs and contributes nothing at small sizes. */}
         <div 
-          className="absolute -inset-20 bg-primary/10 blur-[120px] opacity-20 group-hover/hero:opacity-40 transition-opacity duration-slow pointer-events-none" 
+          className="absolute -inset-20 hidden bg-primary/10 blur-[120px] opacity-20 group-hover/hero:opacity-40 transition-opacity duration-slow pointer-events-none md:block" 
           style={{
             transform: `translate3d(${tiltY * 4}px, ${tiltX * 4}px, 0)`,
           }}
         />
         
         {/* Main Frame */}
-        <div className="relative overflow-hidden rounded-xl border border-border bg-surface-low shadow-modal backdrop-blur-3xl transition-shadow duration-slow group-hover/hero:shadow-[0_32px_64px_-16px_oklch(0_0_0_/_0.8)]">
-          {/* Subtle Scan Line */}
-          <div className="absolute inset-x-0 h-40 bg-gradient-to-b from-transparent via-primary/10 to-transparent animate-scan pointer-events-none z-20" />
+        <div className="relative overflow-hidden rounded-xl border border-border bg-surface-low shadow-modal md:backdrop-blur-3xl transition-shadow duration-slow group-hover/hero:shadow-[0_32px_64px_-16px_oklch(0_0_0_/_0.8)]">
+          {/* Subtle Scan Line — desktop only (continuous animation on mobile
+              burns main-thread style/layout time during load). */}
+          <div className="absolute inset-x-0 hidden h-40 bg-gradient-to-b from-transparent via-primary/10 to-transparent animate-scan pointer-events-none z-20 md:block" />
+
 
           
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">

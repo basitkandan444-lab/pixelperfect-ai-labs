@@ -46,18 +46,44 @@ export function Analytics() {
       }
     };
 
-    const scheduleAnalytics = () => {
-      if ("requestIdleCallback" in window) {
-        const handle = window.requestIdleCallback(loadThirdPartyAnalytics, { timeout: 8_000 });
-        cancelScheduledAnalytics = () => window.cancelIdleCallback(handle);
-      } else {
-        const handle = setTimeout(loadThirdPartyAnalytics, 4_000);
-        cancelScheduledAnalytics = () => clearTimeout(handle);
+    // Third-party analytics are the single largest main-thread cost on first
+    // load, so they are deferred until the visitor actually engages with the
+    // page (pointer, keyboard, scroll or touch), with a long idle fallback so
+    // passive readers are still counted. This keeps them out of the critical
+    // path entirely without losing measurement.
+    const INTERACTION_EVENTS = [
+      "pointerdown",
+      "keydown",
+      "scroll",
+      "touchstart",
+      "wheel",
+    ] as const;
+
+    let fallbackHandle: ReturnType<typeof setTimeout> | undefined;
+
+    const startAnalytics = () => {
+      cleanupTriggers();
+      loadThirdPartyAnalytics();
+    };
+
+    function cleanupTriggers() {
+      for (const evt of INTERACTION_EVENTS) {
+        window.removeEventListener(evt, startAnalytics);
       }
+      if (fallbackHandle !== undefined) clearTimeout(fallbackHandle);
+    }
+
+    const scheduleAnalytics = () => {
+      for (const evt of INTERACTION_EVENTS) {
+        window.addEventListener(evt, startAnalytics, { once: true, passive: true });
+      }
+      fallbackHandle = setTimeout(startAnalytics, 12_000);
+      cancelScheduledAnalytics = cleanupTriggers;
     };
 
     if (document.readyState === "complete") scheduleAnalytics();
     else window.addEventListener("load", scheduleAnalytics, { once: true });
+
 
     initTracker();
     initBehavior();
