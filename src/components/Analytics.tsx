@@ -15,7 +15,7 @@ export function Analytics() {
 
   useEffect(() => {
     let cancelled = false;
-    let idleHandle: number | undefined;
+    let idleHandle: ReturnType<typeof setTimeout> | undefined;
 
     const loadThirdPartyAnalytics = () => {
       if (cancelled) return;
