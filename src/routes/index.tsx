@@ -61,7 +61,10 @@ export const Route = createFileRoute("/")({
         {
           rel: "preload",
           as: "image",
-          href: "/gallery/landscape-after-900.avif",
+          href: "/gallery/landscape-after-600.avif",
+          imageSrcSet:
+            "/gallery/landscape-after-600.avif 600w, /gallery/landscape-after-900.avif 900w",
+          imageSizes: "(min-width: 1024px) 45vw, (min-width: 640px) 90vw, 100vw",
           fetchPriority: "high",
         },
       ],
@@ -691,7 +694,7 @@ function Index() {
         <main>
           {/* Hero — cinematic serif with staggered blur-in entrance */}
           <section className="relative pt-40 pb-20 text-center sm:pt-48">
-            <div className="stagger-in">
+            <div className="hero-copy">
               <div
                 className="mx-auto mb-8 inline-flex items-center gap-2 rounded-md border border-border bg-surface-low px-3.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.22em] text-muted-foreground backdrop-blur"
               >
