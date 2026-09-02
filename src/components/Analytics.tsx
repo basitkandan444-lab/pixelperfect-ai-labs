@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
 
 import { ANALYTICS } from "@/lib/analytics";
@@ -10,6 +10,7 @@ import { ANALYTICS } from "@/lib/analytics";
  */
 export function Analytics() {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const trackRef = useRef<((input: { name: string; path?: string }) => void) | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -104,6 +105,7 @@ export function Analytics() {
       tracker.initTracker();
       initBehavior();
       reportRuntimeError = tracker.track;
+      trackRef.current = tracker.track;
       tracker.track({ name: "page_view", path: window.location.pathname });
     };
 
@@ -143,6 +145,7 @@ export function Analytics() {
     window.addEventListener("unhandledrejection", onRejection);
     return () => {
       cancelled = true;
+      trackRef.current = null;
       clearTimeout(firstPartyHandle);
       window.removeEventListener("load", scheduleAnalytics);
       cancelScheduledAnalytics?.();
@@ -154,9 +157,7 @@ export function Analytics() {
   // Fire a first-party page_view on every route change (SPA nav included).
   useEffect(() => {
     if (typeof window === "undefined") return;
-    void import("@/lib/track").then(({ track }) => {
-      track({ name: "page_view", path: pathname });
-    });
+    trackRef.current?.({ name: "page_view", path: pathname });
     window.gtag?.("event", "page_view", { page_path: pathname });
   }, [pathname]);
 
