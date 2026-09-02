@@ -1045,8 +1045,13 @@ function Index() {
               </div>
             )}
           </section>
-          <HomeContent />
-          <BeforeAfterGallery />
+          <div className="defer-paint">
+            <HomeContent />
+          </div>
+          <div className="defer-paint">
+            <BeforeAfterGallery />
+          </div>
+
         </main>
       </div>
 

@@ -108,8 +108,10 @@ export function BeforeAfterGallery() {
                 }}
                 beforeAlt={`${item.title} — original low-quality version`}
                 afterAlt={`${item.title} — AI enhanced high-resolution version`}
-                loading={i === 0 ? "eager" : "lazy"}
-                fetchPriority={i === 0 ? "high" : undefined}
+                // Every gallery card sits below the fold: lazy-load them all so
+                // they never compete with the hero LCP image for bandwidth.
+                loading="lazy"
+
               />
             </div>
 

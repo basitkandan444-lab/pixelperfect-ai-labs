@@ -556,12 +556,18 @@
   transition:
     opacity 900ms var(--ease-precision),
     transform 900ms var(--ease-precision);
-  will-change: opacity, transform;
+  /* No `will-change` here: dozens of elements carry `.reveal`, and promoting
+     every one of them to its own compositor layer costs far more paint/memory
+     during load than the animation saves. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
 }
 .reveal-in {
   opacity: 1;
   transform: translateY(0);
+  content-visibility: visible;
 }
+
 
 .card-premium {
   position: relative;
@@ -665,4 +671,12 @@
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Below-the-fold blocks: skip style, layout and paint until they scroll near
+   the viewport. The intrinsic size keeps the scrollbar honest so this costs no
+   layout stability. */
+@utility defer-paint {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1200px;
 }

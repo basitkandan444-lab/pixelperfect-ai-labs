@@ -2,7 +2,10 @@ import { Cloud } from "lucide-react";
 
 export function FloatingAtmosphere() {
   return (
-    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+    <div
+      className="pointer-events-none absolute inset-0 z-0 hidden overflow-hidden md:block"
+      aria-hidden="true"
+    >
       {/* Clouds - Large, slow, elegant */}
       <div className="absolute top-[10%] left-[-10%] opacity-20 animate-drift-slow">
         <Cloud className="h-64 w-64 text-surface-mid blur-xl" />
